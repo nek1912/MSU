@@ -1,0 +1,104 @@
+{
+  "files_checked": 12,
+  "files_passed": 12,
+  "files_failed": 0,
+  "errors": [],
+  "placeholders_found": [
+    {
+      "file": "bylaws_governance.md",
+      "line": 13
+    },
+    {
+      "file": "bylaws_governance.md",
+      "line": 18
+    },
+    {
+      "file": "bylaws_membership.md",
+      "line": 13
+    },
+    {
+      "file": "bylaws_membership.md",
+      "line": 18
+    },
+    {
+      "file": "pacs_credit.md",
+      "line": 13
+    },
+    {
+      "file": "pacs_credit.md",
+      "line": 18
+    },
+    {
+      "file": "pacs_role.md",
+      "line": 13
+    },
+    {
+      "file": "pacs_role.md",
+      "line": 18
+    },
+    {
+      "file": "pacs_schemes_computerization.md",
+      "line": 13
+    },
+    {
+      "file": "pacs_schemes_computerization.md",
+      "line": 18
+    },
+    {
+      "file": "pmfby_claims.md",
+      "line": 13
+    },
+    {
+      "file": "pmfby_claims.md",
+      "line": 18
+    },
+    {
+      "file": "pmfby_coverage.md",
+      "line": 13
+    },
+    {
+      "file": "pmfby_coverage.md",
+      "line": 18
+    },
+    {
+      "file": "pmfby_eligibility.md",
+      "line": 13
+    },
+    {
+      "file": "pmfby_eligibility.md",
+      "line": 18
+    },
+    {
+      "file": "pmfby_premium.md",
+      "line": 13
+    },
+    {
+      "file": "pmfby_premium.md",
+      "line": 18
+    },
+    {
+      "file": "pmjdy_account.md",
+      "line": 13
+    },
+    {
+      "file": "pmjdy_account.md",
+      "line": 18
+    },
+    {
+      "file": "pmjdy_rupay.md",
+      "line": 13
+    },
+    {
+      "file": "pmjdy_rupay.md",
+      "line": 18
+    },
+    {
+      "file": "rbi_finlit_awareness.md",
+      "line": 13
+    },
+    {
+      "file": "rbi_finlit_awareness.md",
+      "line": 18
+    }
+  ]
+}

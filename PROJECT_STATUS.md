@@ -16,7 +16,7 @@ trust it. If you only have two minutes, update `Last updated` and the
 
 ## Last updated
 
-`2026-08-26 21:30, by M2/task-11`
+`2026-08-26 21:25, by M1/task-13`
 
 ## Current day / plan position
 
@@ -51,6 +51,7 @@ broken`.
 | Bhashini adapter (Tier 2) | M2 | not started | |
 | Voice UI (Tier 2) | M3 | not started | |
 | Evaluation set (~140 cases) | M1/M4 | not started | |
+| Skeleton exit-gate validator | M1 | working | Task 13: `eval/skeleton_check.py` created, syntax verified, awaits live backend test |
 
 ## Provider account status
 

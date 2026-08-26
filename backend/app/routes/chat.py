@@ -1,6 +1,8 @@
 from typing import Literal
 
+import httpx
 from fastapi import APIRouter
+from postgrest.exceptions import APIError as PostgrestAPIError
 from pydantic import BaseModel, Field
 
 from app.config import get_settings
@@ -25,6 +27,17 @@ ABSTAIN_TEXT = {
           "कृपया प्रश्न दूसरे शब्दों में पूछें या सहकारिता, पीएसीएस, योजनाओं, "
           "पीएमएफबीवाई, कृषि या वित्तीय साक्षरता के बारे में पूछें।",
 }
+
+# Exceptions that represent expected dependency failures (not programmer bugs)
+# → should return 200 + abstained per frozen contract
+_SAFE_FAILURES = (
+    CitationError,
+    AllProvidersFailedError,
+    httpx.TimeoutException,
+    httpx.ConnectError,
+    httpx.HTTPStatusError,
+    PostgrestAPIError,
+)
 
 
 class ChatRequest(BaseModel):
@@ -60,10 +73,12 @@ def chat(req: ChatRequest) -> dict:
         return {"answer": answer, "language": lang, "domain": domain,
                 "confidence": gate.confidence, "citations": citations,
                 "abstained": False, "follow_up_question": None}
-    except (CitationError, AllProvidersFailedError):
-        return _abstain(lang, "provider_or_citation_failure")
-    except Exception:  # noqa: BLE001 — frozen contract requires all failures return 200 + abstained
-        return _abstain(lang, "unexpected_error")
+    except _SAFE_FAILURES:
+        # Known dependency failures → contract-valid abstention
+        return _abstain(lang, "dependency_failure")
+    except Exception:
+        # Unknown failures (programmer bugs) → let FastAPI return 500
+        raise
 
 
 def _abstain(lang: str, _reason: str | None) -> dict:
@@ -73,7 +88,7 @@ def _abstain(lang: str, _reason: str | None) -> dict:
 
 
 def _citations_from(answer: str, chunks: list[RetrievedChunk]) -> list[dict]:
-    ids = verify_citations(answer, [c.chunk_id for c in chunks])
+    valid, _invalid = verify_citations(answer, [c.chunk_id for c in chunks])
     by_id = {c.chunk_id: c for c in chunks}
     return [{"title": by_id[i].title, "page": by_id[i].page,
-             "url": by_id[i].source_url} for i in ids]
+             "url": by_id[i].source_url} for i in valid]

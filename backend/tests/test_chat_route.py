@@ -81,3 +81,19 @@ def test_abstains_when_both_llms_fail(respx_mock):
     assert body["abstained"] is True
     assert body["citations"] == []
     assert body["answer"]  # safe message present
+
+
+@respx.mock
+def test_abstains_on_supabase_failure(respx_mock):
+    """Supabase connection failure → safe abstention, not 503."""
+    respx_mock.post(EMBED_URL).mock(return_value=httpx.Response(200, json={
+        "embedding": {"values": [0.5] * 768}}))
+    # Supabase RPC returns500
+    respx_mock.post(httpx.URL("http://testsupa" + RPC_PATH)).mock(
+        return_value=httpx.Response(500, json={"error": "internal error"}))
+    r = client.post("/chat", json=PAYLOAD)
+    assert r.status_code == 200
+    body = r.json()
+    assert body["abstained"] is True
+    assert body["citations"] == []
+    assert body["answer"]  # safe message present

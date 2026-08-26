@@ -3,7 +3,8 @@ import re
 from app.providers.base import LLMProvider
 from app.retrieval import RetrievedChunk
 
-_CITE = re.compile(r"\[chunk:([0-9a-f]{8})\]")
+_CITE = re.compile(r"\[chunk:([0-9a-fA-F]{8,})\]")  # detect any 8+ hex prefix
+_CITE_RAW = re.compile(r"\[chunk:(.*?)\]")  # detect ANY [chunk:...] for invalid detection
 
 
 class CitationError(Exception): ...
@@ -24,19 +25,41 @@ def build_user_prompt(question: str, chunks: list[RetrievedChunk]) -> str:
     return f"Question: {question}\n\nContext:\n{ctx}"
 
 
-def verify_citations(answer: str, chunk_ids: list[str]) -> list[str]:
+def verify_citations(answer: str, chunk_ids: list[str]) -> tuple[list[str], list[str]]:
+    """Return (valid_ids, invalid_prefixes). Any invalid prefix means the
+    response must be rejected per spec — we never silently discard bad
+    citations."""
     valid: list[str] = []
-    for prefix in _CITE.findall(answer):
-        for cid in chunk_ids:
-            if cid.startswith(prefix) and cid not in valid:
-                valid.append(cid)
-    return valid
+    invalid: list[str] = []
+    # First: find all [chunk:...] markers (any content inside brackets)
+    for raw_match in _CITE_RAW.findall(answer):
+        # Check if it's a valid 8+ hex prefix
+        hex_match = re.fullmatch(r"[0-9a-fA-F]{8,}", raw_match)
+        if not hex_match:
+            # Not valid hex at all — definitely invalid
+            if raw_match not in invalid:
+                invalid.append(raw_match)
+            continue
+        prefix = hex_match.group()[:8].lower()
+        matched = any(cid.startswith(prefix) for cid in chunk_ids)
+        if matched:
+            for cid in chunk_ids:
+                if cid.startswith(prefix) and cid not in valid:
+                    valid.append(cid)
+                    break
+        else:
+            if prefix not in invalid:
+                invalid.append(prefix)
+    return valid, invalid
 
 
 def generate_answer(llm: LLMProvider, question: str, chunks: list[RetrievedChunk]) -> str:
     answer = llm.generate(SYSTEM_PROMPT, build_user_prompt(question, chunks))
     if answer.strip() == "INSUFFICIENT_EVIDENCE":
         raise CitationError("model declined: insufficient evidence")
-    if not verify_citations(answer, [c.chunk_id for c in chunks]):
+    valid, invalid = verify_citations(answer, [c.chunk_id for c in chunks])
+    if invalid:
+        raise CitationError(f"invalid citations: {invalid}")
+    if not valid:
         raise CitationError("answer carried no valid citations")
     return answer

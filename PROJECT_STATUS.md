@@ -16,7 +16,7 @@ trust it. If you only have two minutes, update `Last updated` and the
 
 ## Last updated
 
-`2026-08-26 20:45, by M1/task-8`
+`2026-08-26 21:30, by M2/task-11`
 
 ## Current day / plan position
 
@@ -43,7 +43,7 @@ broken`.
 | Document ingestion (Docling) | M1 | not started | Seed corpus + ingestion pipeline created (task 8) |
 | Embeddings (`gemini-embedding-001`) | M1 | not started | |
 | Retrieval (Supabase pgvector, domain+state filter) | M1 | not started | |
-| `/chat` wired to retrieval | M2 | not started | |
+| `/chat` wired to retrieval | M2 | working | Task 11: session store, evidence gate, citations, abstention all wired |
 | Citation verification | M2 | not started | |
 | Abstention logic | M2 | not started | |
 | Grievance state machine | M2 | not started | |
@@ -97,4 +97,4 @@ Track these independently — they're what actually gets shown to judges.
 
 ## Next immediate action
 
-Run real ingestion: `cd backend; python ../ingestion/ingest.py` (needs .env + Supabase schema). Verify 12 seed documents ingested.
+Next task in sequence per work-plan.md. Task 11 integration is complete — 26/26 tests passing.

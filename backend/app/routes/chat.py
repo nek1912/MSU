@@ -45,7 +45,7 @@ def chat(req: ChatRequest) -> dict:
         domain, _score = get_anchor_store().classify(req.question, embedding)
         # Session is authoritative for jurisdiction (P1-7): explicit request
         # state updates it; a null state continues the session's prior state.
-        resolved_state = req.state or get_state(req.session_id)
+        resolved_state = req.state if req.state is not None else get_state(req.session_id)
         touch_session(req.session_id, resolved_state, lang)
         if domain == "out_of_scope":
             return _abstain(lang, "out_of_scope")
@@ -64,7 +64,7 @@ def chat(req: ChatRequest) -> dict:
     except (CitationError, AllProvidersFailedError):
         return _abstain(lang, "provider_or_citation_failure")
     except Exception:
-        raise HTTPException(status_code=503, detail="service unavailable") from None
+        return _abstain(lang, "unexpected_error")
 
 
 def _abstain(lang: str, _reason: str | None) -> dict:

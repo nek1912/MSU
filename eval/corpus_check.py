@@ -4,20 +4,42 @@ import os
 import re
 import json
 import sys
+from urllib.parse import urlparse
 
 REQUIRED_FIELDS = [
     "source_id", "title", "organization", "domain",
-    "jurisdiction", "url", "verified_date"
+    "jurisdiction", "url", "verified_date",
+    "source_type", "official_domain"
 ]
 ALLOWED_DOMAINS = [
     "cooperative", "pacs", "schemes", "pmfby",
     "agriculture", "finlit", "grievance"
 ]
-ALLOWED_JURISDICTIONS = ["central", "state"]
+ALLOWED_JURISDICTIONS = ["central", "state", "central_and_state"]
 PLACEHOLDERS = [
     "PASTE VERBATIM TEXT HERE", "TODO", "TBD",
     "Lorem ipsum", "Wikipedia"
 ]
+ALLOWED_SOURCE_TYPES = [
+    "official_web_source", "legislation", "legislation_repository",
+    "guidelines", "faq", "financial_literacy", "model_bylaw"
+]
+APPROVED_OFFICIAL_DOMAINS = [
+    "gov.in", "cooperation.gov.in", "pmfby.gov.in",
+    "rbi.org.in", "pmjdy.gov.in", "indiacode.nic.in",
+    "gujaratlegislature.nic.in"
+]
+
+
+def _official_domain_matches(url, declared_domain):
+    """Check if the URL's domain matches or is a subdomain of the declared official domain."""
+    try:
+        parsed = urlparse(url)
+        host = parsed.hostname or ""
+        return host == declared_domain or host.endswith("." + declared_domain)
+    except Exception:
+        return False
+
 
 def parse_frontmatter(content):
     match = re.match(r'^---\s*\n(.*?)\n---\s*\n', content, re.DOTALL)
@@ -37,7 +59,7 @@ def parse_frontmatter(content):
     body = content[match.end():]
     return meta, body
 
-def check_file(filepath):
+def check_file(filepath, seen_source_ids=None):
     errors = []
     placeholders = []
     basename = os.path.basename(filepath)
@@ -63,6 +85,38 @@ def check_file(filepath):
         errors.append({"file": basename, "error": f"Invalid jurisdiction: {meta['jurisdiction']}", "severity": "error"})
     if meta.get("url") and not meta["url"].startswith("https://"):
         errors.append({"file": basename, "error": "URL does not start with https://", "severity": "warning"})
+
+    if meta.get("source_type") and meta["source_type"] not in ALLOWED_SOURCE_TYPES:
+        errors.append({"file": basename, "error": f"Invalid source_type: {meta['source_type']}", "severity": "error"})
+
+    if meta.get("official_domain") and meta["official_domain"] not in APPROVED_OFFICIAL_DOMAINS:
+        errors.append({"file": basename, "error": f"official_domain not in approved registry: {meta['official_domain']}", "severity": "error"})
+
+    if meta.get("url") and meta.get("official_domain"):
+        if not _official_domain_matches(meta["url"], meta["official_domain"]):
+            errors.append({"file": basename, "error": f"URL domain does not match declared official_domain '{meta['official_domain']}'", "severity": "error"})
+
+    current_source_id = meta.get("source_id")
+    if current_source_id:
+        if seen_source_ids is not None:
+            if current_source_id in seen_source_ids:
+                errors.append({"file": basename, "error": f"Duplicate source_id: '{current_source_id}' (also in {seen_source_ids[current_source_id]})", "severity": "error"})
+            else:
+                seen_source_ids[current_source_id] = basename
+        else:
+            dirpath = os.path.dirname(filepath)
+            for other in os.listdir(dirpath):
+                if other.endswith('.md') and other != basename:
+                    other_path = os.path.join(dirpath, other)
+                    try:
+                        with open(other_path, 'r', encoding='utf-8') as f:
+                            other_content = f.read()
+                        other_meta, _ = parse_frontmatter(other_content)
+                        if other_meta and other_meta.get('source_id') == current_source_id:
+                            errors.append({"file": basename, "error": f"Duplicate source_id: '{current_source_id}' (also in {other})", "severity": "error"})
+                            break
+                    except Exception:
+                        pass
 
     if not body.strip():
         errors.append({"file": basename, "error": "Empty content after frontmatter", "severity": "error"})
@@ -95,21 +149,9 @@ def main():
 
     for fname in md_files:
         fpath = os.path.join(seeds_dir, fname)
-        errors, placeholders = check_file(fpath)
+        errors, placeholders = check_file(fpath, seen_source_ids=all_source_ids)
         all_errors.extend(errors)
         all_placeholders.extend(placeholders)
-
-        meta, _ = parse_frontmatter(open(fpath, 'r', encoding='utf-8').read())
-        if meta and 'source_id' in meta:
-            sid = meta['source_id']
-            if sid in all_source_ids:
-                all_errors.append({
-                    "file": fname,
-                    "error": f"Duplicate source_id: '{sid}' (also in {all_source_ids[sid]})",
-                    "severity": "error"
-                })
-            else:
-                all_source_ids[sid] = fname
 
         has_errors = any(e['severity'] == 'error' for e in errors if e['file'] == fname)
         if has_errors:

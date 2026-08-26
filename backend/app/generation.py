@@ -1,5 +1,6 @@
 import re
 
+from app.providers.base import LLMProvider
 from app.retrieval import RetrievedChunk
 
 _CITE = re.compile(r"\[chunk:([0-9a-f]{8})\]")
@@ -32,7 +33,7 @@ def verify_citations(answer: str, chunk_ids: list[str]) -> list[str]:
     return valid
 
 
-def generate_answer(llm, question: str, chunks: list[RetrievedChunk]) -> str:
+def generate_answer(llm: LLMProvider, question: str, chunks: list[RetrievedChunk]) -> str:
     answer = llm.generate(SYSTEM_PROMPT, build_user_prompt(question, chunks))
     if answer.strip() == "INSUFFICIENT_EVIDENCE":
         raise CitationError("model declined: insufficient evidence")

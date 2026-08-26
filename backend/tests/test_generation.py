@@ -1,4 +1,9 @@
-from app.generation import verify_citations
+from unittest.mock import MagicMock
+
+import pytest
+
+from app.generation import CitationError, SYSTEM_PROMPT, generate_answer, verify_citations
+from app.retrieval import RetrievedChunk
 
 IDS = ["aaaaaaaa-1111-2222-3333-444444444444", "bbbbbbbb-5555-6666-7777-888888888888"]
 
@@ -13,6 +18,28 @@ def test_invalid_citation_dropped_and_empty_raises_path():
 
 def test_mixed_citations_keep_only_valid_in_order():
     out = verify_citations("A [chunk:bbbbbbbb] B [chunk:aaaaaaaa]", IDS)
-    assert out == IDS[::-1][:1] + IDS[:1] if False else out == [
+    assert out == [
         "bbbbbbbb-5555-6666-7777-888888888888",
         "aaaaaaaa-1111-2222-3333-444444444444"]
+
+
+def test_generate_answer_raises_on_no_citations():
+    mock_llm = MagicMock()
+    mock_llm.generate.return_value = "The answer is unclear."
+    chunks = [RetrievedChunk(chunk_id="aaaaaaaa-1111-2222-3333-444444444444",
+                             title="T", page=1, section="S", content="C",
+                             similarity=0.8, source_url="https://x",
+                             domain="pmfby", jurisdiction="central", state=None)]
+    with pytest.raises(CitationError):
+        generate_answer(mock_llm, "test question", chunks)
+
+
+def test_generate_answer_returns_answer_with_valid_citation():
+    mock_llm = MagicMock()
+    mock_llm.generate.return_value = "Farmers are eligible [chunk:aaaaaaaa]."
+    chunks = [RetrievedChunk(chunk_id="aaaaaaaa-1111-2222-3333-444444444444",
+                             title="T", page=1, section="S", content="C",
+                             similarity=0.8, source_url="https://x",
+                             domain="pmfby", jurisdiction="central", state=None)]
+    result = generate_answer(mock_llm, "test question", chunks)
+    assert "eligible" in result

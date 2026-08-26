@@ -16,7 +16,7 @@ trust it. If you only have two minutes, update `Last updated` and the
 
 ## Last updated
 
-`2026-08-26 21:25, by M1/task-13`
+`2026-08-26 23:00, by task-12`
 
 ## Current day / plan position
 
@@ -80,13 +80,13 @@ section should only ever show what's currently blocking, not a history log
 
 | Domain | Sources ingested | Chunk count (approx) | Notes |
 |---|---|---|---|
-| cooperative | 0 | 0 | 2 seed files ready (bylaws_governance, bylaws_membership) |
-| pacs | 0 | 0 | 3 seed files ready (pacs_role, pacs_credit, pacs_schemes_computerization) |
-| schemes | 0 | 0 | |
-| pmfby | 0 | 0 | 4 seed files ready (pmfby_eligibility, coverage, premium, claims) |
-| agriculture | 0 | 0 | |
-| finlit | 0 | 0 | 3 seed files ready (rbi_finlit_awareness, pmjdy_account, pmjdy_rupay) |
-| grievance | n/a — no corpus, classification examples only | | |
+| cooperative | 0 | 0 | Validation scripts ready, awaiting official documents |
+| pacs | 0 | 0 | Validation scripts ready, awaiting official documents |
+| schemes | 0 | 0 | Validation scripts ready, awaiting official documents |
+| pmfby | 0 | 0 | Validation scripts ready, awaiting official documents |
+| agriculture | 0 | 0 | Validation scripts ready, awaiting official documents |
+| finlit | 0 | 0 | Validation scripts ready, awaiting official documents |
+| grievance | n/a — no corpus, classification examples only | | Validation scripts ready, awaiting official documents |
 
 ## Three flagship demos (from work-plan.md Day 9)
 
@@ -98,4 +98,6 @@ Track these independently — they're what actually gets shown to judges.
 
 ## Next immediate action
 
-Next task in sequence per work-plan.md. Task 11 integration is complete — 26/26 tests passing.
+Team provides official documents for 12 seed domains, then run Phase 2A evaluation pipeline.
+
+Phase 2A implementation code (evaluation scripts, gold cases, gate config) is complete — awaiting official documents for corpus ingestion.

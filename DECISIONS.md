@@ -115,3 +115,15 @@ design.md's IndicLID/provider-native detection line; earlier voice-first-cut
 order.
 **Doc updated:** yes — spec is authoritative for sequencing; design.md/design
 deviations itemized in spec §8.
+
+### Adopted Phase 2A spec — Corpus & Retrieval Quality Gate
+**Date:** 2026-08-26
+**Changed by:** planning session
+**What:** Phase 2A design spec finalized with 6 hard invariants, 245 gold
+evaluation cases, 4 new evaluation scripts (retrieval, jurisdiction,
+unsupported-query, citation), corpus snapshot versioning, Gate 2 report
+generator, and gate2_config.yaml for frozen target T.
+**Why:** Phase 0-1 code/integrity gate passed; next milestone is corpus quality
+and retrieval accuracy measurement before adding new features.
+**Replaces:** None — extends existing plan.
+**Doc updated:** yes — docs/superpowers/specs/2026-08-26-phase2a-corpus-retrieval-quality-design.md

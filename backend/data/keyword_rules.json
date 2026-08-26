@@ -1,0 +1,9 @@
+{
+  "pmfby": ["pmfby", "crop insurance", "fasal bima", "pradhan mantri fasal"],
+  "pacs": ["pacs", "primary agricultural credit society", "primary agriculture credit"],
+  "cooperative": ["cooperative society", "co-operative society", "byelaws", "by-laws", "sahkari"],
+  "schemes": ["scheme", "yojana", "yojna", "ministry of cooperation"],
+  "finlit": ["rbi", "bank account", "pmjdy", "jan dhan", "financial literacy", "deposit insurance"],
+  "agriculture": ["sowing", "harvest", "mandi", "msp", "fertilizer", "seed variety"],
+  "grievance": ["complaint", "grievance", "shikayat", "report corruption"]
+}

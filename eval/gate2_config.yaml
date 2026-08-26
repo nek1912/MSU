@@ -1,0 +1,12 @@
+# Gate 2 configuration — frozen BEFORE running final evaluation.
+# Target T is set here; do not change after seeing evaluation results.
+
+# Invariant 4: Retrieval Recall@5 target
+# Set to a defensible value based on corpus size and retrieval quality expectations.
+# For a 12-document corpus with ~500 chunks, 0.50 is a reasonable starting point.
+# Adjust based on preliminary evaluation runs, but freeze before the FINAL Gate 2 run.
+recall_at_5_target: 0.50
+
+# Metadata
+created_date: "2026-08-26"
+frozen: false  # Set to true once target is finalized after preliminary evaluation

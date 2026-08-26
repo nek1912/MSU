@@ -72,3 +72,46 @@ instead of two. Fewer moving parts for a 4-person, 10-day build.
 **Replaces:** Earlier architecture using Qdrant Cloud for vectors and a
 separate Postgres instance for relational data.
 **Doc updated:** yes — architecture.md, CLAUDE.md
+
+### Switched embedding model from gemini-embedding-001 to gemini-embedding-2
+**Date:** 2026-08-26
+**Changed by:** spec-review session (user review; verified against live docs)
+**What:** Standardize on `gemini-embedding-2` with `output_dimensionality: 768`
+for chunk and anchor embeddings. `gemini-embedding-001` demoted to approved
+fallback. Phase 0 must smoke-test N inputs → N distinct 768-dim vectors before
+any corpus ingestion; on violation, revert to `gemini-embedding-001` (manual
+normalization at 768) and re-log.
+**Why:** Live Google docs verified 2026-08-26: `gemini-embedding-2` is stable GA
+(released 2026-04-22, no shutdown announced), documents per-string embeddings,
+and auto-renormalizes truncated dimensions; it is Google's listed replacement
+for `gemini-embedding-001`, whose shutdown is now announced for 2028-05-14. The
+earlier rejection below targeted `embedding-2-preview` (shutdown 2026-08-10);
+its aggregation behavior does not carry to the GA model per current official
+docs and examples.
+**Replaces:** "Reverted embedding model from gemini-embedding-2 to
+gemini-embedding-001" (above).
+**Doc updated:** yes — CLAUDE.md, SOURCES.md, spec §2.2
+(docs/superpowers/specs/2026-08-26-mvp-build-design.md)
+
+### Adopted implementation spec; work-plan demoted to reference
+**Date:** 2026-08-26
+**Changed by:** brainstorming/spec session
+**What:** Adopted
+`docs/superpowers/specs/2026-08-26-mvp-build-design.md` as the operational plan:
+Gujarat selected as the state; phase-gated build (0–7) with an MVP gate (Phase 4)
+and a PS-complete gate (Phase 7); cut order protects Hindi voice (a mandatory PS
+requirement) instead of sacrificing it first; language handling switched to
+explicit UI selection with optional heuristic consistency check (no IndicLID /
+no detection-as-dependency); domain classification pinned to hybrid keyword +
+anchor-embedding classifier; deployment staged (trivial `/health` stub early,
+full integration in Phase 5); evidence thresholds explicitly provisional until
+Phase 4 calibration; UI shows evidence bands, not raw confidence numbers;
+sessions gain TTL; state-null questions ask for the state rather than assuming
+Gujarat.
+**Why:** Converts frozen-doc ambiguities into testable decisions before code
+exists; aligns delivery bar with the problem statement's mandatory items.
+**Replaces:** day-by-day sequencing in work-plan.md (now background info);
+design.md's IndicLID/provider-native detection line; earlier voice-first-cut
+order.
+**Doc updated:** yes — spec is authoritative for sequencing; design.md/design
+deviations itemized in spec §8.

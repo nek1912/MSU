@@ -9,7 +9,7 @@ with, not against this document alone.
 | Purpose | Service | Where | Caveat |
 |---|---|---|---|
 | Hindi STT/TTS/translation | Bhashini (ULCA) | https://bhashini.gitbook.io/bhashini-apis | Free, government-run, self-serve registration at bhashini.gov.in. Suitable for PoC/hackathon; production/commercial use may need separate arrangement. Register on Day 1 — approval lead time is unverified. |
-| Embeddings | Gemini API, `gemini-embedding-001` | https://ai.google.dev/gemini-api/docs/embeddings | Free tier, per-string embeddings, 768-dim config used here. Do NOT use `gemini-embedding-2` — see CLAUDE.md for why. |
+| Embeddings | Gemini API, `gemini-embedding-2` @ 768 dims | https://ai.google.dev/gemini-api/docs/embeddings | Stable GA (2026-04), per-string embeddings with auto-renormalized reduced dims, official replacement for `gemini-embedding-001` (shutdown 2028-05-14). Phase 0 guard: smoke-test N inputs → N distinct vectors before ingesting. Re-verify free-tier quotas on account creation. |
 | LLM (fast, primary) | Groq | https://console.groq.com/docs/rate-limits | No credit card. Confirmed free-tier ballpark: ~30 RPM, several thousand TPM, ~1,000-14,400 RPD depending on model — check console.groq.com for the current per-model numbers, they vary by model. |
 | LLM (fallback) | Gemini 2.5 Flash | https://ai.google.dev/gemini-api/docs/pricing | Free tier confirmed generous (~1,500 RPD, 1M TPM as of mid-2026) but Google's own docs warn free-tier inputs/outputs may be used to improve their models — don't send real grievance PII through this path. |
 | STT fallback | Groq-hosted Whisper v3 Turbo | https://console.groq.com/docs | Hosted, no GPU required on your side. |

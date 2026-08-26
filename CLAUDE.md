@@ -53,12 +53,13 @@ to this file rather than silently doing it.
   Site is the fallback if Vercel eligibility becomes an issue)
 - Backend: FastAPI (Python) on Render Free
 - DB + vectors: Supabase Postgres + pgvector (HNSW index)
-- Embeddings: Gemini API, model `gemini-embedding-001`, 768 dimensions.
-  Do NOT use `gemini-embedding-2` / `gemini-embedding-2-preview` — it aggregates
-  multiple inputs into a single vector rather than returning one embedding per
-  input string, which is the wrong behavior for per-chunk retrieval, and it's
-  preview-status with a larger default dimension that costs more free-tier storage
-  for no benefit here. This was tried and reverted — see DECISIONS.md.
+- Embeddings: Gemini API, model `gemini-embedding-2`, 768 dimensions
+  (`output_dimensionality: 768`; truncated dims are auto-renormalized).
+  `gemini-embedding-001` is the approved fallback (shutdown 2028-05-14; requires
+  manual normalization at non-default dims). Phase 0 must empirically verify
+  one-embedding-per-input-string before corpus ingestion — see DECISIONS.md
+  (2026-08-26 reversal entry; the earlier rejection targeted
+  `embedding-2-preview`, whose aggregation behavior does not carry to GA).
 - LLM: provider abstraction, Groq primary (Llama 3.3 70B or similar), Gemini
   2.5 Flash fallback
 - Voice: Bhashini primary → Groq Whisper STT fallback → text-only fallback

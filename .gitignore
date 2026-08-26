@@ -9,3 +9,5 @@ coverage/
 .ruff_cache/
 .superpowers/
 *.egg-info/
+build/
+dist/

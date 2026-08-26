@@ -10,7 +10,9 @@ effective_date: null
 verified_date: 2026-08-26
 page: 1
 section: "Role"
+source_quality: wikipedia_proxy
 ---
 A Primary Agricultural Credit Society (PACS) is a basic unit and smallest co-operative credit institutions in India. It works on the grassroots level (gram panchayat and village level). PACS are the most decentralized cooperative credit institutions in India and form the base of the cooperative credit structure.
 
 PACS provide short-term and medium-term credit to farmers and agricultural laborers. They also perform ancillary functions such as supply of agricultural inputs, marketing of agricultural produce, and providing storage and warehousing facilities. As of 2022, there are 99,635 PACS operating across India in all states and union territories.
+<!-- TODO: Replace with verbatim text from the official URL listed above. Current content is from Wikipedia as a placeholder. -->

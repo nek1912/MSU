@@ -16,9 +16,7 @@ trust it. If you only have two minutes, update `Last updated` and the
 
 ## Last updated
 
-`YYYY-MM-DD HH:MM, by <name/session>` — replace this line every time you touch
-the file. An update with no timestamp change is a sign nobody actually updated
-it.
+`2026-08-26 20:45, by M1/task-8`
 
 ## Current day / plan position
 
@@ -42,7 +40,7 @@ broken`.
 | Repo / CI / deploy pipeline | M4 | not started | |
 | FastAPI skeleton + `/health` | M2 | not started | |
 | Next.js skeleton (chat + grievance screens) | M3 | not started | |
-| Document ingestion (Docling) | M1 | not started | |
+| Document ingestion (Docling) | M1 | not started | Seed corpus + ingestion pipeline created (task 8) |
 | Embeddings (`gemini-embedding-001`) | M1 | not started | |
 | Retrieval (Supabase pgvector, domain+state filter) | M1 | not started | |
 | `/chat` wired to retrieval | M2 | not started | |
@@ -81,12 +79,12 @@ section should only ever show what's currently blocking, not a history log
 
 | Domain | Sources ingested | Chunk count (approx) | Notes |
 |---|---|---|---|
-| cooperative | 0 | 0 | |
-| pacs | 0 | 0 | |
+| cooperative | 0 | 0 | 2 seed files ready (bylaws_governance, bylaws_membership) |
+| pacs | 0 | 0 | 3 seed files ready (pacs_role, pacs_credit, pacs_schemes_computerization) |
 | schemes | 0 | 0 | |
-| pmfby | 0 | 0 | |
+| pmfby | 0 | 0 | 4 seed files ready (pmfby_eligibility, coverage, premium, claims) |
 | agriculture | 0 | 0 | |
-| finlit | 0 | 0 | |
+| finlit | 0 | 0 | 3 seed files ready (rbi_finlit_awareness, pmjdy_account, pmjdy_rupay) |
 | grievance | n/a — no corpus, classification examples only | | |
 
 ## Three flagship demos (from work-plan.md Day 9)
@@ -99,8 +97,4 @@ Track these independently — they're what actually gets shown to judges.
 
 ## Next immediate action
 
-The single next thing whoever opens this file next should do. Keep this to one
-or two lines — if it needs more than that, it belongs in work-plan.md or a
-GitHub issue, not here.
-
-`<fill in>`
+Run real ingestion: `cd backend; python ../ingestion/ingest.py` (needs .env + Supabase schema). Verify 12 seed documents ingested.

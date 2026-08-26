@@ -1,0 +1,120 @@
+# Source manifest. Add the selected state's cooperative act/rules on Day 1 —
+# see the placeholder at the bottom. Update verified_date whenever a source is
+# re-checked, don't just leave the original date.
+
+sources:
+  # ============================================================
+  # COOPERATIVE / PACS
+  # ============================================================
+  - id: ministry_cooperation
+    organization: Ministry of Cooperation
+    domain: cooperative
+    jurisdiction: central
+    state: null
+    document_type: official_web_source
+    url: https://www.cooperation.gov.in/
+    effective_date: null
+    verified_date: 2026-08-26
+
+  - id: ministry_pacs
+    organization: Ministry of Cooperation
+    domain: pacs
+    jurisdiction: central
+    state: null
+    document_type: official_web_source
+    url: https://cooperation.gov.in/en/about-primary-agriculture-cooperative-credit-societies-pacs
+    effective_date: null
+    verified_date: 2026-08-26
+
+  - id: ministry_pacs_schemes
+    organization: Ministry of Cooperation
+    domain: schemes
+    jurisdiction: central
+    state: null
+    document_type: official_web_source
+    url: https://cooperation.gov.in/index.php/en/pacs-related-schemes
+    effective_date: null
+    verified_date: 2026-08-26
+
+  - id: model_pacs_bylaws
+    organization: Ministry of Cooperation
+    domain: cooperative
+    jurisdiction: central
+    state: null
+    document_type: model_bylaw
+    url: https://www.cooperation.gov.in/en/model-byelaws
+    effective_date: "2023-01-05"
+    verified_date: 2026-08-26
+
+  # ============================================================
+  # LAWS
+  # ============================================================
+  - id: india_code
+    organization: India Code
+    domain: cooperative
+    jurisdiction: central_and_state
+    state: null
+    document_type: legislation_repository
+    url: https://www.indiacode.nic.in/
+    effective_date: null
+    verified_date: 2026-08-26
+
+  # ============================================================
+  # PMFBY
+  # ============================================================
+  - id: pmfby_guidelines
+    organization: PMFBY
+    domain: pmfby
+    jurisdiction: central
+    state: null
+    document_type: guidelines
+    url: https://pmfby.gov.in/guidelines
+    effective_date: null
+    verified_date: 2026-08-26
+
+  - id: pmfby_faq
+    organization: PMFBY
+    domain: pmfby
+    jurisdiction: central
+    state: null
+    document_type: faq
+    url: https://pmfby.gov.in/faq
+    effective_date: null
+    verified_date: 2026-08-26
+
+  # ============================================================
+  # FINANCIAL LITERACY
+  # ============================================================
+  - id: rbi_financial_literacy
+    organization: Reserve Bank of India
+    domain: finlit
+    jurisdiction: central
+    state: null
+    document_type: financial_literacy
+    url: https://rbi.org.in/
+    effective_date: null
+    verified_date: 2026-08-26
+
+  - id: pmjdy_financial_literacy
+    organization: PMJDY
+    domain: finlit
+    jurisdiction: central
+    state: null
+    document_type: financial_literacy
+    url: https://www.pmjdy.gov.in/literacy
+    effective_date: null
+    verified_date: 2026-08-26
+
+  # ============================================================
+  # STATE — fill this in on Day 1, then update this file and
+  # PROJECT_STATUS.md in the same commit.
+  # ============================================================
+  # - id: selected_state_cooperative_act
+  #   organization:
+  #   domain: cooperative
+  #   jurisdiction: state
+  #   state:
+  #   document_type: cooperative_act
+  #   url:
+  #   effective_date: null
+  #   verified_date: 2026-08-26

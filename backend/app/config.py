@@ -25,6 +25,11 @@ class Settings(BaseSettings):
 EMBED_DIMS = 768
 REQUEST_TIMEOUT_S = 30.0
 
+# Retrieval gate thresholds (spec §2.4)
+TOP1_THRESHOLD = 0.35
+SECONDARY_THRESHOLD = 0.34
+MIN_CHUNKS_ABOVE_SECONDARY = 2
+
 @lru_cache
 def get_settings() -> Settings:
     return Settings()

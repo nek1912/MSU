@@ -71,39 +71,55 @@ The Phase 0-1 foundation has been hardened with two critical correctness fixes, 
 
 ## Component Status
 
-| Component | Status | Confidence |
-|---|---|---|
-| API contract | Tested (13 contract tests) | High |
-| Citation verification | Strict (any invalid = abstain) | High |
-| Evidence gate | Boundary-tested (18 tests) | High |
-| Domain routing | Evaluated (74.4% keyword) | Medium |
-| LLM fallback | Failure-injected (18 tests) | High |
-| Session handling | Design reviewed | Medium-high |
-| Ingestion pipeline | Idempotent, chunked | Medium |
-| Corpus quality | Placeholder content | Low |
-| Security | All checks pass | High |
-| Reproducibility | Not yet demonstrated | Low |
+| Component | Status | Confidence | Measured |
+|---|---|---|---|
+| API contract | Tested (13 contract tests) | High | Yes |
+| Citation verification | Strict (any invalid = abstain) | High | Yes |
+| Evidence gate | Boundary-tested (18 tests) | High | Yes |
+| Domain routing | 74.4% keyword-only (43 cases) | Medium | Partial |
+| LLM fallback | Failure-injected (18 tests) | High | Yes |
+| Session handling | Design reviewed | Medium-high | No |
+| Ingestion pipeline | Idempotent, chunked | Medium | No |
+| Corpus quality | Placeholder content | Low | Yes |
+| Security | All checks pass | High | Yes |
+| Reproducibility | Not yet demonstrated | Low | No |
 
 ## Remaining Risks
 
-1. **Corpus placeholders** — Must be replaced with official government text before ingestion
-2. **Domain keyword gaps** — 25.6% of domain questions misclassified (keyword path only)
-3. **Whitespace-only questions** — Not rejected by Pydantic validation
-4. **Provider malformed responses** — JSONDecodeError/KeyError not caught by fallback chain
-5. **No performance baseline** — Latency not measured
-6. **No concurrency testing** — Race conditions untested
+### P0 (Phase 2A gate — must complete before new features)
+1. **Corpus placeholders** — Wikipedia proxy content must be replaced with verbatim official government text before any accuracy evaluation
+2. **Hybrid domain accuracy not measured** — 74.4% is keyword-only; hybrid (keyword + embedding) accuracy unknown
+3. **Domain evaluation set too small** — 43 cases insufficient; need 30-50/domain + adversarial
 
-## Exit Condition Met
+### P1 (before final demo)
+4. **No performance baseline** — Latency not measured
+5. **No concurrency testing** — Race conditions untested
 
+### P2 (acceptable for hackathon)
+6. **Domain keyword gaps** — 25.6% keyword misclassification (may be acceptable if hybrid accuracy is high)
+7. **Whitespace-only questions** — Not rejected by Pydantic validation
+8. **Provider malformed responses** — JSONDecodeError/KeyError not caught by fallback chain
+
+## Exit Condition
+
+### Code/Integrity Gate (PASSED)
 - [x] All existing tests pass (31/31)
 - [x] All new invariant tests pass (49/49)
-- [x] Domain evaluation reported (74.4% keyword accuracy)
-- [x] Citation integrity tests pass (strict invalid rejection)
-- [x] Provider failure tests pass (18 failure injection cases)
-- [x] Corpus placeholder scan passes (0 duplicates, markers present)
-- [x] Security scan passes (5/5 checks)
-- [ ] Clean-environment reproduction — not yet demonstrated
-- [ ] Performance baseline — not yet recorded
-- [ ] Concurrency testing — not yet done
+- [x] Citation integrity: strict invalid rejection verified
+- [x] Provider failures: 18 failure injection cases pass
+- [x] Security scan: 5/5 checks pass
+- [x] Corpus placeholder detection: automated
 
-**Status: FOUNDATION-HARDENED** (with noted risks for Phase 2)
+### Corpus/Retrieval Quality Gate (PENDING)
+- [ ] Official corpus replacement (no placeholders)
+- [ ] Hybrid domain accuracy measured (not just keyword-only)
+- [ ] Evaluation set expanded to 30-50/domain
+- [ ] Retrieval Recall@5 measured
+- [ ] Jurisdiction contamination = 0
+- [ ] Unsafe-answer rate ≈ 0
+- [ ] Performance baseline recorded
+- [ ] Concurrency tested
+
+**Status: FOUNDATION-HARDENED — CODE/INTEGRITY GATE PASSED; CORPUS AND RETRIEVAL QUALITY GATE PENDING.**
+
+The software behaves safely under many expected failures. Accuracy over the real government corpus has not yet been demonstrated. The next milestone is official corpus replacement + retrieval/domain evaluation before adding new user-facing functionality.

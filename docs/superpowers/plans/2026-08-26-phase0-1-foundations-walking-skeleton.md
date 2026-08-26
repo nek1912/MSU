@@ -463,20 +463,30 @@ class Settings(BaseSettings):
     supabase_service_key: str
     allowed_origins: str = "http://localhost:3000"
     selected_state: str | None = "gujarat"
+    # Model IDs are deployment config, not code truth — Task 2 verifies the
+    # current IDs against live docs and they are set via .env; defaults here
+    # are best-known values only.
+    groq_model: str = "llama-3.3-70b-versatile"
+    gemini_model: str = "gemini-2.5-flash"
+    embed_model: str = "gemini-embedding-2"
 
     @property
     def origins(self) -> list[str]:
         return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]
 
-GROQ_MODEL = "llama-3.3-70b-versatile"
-GEMINI_MODEL = "gemini-2.5-flash"
-EMBED_MODEL = "gemini-embedding-2"
 EMBED_DIMS = 768
 REQUEST_TIMEOUT_S = 30.0
 
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+```
+
+`.env.example` gains:
+```
+GROQ_MODEL=llama-3.3-70b-versatile
+GEMINI_MODEL=gemini-2.5-flash
+EMBED_MODEL=gemini-embedding-2
 ```
 
 `backend/app/providers/base.py`:
@@ -494,22 +504,24 @@ class EmbeddingProvider(Protocol):
 
 `backend/app/providers/embeddings.py`:
 ```python
-import httpx
-from app.config import EMBED_DIMS, EMBED_MODEL, REQUEST_TIMEOUT_S, Settings
+from functools import lru_cache
 
-_ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
-             f"{EMBED_MODEL}:embedContent")
+import httpx
+
+from app.config import EMBED_DIMS, REQUEST_TIMEOUT_S, Settings
 
 
 class GeminiEmbeddingProvider:
     def __init__(self, settings: Settings):
         self._key = settings.gemini_api_key
+        self._endpoint = ("https://generativelanguage.googleapis.com/v1beta/models/"
+                          f"{settings.embed_model}:embedContent")
 
     def embed_texts(self, texts: list[str]) -> list[list[float]]:
         out: list[list[float]] = []
         with httpx.Client(timeout=REQUEST_TIMEOUT_S) as client:
             for text in texts:  # one request per string: per-string guarantee
-                r = client.post(f"{_ENDPOINT}?key={self._key}", json={
+                r = client.post(f"{self._endpoint}?key={self._key}", json={
                     "content": {"parts": [{"text": text}]},
                     "output_dimensionality": EMBED_DIMS})
                 r.raise_for_status()
@@ -518,12 +530,20 @@ class GeminiEmbeddingProvider:
                     raise ValueError(f"unexpected dims {len(values)}")
                 out.append(values)
         return out
+
+
+@lru_cache(maxsize=1)
+def get_embedding_provider() -> GeminiEmbeddingProvider:
+    """Process-wide singleton. The route MUST use this — constructing a fresh
+    provider per request would defeat the anchor-store cache (P0-1)."""
+    return GeminiEmbeddingProvider(get_settings())
 ```
 
 `backend/app/providers/groq_llm.py`:
 ```python
 import httpx
-from app.config import GROQ_MODEL, REQUEST_TIMEOUT_S, Settings
+
+from app.config import REQUEST_TIMEOUT_S, Settings
 
 _URL = "https://api.groq.com/openai/v1/chat/completions"
 
@@ -531,11 +551,12 @@ _URL = "https://api.groq.com/openai/v1/chat/completions"
 class GroqLLMProvider:
     def __init__(self, settings: Settings):
         self._key = settings.groq_api_key
+        self._model = settings.groq_model
 
     def generate(self, system: str, user: str, temperature: float = 0.1) -> str:
         r = httpx.post(_URL,
             headers={"Authorization": f"Bearer {self._key}"},
-            json={"model": GROQ_MODEL, "temperature": temperature,
+            json={"model": self._model, "temperature": temperature,
                   "messages": [{"role": "system", "content": system},
                                {"role": "user", "content": user}]},
             timeout=REQUEST_TIMEOUT_S)
@@ -546,18 +567,18 @@ class GroqLLMProvider:
 `backend/app/providers/gemini_llm.py`:
 ```python
 import httpx
-from app.config import GEMINI_MODEL, REQUEST_TIMEOUT_S, Settings
 
-_URL = ("https://generativelanguage.googleapis.com/v1beta/models/"
-        f"{GEMINI_MODEL}:generateContent")
+from app.config import REQUEST_TIMEOUT_S, Settings
 
 
 class GeminiLLMProvider:
     def __init__(self, settings: Settings):
         self._key = settings.gemini_api_key
+        self._url = ("https://generativelanguage.googleapis.com/v1beta/models/"
+                     f"{settings.gemini_model}:generateContent")
 
     def generate(self, system: str, user: str, temperature: float = 0.1) -> str:
-        r = httpx.post(f"{_URL}?key={self._key}", json={
+        r = httpx.post(f"{self._url}?key={self._key}", json={
             "systemInstruction": {"parts": [{"text": system}]},
             "contents": [{"role": "user", "parts": [{"text": user}]}],
             "generationConfig": {"temperature": temperature}},
@@ -660,6 +681,7 @@ def test_health_providers_shape():
 `backend/app/main.py`:
 ```python
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -669,7 +691,21 @@ from app.config import get_settings
 logging.basicConfig(level=logging.INFO,
                     format='{"level":"%(levelname)s","msg":"%(message)s"}')
 
-app = FastAPI(title="Sahayak API", version="0.1.0")
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    # One-time anchor embedding at boot (~70 requests) so no user request
+    # ever pays for it (P0-1). Failure defers to first /chat instead of
+    # blocking startup — e.g. when running tests offline.
+    try:
+        from app.domains import get_anchor_store
+        get_anchor_store()
+    except Exception as exc:
+        logging.getLogger(__name__).warning("anchor warmup deferred: %r", exc)
+    yield
+
+
+app = FastAPI(title="Sahayak API", version="0.1.0", lifespan=lifespan)
 
 app.add_middleware(CORSMiddleware,
                    allow_origins=get_settings().origins,
@@ -973,6 +1009,16 @@ def load_anchor_store(embed_texts, rules_path: Path = DATA_DIR / "keyword_rules.
     flat = [a for items in anchors.values() for a in items]
     vectors = np.asarray(embed_texts(flat), dtype=float)
     return AnchorStore(load_rules(rules_path), anchors, vectors)
+
+
+def get_anchor_store() -> AnchorStore:
+    """Process-wide singleton. The route MUST call THIS, never
+    `load_anchor_store(provider.embed_texts)` directly — a fresh bound method
+    per request would defeat the cache and re-embed all ~70 anchors on every
+    `/chat` (P0-1). First call costs ~70 embedding requests; the FastAPI
+    startup hook (Task 11) warms it so no user request ever pays for it."""
+    from app.providers.embeddings import get_embedding_provider
+    return load_anchor_store(get_embedding_provider().embed_texts)
 ```
 
 - [ ] **Step 4: Run → 3 PASS; lint.**
@@ -997,10 +1043,27 @@ def load_anchor_store(embed_texts, rules_path: Path = DATA_DIR / "keyword_rules.
 For EACH of these sources, open the live URL and copy 2–4 factual sentences VERBATIM (public-domain government material; cite the URL in frontmatter). Do NOT write facts from memory:
 `https://pmfby.gov.in/faq` ×4 (eligibility, coverage, premium, claim), `https://www.cooperation.gov.in/en/model-byelaws` ×2, `https://cooperation.gov.in/en/about-primary-agriculture-cooperative-credit-societies-pacs` ×2, `https://cooperation.gov.in/index.php/en/pacs-related-schemes` ×1, `https://rbi.org.in/` (financial literacy page) ×1, `https://www.pmjdy.gov.in/literacy` ×2.
 
+**Every file gets a UNIQUE `source_id`** — several files may share one URL, and ingestion deletes by `source_id`, so duplicate IDs would silently overwrite earlier documents (P0-2):
+
+| File | source_id |
+|---|---|
+| `pmfby_eligibility.md` | `pmfby_faq_eligibility` |
+| `pmfby_coverage.md` | `pmfby_faq_coverage` |
+| `pmfby_premium.md` | `pmfby_faq_premium` |
+| `pmfby_claims.md` | `pmfby_faq_claims` |
+| `bylaws_governance.md` | `model_pacs_bylaws_governance` |
+| `bylaws_membership.md` | `model_pacs_bylaws_membership` |
+| `pacs_role.md` | `pacs_overview_role` |
+| `pacs_credit.md` | `pacs_overview_credit` |
+| `pacs_schemes_computerization.md` | `pacs_schemes_computerization` |
+| `rbi_finlit_awareness.md` | `rbi_finlit_awareness` |
+| `pmjdy_account.md` | `pmjdy_finlit_account` |
+| `pmjdy_rupay.md` | `pmjdy_finlit_rupay` |
+
 Template `corpus/seeds/pmfby_eligibility.md`:
 ```markdown
 ---
-source_id: pmfby_faq
+source_id: pmfby_faq_eligibility
 title: "PMFBY FAQ — Eligibility"
 organization: PMFBY
 domain: pmfby
@@ -1014,7 +1077,7 @@ section: "Eligibility"
 ---
 <PASTE VERBATIM TEXT HERE>
 ```
-(Repeat per file with correct frontmatter; `page` = visible page/section number where found, else 0.)
+(Repeat per file with correct frontmatter from the table; `page` = visible page/section number where found, else 0.)
 
 - [ ] **Step 2: Failing chunker test**
 
@@ -1094,11 +1157,13 @@ def parse_chunk_file(path) -> dict:
 ```python
 from pathlib import Path
 
+from ingestion.chunker import chunk_markdown
+from ingestion.loader import parse_chunk_file
+
 SEEDS_DIR = Path(__file__).parent.parent / "corpus" / "seeds"
 
 
 def seeds_to_supabase(paths: list[Path], embed_texts, supabase) -> int:
-    from ingestion.loader import parse_chunk_file
     total = 0
     for path in paths:
         rec = parse_chunk_file(path)
@@ -1111,24 +1176,27 @@ def seeds_to_supabase(paths: list[Path], embed_texts, supabase) -> int:
             "effective_date": rec.get("effective_date"),
             "verified_date": rec["verified_date"],
         }).execute().data[0]
-        vectors = embed_texts([rec["content"]])
-        supabase.table("chunks").insert({
-            "document_id": doc["id"], "page": rec.get("page", 0),
-            "section": rec.get("section", ""), "content": rec["content"],
-            "embedding": vectors[0]})
+        # Same pipeline as the real corpus (P1-6): parse → chunk → embed → insert.
+        pieces = chunk_markdown(rec["content"])
+        vectors = embed_texts(pieces)
+        for piece, vector in zip(pieces, vectors):
+            supabase.table("chunks").insert({
+                "document_id": doc["id"], "page": rec.get("page", 0),
+                "section": rec.get("section", ""), "content": piece,
+                "embedding": vector})
         total += 1
     return total
 
 
 if __name__ == "__main__":
-    import os
     from supabase import create_client
+
     from app.config import get_settings
-    from app.providers.embeddings import GeminiEmbeddingProvider
+    from app.providers.embeddings import get_embedding_provider
 
     s = get_settings()
     paths = sorted(SEEDS_DIR.glob("*.md"))
-    count = seeds_to_supabase(paths, GeminiEmbeddingProvider(s).embed_texts,
+    count = seeds_to_supabase(paths, get_embedding_provider().embed_texts,
                               create_client(s.supabase_url, s.supabase_service_key))
     print(f"ingested {count} seed documents")
 ```
@@ -1146,12 +1214,12 @@ if __name__ == "__main__":
 - Test: `backend/tests/test_retrieval.py`
 
 **Interfaces:**
-- Consumes: Supabase RPC `match_chunks`; config thresholds.
+- Consumes: Supabase RPC `match_chunks` (already returns `domain`, `jurisdiction`, `state` columns); config thresholds.
 - Produces:
-  - `RetrievedChunk` (pydantic): `chunk_id: str, title: str, page: int, section: str, content: str, similarity: float, source_url: str`
+  - `RetrievedChunk` (pydantic): `chunk_id: str, title: str, page: int, section: str, content: str, similarity: float, source_url: str, domain: str, jurisdiction: str, state: str | None`
   - `retrieve(supabase, query_embedding: list[float], domain: str, state: str | None, k: int = 6) -> list[RetrievedChunk]`
   - `GateResult(abstained: bool, reason: str | None, confidence: float)`
-  - `evidence_gate(chunks) -> GateResult` — implements §2.4 exactly (top1 ≥0.35, ≥2 chunks ≥0.30, domain/jurisdiction asserted upstream, confidence formula rounded 2dp).
+  - `evidence_gate(chunks, expected_domain=None, expected_state=None) -> GateResult` — implements spec §2.4 fully: top1 ≥0.35, ≥2 chunks ≥0.30, PLUS defense-in-depth checks that every chunk's `domain == expected_domain` (when given) and each chunk is jurisdiction-valid (`jurisdiction == "central"` or `state == expected_state`) even though the SQL prefilter should guarantee it.
 
 - [ ] **Step 1: Failing tests**
 
@@ -1160,13 +1228,15 @@ if __name__ == "__main__":
 from app.retrieval import GateResult, RetrievedChunk, evidence_gate
 
 
-def mk(sim: float) -> RetrievedChunk:
+def mk(sim: float, domain: str = "pmfby", jurisdiction: str = "central",
+       state: str | None = None) -> RetrievedChunk:
     return RetrievedChunk(chunk_id="c1", title="T", page=1, section="S",
-                          content="C", similarity=sim, source_url="https://x")
+                          content="C", similarity=sim, source_url="https://x",
+                          domain=domain, jurisdiction=jurisdiction, state=state)
 
 
 def test_gate_pass():
-    g = evidence_gate([mk(0.62), mk(0.41), mk(0.33)])
+    g = evidence_gate([mk(0.62), mk(0.41), mk(0.33)], expected_domain="pmfby")
     assert not g.abstained and g.confidence == round(0.6 * 0.62 + 0.4 * (2 / 3), 2)
 
 
@@ -1182,6 +1252,18 @@ def test_gate_empty():
     g = evidence_gate([])
     assert g.abstained and g.confidence == 0.0
     assert isinstance(g, GateResult)
+
+
+def test_gate_rejects_wrong_domain_chunk():
+    g = evidence_gate([mk(0.9), mk(0.7, domain="finlit")],
+                      expected_domain="pmfby")
+    assert g.abstained
+
+
+def test_gate_rejects_wrong_state_document():
+    g = evidence_gate([mk(0.9), mk(0.7, jurisdiction="state", state="maharashtra")],
+                      expected_domain="pmfby", expected_state="gujarat")
+    assert g.abstained
 ```
 
 - [ ] **Step 2: Run → FAIL. Implement**
@@ -1202,6 +1284,9 @@ class RetrievedChunk(BaseModel):
     content: str
     similarity: float
     source_url: str
+    domain: str
+    jurisdiction: str
+    state: str | None = None
 
 
 class GateResult(BaseModel):
@@ -1218,12 +1303,25 @@ def retrieve(supabase, query_embedding: list[float], domain: str,
     return [RetrievedChunk(chunk_id=str(r["chunk_id"]), title=r["title"],
                            page=r["page"], section=r["section"],
                            content=r["content"], similarity=r["similarity"],
-                           source_url=r["source_url"]) for r in rows]
+                           source_url=r["source_url"], domain=r["domain"],
+                           jurisdiction=r["jurisdiction"],
+                           state=r.get("state")) for r in rows]
 
 
-def evidence_gate(chunks: list[RetrievedChunk]) -> GateResult:
+def _jurisdiction_ok(chunk: RetrievedChunk, expected_state: str | None) -> bool:
+    return chunk.jurisdiction == "central" or chunk.state == expected_state
+
+
+def evidence_gate(chunks: list[RetrievedChunk], expected_domain: str | None = None,
+                  expected_state: str | None = None) -> GateResult:
     if not chunks:
         return GateResult(abstained=True, reason="no_chunks")
+    # Defense-in-depth (spec §2.4): SQL prefilter should guarantee these;
+    # verify anyway so a bad filter can never surface cross-domain evidence.
+    if expected_domain is not None and any(c.domain != expected_domain for c in chunks):
+        return GateResult(abstained=True, reason="domain_mismatch_in_retrieval")
+    if not all(_jurisdiction_ok(c, expected_state) for c in chunks):
+        return GateResult(abstained=True, reason="jurisdiction_mismatch_in_retrieval")
     sims = sorted((c.similarity for c in chunks), reverse=True)
     if sims[0] < TOP1_THRESHOLD:
         return GateResult(abstained=True, reason="below_top1_threshold")
@@ -1234,7 +1332,7 @@ def evidence_gate(chunks: list[RetrievedChunk]) -> GateResult:
     return GateResult(abstained=False, reason=None, confidence=confidence)
 ```
 
-- [ ] **Step 3: Run → 4 PASS; lint; commit** — `git commit -m "feat: filtered retrieval + provisional evidence gate"`
+- [ ] **Step 3: Run → 6 PASS; lint; commit** — `git commit -m "feat: filtered retrieval + evidence gate with jurisdiction defense-in-depth"`
 
 ---
 
@@ -1337,6 +1435,34 @@ def generate_answer(llm, question: str, chunks: list[RetrievedChunk]) -> str:
 
 - [ ] **Step 1: Failing test (mocks at provider boundary, real logic)**
 
+`backend/tests/conftest.py` (autouse — env, classifier stub at the route boundary, session stubs; Supabase itself goes over real httpx so `respx` can mock its URLs):
+```python
+import pytest
+
+from app.config import get_settings
+
+
+class _FakeStore:
+    @staticmethod
+    def classify(_text: str, _embedding: list[float]) -> tuple[str, float]:
+        return "pmfby", 1.0  # classifier is unit-tested in Task 7
+
+
+@pytest.fixture(autouse=True)
+def env_and_route_stubs(monkeypatch):
+    monkeypatch.setenv("GROQ_API_KEY", "test")
+    monkeypatch.setenv("GEMINI_API_KEY", "test")
+    monkeypatch.setenv("SUPABASE_URL", "http://testsupa")
+    monkeypatch.setenv("SUPABASE_SERVICE_KEY", "test")
+    get_settings.cache_clear()
+    import app.routes.chat as chat_route
+    monkeypatch.setattr(chat_route, "get_anchor_store", lambda: _FakeStore())
+    monkeypatch.setattr(chat_route, "get_state", lambda _sid: None)
+    monkeypatch.setattr(chat_route, "touch_session", lambda *_a, **_k: None)
+    yield
+    get_settings.cache_clear()
+```
+
 `backend/tests/test_chat_route.py`:
 ```python
 import uuid
@@ -1363,11 +1489,13 @@ def test_answered_with_valid_citation(respx_mock):
             "chunk_id": "aaaaaaaa-1111-2222-3333-444444444444",
             "title": "PMFBY FAQ", "page": 1, "section": "Eligibility",
             "content": "Eligible farmers are covered.", "similarity": 0.72,
-            "source_url": "https://pmfby.gov.in/faq"}, {
+            "source_url": "https://pmfby.gov.in/faq", "domain": "pmfby",
+            "jurisdiction": "central", "state": None}, {
             "chunk_id": "bbbbbbbb-5555-6666-7777-888888888888",
             "title": "PMFBY Guidelines", "page": 4, "section": "Coverage",
             "content": "Coverage extends to notified crops.", "similarity": 0.51,
-            "source_url": "https://pmfby.gov.in/guidelines"}]))
+            "source_url": "https://pmfby.gov.in/guidelines", "domain": "pmfby",
+            "jurisdiction": "central", "state": None}]))
     respx_mock.post("https://api.groq.com/openai/v1/chat/completions").mock(
         return_value=httpx.Response(200, json={"choices": [{"message": {
             "content": "Farmers growing notified crops are eligible [chunk:aaaaaaaa]."}}]}))
@@ -1392,7 +1520,7 @@ def test_abstains_when_retrieval_below_threshold(respx_mock):
     assert body["answer"]  # safe message present
 ```
 
-(Test infra note: conftest overrides Settings with dummy keys + `supabase_url="http://testsupa"` and swaps the app's cached clients — implement `backend/tests/conftest.py` fixture `autouse=True` setting env vars and clearing `get_settings.cache_clear()` plus a fake supabase object exposing `.rpc(...)`/`.table(...)` wired to `respx`-backed httpx via `postgrest` client replacement. If `supabase-py` internals resist patching, wrap all Supabase access behind `backend/app/db.py: get_supabase()` and monkeypatch THAT in tests — prefer this wrapper approach outright.)
+Note: the route's happy path above exercises real evidence-gate logic (two chunks ≥0.30 → pass) with only the domain classifier and session store stubbed at the route boundary — both have dedicated tests or arrive in Phase 2/3.
 
 - [ ] **Step 2: Implement `db.py` wrapper + session store + route**
 
@@ -1416,6 +1544,16 @@ def get_supabase() -> Client:
 from datetime import datetime, timedelta, timezone
 
 from app.db import get_supabase
+
+
+def get_state(session_id: str) -> str | None:
+    """Session is authoritative for jurisdiction (spec §2.3, P1-7): a request
+    with state=null continues in the session's previously selected state."""
+    rows = (get_supabase().table("sessions").select("state")
+            .eq("session_id", session_id).limit(1).execute().data or [])
+    if not rows:
+        return None
+    return (rows[0].get("state") or {}).get("selected_state")
 
 
 def touch_session(session_id: str, selected_state: str | None, language: str) -> None:
@@ -1443,17 +1581,17 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.config import get_settings
+from app.domains import get_anchor_store
 from app.db import get_supabase
-from app.domains import load_anchor_store
 from app.generation import (SYSTEM_PROMPT, CitationError, build_user_prompt,
                             verify_citations)
 from app.language import normalize_language
 from app.llm_fallback import AllProvidersFailedError, grounded_answer
-from app.providers.embeddings import GeminiEmbeddingProvider
+from app.providers.embeddings import get_embedding_provider
 from app.providers.gemini_llm import GeminiLLMProvider
 from app.providers.groq_llm import GroqLLMProvider
 from app.retrieval import RetrievedChunk, evidence_gate, retrieve
-from app.session_store import touch_session
+from app.session_store import get_state, touch_session
 
 router = APIRouter()
 
@@ -1479,14 +1617,18 @@ def chat(req: ChatRequest) -> dict:
     settings = get_settings()
     lang = normalize_language(req.language, req.question)
     try:
-        embedding = GeminiEmbeddingProvider(settings).embed_texts([req.question])[0]
-        store = load_anchor_store(GeminiEmbeddingProvider(settings).embed_texts)
-        domain, _score = store.classify(req.question, embedding)
-        touch_session(req.session_id, req.state, lang)
+        provider = get_embedding_provider()          # cached singleton (P0-1)
+        embedding = provider.embed_texts([req.question])[0]
+        domain, _score = get_anchor_store().classify(req.question, embedding)
+        # Session is authoritative for jurisdiction (P1-7): explicit request
+        # state updates it; a null state continues the session's prior state.
+        resolved_state = req.state or get_state(req.session_id)
+        touch_session(req.session_id, resolved_state, lang)
         if domain == "out_of_scope":
             return _abstain(lang, "out_of_scope")
-        chunks = retrieve(get_supabase(), embedding, domain, req.state)
-        gate = evidence_gate(chunks)
+        chunks = retrieve(get_supabase(), embedding, domain, resolved_state)
+        gate = evidence_gate(chunks, expected_domain=domain,
+                             expected_state=resolved_state)
         if gate.abstained:
             return _abstain(lang, gate.reason)
         prompt = build_user_prompt(req.question, chunks)
@@ -1697,10 +1839,13 @@ export default function Home() {
 ```python
 import json
 import os
+import re
 import sys
 import time
 import urllib.request
+from pathlib import Path
 
+SEEDS_DIR = Path(__file__).parent.parent / "corpus" / "seeds"
 CASES_ANSWER = [
     ("What are the eligibility criteria under PMFBY?", "en"),
     ("How are PMFBY claims made after crop loss?", "en"),
@@ -1711,12 +1856,28 @@ CASES_ANSWER = [
 CASES_ABSTAIN = [("Who won yesterday's cricket match?", "en"),
                  ("Recommend me a good movie", "hi")]
 
-API = os.environ.get("API_BASE", "http://localhost:8000")
+
+def api_base() -> str:
+    return sys.argv[1] if len(sys.argv) > 1 else os.environ.get(
+        "API_BASE", "http://localhost:8000")
 
 
-def chat(q: str, lang: str) -> dict:
+def load_seed_urls() -> set[str]:
+    """Every citation must point at a URL present in the seed manifest
+    (P0-4): the gate verifies sources, not just shapes."""
+    urls = set()
+    for path in SEEDS_DIR.glob("*.md"):
+        for line in path.read_text(encoding="utf-8").splitlines():
+            m = re.match(r"^url:\s*(\S+)", line)
+            if m:
+                urls.add(m.group(1))
+                break
+    return urls
+
+
+def chat(base: str, q: str, lang: str) -> dict:
     req = urllib.request.Request(
-        f"{API}/chat", method="POST",
+        f"{base}/chat", method="POST",
         data=json.dumps({"question": q, "session_id": str(time.time_ns()),
                          "language": lang, "state": None}).encode(),
         headers={"Content-Type": "application/json"})
@@ -1725,14 +1886,18 @@ def chat(q: str, lang: str) -> dict:
 
 
 def main() -> int:
-    results = {"passed": True, "answers": [], "abstains": []}
+    base = api_base()
+    allowed = load_seed_urls()
+    results = {"passed": True, "api": base, "answers": [], "abstains": []}
     for q, lang in CASES_ANSWER:
-        body = chat(q, lang)
-        ok = (not body["abstained"]) and len(body["citations"]) >= 1
+        body = chat(base, q, lang)
+        ok = (not body["abstained"]
+              and len(body["citations"]) >= 1
+              and all(c["url"] in allowed for c in body["citations"]))
         results["passed"] &= ok
         results["answers"].append({"q": q, "ok": ok, "citations": body["citations"]})
     for q, lang in CASES_ABSTAIN:
-        body = chat(q, lang)
+        body = chat(base, q, lang)
         ok = body["abstained"] and body["citations"] == []
         results["passed"] &= ok
         results["abstains"].append({"q": q, "ok": ok})
@@ -1747,13 +1912,14 @@ if __name__ == "__main__":
     sys.exit(main())
 ```
 
-- [ ] **Step 2: Run against live local stack** — Expected: exit 0, report shows 5/5 answered + 2/2 abstained.
+- [ ] **Step 2: Run against live local stack** — `python eval/skeleton_check.py http://localhost:8000` (or set `API_BASE`). Expected: exit 0, report shows 5/5 answered with citations whose URLs all come from `corpus/seeds/`, and 2/2 abstained.
 - [ ] **Step 3: Fix any failure by returning to the owning task (chunk quality, threshold, classifier floor) — rerun until green.**
 - [ ] **Step 4: Update PROJECT_STATUS.md (component table, provider table, next action) and commit** — `git commit -m "test: phase-1 skeleton exit-gate validator"`
 
 ## Self-Review Notes
 
-- Spec coverage: §2.1→Task 6; §2.2→Tasks 7+2(guard); §2.3→Task 3(sessions)+11(purge/TTL); §2.4→Task 9(+band display Task 12); §2.5→Task 8(page+section columns, seeds carry both); Phase 0 gates→Tasks 1–5; Phase 1 gates→Tasks 6–13. Voice stubs→Task 4. Render stub→Tasks 1(render.yaml)+5(deploy).
-- Placeholder scan: none — the "PASTE VERBATIM TEXT HERE" marker in seed files is an anti-fabrication execution instruction (fetch live text, don't write from memory), not a plan TODO. All code blocks are final.
-- Type consistency: `RetrievedChunk` fields match across Tasks 9/10/11; `GateResult.reason` consumed by `_abstain`; `AnchorStore.classify(text, embedding)` consistent Tasks 7↔11; `embed_texts` contract consistent Tasks 3/7/8/11; frontend `ChatResponse` mirrors the frozen API exactly; Task 11 happy-path fixture returns two chunks ≥0.30 so it passes the evidence gate it exercises.
-- Known simplification: `generate_answer` (Task 10) is exercised by unit tests but the route calls `grounded_answer` + `_citations_from` directly for the same guarantees with one less indirection; Task 13's exit gate validates the composed behavior either way.
+- Spec coverage: §2.1→Task 6; §2.2→Tasks 7+2(guard); §2.3→Tasks 3+11(sessions, TTL purge, session-authoritative state); §2.4→Task 9(gate incl. domain/jurisdiction defense-in-depth)+Task 12(bands); §2.5→Task 8(chunker used by ingestion; page+section on every chunk); Phase 0 gates→Tasks 1–5; Phase 1 gates→Tasks 6–13. Voice stubs→Task 4. Render stub→Tasks 1(render.yaml)+5(deploy).
+- Post-review patch round (user review): **P0** anchor-store caching (`get_embedding_provider`/`get_anchor_store` singletons + lifespan warmup so no request pays the ~70-call cost), unique per-file seed `source_id`s (delete-by-id can no longer silently drop documents), skeleton_check reads `argv[1]`, gate validates citation URLs against seed manifest, `RetrievedChunk` carries domain/jurisdiction/state and the gate enforces them. **P1** ingestion runs the same chunker as real corpus, session state resolves null-state requests, model IDs are env config with code defaults.
+- Placeholder scan: none — the "PASTE VERBATIM TEXT HERE" marker in seed files is an anti-fabrication execution instruction (fetch live text from each URL, never write facts from memory), not a plan TODO.
+- Type consistency: `RetrievedChunk` fields match across Tasks 9/10/11 and the RPC column list; `GateResult.reason` consumed by `_abstain`; `AnchorStore.classify(text, embedding)` consistent Tasks 7↔11; `embed_texts` contract consistent Tasks 3/7/8/11; frontend `ChatResponse` mirrors the frozen API exactly; Task 11 fixtures supply the columns `retrieve()` maps.
+- Known simplification: `generate_answer` (Task 10) is exercised by unit tests but the route composes `grounded_answer` + `_citations_from` directly — same guarantees, one less indirection; Task 13's exit gate validates composed behavior live. Session-store DB behavior is stubbed at the route boundary in Phase 1 tests and exercised for real when grievance slot-filling lands in Phase 2.

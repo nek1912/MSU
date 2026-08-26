@@ -4,6 +4,7 @@ import os
 import re
 import json
 import sys
+from pathlib import Path
 from urllib.parse import urlparse
 
 REQUIRED_FIELDS = [
@@ -179,7 +180,39 @@ def main():
         print(f"Placeholders found: {len(all_placeholders)}")
     print(f"Report written to {out_path}")
 
-    sys.exit(1 if files_failed > 0 else 0)
+    gold_result = validate_gold_cases()
+    sys.exit(1 if files_failed > 0 or gold_result != 0 else 0)
+
+
+def validate_gold_cases():
+    """Validate that all source_ids in gold_cases.yaml exist in sources.yaml."""
+    import yaml
+    base = Path(__file__).resolve().parent.parent
+    sources_path = base / "sources.yaml"
+    gold_path = base / "eval" / "gold_cases.yaml"
+
+    if not gold_path.exists():
+        return 0
+
+    with open(sources_path, encoding="utf-8") as f:
+        sources = yaml.safe_load(f)
+    source_ids = {s["id"] for s in sources.get("sources", [])}
+
+    with open(gold_path, encoding="utf-8") as f:
+        cases = yaml.safe_load(f)
+
+    missing = set()
+    for case in cases:
+        for sid in case.get("relevant_source_ids", []):
+            if sid not in source_ids:
+                missing.add(sid)
+
+    if missing:
+        print(f"Gold cases reference missing source_ids: {missing}", file=sys.stderr)
+        return 1
+    print(f"Gold case validation passed: all {len(source_ids)} source_ids valid")
+    return 0
+
 
 if __name__ == '__main__':
     main()

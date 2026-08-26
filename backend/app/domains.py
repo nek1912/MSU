@@ -13,11 +13,11 @@ def load_rules(path: Path = DATA_DIR / "keyword_rules.json") -> dict[str, list[s
 
 
 class AnchorStore:
-    def __init__(self, rules: dict[str, list[str]], anchors: dict[str, list[str]],
-                 vectors: np.ndarray):
+    def __init__(self, rules: dict[str, list[str]], domain_vectors: dict[str, np.ndarray]):
         self.rules = rules
-        self.domains = sorted(anchors)
-        self.vectors = vectors / np.maximum(np.linalg.norm(vectors, axis=1, keepdims=True), 1e-9)
+        self.domains = sorted(domain_vectors)
+        vecs = np.array([domain_vectors[d] for d in self.domains])
+        self.vectors = vecs / np.maximum(np.linalg.norm(vecs, axis=1, keepdims=True), 1e-9)
 
     def classify(self, text: str, query_embedding: list[float]) -> tuple[str, float]:
         lowered = text.lower()
@@ -37,9 +37,11 @@ class AnchorStore:
 def load_anchor_store(embed_texts, rules_path: Path = DATA_DIR / "keyword_rules.json",
                       anchors_path: Path = DATA_DIR / "domain_anchors.json") -> AnchorStore:
     anchors = json.loads(anchors_path.read_text(encoding="utf-8"))
-    flat = [a for items in anchors.values() for a in items]
-    vectors = np.asarray(embed_texts(flat), dtype=float)
-    return AnchorStore(load_rules(rules_path), anchors, vectors)
+    domain_vectors = {}
+    for domain, phrases in anchors.items():
+        vecs = np.asarray(embed_texts(phrases), dtype=float)
+        domain_vectors[domain] = vecs.mean(axis=0)  # average per domain
+    return AnchorStore(load_rules(rules_path), domain_vectors)
 
 
 def get_anchor_store() -> AnchorStore:

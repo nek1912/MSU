@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from app.generation import CitationError, SYSTEM_PROMPT, generate_answer, verify_citations
+from app.generation import CitationError, generate_answer, verify_citations
 from app.retrieval import RetrievedChunk
 
 IDS = ["aaaaaaaa-1111-2222-3333-444444444444", "bbbbbbbb-5555-6666-7777-888888888888"]

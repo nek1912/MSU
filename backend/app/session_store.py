@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from app.db import get_supabase
 
@@ -17,9 +17,9 @@ def touch_session(session_id: str, selected_state: str | None, language: str) ->
     sb = get_supabase()
     try:
         sb.rpc("purge_expired_sessions", {}).execute()
-    except Exception:
-        pass  # RPC may not exist until migration 0002 is applied
-    expires = (datetime.now(timezone.utc) + timedelta(hours=24)).isoformat()
+    except Exception:  # noqa: BLE001,S110 — RPC may not exist until migration 0002 is applied
+        pass
+    expires = (datetime.now(UTC) + timedelta(hours=24)).isoformat()
     sb.table("sessions").upsert({
         "session_id": session_id,
         "state": {"selected_state": selected_state, "language": language},

@@ -4,10 +4,9 @@ from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
 from app.config import get_settings
-from app.domains import get_anchor_store
 from app.db import get_supabase
-from app.generation import (SYSTEM_PROMPT, CitationError, build_user_prompt,
-                            verify_citations)
+from app.domains import get_anchor_store
+from app.generation import SYSTEM_PROMPT, CitationError, build_user_prompt, verify_citations
 from app.language import normalize_language
 from app.llm_fallback import AllProvidersFailedError, grounded_answer
 from app.providers.embeddings import get_embedding_provider
@@ -63,7 +62,7 @@ def chat(req: ChatRequest) -> dict:
                 "abstained": False, "follow_up_question": None}
     except (CitationError, AllProvidersFailedError):
         return _abstain(lang, "provider_or_citation_failure")
-    except Exception:
+    except Exception:  # noqa: BLE001 — frozen contract requires all failures return 200 + abstained
         return _abstain(lang, "unexpected_error")
 
 

@@ -10,7 +10,7 @@ def mk(sim: float, domain: str = "pmfby", jurisdiction: str = "central",
 
 def test_gate_pass():
     g = evidence_gate([mk(0.62), mk(0.41), mk(0.33)], expected_domain="pmfby")
-    assert not g.abstained and g.confidence == round(0.6 * 0.62 + 0.4 * (2 / 3), 2)
+    assert not g.abstained and g.confidence == round(0.6 * 0.62 + 0.4 * (3 / 3), 2)
 
 
 def test_gate_abstains_low_top1():

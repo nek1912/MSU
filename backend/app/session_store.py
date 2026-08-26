@@ -15,7 +15,10 @@ def get_state(session_id: str) -> str | None:
 
 def touch_session(session_id: str, selected_state: str | None, language: str) -> None:
     sb = get_supabase()
-    sb.rpc("purge_expired_sessions", {}).execute()
+    try:
+        sb.rpc("purge_expired_sessions", {}).execute()
+    except Exception:
+        pass  # RPC may not exist until migration 0002 is applied
     expires = (datetime.now(timezone.utc) + timedelta(hours=24)).isoformat()
     sb.table("sessions").upsert({
         "session_id": session_id,

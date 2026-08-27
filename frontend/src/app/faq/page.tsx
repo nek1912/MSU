@@ -1,7 +1,8 @@
 "use client";
 import { useMemo, useState } from "react";
 import { useI18n } from "@/lib/i18n/provider";
-import { getFaqItems } from "@/lib/data";
+import { getFaqItems, faqItems as rawFaqItems } from "@/lib/data";
+import { useTranslatedFields } from "@/lib/useTranslatedFields";
 import { Input } from "@/components/ui/Input";
 import { Chips } from "@/components/ui/Chips";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -15,11 +16,18 @@ type Filter = (typeof categories)[number];
 export default function FaqPage() {
   const { t, locale } = useI18n();
   const items = useMemo(() => getFaqItems(locale), [locale]);
+  const translated = useTranslatedFields({
+    locale,
+    items,
+    rawItems: rawFaqItems as never,
+    textFields: ["question", "answer"],
+    listFields: [],
+  });
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Filter>(CATEGORY_ALL);
   const [open, setOpen] = useState<Set<string>>(new Set());
 
-  const filtered = items.filter((f) => {
+  const filtered = translated.filter((f) => {
     const okCat = cat === CATEGORY_ALL || f.category === cat;
     const q = query.trim().toLowerCase();
     const okQuery = !q || f.question.toLowerCase().includes(q) || f.answer.toLowerCase().includes(q);

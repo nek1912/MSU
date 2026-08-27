@@ -2,7 +2,8 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n/provider";
-import { getLegalDocs } from "@/lib/data";
+import { getLegalDocs, legalDocs as rawLegalDocs } from "@/lib/data";
+import { useTranslatedFields } from "@/lib/useTranslatedFields";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
@@ -16,10 +17,17 @@ type Filter = (typeof categories)[number];
 export default function LegalPage() {
   const { t, locale } = useI18n();
   const all = useMemo(() => getLegalDocs(locale), [locale]);
+  const translated = useTranslatedFields({
+    locale,
+    items: all,
+    rawItems: rawLegalDocs as never,
+    textFields: ["badge", "overview"],
+    listFields: [],
+  });
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Filter>(CATEGORY_ALL);
 
-  const filtered = all.filter((d) => {
+  const filtered = translated.filter((d) => {
     const okCat = cat === CATEGORY_ALL || d.category === cat;
     const q = query.trim().toLowerCase();
     const okQuery = !q || d.badge.toLowerCase().includes(q) || d.overview.toLowerCase().includes(q);

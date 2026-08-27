@@ -1,7 +1,8 @@
 "use client";
 import { useMemo, useState } from "react";
 import { useI18n } from "@/lib/i18n/provider";
-import { getLibraryDocs } from "@/lib/data";
+import { getLibraryDocs, libraryDocs as rawLibraryDocs } from "@/lib/data";
+import { useTranslatedFields } from "@/lib/useTranslatedFields";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -13,10 +14,17 @@ type Filter = (typeof domains)[number];
 export default function LibraryPage() {
   const { t, locale } = useI18n();
   const docs = useMemo(() => getLibraryDocs(locale), [locale]);
+  const translated = useTranslatedFields({
+    locale,
+    items: docs,
+    rawItems: rawLibraryDocs as never,
+    textFields: ["title", "source"],
+    listFields: [],
+  });
   const [query, setQuery] = useState("");
   const [domain, setDomain] = useState<Filter>("all");
 
-  const filtered = docs.filter((d) => {
+  const filtered = translated.filter((d) => {
     const okDomain = domain === "all" || d.domain === domain;
     const q = query.trim().toLowerCase();
     const okQuery = !q || d.title.toLowerCase().includes(q) || d.source.toLowerCase().includes(q);

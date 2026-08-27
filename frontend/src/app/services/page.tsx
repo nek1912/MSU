@@ -2,7 +2,8 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n/provider";
-import { getServices } from "@/lib/data";
+import { getServices, services as rawServices } from "@/lib/data";
+import { useTranslatedFields } from "@/lib/useTranslatedFields";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
@@ -16,10 +17,17 @@ type Filter = (typeof categories)[number];
 export default function ServicesPage() {
   const { t, locale } = useI18n();
   const all = useMemo(() => getServices(locale), [locale]);
+  const translated = useTranslatedFields({
+    locale,
+    items: all,
+    rawItems: rawServices as never,
+    textFields: ["name", "summary"],
+    listFields: [],
+  });
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Filter>(CATEGORY_ALL);
 
-  const filtered = all.filter((s) => {
+  const filtered = translated.filter((s) => {
     const okCat = cat === CATEGORY_ALL || s.category === cat;
     const q = query.trim().toLowerCase();
     const okQuery = !q || s.name.toLowerCase().includes(q) || s.summary.toLowerCase().includes(q);

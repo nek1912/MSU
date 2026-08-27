@@ -1,11 +1,13 @@
 "use client";
+import { useMemo } from "react";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n/provider";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { IconChat, IconMic, IconDoc, IconGlobe, IconLeaf, IconCheck } from "@/components/ui/Icons";
-import { getSchemes } from "@/lib/data";
+import { getSchemes, schemes as rawSchemes } from "@/lib/data";
+import { useTranslatedFields } from "@/lib/useTranslatedFields";
 
 const FEATURES = [
   { icon: <IconGlobe />, title: "landing.f1title", text: "landing.f1text" },
@@ -20,7 +22,14 @@ const HOW = [
 
 export default function HomePage() {
   const { t, locale } = useI18n();
-  const schemes = getSchemes(locale);
+  const schemes = useMemo(() => getSchemes(locale), [locale]);
+  const translated = useTranslatedFields({
+    locale,
+    items: schemes,
+    rawItems: rawSchemes as never,
+    textFields: ["name"],
+    listFields: [],
+  });
   return (
     <div className="mx-auto max-w-6xl">
       <section className="flex flex-col items-center px-[var(--space-4)] py-24 text-center">
@@ -71,7 +80,7 @@ export default function HomePage() {
 
       <section className="px-[var(--space-4)] pb-24">
         <div className="mx-auto grid max-w-5xl grid-cols-2 gap-x-4 gap-y-6 rounded-[var(--radius-xl)] bg-[var(--surface-overlay)] px-[var(--space-6)] py-[var(--space-8)] md:grid-cols-4">
-          {schemes.slice(0, 4).map((s) => (
+          {translated.slice(0, 4).map((s) => (
             <Link key={s.slug} href={`/schemes/${s.slug}`} className="text-center">
               <p className="font-[var(--font-semibold)] text-[var(--text-primary)]">{s.name}</p>
               <p className="mt-1 text-[var(--text-sm)] text-[var(--text-secondary)]">{t(`category.${s.category}`)}</p>

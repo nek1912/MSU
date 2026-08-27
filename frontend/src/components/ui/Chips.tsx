@@ -22,7 +22,7 @@ export function Chips<T extends string>({
           onClick={() => onChange(o)}
           className={`rounded-[var(--radius-full)] px-[var(--space-3)] py-[var(--space-1)] text-[var(--text-sm)] font-[var(--font-medium)] transition ${
             o === value
-              ? "bg-[var(--accent-primary)] text-[var(--text-inverse)]"
+              ? "bg-[var(--text-primary)] text-white"
               : "bg-[var(--surface-overlay)] text-[var(--text-secondary)] hover:bg-[var(--border-hover)]"
           }`}
         >

@@ -34,7 +34,7 @@ export default function GrievancePage() {
     return (
       <div className="mx-auto max-w-xl px-4 py-10 text-center">
         <IconShield className="mx-auto w-10 h-10 text-[var(--state-success)]" />
-        <h1 className="mt-3 text-2xl font-bold text-[var(--text-primary)]">{t("grievance.successTitle")}</h1>
+        <h1 className="mt-3 font-[var(--font-display)] text-[var(--text-3xl)] font-[var(--font-medium)] tracking-tight text-[var(--text-primary)]">{t("grievance.successTitle")}</h1>
         <p className="mt-2 text-[var(--text-secondary)]">{t("grievance.complaintIdLabel")}</p>
         <p className="mt-1 font-mono text-lg text-[var(--accent-primary)]">{record.id}</p>
         <div className="mt-4">
@@ -49,7 +49,7 @@ export default function GrievancePage() {
 
   return (
     <div className="mx-auto max-w-xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-[var(--text-primary)]">{t("grievance.title")}</h1>
+      <h1 className="font-[var(--font-display)] text-[var(--text-3xl)] font-[var(--font-medium)] tracking-tight text-[var(--text-primary)]">{t("grievance.title")}</h1>
       <p className="mt-1 text-[var(--text-secondary)]">{t("grievance.subtitle")}</p>
       <div className="mt-6">
         <Stepper steps={steps} current={step} />

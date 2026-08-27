@@ -11,7 +11,7 @@ export function Card({
 }) {
   return (
     <div
-      className={`rounded-[var(--radius-xl)] border border-[var(--border-default)] bg-[var(--surface-elevated)] p-[var(--space-4)] shadow-sm ${interactive ? "transition hover:border-[var(--border-hover)] hover:shadow-md focus-visible:ring-2 focus-visible:ring-[var(--border-focus)]" : ""} ${className}`}
+      className={`rounded-[var(--radius-xl)] bg-[var(--surface-overlay)] p-[var(--space-6)] ${interactive ? "transition hover:bg-[var(--surface-tint)] focus-visible:ring-2 focus-visible:ring-[var(--border-focus)]" : ""} ${className}`}
     >
       {children}
     </div>

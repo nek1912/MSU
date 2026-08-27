@@ -26,7 +26,7 @@ export default function GrievanceStatusPage() {
 
   return (
     <div className="mx-auto max-w-xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-[var(--text-primary)]">{t("grievance.statusTitle")}</h1>
+      <h1 className="font-[var(--font-display)] text-[var(--text-3xl)] font-[var(--font-medium)] tracking-tight text-[var(--text-primary)]">{t("grievance.statusTitle")}</h1>
       <p className="mt-1 text-[var(--text-secondary)]">{t("grievance.statusSubtitle")}</p>
       <div className="mt-4 flex gap-2">
         <Input value={id} onChange={(e) => setId(e.target.value)} placeholder={t("common.enterComplaintId")} />

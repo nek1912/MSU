@@ -17,7 +17,7 @@ export function Stepper({
             <span
               className={`flex h-7 w-7 items-center justify-center rounded-[var(--radius-full)] text-[var(--text-xs)] font-[var(--font-semibold)] ${
                 active
-                  ? "bg-[var(--accent-primary)] text-[var(--text-inverse)]"
+                  ? "bg-[var(--text-primary)] text-white"
                   : done
                     ? "bg-[var(--accent-primary)]/15 text-[var(--accent-primary)]"
                     : "bg-[var(--surface-overlay)] text-[var(--text-secondary)]"

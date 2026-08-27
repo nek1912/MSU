@@ -1,0 +1,29 @@
+frontend/src/components/layout/MoreSheet.tsx
+  s_f3296b1fc21aea::t_133467223e9886 1-49
+frontend/src/components/layout/MobileNav.tsx
+  s_f3296b1fc21aea::t_d7bc0637030200 2,6-7,20-21,23-47,49-55
+frontend/src/lib/i18n/dictionaries.ts
+  s_f3296b1fc21aea::t_4e3e66928fbab3 23
+  s_f3296b1fc21aea::t_2c514c298faf69 193
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "58e218b31fbca5acd71ead5103b1fddd6d6e1761",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_f3296b1fc21aea": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbca0bed3ffebnrh71UfjoT3EN",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

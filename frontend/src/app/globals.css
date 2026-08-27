@@ -3,12 +3,82 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Surface */
+  --surface-base: #000000;
+  --surface-elevated: #111111;
+  --surface-overlay: #1a1a1a;
+
+  /* Text */
+  --text-primary: #232323;
+  --text-secondary: #1b1b1b;
+  --text-tertiary: #f5f5f5;
+  --text-inverse: #0000ee;
+
+  /* Accent */
+  --accent-primary: #0000ee;
+  --accent-hover: #0000cc;
+  --accent-active: #0000aa;
+
+  /* Border */
+  --border-default: #333333;
+  --border-hover: #444444;
+  --border-focus: #0000ee;
+
+  /* State */
+  --state-error: #ff4444;
+  --state-success: #00cc00;
+  --state-warning: #ffaa00;
+
+  /* Typography - Font Family */
+  --font-primary: Geist, Geist Placeholder, sans-serif;
+  --font-mono: Geist Mono, monospace;
+
+  /* Typography - Font Size */
+  --text-xs: 10px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+  --text-2xl: 20px;
+  --text-3xl: 28px;
+  --text-4xl: 36px;
+
+  /* Typography - Line Height */
+  --leading-tight: 1.2;
+  --leading-normal: 1.6;
+  --leading-relaxed: 1.8;
+
+  /* Typography - Font Weight */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-geist-sans), var(--font-devanagari), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
@@ -20,7 +90,7 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--surface-base);
+  color: var(--text-primary);
+  font-family: var(--font-primary);
 }

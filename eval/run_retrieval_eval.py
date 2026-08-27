@@ -59,7 +59,30 @@ def retrieve_live(question: str, domain: str, state: str | None, k: int = 6) -> 
         "match_state": state,
         "match_count": k,
     }).execute().data or []
-    return [{"chunk_id": str(r["chunk_id"]), "source_id": r.get("source_id", "")} for r in rows]
+    return [{"chunk_id": str(r["chunk_id"]), "document_id": str(r.get("document_id", ""))} for r in rows]
+
+
+def resolve_source_ids(retrieved: list[dict], supabase) -> list[dict]:
+    """Resolve document_id → source_id by querying the documents table.
+
+    Takes retrieval results (each with 'chunk_id' and 'document_id') and
+    returns the same results augmented with 'source_id' from the documents table.
+    """
+    if not retrieved:
+        return []
+
+    doc_ids = list({r["document_id"] for r in retrieved if r.get("document_id")})
+    if not doc_ids:
+        return [{**r, "source_id": ""} for r in retrieved]
+
+    # Batch query: fetch all needed documents in one call
+    resp = supabase.table("documents").select("id, source_id").in_("id", doc_ids).execute()
+    doc_map = {str(d["id"]): d.get("source_id", "") for d in (resp.data or [])}
+
+    return [
+        {**r, "source_id": doc_map.get(r.get("document_id", ""), "")}
+        for r in retrieved
+    ]
 
 
 def compute_recall_metrics(results: list[dict], k_values: list[int] = [1, 3, 5]) -> dict:
@@ -118,6 +141,15 @@ def main() -> int:
     retrieve_fn = retrieve_live if args.live else retrieve_local
 
     results = []
+    supabase_client = None
+    if args.live:
+        import os
+        from supabase import create_client
+        url = os.environ.get("SUPABASE_URL", "")
+        key = os.environ.get("SUPABASE_SERVICE_KEY", os.environ.get("SUPABASE_KEY", ""))
+        if url and key:
+            supabase_client = create_client(url, key)
+
     for case in cases:
         try:
             retrieved = retrieve_fn(
@@ -131,6 +163,10 @@ def main() -> int:
         except Exception as e:
             print(f"ERROR retrieving for '{case['question']}': {e}", file=sys.stderr)
             retrieved = []
+
+        # Resolve document_id → source_id for live retrieval
+        if args.live and supabase_client and retrieved:
+            retrieved = resolve_source_ids(retrieved, supabase_client)
 
         results.append({
             "question": case["question"],

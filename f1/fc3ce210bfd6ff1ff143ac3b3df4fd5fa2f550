@@ -1,0 +1,163 @@
+frontend/src/lib/data/legal.ts
+  s_5e79bc88b9ed0e::t_81a4080f3375e0 201
+  s_5e79bc88b9ed0e::t_ae9b67479a0508 101-103
+  s_5e79bc88b9ed0e::t_4d45f21ee8d1f4 26
+  s_5e79bc88b9ed0e::t_ccde02e25b5e31 67
+  s_5e79bc88b9ed0e::t_9836d6daf55eb6 37-42
+  s_5e79bc88b9ed0e::t_15bb19c18baf49 57
+  s_5e79bc88b9ed0e::t_805af3a6bf9228 133
+  s_5e79bc88b9ed0e::t_cf956da1ae2235 148-152
+  s_5e79bc88b9ed0e::t_d6ac1d1d2cf59d 138
+  s_5e79bc88b9ed0e::t_5ba336058e14ab 207
+  s_5e79bc88b9ed0e::t_f99ad388d8a077 212
+  s_5e79bc88b9ed0e::t_35374c6b0df27c 238
+  s_5e79bc88b9ed0e::t_5933f829eadc49 165
+  s_5e79bc88b9ed0e::t_fc8b0b4e8a2ad3 78-83
+  s_5e79bc88b9ed0e::t_715320f39579c0 56
+  s_5e79bc88b9ed0e::t_a6e123de259a6a 22
+  s_5e79bc88b9ed0e::t_657015ebb10f3f 164
+  s_5e79bc88b9ed0e::t_ba59f0680e7431 21
+  s_5e79bc88b9ed0e::t_c1126920ec7ac5 58,129,166,203,240
+  s_5e79bc88b9ed0e::t_439c6ec1838d01 185-189
+  s_5e79bc88b9ed0e::t_a31d3e6a10f8c1 62
+  s_5e79bc88b9ed0e::t_804e135990235a 63
+  s_5e79bc88b9ed0e::t_4ab5df5f174ca0 202
+  s_5e79bc88b9ed0e::t_c5ebbb88cb05a0 170
+  s_5e79bc88b9ed0e::t_7211b648ea8bf6 239
+  s_5e79bc88b9ed0e::t_79cb08502ed5c6 134
+  s_5e79bc88b9ed0e::t_9ae61b305bbfc7 175
+  s_5e79bc88b9ed0e::t_e546494d7a5555 222-226
+  s_5e79bc88b9ed0e::t_61d68c796e63df 208
+  s_5e79bc88b9ed0e::t_7a2c2ae376d6cc 116-119
+  s_5e79bc88b9ed0e::t_cc1f358192f155 171
+frontend/src/lib/data/schemes.ts
+  s_5e79bc88b9ed0e::t_aa4dddec8f5596 85
+  s_5e79bc88b9ed0e::t_cf8c0eaa935ddc 56
+  s_5e79bc88b9ed0e::t_a80a2f4e187d73 74
+  s_5e79bc88b9ed0e::t_700d35e1750ecf 68
+  s_5e79bc88b9ed0e::t_c63bece65ab920 51
+  s_5e79bc88b9ed0e::t_a4968db0c2da2c 64
+  s_5e79bc88b9ed0e::t_c77e5adfa60a9e 41
+  s_5e79bc88b9ed0e::t_8e57b3f9a2c2d0 63
+  s_5e79bc88b9ed0e::t_d3afe4594bced8 66
+  s_5e79bc88b9ed0e::t_98d3ca4adf11bf 73
+  s_5e79bc88b9ed0e::t_0b693a4877bb4c 62
+  s_5e79bc88b9ed0e::t_7267d1f131bf68 87
+  s_5e79bc88b9ed0e::t_9218e4052e8443 89
+  s_5e79bc88b9ed0e::t_5b7a863f69ad2e 76
+  s_5e79bc88b9ed0e::t_b3fc5273770a5c 43
+  s_5e79bc88b9ed0e::t_299ebbacc17a30 45
+  s_5e79bc88b9ed0e::t_4f8259c6df1829 42
+  s_5e79bc88b9ed0e::t_4421d15625f3d9 77
+  s_5e79bc88b9ed0e::t_72dcd112496622 55
+  s_5e79bc88b9ed0e::t_d192abad4d56f4 46
+  s_5e79bc88b9ed0e::t_9d3c041331bfe5 30
+  s_5e79bc88b9ed0e::t_65d0207900e7c0 84
+  s_5e79bc88b9ed0e::t_e4c9741068bcd9 52
+  s_5e79bc88b9ed0e::t_a8e9864e79f55b 65
+  s_5e79bc88b9ed0e::t_852aaea2a22ada 88
+  s_5e79bc88b9ed0e::t_4aac535ae15679 86
+  s_5e79bc88b9ed0e::t_b0a2906c5878ab 40
+  s_5e79bc88b9ed0e::t_231d0bc1d175df 44
+  s_5e79bc88b9ed0e::t_7c30fbe3b631a3 33
+  s_5e79bc88b9ed0e::t_7f31940f531b21 34
+  s_5e79bc88b9ed0e::t_3c5be626fda463 67
+  s_5e79bc88b9ed0e::t_c235ab06b58c43 54
+  s_5e79bc88b9ed0e::t_5f268226c0494d 78
+  s_5e79bc88b9ed0e::t_3a58305142f023 31
+  s_5e79bc88b9ed0e::t_cf1a3921b53a41 90
+  s_5e79bc88b9ed0e::t_1183a4c56a4aba 32
+  s_5e79bc88b9ed0e::t_9d7ee2c606ded9 53
+  s_5e79bc88b9ed0e::t_ecb561a0653401 75
+  s_5e79bc88b9ed0e::t_3ec02ed66a2dd2 79
+  s_5e79bc88b9ed0e::t_7385da0fadc961 29
+  s_5e79bc88b9ed0e::t_a83c146944c176 57
+  s_5e79bc88b9ed0e::t_8396e2e087cfc0 35
+frontend/src/lib/data/library.ts
+  s_5e79bc88b9ed0e::t_32296682c14534 16
+  s_5e79bc88b9ed0e::t_1567b7197beec0 17
+  s_5e79bc88b9ed0e::t_ce1cec3c4f0661 19
+  s_5e79bc88b9ed0e::t_457f2de2770a06 15
+  s_5e79bc88b9ed0e::t_141bb0d4331120 18
+frontend/src/lib/data/faq.ts
+  s_5e79bc88b9ed0e::t_c61c23ba69ec9d 59
+  s_5e79bc88b9ed0e::t_395c926dff2e57 82
+  s_5e79bc88b9ed0e::t_88a24c7253211c 47
+  s_5e79bc88b9ed0e::t_0e2af4ed9cee6f 75
+  s_5e79bc88b9ed0e::t_dfd1e0d89326ff 52
+  s_5e79bc88b9ed0e::t_5a58f8f5e5b9ce 19
+  s_5e79bc88b9ed0e::t_152750761d417d 89
+  s_5e79bc88b9ed0e::t_926304cb3875d5 33
+  s_5e79bc88b9ed0e::t_1eb139357d32ab 87
+  s_5e79bc88b9ed0e::t_479b2a0b8dbec6 80
+  s_5e79bc88b9ed0e::t_e6959064e53e96 26
+  s_5e79bc88b9ed0e::t_dd3ca3298be87a 54
+  s_5e79bc88b9ed0e::t_b6ec054849c337 45
+  s_5e79bc88b9ed0e::t_7c1230642869e0 24
+  s_5e79bc88b9ed0e::t_eaf5ce17b548a2 38
+  s_5e79bc88b9ed0e::t_da6549758a74d4 66
+  s_5e79bc88b9ed0e::t_d9a1933b34045e 40
+  s_5e79bc88b9ed0e::t_bd2d64615e61c4 68
+  s_5e79bc88b9ed0e::t_c24066c53d9d81 31
+  s_5e79bc88b9ed0e::t_75e138e36e27d8 61
+  s_5e79bc88b9ed0e::t_d27357a9a3a993 17
+  s_5e79bc88b9ed0e::t_de6f3bc210ab76 73
+frontend/src/lib/data/services.ts
+  s_5e79bc88b9ed0e::t_9c08f5053b4c1d 26
+  s_5e79bc88b9ed0e::t_e9fa323e2f067a 38
+  s_5e79bc88b9ed0e::t_a121baaf29440c 57
+  s_5e79bc88b9ed0e::t_14b082d2228ddb 69
+  s_5e79bc88b9ed0e::t_d43543ad86fdee 46
+  s_5e79bc88b9ed0e::t_66fc0331848df9 60
+  s_5e79bc88b9ed0e::t_804f776698f3f1 71
+  s_5e79bc88b9ed0e::t_887df396978055 64
+  s_5e79bc88b9ed0e::t_e1e48110d08738 24
+  s_5e79bc88b9ed0e::t_0ecdc6de2e45fa 47
+  s_5e79bc88b9ed0e::t_31f74ec03ac05f 70
+  s_5e79bc88b9ed0e::t_cf88743b4631a6 77
+  s_5e79bc88b9ed0e::t_df2ebad9005c92 82
+  s_5e79bc88b9ed0e::t_89a3b25819a7f9 44
+  s_5e79bc88b9ed0e::t_09e5e0636d1fe3 68
+  s_5e79bc88b9ed0e::t_8c48186cf38caa 20
+  s_5e79bc88b9ed0e::t_70ed3a6633becf 42
+  s_5e79bc88b9ed0e::t_245f1e075734e3 59
+  s_5e79bc88b9ed0e::t_9f35730cf13537 48
+  s_5e79bc88b9ed0e::t_ed746690d566d3 75
+  s_5e79bc88b9ed0e::t_d7d17ad5611798 33
+  s_5e79bc88b9ed0e::t_a40cf8fed180a1 31
+  s_5e79bc88b9ed0e::t_cdc4aabf1c052c 27
+  s_5e79bc88b9ed0e::t_45004c200de823 80
+  s_5e79bc88b9ed0e::t_9f7caee271ec33 37
+  s_5e79bc88b9ed0e::t_1183ba922b64ee 49
+  s_5e79bc88b9ed0e::t_fd158ece9f08ee 53
+  s_5e79bc88b9ed0e::t_ceed10da2246df 66
+  s_5e79bc88b9ed0e::t_a85ba714dd15cf 79
+  s_5e79bc88b9ed0e::t_ddcf66b9809dad 25
+  s_5e79bc88b9ed0e::t_22f103fee6d5a4 35
+  s_5e79bc88b9ed0e::t_591c11b1169586 55
+  s_5e79bc88b9ed0e::t_2ca1726437ebd7 58
+  s_5e79bc88b9ed0e::t_9c65ebe388daaf 22
+  s_5e79bc88b9ed0e::t_36369b266cd9d6 81
+  s_5e79bc88b9ed0e::t_08a40b8a79cd6a 36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "f1fc3ce210bfd6ff1ff143ac3b3df4fd5fa2f550",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_5e79bc88b9ed0e": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbc32a107ffebx0h8TYmBKaALZ",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

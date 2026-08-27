@@ -1,0 +1,27 @@
+frontend/src/components/ChatWindow.tsx
+  s_a30b70f3601eac::t_2feca39f39a2ee 31
+  s_a30b70f3601eac::t_ac4b98cabe338a 42
+  s_a30b70f3601eac::t_f502261e8a5f91 7
+  s_a30b70f3601eac::t_d76656196d070d 73-79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "78827d2a33ffdd8801bc3585de2d15d692418725",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_a30b70f3601eac": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbcc52a71ffeg18ASW86EbPgUy",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

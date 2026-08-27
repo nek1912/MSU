@@ -1,0 +1,207 @@
+frontend/src/lib/data/grievance.ts
+  s_e037aa7f552884::t_ea2c30262e082c 1-52
+frontend/src/components/ui/Stepper.tsx
+  s_01dc4af7d48aa6::t_91aadbef7116c6 20
+frontend/src/lib/data/faq.ts
+  s_155f7ec8f0dd88::t_6a30724284fd3a 80
+  s_155f7ec8f0dd88::t_4e6074d7a25992 45
+  s_155f7ec8f0dd88::t_2100639d672a87 59
+  s_155f7ec8f0dd88::t_4d52aba8bc64ba 66
+  s_155f7ec8f0dd88::t_f1685736ab79c5 54
+  s_155f7ec8f0dd88::t_9d58bd046da482 40
+  s_155f7ec8f0dd88::t_784bf4b2eae754 17
+  s_155f7ec8f0dd88::t_738a701acc2c02 75
+  s_155f7ec8f0dd88::t_50ae51280779d5 61
+  s_155f7ec8f0dd88::t_1f409395277cf2 52
+  s_155f7ec8f0dd88::t_f5da995661f4bf 82
+  s_155f7ec8f0dd88::t_091faa3c92dca6 24
+  s_155f7ec8f0dd88::t_792d1ad5094421 38
+  s_155f7ec8f0dd88::t_4c80d916689fab 89
+  s_155f7ec8f0dd88::t_58a5030edbd2b4 19
+  s_155f7ec8f0dd88::t_869d93666f6df1 87
+  s_155f7ec8f0dd88::t_e083ab477a1769 26
+  s_155f7ec8f0dd88::t_fdcc32fd4c17c4 33
+  s_155f7ec8f0dd88::t_27c3926421173a 73
+  s_155f7ec8f0dd88::t_7f6240e7cfd256 31
+  s_155f7ec8f0dd88::t_3526e329f8d586 47
+  s_155f7ec8f0dd88::t_d0402c9b0f24db 68
+frontend/src/components/ui/Card.tsx
+  s_01dc4af7d48aa6::t_50bc4fea91fda3 14
+frontend/src/components/ui/Button.tsx
+  s_01dc4af7d48aa6::t_e70f01153287b6 11,13,15-16,23
+frontend/src/lib/data/services.ts
+  s_155f7ec8f0dd88::t_cdf14aa9b42f62 26
+  s_155f7ec8f0dd88::t_fd5ce6e96282f8 27
+  s_155f7ec8f0dd88::t_391aa1dcc42f8e 49
+  s_155f7ec8f0dd88::t_b89fe229205710 36
+  s_155f7ec8f0dd88::t_818add20e7b834 75
+  s_155f7ec8f0dd88::t_f8922443dbed43 69
+  s_155f7ec8f0dd88::t_cdf6fa91bdb349 38
+  s_155f7ec8f0dd88::t_f0801ccfa844ef 37
+  s_155f7ec8f0dd88::t_8cd1045cc26da4 81
+  s_155f7ec8f0dd88::t_70318757bb7b73 24
+  s_155f7ec8f0dd88::t_4dd84710077fd1 70
+  s_155f7ec8f0dd88::t_521e7fed606a87 71
+  s_155f7ec8f0dd88::t_7ea3b53a53d361 33
+  s_155f7ec8f0dd88::t_0136897a5668f2 68
+  s_155f7ec8f0dd88::t_42ffc9694a9737 25
+  s_155f7ec8f0dd88::t_0803f0ba868f99 60
+  s_155f7ec8f0dd88::t_869164e3473b17 77
+  s_155f7ec8f0dd88::t_3abec6603d556b 59
+  s_155f7ec8f0dd88::t_3eddb6b4d5e333 20
+  s_155f7ec8f0dd88::t_ff4097e453beea 47
+  s_155f7ec8f0dd88::t_3c07a446fa0f04 35
+  s_155f7ec8f0dd88::t_7e237b753b904c 48
+  s_155f7ec8f0dd88::t_e3e46eab210e52 64
+  s_155f7ec8f0dd88::t_266078b70389ea 79
+  s_155f7ec8f0dd88::t_691d88eca78f7a 55
+  s_155f7ec8f0dd88::t_b6c1bb0eda1ac4 57
+  s_155f7ec8f0dd88::t_29f81d9ffc2439 58
+  s_155f7ec8f0dd88::t_b3f19f1288444b 80
+  s_155f7ec8f0dd88::t_f5cbf00ae73c60 44
+  s_155f7ec8f0dd88::t_79acb2855e46de 22
+  s_155f7ec8f0dd88::t_be8ee38cc294ae 66
+  s_155f7ec8f0dd88::t_e53c3588a082cd 82
+  s_155f7ec8f0dd88::t_aa5e675ab77a9e 53
+  s_155f7ec8f0dd88::t_cca50fd8121d48 31
+  s_155f7ec8f0dd88::t_1fd08ceb96f9f3 46
+  s_155f7ec8f0dd88::t_b88ab108463dec 42
+frontend/src/components/ui/Chips.tsx
+  s_01dc4af7d48aa6::t_b95f5b0262b44e 25
+frontend/src/app/grievance/page.tsx
+  s_01dc4af7d48aa6::t_930ccfeae07d0e 52
+  s_01dc4af7d48aa6::t_0410e5b5ba15df 37
+frontend/src/components/ui/Badge.tsx
+  s_01dc4af7d48aa6::t_4770bb3e8f3ae5 6
+  s_01dc4af7d48aa6::t_7660632791d1c8 22
+frontend/src/lib/data/legal.ts
+  s_155f7ec8f0dd88::t_5889b7b67eaecc 354
+  s_155f7ec8f0dd88::t_afd80cbc8f2c4c 349
+  s_155f7ec8f0dd88::t_d3cad021c5e516 228
+  s_155f7ec8f0dd88::t_7eb3711969a347 370-375
+  s_155f7ec8f0dd88::t_623fc12ecbde0c 295
+  s_155f7ec8f0dd88::t_3a0cf2eba8e28a 292
+  s_155f7ec8f0dd88::t_0e00402c342c2d 307-312
+  s_155f7ec8f0dd88::t_ec3cc38f5129e1 21
+  s_155f7ec8f0dd88::t_37e409de48cd02 22
+  s_155f7ec8f0dd88::t_7e73fbea76cb93 285
+  s_155f7ec8f0dd88::t_dd0be662309daa 348
+  s_155f7ec8f0dd88::t_421e4a7cc9298f 94
+  s_155f7ec8f0dd88::t_1afb1a07c15448 411
+  s_155f7ec8f0dd88::t_03bef18841f524 412
+  s_155f7ec8f0dd88::t_0a61a1a03d130f 88
+  s_155f7ec8f0dd88::t_066acd9ae26d87 93
+  s_155f7ec8f0dd88::t_1f7b6055a792f4 25
+  s_155f7ec8f0dd88::t_966ab547c32175 38-44
+  s_155f7ec8f0dd88::t_fb3fbca3726f18 286
+  s_155f7ec8f0dd88::t_e0a270e1a1a41b 97
+  s_155f7ec8f0dd88::t_45c855acfa8724 244-249
+  s_155f7ec8f0dd88::t_e29d3a5a8c79c3 355
+  s_155f7ec8f0dd88::t_aeec5b584f9182 291
+  s_155f7ec8f0dd88::t_e7a23d45c5b46b 232
+  s_155f7ec8f0dd88::t_a0f9a559583508 191-195
+  s_155f7ec8f0dd88::t_7bbf6daed6b097 87
+  s_155f7ec8f0dd88::t_57dc41814b3569 358
+  s_155f7ec8f0dd88::t_f52c3370e85cd0 89,224,287,350,413
+  s_155f7ec8f0dd88::t_a92320c9566a04 229
+  s_155f7ec8f0dd88::t_f9644e4985d3ac 110-116
+  s_155f7ec8f0dd88::t_ef07d2b96d2dae 162-165
+frontend/src/lib/data/library.ts
+  s_155f7ec8f0dd88::t_ef86d0d008986d 15
+  s_155f7ec8f0dd88::t_6b5b02b2ea2130 17
+  s_155f7ec8f0dd88::t_b499ae70acf51d 16
+  s_155f7ec8f0dd88::t_f57e84af18d1f8 18
+  s_155f7ec8f0dd88::t_53b4c83aae97a2 19
+frontend/src/lib/data/schemes.ts
+  s_155f7ec8f0dd88::t_069ffc2fa7aee7 79
+  s_155f7ec8f0dd88::t_26ad9e76df178c 41
+  s_155f7ec8f0dd88::t_11815f1b3e90c6 52
+  s_155f7ec8f0dd88::t_7554a17a0839f2 55
+  s_155f7ec8f0dd88::t_5348287e35a143 57
+  s_155f7ec8f0dd88::t_effac03f47bfb4 75
+  s_155f7ec8f0dd88::t_d703eae47f7261 66
+  s_155f7ec8f0dd88::t_64c6cb8252dd82 73
+  s_155f7ec8f0dd88::t_5c413160e182cf 74
+  s_155f7ec8f0dd88::t_cab0a3bbeead80 32
+  s_155f7ec8f0dd88::t_a177ac91e6e7a7 30
+  s_155f7ec8f0dd88::t_490cdbb1a06449 87
+  s_155f7ec8f0dd88::t_5d28fadad3c552 46
+  s_155f7ec8f0dd88::t_590aa5627d0fbc 65
+  s_155f7ec8f0dd88::t_0e453c2c912183 68
+  s_155f7ec8f0dd88::t_5c9276c73a0161 90
+  s_155f7ec8f0dd88::t_c9c60c8904eeda 62
+  s_155f7ec8f0dd88::t_d945691656aac2 64
+  s_155f7ec8f0dd88::t_ff41e294151fe3 45
+  s_155f7ec8f0dd88::t_44e8cd5b5f5eb9 53
+  s_155f7ec8f0dd88::t_c1e8744fbf190e 89
+  s_155f7ec8f0dd88::t_774be45746a003 29
+  s_155f7ec8f0dd88::t_80c7867556465c 84
+  s_155f7ec8f0dd88::t_cf601b3fff4302 44
+  s_155f7ec8f0dd88::t_3afd67f692a1ac 34
+  s_155f7ec8f0dd88::t_22019c40264106 42
+  s_155f7ec8f0dd88::t_323c34b3ceabe0 51
+  s_155f7ec8f0dd88::t_3956355a62490d 67
+  s_155f7ec8f0dd88::t_86ec2b1294b517 86
+  s_155f7ec8f0dd88::t_4eefb3c4f0110b 43
+  s_155f7ec8f0dd88::t_783b2e954b88e3 78
+  s_155f7ec8f0dd88::t_3262137016c638 63
+  s_155f7ec8f0dd88::t_9651509d7f195e 35
+  s_155f7ec8f0dd88::t_4c4515dc9b105b 31
+  s_155f7ec8f0dd88::t_d698a5ae8d5e65 85
+  s_155f7ec8f0dd88::t_4516fbfbd5ee2d 54
+  s_155f7ec8f0dd88::t_875f0f94ec61a0 76
+  s_155f7ec8f0dd88::t_c3deff5b89cb3e 56
+  s_155f7ec8f0dd88::t_f769d2eeffe653 40
+  s_155f7ec8f0dd88::t_2fd5ca888ef7a5 88
+  s_155f7ec8f0dd88::t_e261c2e46638c8 77
+  s_155f7ec8f0dd88::t_2951581023aa99 33
+frontend/package.json
+  s_5ea31355a7921b::t_3b8983f4d73619 9-10
+frontend/src/app/grievance/status/page.tsx
+  s_01dc4af7d48aa6::t_d36fc795c79a45 29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "0e5f482de0f86a60987945e218ce86b0d55e3cd4",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_01dc4af7d48aa6": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd11fd54ffeCdSwcjzDM6RQtB",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_155f7ec8f0dd88": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbb8117eaffe3pQ8EevmrC4cmc",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_5ea31355a7921b": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd582477ffevjqhMafUWRxy6f",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_e037aa7f552884": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd43898affeLXaBvLhVLU4cc5",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

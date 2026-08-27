@@ -1,0 +1,33 @@
+frontend/src/app/library/page.tsx
+  s_1e5b11677f1642::t_5f1c40dca06a79 27-29,38-39,54,56-57,61
+  s_21e4a315a05d36::t_717a00be77573e 1-26,30-37,40-53,55,58-60,62-70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "7c502630697208d40329c755fb460ef555500efc",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_1e5b11677f1642": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbcef8379ffexdTOWZh6rqwck4",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_21e4a315a05d36": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd317bf8ffelfd712x60WiheI",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

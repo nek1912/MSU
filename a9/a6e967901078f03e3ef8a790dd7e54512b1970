@@ -1,0 +1,52 @@
+frontend/src/lib/i18n/dictionaries.ts
+  s_3e9c8936199a65::t_96fb9626d86039 20-22
+  s_8d9724b9c80c64::t_e6b262c760d2d6 338
+  s_8d9724b9c80c64::t_c5388a5b5e5230 46
+  s_8d9724b9c80c64::t_5aa41e8cb9ddaf 213
+  s_3e9c8936199a65::t_14b850dca15ab2 138-179
+  s_3e9c8936199a65::t_1cc9cacf6ed138 334-336
+  s_3e9c8936199a65::t_d4325b9abce89f 347-349
+  s_3e9c8936199a65::t_a0eecd78d77047 321-323
+  s_3e9c8936199a65::t_33509a6347450b 271-312
+  s_8d9724b9c80c64::t_de8444003c5827 325
+  s_3e9c8936199a65::t_713a411b2f4565 189-191
+  s_8d9724b9c80c64::t_66d2b4babb9979 351
+  s_c9549851012e73::t_2e2b0f22defaed 1-19,23-45,47-137,180-188,192-212,214-270,313-320,324,326-333,337,339-346,350,352-363
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "a9a6e967901078f03e3ef8a790dd7e54512b1970",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_3e9c8936199a65": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbcb55537ffe91SbCEXuo8Lbn9",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_8d9724b9c80c64": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd4fd9d7ffeFIPzLYVmaR5o6j",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_c9549851012e73": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd574418ffeCby5vyXkY7VO0n",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,33 @@
+frontend/src/components/ui/Select.tsx
+  s_185efc110b3583::t_dc77388d343c70 1-6,8-12
+  s_7351206b36632b::t_b74d959def10dd 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "04c7a1fdb07ad91c4eb7000aeef084b792a0f110",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_185efc110b3583": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd4d9181ffeXJZzLFCnDwfcJg",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_7351206b36632b": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbcfc73dfffeAtGGwiLBwuVC0D",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

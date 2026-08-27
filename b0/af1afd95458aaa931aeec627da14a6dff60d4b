@@ -1,0 +1,30 @@
+frontend/src/lib/data/services.ts
+  s_3f3b151ff7f5eb::t_10879071a901d3 1-3,8,10-14,20,22,24-27,31,33,35-38,42,44,46-49,53,55,57-60,64,66,68-71,75,77,79-82,86-111,113-116
+frontend/src/app/services/page.tsx
+  s_3f3b151ff7f5eb::t_c43749a3501bff 18
+frontend/src/app/services/[slug]/page.tsx
+  s_3f3b151ff7f5eb::t_0e72b6a007ab22 14
+frontend/src/lib/data/services.test.ts
+  s_3f3b151ff7f5eb::t_508b92fd49bd0a 5,9,12-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "b0af1afd95458aaa931aeec627da14a6dff60d4b",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_3f3b151ff7f5eb": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbc762cd1ffea59Hz7jeQYsHfl",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

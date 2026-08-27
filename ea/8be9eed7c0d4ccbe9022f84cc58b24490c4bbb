@@ -1,0 +1,56 @@
+frontend/src/lib/data/legal.ts
+  s_f4297350655634::t_f577760746ed52 21-22,27,42-47,49-51
+  s_f4297350655634::t_f8c97c45324494 174-175,180,193-197,199-201
+  s_f4297350655634::t_590251d0332094 143-144,149,162-166,168-170
+  s_f4297350655634::t_c90f9dfc0decae 112-113,118,131-135,137-139
+  s_f4297350655634::t_fd057042266baa 55-56,61,76-81,90-92,103-106,108
+frontend/src/lib/data/library.ts
+  s_f4297350655634::t_0e906be3a43fe5 15-19
+frontend/src/lib/data/services.ts
+  s_f4297350655634::t_fb3a64075ddc78 75,77,79-82
+  s_f4297350655634::t_4165a6561b9139 42,44,46-49
+  s_f4297350655634::t_35d57382e9d9eb 31,33,35-38
+  s_f4297350655634::t_61932fed320a95 64,66,68-71
+  s_f4297350655634::t_f8c8cfa4f9b10e 20,22,24-27
+  s_f4297350655634::t_1ba50945e61dc9 53,55,57-60
+frontend/src/lib/data/schemes.ts
+  s_f4297350655634::t_03055e57b09fe1 29-35
+  s_f4297350655634::t_1f7ce9a0e3702b 51-57
+  s_f4297350655634::t_bc90c3d3a59651 62-68
+  s_f4297350655634::t_8e26ae5cfcb568 73-79
+  s_f4297350655634::t_9de76c7d2df432 40-46
+  s_f4297350655634::t_be6b0ef3febbf9 84-90
+frontend/src/lib/data/faq.ts
+  s_f4297350655634::t_101725c8814025 66,68
+  s_f4297350655634::t_92fde5383e7118 80,82
+  s_f4297350655634::t_6b9801770255e2 31,33
+  s_f4297350655634::t_451912c4ad02d8 17,19
+  s_f4297350655634::t_da7148921f0305 45,47
+  s_f4297350655634::t_ae8a8c47b5b401 24,26
+  s_f4297350655634::t_1e2c176e7525e1 52,54
+  s_f4297350655634::t_901b062bbf2048 59,61
+  s_f4297350655634::t_ef563092085fb6 73,75
+  s_f4297350655634::t_e151e1ca72e979 87,89
+  s_f4297350655634::t_e34c12099cb46f 38,40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "ea8be9eed7c0d4ccbe9022f84cc58b24490c4bbb",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_f4297350655634": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbc3cc3d5ffebzI9noXNDda3L1",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

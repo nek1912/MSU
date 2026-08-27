@@ -1,0 +1,34 @@
+frontend/src/components/layout/MobileNav.tsx
+  s_01010cff30d927::t_8152d80f1195d5 1-22,24-30,32,35-44
+  s_df745c9742e5ce::t_1f1d3b51b2d8ba 23
+  s_df745c9742e5ce::t_cfa57a6a8bcefe 31,33-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "84b011991042d1e0fc8f029f4a010b46964de154",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_01010cff30d927": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd53bbe7ffereTKsyjEK60CLQ",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_df745c9742e5ce": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbcf965acffeqbkzMcha5N2Bzs",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

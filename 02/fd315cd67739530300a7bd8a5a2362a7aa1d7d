@@ -1,0 +1,24 @@
+frontend/src/app/services/page.tsx
+  s_9db2ab79bf6b1e::t_220a33245c0793 1-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "02fd315cd67739530300a7bd8a5a2362a7aa1d7d",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_9db2ab79bf6b1e": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbcaa6673ffermALpDqB62jcmu",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

@@ -5,6 +5,8 @@ import { IconGlobe } from "@/components/ui/Icons";
 
 const NAMES: Record<Locale, string> = {
   en: "English", hi: "हिंदी", mr: "मराठी", bn: "বাংলা", ta: "தமிழ்",
+  te: "తెలుగు", kn: "ಕನ್ನಡ", pa: "ਪੰਜਾਬੀ", gu: "ગુજરાતી",
+  or: "ଓଡ଼ିଆ", ml: "മലയാളം", ur: "اردو",
 };
 
 export function LanguageSwitcher({ className = "" }: { className?: string }) {

@@ -9,858 +9,863 @@
 # =====================================================================
 # COOPERATIVE (30 cases)
 # =====================================================================
+
 - question: "How is a cooperative society registered in Gujarat?"
   expected_domain: cooperative
   expected_state: gujarat
-  relevant_source_ids: [gujarat_cooperative_act, ministry_cooperation]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "What are the byelaws for a cooperative society?"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws]
+  relevant_source_ids: ['pacs_model_bylaws_2023']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "Can I amend my cooperative society's rules?"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws, ministry_cooperation]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Voting rights in a cooperative society"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws]
+  relevant_source_ids: ['pacs_model_bylaws_2023']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "Role of the registrar of cooperative societies"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [ministry_cooperation]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Gujarat cooperative society annual general meeting requirements"
   expected_domain: cooperative
   expected_state: gujarat
-  relevant_source_ids: [gujarat_cooperative_act]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "How does dissolution work for a cooperative society?"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws, ministry_cooperation]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "What are the powers of the cooperative tribunal?"
   expected_domain: cooperative
   expected_state: gujarat
-  relevant_source_ids: [gujarat_cooperative_act]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Quorum requirements for cooperative society meetings"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws]
+  relevant_source_ids: ['pacs_model_bylaws_2023']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "How to become a member of a cooperative society?"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws]
+  relevant_source_ids: ['pacs_model_bylaws_2023']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "Cooperative society audit requirements"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [ministry_cooperation]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Gujarat cooperative societies act section 35"
   expected_domain: cooperative
   expected_state: gujarat
-  relevant_source_ids: [gujarat_cooperative_act]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Share transfer rules in cooperative society"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws]
+  relevant_source_ids: ['pacs_model_bylaws_2023']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "Election process for cooperative society committee"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws]
+  relevant_source_ids: ['pacs_model_bylaws_2023']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "What is the minimum members required for cooperative?"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [ministry_cooperation]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Gujarat cooperative dispute resolution mechanism"
   expected_domain: cooperative
   expected_state: gujarat
-  relevant_source_ids: [gujarat_cooperative_act]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Filing annual returns for cooperative society"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [ministry_cooperation]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Restrictions on cooperative society borrowing"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws]
+  relevant_source_ids: ['pacs_model_bylaws_2023']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "Gujarat cooperative societies welfare fund"
   expected_domain: cooperative
   expected_state: gujarat
-  relevant_source_ids: [gujarat_cooperative_act]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Managing committee powers under cooperative act"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws]
+  relevant_source_ids: ['pacs_model_bylaws_2023']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "Cooperative society registration fee in Gujarat"
   expected_domain: cooperative
   expected_state: gujarat
-  relevant_source_ids: [gujarat_cooperative_act]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Surplus distribution in cooperative society"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws]
+  relevant_source_ids: ['pacs_model_bylaws_2023']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "How is a cooperative society wound up?"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [ministry_cooperation]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Gujarat cooperative society branch office rules"
   expected_domain: cooperative
   expected_state: gujarat
-  relevant_source_ids: [gujarat_cooperative_act]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Member expulsion from cooperative society"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws]
+  relevant_source_ids: ['pacs_model_bylaws_2023']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "Cooperative society bylaw amendment process"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws]
+  relevant_source_ids: ['pacs_model_bylaws_2023']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "Gujarat cooperative society inspection powers"
   expected_domain: cooperative
   expected_state: gujarat
-  relevant_source_ids: [gujarat_cooperative_act]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Dividend declaration rules for cooperative"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws]
+  relevant_source_ids: ['pacs_model_bylaws_2023']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "Cooperative society special resolution requirements"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws]
+  relevant_source_ids: ['pacs_model_bylaws_2023']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "Gujarat cooperative society reserve fund rules"
   expected_domain: cooperative
   expected_state: gujarat
-  relevant_source_ids: [gujarat_cooperative_act]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 # =====================================================================
 # PACS (30 cases)
 # =====================================================================
+
 - question: "What does a PACS do for farmers?"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS loan services for farmers"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Membership of a primary agricultural credit society"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "How PACS interact with district cooperative banks"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Election of the PACS managing committee"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws]
+  relevant_source_ids: ['pacs_model_bylaws_2023']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PACS crop loan disbursement process"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "What is the role of PACS in rural credit?"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS interest rates on agricultural loans"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Gujarat PACS computerization scheme"
   expected_domain: pacs
   expected_state: gujarat
-  relevant_source_ids: [ministry_pacs, ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS warehouse operations for grain storage"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "How to form a primary agricultural credit society"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS non-performing assets management"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS member dividend calculation"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS audit by cooperative department"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Gujarat PACS revival package"
   expected_domain: pacs
   expected_state: gujarat
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS Gold loan services"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS Kisan Credit Card issuance"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS meeting frequency requirements"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws]
+  relevant_source_ids: ['pacs_model_bylaws_2023']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PACS share capital requirements"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS loan recovery procedures"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Gujarat PACS fertigation scheme"
   expected_domain: pacs
   expected_state: gujarat
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS role in PM-KISAN disbursement"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS digital payment systems"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS cold storage facility for farmers"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS insurance agent license"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS bylaw amendment procedure"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws]
+  relevant_source_ids: ['pacs_model_bylaws_2023']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PACS loan to non-member restrictions"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS annual general meeting rules"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws]
+  relevant_source_ids: ['pacs_model_bylaws_2023']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PACS shareholder limit"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACSNPA resolution framework Gujarat"
   expected_domain: pacs
   expected_state: gujarat
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 # =====================================================================
 # SCHEMES (30 cases)
 # =====================================================================
+
 - question: "What Ministry of Cooperation schemes are available?"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Computerization of PACS scheme details"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "National dairy development plan support"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "How to apply for cooperation ministry funding?"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Sector-specific cooperative schemes"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS computerization scheme eligibility"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Cooperative sugar mill modernization scheme"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Gujarat cooperative scheme for textile cooperatives"
   expected_domain: schemes
   expected_state: gujarat
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Ministry of Cooperation budget allocation"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Cooperative marketing society scheme"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS sports cooperative scheme"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Cooperative housing society scheme"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Handloom cooperative modernization scheme"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Cooperative spinning mill scheme"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Gujarat cooperative dairy scheme"
   expected_domain: schemes
   expected_state: gujarat
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Fish cooperative society scheme"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Cooperative society training program"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS infrastructure development scheme"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Cooperative fiber to home scheme"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Cooperative bank capital infusion scheme"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Gujarat PACS solar pump scheme"
   expected_domain: schemes
   expected_state: gujarat
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Cooperative society IT modernization"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Handicraft cooperative export scheme"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Cooperative education and training scheme"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS cold chain development scheme"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Cooperative jute development scheme"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Gujarat cooperative scheme for fisheries"
   expected_domain: schemes
   expected_state: gujarat
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Cooperative society audit scheme"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PACS grievance redressal mechanism"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Cooperative society modernization fund"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 # =====================================================================
 # PMFBY (30 cases)
 # =====================================================================
+
 - question: "How do I enroll my crops under PMFBY?"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines, pmfby_faq]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "What risks does PMFBY cover for standing crops?"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PMFBY premium rates for food crops"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "Crop insurance claim rejection remedies under PMFBY"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_faq]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Who is eligible for PMFBY coverage?"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PMFBY enrollment deadline for kharif crops"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PMFBY claim settlement timeline"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_faq]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Gujarat PMFBY crop insurance portal"
   expected_domain: pmfby
   expected_state: gujarat
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PMFBY coverage for horticultural crops"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PMFBY preventive sowing provision"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PMFBY calamity verification process"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_faq]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PMFBY add-on coverage options"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PMFBY use of technology for crop cutting experiments"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PMFBY claim filing process step by step"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_faq]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PMFBY premium subsidy by state government"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "Gujarat PMFBY farmer enrollment drive"
   expected_domain: pmfby
   expected_state: gujarat
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PMFBY coverage for perennial crops"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PMFBY insurance company empanelment"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PMFBY grievance redressal officer"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_faq]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PMFBY coverage area definition"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PMFBY loanee farmer auto-enrollment"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_faq]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PMFBY mobile app for enrollment"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_faq]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PMFBY private crop insurance companies list"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PMFBY restructured weather-based scheme"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "Gujarat PMFBY district-wise premium rates"
   expected_domain: pmfby
   expected_state: gujarat
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PMFBY indemnity level calculation"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PMFBY exclusion period for prevented sowing"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PMFBY claim amount based on yield estimation"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 - question: "PMFBY DBT payment to farmers"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_faq]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PMFBY notification date for each season"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
 
 # =====================================================================
 # AGRICULTURE (30 cases)
 # =====================================================================
+
 - question: "Best sowing window for kharif crops"
   expected_domain: agriculture
   expected_state: null
@@ -1074,219 +1079,221 @@
 # =====================================================================
 # FINLIT (30 cases)
 # =====================================================================
+
 - question: "How does deposit insurance protect my savings?"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [rbi_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Steps to open a Jan Dhan account"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [pmjdy_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "RBI guidelines for cooperative banks"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [rbi_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Safe use of UPI payments"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [rbi_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Loan borrowing warnings and debt traps"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [rbi_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Jan Dhan account balance check methods"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [pmjdy_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PMJDY overdraft facility details"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [pmjdy_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "RBI financial literacy centers"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [rbi_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PMJDY RuPay card benefits"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [pmjdy_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "How to file a banking complaint with RBI?"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [rbi_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Jan Dhan account zero balance rules"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [pmjdy_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Digital banking safety tips"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [rbi_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PMJDY account for women empowerment"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [pmjdy_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "RBI guidelines on interest rates"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [rbi_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PMJDY accident insurance coverage"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [pmjdy_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Gujarat financial literacy programs"
   expected_domain: finlit
   expected_state: gujarat
-  relevant_source_ids: [rbi_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "How to link Aadhaar to Jan Dhan account?"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [pmjdy_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "RBI consumer protection rights"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [rbi_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PMJDY mobile banking registration"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [pmjdy_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "RBI warnings about Ponzi schemes"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [rbi_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PMJDY scheme statistics and coverage"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [pmjdy_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Safe ATM usage guidelines"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [rbi_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Jan Dhan account for minors"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [pmjdy_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "RBI banking ombudsman scheme"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [rbi_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PMJDY Direct Benefit Transfer mechanism"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [pmjdy_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Gujarat banking correspondents network"
   expected_domain: finlit
   expected_state: gujarat
-  relevant_source_ids: [rbi_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "RBI guidelines on KYC documents"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [rbi_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PMJDY RuPay card replacement process"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [pmjdy_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "Financial planning for small farmers"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [rbi_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 - question: "PMJDY account closure rules"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [pmjdy_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
 
 # =====================================================================
 # GRIEVANCE (30 cases)
 # =====================================================================
+
 - question: "How do I file a complaint about a cooperative society?"
   expected_domain: grievance
   expected_state: null
@@ -1500,6 +1507,7 @@
 # =====================================================================
 # OUT OF SCOPE (15 cases)
 # =====================================================================
+
 - question: "What is the weather like today?"
   expected_domain: out_of_scope
   expected_state: null
@@ -1606,60 +1614,61 @@
   answerable: false
 
 # =====================================================================
-# ADVERSARIAL CROSS-DOMAIN (15 cases)
+# ADVERSARIAL CROSS-DOMAIN (20 cases)
 # =====================================================================
+
 - question: "How do I file a complaint about PMFBY?"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_faq]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
   note: "adversarial: pmfby keyword wins over complaint"
 
 - question: "Is PACS eligible for this Ministry scheme?"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs, ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
   note: "adversarial: pacs keyword wins over scheme"
 
 - question: "Cooperative society rules for agriculture loans"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [ministry_cooperation]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
   note: "adversarial: cooperative keyword wins over agriculture"
 
 - question: "RBI guidelines for cooperative banks"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [rbi_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
   note: "adversarial: rbi keyword wins over cooperative"
 
 - question: "Grievance redressal for PMFBY claim"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_faq]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
   note: "adversarial: pmfby keyword wins over grievance"
 
 - question: "PACS computerization scheme under Ministry"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
   note: "adversarial: scheme keyword wins over PACS"
 
 - question: "Cooperative society deposit insurance coverage"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [model_pacs_bylaws]
+  relevant_source_ids: ['pacs_model_bylaws_2023']
   relevant_chunk_ids: []
   answerable: true
   note: "adversarial: cooperative keyword wins over finlit"
@@ -1667,15 +1676,15 @@
 - question: "Agricultural credit through cooperative banks"
   expected_domain: cooperative
   expected_state: null
-  relevant_source_ids: [ministry_cooperation]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
   note: "adversarial: cooperative keyword wins over agriculture"
 
 - question: "PMFBY premium subsidy through PACS"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_guidelines]
+  relevant_source_ids: ['pmfby_operational_guidelines']
   relevant_chunk_ids: []
   answerable: true
   note: "adversarial: pmfby keyword wins over pacs"
@@ -1683,87 +1692,87 @@
 - question: "Jan Dhan account for cooperative society members"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [pmjdy_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
   note: "adversarial: jan dhan keyword wins over cooperative"
 
 - question: "Gujarat cooperative act and PMFBY provisions"
   expected_domain: cooperative
   expected_state: gujarat
-  relevant_source_ids: [gujarat_cooperative_act]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
   note: "adversarial: cooperative keyword wins over pmfby"
 
 - question: "Ministry schemes for agriculture cooperatives"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
   note: "adversarial: ministry keyword wins over agriculture"
 
 - question: "RBI financial literacy for PACS members"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [rbi_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
   note: "adversarial: rbi keyword wins over pacs"
 
 - question: "Crop insurance grievance for cooperative farmers"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_faq]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
   note: "adversarial: crop insurance wins over cooperative+grievance"
 
 - question: "PACS membership for PMFBY enrollment"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
   note: "adversarial: pacs keyword wins over pmfby"
 
 - question: "Gujarat cooperative scheme for agriculture"
   expected_domain: cooperative
   expected_state: gujarat
-  relevant_source_ids: [gujarat_cooperative_act]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
   note: "adversarial: cooperative keyword wins over agriculture+schemes"
 
 - question: "PMFBY claim process through cooperative bank"
   expected_domain: pmfby
   expected_state: null
-  relevant_source_ids: [pmfby_faq]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
   note: "adversarial: pmfby keyword wins over cooperative"
 
 - question: "PACS role in cooperative society elections"
   expected_domain: pacs
   expected_state: null
-  relevant_source_ids: [ministry_pacs]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
   note: "adversarial: pacs keyword wins over cooperative"
 
 - question: "RBI deposit insurance for cooperative bank deposits"
   expected_domain: finlit
   expected_state: null
-  relevant_source_ids: [rbi_financial_literacy]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
   note: "adversarial: rbi keyword wins over cooperative"
 
 - question: "Ministry scheme for cooperative agriculture credit"
   expected_domain: schemes
   expected_state: null
-  relevant_source_ids: [ministry_pacs_schemes]
+  relevant_source_ids: []
   relevant_chunk_ids: []
-  answerable: true
+  answerable: false
   note: "adversarial: ministry keyword wins over agriculture"

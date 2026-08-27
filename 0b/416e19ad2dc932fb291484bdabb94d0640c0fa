@@ -1,0 +1,36 @@
+frontend/src/app/grievance/page.tsx
+  s_0eafb727294b83::t_ab10647120828c 1-4,6-9,11-35,40-51,54-60,62-67,69,72-86,88-94,96-98,101-104,107-118,121,123,125-127,129-138
+  s_0eafb727294b83::t_04e6df331e29c3 5
+  s_89270c1921a6cd::t_3fe0a803c464e8 10,36-39,52-53,61,68,70-71,87,95,99-100,105-106,119-120,122,124,128
+frontend/src/app/grievance/status/page.tsx
+  s_89270c1921a6cd::t_ac533c3ad122ed 9,29-30,43-45,56,58,62,69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "0b416e19ad2dc932fb291484bdabb94d0640c0fa",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_0eafb727294b83": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd2dd594ffeoNEyGGMOtiAvHc",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_89270c1921a6cd": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbced9b4cffeqL5mJVhCBQB5BS",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

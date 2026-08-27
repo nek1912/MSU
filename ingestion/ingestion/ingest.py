@@ -4,7 +4,7 @@ from pathlib import Path
 from ingestion.chunker import chunk_markdown
 from ingestion.loader import parse_chunk_file
 from ingestion.manifest import load_mvp_manifest, validate_manifest_fields, validate_manifest_files
-from ingestion.pdf_extractor import extract_pdf_to_markdown
+from ingestion.pdf_extractor import extract_pdf_to_markdown, validate_extraction
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +98,7 @@ def manifest_to_supabase(manifest_path: Path, embed_texts, supabase, dry_run: bo
         try:
             # Extract PDF to markdown using Docling
             markdown_content = extract_pdf_to_markdown(file_path)
+            markdown_content = validate_extraction(markdown_content, file_path.name)
             
             # Chunk the extracted content
             pieces = chunk_markdown(markdown_content)

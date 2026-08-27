@@ -43,7 +43,7 @@ def test_one_bad_file_others_succeed(mock_load, mock_validate, mock_chunk, mock_
         # path is base_dir / source["path"], so match on source["path"]
         if "bad.pdf" in str(path):
             raise ValueError("corrupt PDF")
-        return "# content"
+        return "# Good content\n\n" + "x" * 50
 
     mock_extract.side_effect = extract_side_effect
     mock_chunk.return_value = ["chunk"]
@@ -137,7 +137,7 @@ def test_db_not_called_for_failed_files(mock_load, mock_validate, mock_chunk, mo
     def extract_side_effect(path):
         if "fail_me.pdf" in str(path):
             raise ValueError("bad pdf")
-        return "# ok"
+        return "# Good content\n\n" + "x" * 50
 
     mock_extract.side_effect = extract_side_effect
     mock_chunk.return_value = ["chunk"]
@@ -195,7 +195,7 @@ def test_summary_logged(mock_load, mock_validate, mock_chunk, mock_extract, capl
     def extract_side_effect(path):
         if "bad.pdf" in str(path):
             raise ValueError("fail")
-        return "# ok"
+        return "# Good content\n\n" + "x" * 50
 
     mock_extract.side_effect = extract_side_effect
     mock_chunk.return_value = ["chunk"]

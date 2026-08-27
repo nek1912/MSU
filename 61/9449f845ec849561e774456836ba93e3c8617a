@@ -1,0 +1,33 @@
+frontend/src/components/ui/Icons.tsx
+  s_dc1256fbbc46ce::t_08c1c343e86342 81-109
+  s_01010cff30d927::t_7a2a7bfbe40511 1-80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "619449f845ec849561e774456836ba93e3c8617a",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_01010cff30d927": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd53bbe7ffereTKsyjEK60CLQ",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_dc1256fbbc46ce": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbcb122d5ffe5E6988xCIiyOlW",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

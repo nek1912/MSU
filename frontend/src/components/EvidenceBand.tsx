@@ -1,9 +1,16 @@
-import { BAND_LABEL, evidenceBand } from "@/lib/band";
+import { evidenceBand, type Band } from "@/lib/band";
 
-export function EvidenceBand({ confidence }: { confidence: number }) {
+const TONE: Record<Band, string> = {
+  strong: "bg-[var(--state-success)]/15 text-[var(--state-success)]",
+  moderate: "bg-[var(--state-warning)]/15 text-[var(--state-warning)]",
+  weak: "bg-[var(--state-error)]/15 text-[var(--state-error)]",
+};
+
+export function EvidenceBand({ confidence, label }: { confidence: number; label: string }) {
   const band = evidenceBand(confidence);
-  const color = band === "strong" ? "bg-green-100 text-green-800"
-    : band === "moderate" ? "bg-amber-100 text-amber-800" : "bg-red-100 text-red-800";
-  return <span className={`rounded px-2 py-0.5 text-xs font-medium ${color}`}>
-    {BAND_LABEL[band]}</span>;
+  return (
+    <span className={`rounded-[var(--radius-sm)] px-[var(--space-2)] py-[var(--space-1)] text-[var(--text-xs)] font-[var(--font-medium)] ${TONE[band]}`}>
+      {label}
+    </span>
+  );
 }

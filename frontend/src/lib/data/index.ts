@@ -5,3 +5,4 @@ export * from "./accent";
 export * from "./legal";
 export * from "./services";
 export * from "./faq";
+export * from "./i18n";

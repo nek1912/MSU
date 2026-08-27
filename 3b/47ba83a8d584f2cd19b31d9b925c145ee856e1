@@ -1,0 +1,28 @@
+frontend/src/lib/data/i18n.test.ts
+  s_0d519bf2c224ee::t_65faf26bfcc17e 1-22
+frontend/src/lib/data/i18n.ts
+  s_0d519bf2c224ee::t_ffe0df3c7de88e 1-11
+frontend/src/lib/data/index.ts
+  s_0d519bf2c224ee::t_a09647ca0df8b6 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "3b47ba83a8d584f2cd19b31d9b925c145ee856e1",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_0d519bf2c224ee": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbc8024a6ffegp7ZP0YP5vKAaw",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,64 @@
+frontend/src/app/grievance/status/page.tsx
+  s_3706a3d2c42e2d::t_492e9ddf32b15d 46
+  s_0eafb727294b83::t_fa809904dae285 1-45,47-78
+frontend/src/app/page.tsx
+  s_3706a3d2c42e2d::t_64123f01313a9c 27
+  s_f7b5a8978af5b9::t_474c835ba1282b 1-8,10-23,25-26,28-78
+  s_d9ae49e95c1a43::t_2f285cf3baed5e 24,79
+frontend/src/components/ui/Badge.tsx
+  s_185efc110b3583::t_b2b1e5b5c59c84 1-2,4-5,10-21,23-26
+  s_3706a3d2c42e2d::t_dfa07369a460f8 3,6-9,22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "9a05e080e820ada504454af69f834665bd00e630",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_0eafb727294b83": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd2dd594ffeoNEyGGMOtiAvHc",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_185efc110b3583": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd4d9181ffeXJZzLFCnDwfcJg",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_3706a3d2c42e2d": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbcfea27affe1PqiSwo0ooP2s3",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_d9ae49e95c1a43": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd3e3ccfffew36qjMKboi85DJ",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_f7b5a8978af5b9": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd24da3bffehAbbfM5BrhEsN4",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+frontend/src/lib/i18n/dictionaries.ts
+  s_033e4c07494368::t_63fa750d11825c 238-249,251-252
+  s_033e4c07494368::t_349a3e06d45906 202-203
+  s_033e4c07494368::t_8deff7df865cc0 227-234
+  s_033e4c07494368::t_3fcd45b0e60038 280-282
+  s_033e4c07494368::t_b69bfd057ce155 265
+  s_033e4c07494368::t_49a5a47712ea99 260
+  s_033e4c07494368::t_05b7d46ee84a8b 288
+  s_033e4c07494368::t_f58d07bc656810 272-277
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "e8594116cc5d69a74640970497bc7d8a79bd7d76",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_033e4c07494368": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbc53266bffeF8sH7eymQIgw8r",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

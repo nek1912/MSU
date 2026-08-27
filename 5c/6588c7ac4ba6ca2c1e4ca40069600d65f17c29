@@ -1,0 +1,38 @@
+frontend/src/lib/i18n/i18n.ts
+  s_c9549851012e73::t_e0c902d988d919 4
+  s_0d2b9d43c594ec::t_019bd4d8dc4f5c 1-3
+frontend/src/components/layout/LanguageSwitcher.tsx
+  s_0d2b9d43c594ec::t_391a8329ed76a1 8-9
+frontend/src/lib/i18n/i18n.test.ts
+  s_c9549851012e73::t_65f4ca7ac212e6 1-4,7-26
+  s_0d2b9d43c594ec::t_06ee044d57b6ad 5-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "5c6588c7ac4ba6ca2c1e4ca40069600d65f17c29",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_0d2b9d43c594ec": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbc8211a4ffe8YjhwdYKnuXpwh",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_c9549851012e73": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd574418ffeCby5vyXkY7VO0n",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

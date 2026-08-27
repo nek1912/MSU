@@ -1,0 +1,42 @@
+frontend/src/components/layout/TopNav.tsx
+  s_ad63cb22989770::t_1cf1734a29619a 22-24,34,36-37
+  s_7dfe31a0f6a791::t_6d5c1d57c0e6e9 33
+  s_01010cff30d927::t_39890022665e7b 1-21,25-32,35,38-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "a52a47413ac15b1df8af8e08a3fe8f1240121429",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_01010cff30d927": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd53bbe7ffereTKsyjEK60CLQ",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_7dfe31a0f6a791": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd1ae4b2ffeKw6Z4PBMPdyy2O",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_ad63cb22989770": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbcfb2eb5ffeBarsBg8F35Z339",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

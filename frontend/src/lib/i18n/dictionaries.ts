@@ -150,6 +150,7 @@ const en: Record<string, string> = {
   "legalCategory.act": "Act",
   "legalCategory.bye-laws": "Bye-laws",
   "legalCategory.provisions": "Provisions",
+  "legal.count": "{n} laws available",
 
   "services.title": "Cooperative & PACS Services",
   "services.subtitle": "Find the cooperative and PACS service you need.",
@@ -167,6 +168,7 @@ const en: Record<string, string> = {
   "serviceCategory.agro-inputs": "Agro inputs",
   "serviceCategory.subsidy": "Subsidy",
   "serviceCategory.membership": "Membership",
+  "services.count": "{n} services available",
 
   "faq.title": "Frequently asked questions",
   "faq.subtitle": "Quick answers to common cooperative questions.",
@@ -284,6 +286,7 @@ const hi: Record<string, string> = {
   "legalCategory.act": "अधिनियम",
   "legalCategory.bye-laws": "उपनियम",
   "legalCategory.provisions": "प्रावधान",
+  "legal.count": "{n} कानून उपलब्ध",
 
   "services.title": "सहकारी और PACS सेवाएँ",
   "services.subtitle": "अपनी ज़रूरत की सहकारी और PACS सेवा खोजें।",
@@ -301,6 +304,7 @@ const hi: Record<string, string> = {
   "serviceCategory.agro-inputs": "कृषि सामग्री",
   "serviceCategory.subsidy": "सब्सिडी",
   "serviceCategory.membership": "सदस्यता",
+  "services.count": "{n} सेवाएँ उपलब्ध",
 
   "faq.title": "अक्सर पूछे जाने वाले प्रश्न",
   "faq.subtitle": "सामान्य सहकारी प्रश्नों के त्वरित उत्तर।",

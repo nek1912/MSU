@@ -32,7 +32,7 @@ export default function LegalPage() {
       <p className="mt-[var(--space-1)] text-[var(--text-secondary)]">{t("legal.subtitle")}</p>
       <div className="mt-[var(--space-4)] flex flex-col gap-[var(--space-3)] sm:flex-row sm:items-center">
         <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("legal.searchPlaceholder")} className="max-w-sm" />
-        <p className="text-[var(--text-sm)] text-[var(--text-secondary)]">{t("schemes.count", { n: filtered.length })}</p>
+        <p className="text-[var(--text-sm)] text-[var(--text-secondary)]">{t("legal.count", { n: filtered.length })}</p>
       </div>
       <div className="mt-[var(--space-4)]">
         <Chips<Filter>

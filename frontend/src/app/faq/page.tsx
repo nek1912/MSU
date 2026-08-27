@@ -5,7 +5,7 @@ import { getFaqItems } from "@/lib/data";
 import { Input } from "@/components/ui/Input";
 import { Chips } from "@/components/ui/Chips";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Button } from "@/components/ui/Button";
+import Link from "next/link";
 import { IconChevronRight } from "@/components/ui/Icons";
 
 const CATEGORY_ALL = "all";
@@ -68,9 +68,9 @@ export default function FaqPage() {
                 {isOpen && (
                   <div className="px-[var(--space-4)] pb-[var(--space-4)]">
                     <p className="text-sm text-[var(--text-secondary)]">{f.answer}</p>
-                    <a href={`/chat?q=${encodeURIComponent(f.question)}`} className="mt-3 inline-block">
-                      <Button variant="secondary" className="!py-1 !px-3 text-xs">{t("faq.askInChat")}</Button>
-                    </a>
+                    <Link href={`/chat?q=${encodeURIComponent(f.question)}`} className="mt-3 inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[var(--text-base)] font-[var(--font-medium)] transition focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] bg-[var(--color-pill)] text-[var(--text-primary)] hover:bg-[var(--surface-overlay)]">
+                      {t("faq.askInChat")}
+                    </Link>
                   </div>
                 )}
               </li>

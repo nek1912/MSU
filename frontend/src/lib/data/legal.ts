@@ -77,7 +77,7 @@ export const legalDocs: LegalDoc[] = [
       "Disputes between a cooperative and its members — over loans, share capital, or by-law obligations — are resolved through arbitration or a cooperative dispute authority, not regular civil courts.",
     keyProvisions: [
       "Matters that are deemed disputes under the Act.",
-      "Reference of disputes to arbitration or a designated authorit(y).",
+      "Reference of disputes to arbitration or a designated authority.",
       "Enforceability of arbitration awards.",
     ],
     applicability: ["Members, former members and cooperatives facing internal disputes."],

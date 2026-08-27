@@ -1,0 +1,40 @@
+frontend/src/app/schemes/[slug]/page.tsx
+  s_c14b20c09acf11::t_b58ab9df63bb4f 15-16
+frontend/src/app/faq/page.tsx
+  s_c14b20c09acf11::t_31ca381de85062 16-17
+frontend/src/app/services/page.tsx
+  s_c14b20c09acf11::t_b30841bd7ddb4b 17-18
+frontend/src/app/legal/page.tsx
+  s_c14b20c09acf11::t_65b8ead1cab4f2 17-18
+frontend/src/app/legal/[slug]/page.tsx
+  s_c14b20c09acf11::t_a5706b5cf54db6 15-16
+frontend/src/app/services/[slug]/page.tsx
+  s_c14b20c09acf11::t_4f1cc1744351cd 13-14
+frontend/src/app/schemes/page.tsx
+  s_c14b20c09acf11::t_b36bc3eaf3f883 17-18
+frontend/src/app/library/page.tsx
+  s_c14b20c09acf11::t_1ee0083bbd3607 14-15
+frontend/src/app/page.tsx
+  s_c14b20c09acf11::t_378dc9d937c2c4 22-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "265861ea2ed8b0185592eb4a8844ca152f93325c",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_c14b20c09acf11": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbc701887ffeQt5svfo2DAJPWN",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { sendChat, ChatResponse } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
+import type { Locale } from "@/lib/i18n/i18n";
 import { createSpeechService } from "@/lib/speech";
 import { MessageBubble } from "./chat/MessageBubble";
 import { Button } from "@/components/ui/Button";
@@ -12,7 +13,7 @@ import { IconMic, IconChat } from "@/components/ui/Icons";
 
 type Msg = { role: "user" | "assistant"; text?: string; resp?: ChatResponse };
 
-function fallback(lang: "en" | "hi"): ChatResponse {
+function fallback(lang: Locale): ChatResponse {
   return {
     answer: lang === "hi" ? "सेवा अभी उपलब्ध नहीं है।" : "Service unavailable right now.",
     language: lang,
@@ -35,7 +36,7 @@ export function ChatWindow() {
   const [sessionId] = useState(() => crypto.randomUUID());
   const cancelListen = useRef<(() => void) | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const lang: "en" | "hi" = locale === "hi" ? "hi" : "en";
+  const lang: Locale = locale;
 
   function factoryPrompt(scheme: string) {
     return scheme === "pmfby" ? "How does the PMFBY scheme work?" : "Tell me about the " + scheme.replace(/-/g, " ") + " scheme.";
@@ -81,7 +82,7 @@ export function ChatWindow() {
       setListening(false);
       return;
     }
-    cancelListen.current = speech.listen(lang === "hi" ? "hi-IN" : "en-IN", (text) => {
+    cancelListen.current = speech.listen(lang, (text) => {
       setInput((prev) => (prev ? prev + " " : "") + text);
       setListening(false);
     });

@@ -1,34 +1,34 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5f5f5;
+  --foreground: #232323;
 
   /* Surface */
-  --surface-base: #000000;
-  --surface-elevated: #111111;
-  --surface-overlay: #1a1a1a;
+  --surface-base: #f5f5f5;
+  --surface-elevated: #ffffff;
+  --surface-overlay: #efefef;
 
   /* Text */
   --text-primary: #232323;
-  --text-secondary: #1b1b1b;
-  --text-tertiary: #f5f5f5;
-  --text-inverse: #0000ee;
+  --text-secondary: rgba(27, 27, 27, 0.6);
+  --text-tertiary: #8a8a8a;
+  --text-inverse: #ffffff;
 
   /* Accent */
-  --accent-primary: #0000ee;
-  --accent-hover: #0000cc;
-  --accent-active: #0000aa;
+  --accent-primary: #0099ff;
+  --accent-hover: #0083d9;
+  --accent-active: #006dbc;
 
   /* Border */
-  --border-default: #333333;
-  --border-hover: #444444;
-  --border-focus: #0000ee;
+  --border-default: #e2e2e2;
+  --border-hover: #d0d0d0;
+  --border-focus: #0099ff;
 
   /* State */
-  --state-error: #ff4444;
-  --state-success: #00cc00;
-  --state-warning: #ffaa00;
+  --state-error: #e5484d;
+  --state-success: #30a46c;
+  --state-warning: #f5a524;
 
   /* Typography - Font Family */
   --font-primary: Geist, Geist Placeholder, sans-serif;
@@ -80,6 +80,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans), var(--font-devanagari), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-script);
 
   /* Surface */
   --color-surface-base: var(--surface-base);
@@ -106,13 +107,42 @@
   --color-state-error: var(--state-error);
   --color-state-success: var(--state-success);
   --color-state-warning: var(--state-warning);
+
+  /* Tints */
+  --color-accent-tint: rgba(0, 153, 255, 0.14);
+  --color-pill: #ececec;
+  --color-surface-tint: rgba(245, 245, 245, 0.8);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Typography - Script Font Mapping */
+:root,
+[lang="hi"],
+[lang="mr"] {
+  --font-script: var(--font-devanagari);
+}
+html[data-locale="bn"] {
+  --font-script: var(--font-bengali);
+}
+html[data-locale="ta"] {
+  --font-script: var(--font-tamil);
+}
+html[data-locale="te"] {
+  --font-script: var(--font-telugu);
+}
+html[data-locale="kn"] {
+  --font-script: var(--font-kannada);
+}
+html[data-locale="pa"] {
+  --font-script: var(--font-gurmukhi);
+}
+html[data-locale="gu"] {
+  --font-script: var(--font-gujarati);
+}
+html[data-locale="or"] {
+  --font-script: var(--font-odia);
+}
+html[data-locale="ml"] {
+  --font-script: var(--font-malayalam);
 }
 
 body {

@@ -14,8 +14,8 @@ const categories = ["all", "credit", "storage", "insurance", "agro-inputs", "sub
 type Filter = (typeof categories)[number];
 
 export default function ServicesPage() {
-  const { t } = useI18n();
-  const all = useMemo(() => getServices("en"), []);
+  const { t, locale } = useI18n();
+  const all = useMemo(() => getServices(locale), [locale]);
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Filter>(CATEGORY_ALL);
 

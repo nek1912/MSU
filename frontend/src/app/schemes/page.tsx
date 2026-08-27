@@ -14,8 +14,8 @@ const categories = ["all", "crop-insurance", "pacs", "financial", "subsidy"] as 
 type Filter = (typeof categories)[number];
 
 export default function SchemesPage() {
-  const { t } = useI18n();
-  const all = useMemo(() => getSchemes("en"), []);
+  const { t, locale } = useI18n();
+  const all = useMemo(() => getSchemes(locale), [locale]);
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Filter>(CATEGORY_ALL);
 

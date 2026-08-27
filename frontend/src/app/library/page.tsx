@@ -11,8 +11,8 @@ const domains = ["all", "cropInsurance", "law", "financial", "grievance"] as con
 type Filter = (typeof domains)[number];
 
 export default function LibraryPage() {
-  const { t } = useI18n();
-  const docs = useMemo(() => getLibraryDocs("en"), []);
+  const { t, locale } = useI18n();
+  const docs = useMemo(() => getLibraryDocs(locale), [locale]);
   const [query, setQuery] = useState("");
   const [domain, setDomain] = useState<Filter>("all");
 

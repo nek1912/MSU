@@ -19,8 +19,8 @@ const HOW = [
 ];
 
 export default function HomePage() {
-  const { t } = useI18n();
-  const schemes = getSchemes("en");
+  const { t, locale } = useI18n();
+  const schemes = getSchemes(locale);
   return (
     <div className="mx-auto max-w-6xl">
       <section className="flex flex-col items-center px-[var(--space-4)] py-24 text-center">

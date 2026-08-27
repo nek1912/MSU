@@ -12,8 +12,8 @@ const SECTIONS = ["keyProvisions", "applicability", "byLaws"] as const;
 
 export default function LegalDetailPage() {
   const { slug } = useParams<{ slug: string }>();
-  const { t } = useI18n();
-  const doc = getLegalDoc("en", slug);
+  const { t, locale } = useI18n();
+  const doc = getLegalDoc(locale, slug);
   if (!doc) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-8">

@@ -12,8 +12,8 @@ const SECTIONS = ["overview", "eligibility", "benefits", "howToApply", "document
 
 export default function SchemeDetailPage() {
   const { slug } = useParams<{ slug: string }>();
-  const { t } = useI18n();
-  const scheme = getScheme("en", slug);
+  const { t, locale } = useI18n();
+  const scheme = getScheme(locale, slug);
   if (!scheme) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-8">

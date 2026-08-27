@@ -14,8 +14,8 @@ const categories = ["all", "act", "bye-laws", "provisions"] as const;
 type Filter = (typeof categories)[number];
 
 export default function LegalPage() {
-  const { t } = useI18n();
-  const all = useMemo(() => getLegalDocs("en"), []);
+  const { t, locale } = useI18n();
+  const all = useMemo(() => getLegalDocs(locale), [locale]);
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Filter>(CATEGORY_ALL);
 

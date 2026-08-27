@@ -10,8 +10,8 @@ import { IconChevronRight } from "@/components/ui/Icons";
 
 export default function ServiceDetailPage() {
   const { slug } = useParams<{ slug: string }>();
-  const { t } = useI18n();
-  const service = getService("en", slug);
+  const { t, locale } = useI18n();
+  const service = getService(locale, slug);
   if (!service) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-8">

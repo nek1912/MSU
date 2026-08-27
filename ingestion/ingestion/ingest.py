@@ -3,6 +3,7 @@ from pathlib import Path
 from ingestion.chunker import chunk_markdown
 from ingestion.loader import parse_chunk_file
 from ingestion.manifest import load_mvp_manifest, validate_manifest_fields, validate_manifest_files
+from ingestion.pdf_extractor import extract_pdf_to_markdown
 
 SEEDS_DIR = Path(__file__).parent.parent / "corpus" / "seeds"
 
@@ -92,9 +93,8 @@ def manifest_to_supabase(manifest_path: Path, embed_texts, supabase, dry_run: bo
     for source in valid_sources:
         file_path = base_dir / source["path"]
         try:
-            # Extract PDF to markdown (placeholder - will be implemented in Task 4)
-            # For now, use a simple file read as placeholder
-            markdown_content = f"# {source.get('actual_title', source['source_id'])}\n\nPlaceholder content for {file_path.name}"
+            # Extract PDF to markdown using Docling
+            markdown_content = extract_pdf_to_markdown(file_path)
             
             # Chunk the extracted content
             pieces = chunk_markdown(markdown_content)

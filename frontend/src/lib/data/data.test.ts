@@ -12,7 +12,7 @@ test("schemes accessors return well-formed data", () => {
 });
 
 test("library accessor returns documents", () => {
-  const docs = getLibraryDocs();
+  const docs = getLibraryDocs("en");
   expect(docs.length).toBeGreaterThan(0);
   expect(docs[0]).toHaveProperty("title");
   expect(docs[0]).toHaveProperty("url");

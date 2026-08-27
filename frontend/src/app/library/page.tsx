@@ -12,7 +12,7 @@ type Filter = (typeof domains)[number];
 
 export default function LibraryPage() {
   const { t } = useI18n();
-  const docs = useMemo(() => getLibraryDocs(), []);
+  const docs = useMemo(() => getLibraryDocs("en"), []);
   const [query, setQuery] = useState("");
   const [domain, setDomain] = useState<Filter>("all");
 
@@ -24,8 +24,8 @@ export default function LibraryPage() {
   });
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 bg-[var(--surface-base)] text-[var(--text-primary)]">
-      <h1 className="text-2xl font-bold text-[var(--text-primary)]">{t("library.title")}</h1>
+    <div className="mx-auto max-w-4xl px-[var(--space-4)] py-[var(--space-8)] bg-[var(--surface-base)] text-[var(--text-primary)]">
+      <h1 className="font-[var(--font-display)] text-[var(--text-3xl)] font-[var(--font-medium)] tracking-tight text-[var(--text-primary)]">{t("library.title")}</h1>
       <p className="mt-1 text-[var(--text-secondary)]">{t("library.subtitle")}</p>
       <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("library.searchPlaceholder")} className="mt-4 max-w-sm" />
       <div className="mt-4 flex flex-wrap gap-2">
@@ -34,9 +34,9 @@ export default function LibraryPage() {
             key={d}
             onClick={() => setDomain(d)}
             className={`rounded-full px-3 py-1.5 text-sm font-medium ${
-              d === domain
-                ? "bg-[var(--accent-primary)] text-white"
-                : "bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:bg-[var(--surface-overlay)]"
+            d === domain
+              ? "bg-[var(--text-primary)] text-white"
+              : "bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:bg-[var(--surface-overlay)]"
             }`}
           >
             {d === "all" ? t("common.all") : d}

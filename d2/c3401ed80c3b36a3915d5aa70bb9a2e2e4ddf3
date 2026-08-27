@@ -1,0 +1,60 @@
+frontend/src/app/library/page.tsx
+  s_a30b70f3601eac::t_2e222ddaa50069 4-5
+  s_a30b70f3601eac::t_c338ad79187003 17-23,27
+frontend/src/app/legal/[slug]/page.tsx
+  s_a30b70f3601eac::t_cfd50f208f17e0 5-6
+  s_a30b70f3601eac::t_142e7b1093700d 18-21,23-27
+  s_a30b70f3601eac::t_d93ba9277e417b 38-41,51,57,65-66
+  s_a30b70f3601eac::t_cad265f27bf304 22
+frontend/src/lib/useTranslatedFields.ts
+  s_a30b70f3601eac::t_2647ef96fc20cc 6,33,37-40,42-43,45-49,55-56,58-60,71-76,80
+  s_a30b70f3601eac::t_8e61fd2173418c 1-5,7-32,34-36,41,44,50-54,57,61-70,77-79,81-90
+frontend/src/app/services/page.tsx
+  s_a30b70f3601eac::t_6706bbaec95f0b 5-6
+  s_a30b70f3601eac::t_a05a6defb9e899 20-26,30
+frontend/src/app/faq/page.tsx
+  s_a30b70f3601eac::t_430248d285e53d 19-25,30
+  s_a30b70f3601eac::t_d72e66801d91ff 4-5
+frontend/src/app/services/[slug]/page.tsx
+  s_a30b70f3601eac::t_48c842bbfe4f90 20
+  s_a30b70f3601eac::t_adc606f9b28d88 36-39,49,54,60,65-66
+  s_a30b70f3601eac::t_0d78148d3eba6f 16-19,21-25,32
+  s_a30b70f3601eac::t_192e533e10cec1 5-6
+frontend/src/app/page.tsx
+  s_a30b70f3601eac::t_5a52410c4b2602 25-32
+  s_a30b70f3601eac::t_089d894d98173e 2,9-10
+  s_a30b70f3601eac::t_7324b353b9d939 83
+frontend/src/app/legal/page.tsx
+  s_a30b70f3601eac::t_3492f62108309d 5-6
+  s_a30b70f3601eac::t_7b5f74b1574448 20-26,30
+frontend/src/app/schemes/page.tsx
+  s_a30b70f3601eac::t_a4b462e759c907 5-6
+  s_a30b70f3601eac::t_e27148b0ccadde 20-26,30
+frontend/src/app/schemes/[slug]/page.tsx
+  s_a30b70f3601eac::t_3b9bfd1f3f584e 18-21,23-27,34,36-40
+  s_a30b70f3601eac::t_1929ef0a0532dd 5-6
+  s_a30b70f3601eac::t_76bc1094e653ee 22
+  s_a30b70f3601eac::t_3f72b4965ba670 49
+  s_a30b70f3601eac::t_28a8c426c43826 46-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "d2c3401ed80c3b36a3915d5aa70bb9a2e2e4ddf3",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_a30b70f3601eac": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbcc52a71ffeg18ASW86EbPgUy",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+frontend/src/lib/data/faq.ts
+  s_99cdf53c937098::t_979a4c83611739 1-3,9-10,17,19,24,26,31,33,38,40,45,47,52,54,59,61,66,68,73,75,80,82,87,89,93-110
+frontend/src/app/faq/page.tsx
+  s_99cdf53c937098::t_31c0a710106427 17
+frontend/src/lib/data/faq.test.ts
+  s_99cdf53c937098::t_3f18cf0ae382fc 5,11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "e682e6b20b82dc405e104e2876f542fb0a411231",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_99cdf53c937098": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbc7490e3ffe312zVd5qmrNUkE",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

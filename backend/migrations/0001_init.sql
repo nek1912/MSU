@@ -11,8 +11,10 @@ create table if not exists documents (
   document_type text not null,
   source_url text not null,
   effective_date date,
+  document_date date,
   verified_date date not null default current_date,
   document_hash text,
+  source_type text not null default 'seed',
   created_at timestamptz not null default now()
 );
 

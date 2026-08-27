@@ -17,7 +17,9 @@ def seeds_to_supabase(paths: list[Path], embed_texts, supabase) -> int:
             "jurisdiction": rec["jurisdiction"], "state": rec.get("state"),
             "document_type": "seed", "source_url": rec["url"],
             "effective_date": rec.get("effective_date"),
+            "document_date": rec.get("document_date"),
             "verified_date": rec["verified_date"],
+            "source_type": "seed",  # Explicit value, not derived
         }).execute().data[0]
         # Same pipeline as the real corpus (P1-6): parse -> chunk -> embed -> insert.
         pieces = chunk_markdown(rec["content"])

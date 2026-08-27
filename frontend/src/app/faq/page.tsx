@@ -14,7 +14,7 @@ type Filter = (typeof categories)[number];
 
 export default function FaqPage() {
   const { t } = useI18n();
-  const items = useMemo(() => getFaqItems(), []);
+  const items = useMemo(() => getFaqItems("en"), []);
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Filter>(CATEGORY_ALL);
   const [open, setOpen] = useState<Set<string>>(new Set());

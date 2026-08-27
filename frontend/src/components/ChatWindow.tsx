@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { sendChat, ChatResponse } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
 import type { Locale } from "@/lib/i18n/i18n";
+import { useTranslate } from "@/lib/useTranslate";
 import { createSpeechService } from "@/lib/speech";
 import { MessageBubble } from "./chat/MessageBubble";
 import { Button } from "@/components/ui/Button";
@@ -27,6 +28,7 @@ function fallback(lang: Locale): ChatResponse {
 
 export function ChatWindow() {
   const { t, locale } = useI18n();
+  const { translate } = useTranslate();
   const speech = useMemo(() => createSpeechService(), []);
   const sp = useSearchParams();
   const [input, setInput] = useState("");
@@ -37,6 +39,7 @@ export function ChatWindow() {
   const cancelListen = useRef<(() => void) | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const lang: Locale = locale;
+  const sendLang: "en" | "hi" = locale === "hi" ? "hi" : "en";
 
   function factoryPrompt(scheme: string) {
     return scheme === "pmfby" ? "How does the PMFBY scheme work?" : "Tell me about the " + scheme.replace(/-/g, " ") + " scheme.";
@@ -67,8 +70,13 @@ export function ChatWindow() {
     setMsgs((m) => [...m, { role: "user", text: question }]);
     setTyping(true);
     try {
-      const resp = await sendChat({ question, session_id: sessionId, language: lang, state: null });
-      setMsgs((m) => [...m, { role: "assistant", resp }]);
+      const backendQuestion = locale === sendLang ? question : await translate(question, sendLang);
+      const resp = await sendChat({ question: backendQuestion, session_id: sessionId, language: sendLang, state: null });
+      let answer = resp.answer;
+      if (resp.language !== locale && !resp.abstained) {
+        answer = await translate(answer, locale);
+      }
+      setMsgs((m) => [...m, { role: "assistant", resp: { ...resp, answer, language: locale } }]);
     } catch {
       setMsgs((m) => [...m, { role: "assistant", resp: fallback(lang) }]);
     } finally {

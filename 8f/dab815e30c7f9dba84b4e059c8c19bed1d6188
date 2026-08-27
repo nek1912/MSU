@@ -1,0 +1,32 @@
+frontend/src/app/api/translate/route.ts
+  s_a30b70f3601eac::t_e06b2c323bd897 1-58
+frontend/src/lib/translator.ts
+  s_a30b70f3601eac::t_09d28c72681af1 1-71
+frontend/.env.example
+  s_a30b70f3601eac::t_0cf2d81fde166e 1-12
+frontend/src/lib/useTranslate.ts
+  s_a30b70f3601eac::t_4a75f3fb63f145 1-19
+frontend/.gitignore
+  s_a30b70f3601eac::t_2377de464c5129 35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "8fdab815e30c7f9dba84b4e059c8c19bed1d6188",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_a30b70f3601eac": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbcc52a71ffeg18ASW86EbPgUy",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

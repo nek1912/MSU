@@ -1,0 +1,24 @@
+frontend/src/app/globals.css
+  s_453fa4cb9e39d2::t_cef8b1f19307b3 121
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "37ec6196c858231219ce97e7744793fb86517997",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_453fa4cb9e39d2": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbce7594cffeUk0T1dVZS5Kklp",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

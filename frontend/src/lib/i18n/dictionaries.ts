@@ -357,7 +357,9 @@ const ta: Record<string, string> = {
   "common.globe": "மொழி",
 };
 
-export const dict: Record<Locale, Record<string, string>> = { en, hi, mr, bn, ta };
+export const dict: Record<Locale, Record<string, string>> = {
+  en, hi, mr, bn, ta, te: {}, kn: {}, pa: {}, gu: {}, or: {}, ml: {}, ur: {},
+};
 
 export function translate(
   locale: string,

@@ -1,0 +1,24 @@
+frontend/src/app/legal/page.tsx
+  s_fc933f1e975e38::t_222876f236f826 1-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "8d13519062820af6148988c00407b24c387cefc2",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_fc933f1e975e38": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbcaf4ad3ffecF0q2qP8FOJs4F",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

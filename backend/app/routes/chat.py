@@ -69,6 +69,9 @@ def chat(req: ChatRequest) -> dict:
         prompt = build_user_prompt(req.question, chunks)
         answer = grounded_answer(GroqLLMProvider(settings),
                                  GeminiLLMProvider(settings), SYSTEM_PROMPT, prompt)
+        _valid, invalid = verify_citations(answer, [c.chunk_id for c in chunks])
+        if invalid:
+            return _abstain(lang, "invalid_citations")
         citations = _citations_from(answer, chunks)
         return {"answer": answer, "language": lang, "domain": domain,
                 "confidence": gate.confidence, "citations": citations,

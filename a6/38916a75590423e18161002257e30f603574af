@@ -1,0 +1,33 @@
+frontend/src/components/ui/Input.tsx
+  s_185efc110b3583::t_58881adbacb40e 1-6,8-10
+  s_8d6fa38fc784c0::t_2931c0a6c5b1b2 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "a638916a75590423e18161002257e30f603574af",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_185efc110b3583": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd4d9181ffeXJZzLFCnDwfcJg",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_8d6fa38fc784c0": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd03a99dfferiUN1U2oPXjXtu",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,36 @@
+frontend/src/app/legal/page.tsx
+  s_272809a4157a07::t_e0fc1340e6ab05 35
+frontend/src/lib/data/legal.ts
+  s_272809a4157a07::t_03b895619bcb19 80
+frontend/src/app/services/page.tsx
+  s_272809a4157a07::t_ad895d113c1790 35
+frontend/src/app/faq/page.tsx
+  s_272809a4157a07::t_6a4179b1247f28 8
+  s_272809a4157a07::t_4e76cf47eebf25 71-73
+frontend/src/lib/i18n/dictionaries.ts
+  s_272809a4157a07::t_57242218dabb58 153
+  s_272809a4157a07::t_6bec7e641b2277 171
+  s_272809a4157a07::t_31dc97d3f418a7 289
+  s_272809a4157a07::t_c7002ae6fbaa7c 307
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "8cea16fbfe07651c8da5c6af112fe6f191dc737a",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_272809a4157a07": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbc997881ffe1n2ktVDvOpG8U4",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

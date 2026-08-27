@@ -1,0 +1,24 @@
+frontend/src/lib/i18n/dictionaries.ts
+  s_be390df28e12bc::t_036d7fb9376fd4 360-362
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "1c929094ec3e64071198759097773765db736ff1",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_be390df28e12bc": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbc79f0beffe6ZKrCg0Usn86t3",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+frontend/src/lib/data/library.ts
+  s_1424186a2935e0::t_ed1427cf2df8fa 15-19
+frontend/src/lib/data/schemes.ts
+  s_1424186a2935e0::t_685dc379779f52 29-35,40-46,51-57,62-68,73-79,84-90
+frontend/src/lib/data/faq.ts
+  s_1424186a2935e0::t_65eb94fe94816d 17,19,24,26,31,33,38,40,45,47,52,54,59,61,66,68,73,75,80,82,87,89
+frontend/src/lib/data/legal.ts
+  s_1424186a2935e0::t_e7446c5bd1804c 21-22,26,38-43,63-65,69-70,74,86-91,115-117,133-136,150,154-155,159,170-174,191-193,197-198,202,213-217,234-236,240-241,245,256-260,277-279
+frontend/src/lib/data/services.ts
+  s_1424186a2935e0::t_ba2f94d7388eae 20,22,24-27,31,33,35-38,42,44,46-49,53,55,57-60,64,66,68-71,75,77,79-82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "1096f4cb44de7b16ab3c5ff9cca90e18ef417e99",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_1424186a2935e0": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbc26c0f6ffeGfuwy78RY3o1oB",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

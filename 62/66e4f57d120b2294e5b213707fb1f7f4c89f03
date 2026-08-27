@@ -1,0 +1,24 @@
+frontend/docs/superpowers/specs/2026-08-27-full-multilingual-12-locales-design.md
+  s_a30b70f3601eac::t_b853e9c916e0b6 1-192
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "6266e4f57d120b2294e5b213707fb1f7f4c89f03",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_a30b70f3601eac": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbcc52a71ffeg18ASW86EbPgUy",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

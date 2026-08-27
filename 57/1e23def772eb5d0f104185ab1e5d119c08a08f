@@ -1,0 +1,34 @@
+frontend/src/components/ui/Button.tsx
+  s_3eadd6f3865193::t_b378d733d53c87 23
+  s_185efc110b3583::t_f6aa989984f2f7 1-10,12,14,17-22,24-28
+  s_3eadd6f3865193::t_41649997c59d70 11,13,15-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "571e23def772eb5d0f104185ab1e5d119c08a08f",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_185efc110b3583": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd4d9181ffeXJZzLFCnDwfcJg",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_3eadd6f3865193": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd0654acffeRun77f08Goeq9C",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

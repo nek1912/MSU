@@ -1,9 +1,12 @@
+import logging
 from pathlib import Path
 
 from ingestion.chunker import chunk_markdown
 from ingestion.loader import parse_chunk_file
 from ingestion.manifest import load_mvp_manifest, validate_manifest_fields, validate_manifest_files
 from ingestion.pdf_extractor import extract_pdf_to_markdown
+
+logger = logging.getLogger(__name__)
 
 SEEDS_DIR = Path(__file__).parent.parent / "corpus" / "seeds"
 
@@ -100,7 +103,7 @@ def manifest_to_supabase(manifest_path: Path, embed_texts, supabase, dry_run: bo
             pieces = chunk_markdown(markdown_content)
             
             if dry_run:
-                print(f"DRY RUN: Would process {source['source_id']}: {len(pieces)} chunks")
+                logger.info("DRY RUN: Would process %s: %d chunks", source["source_id"], len(pieces))
                 succeeded.append(source["source_id"])
                 continue
             
@@ -108,7 +111,7 @@ def manifest_to_supabase(manifest_path: Path, embed_texts, supabase, dry_run: bo
             vectors = embed_texts(pieces)
             
             if preflight:
-                print(f"PREFLIGHT: Would process {source['source_id']}: {len(pieces)} chunks, {len(vectors)} embeddings")
+                logger.info("PREFLIGHT: Would process %s: %d chunks, %d embeddings", source["source_id"], len(pieces), len(vectors))
                 succeeded.append(source["source_id"])
                 continue
             
@@ -141,16 +144,17 @@ def manifest_to_supabase(manifest_path: Path, embed_texts, supabase, dry_run: bo
                 }).execute()
             
             succeeded.append(source["source_id"])
-            print(f"Successfully ingested: {source['source_id']}")
+            logger.info("Successfully ingested: %s", source["source_id"])
             
-        except (FileNotFoundError, ValueError, KeyError) as e:
+        except Exception as e:
+            error_msg = f"Failed to process {source['source_id']}: {type(e).__name__}: {e}"
+            logger.error(error_msg)
             failed.append({"source_id": source["source_id"], "error": str(e)})
-            print(f"ERROR processing {source['source_id']}: {e}")
             continue
-    
-    print(f"\nSummary: {len(succeeded)} succeeded, {len(failed)} failed")
+
+    logger.info("Ingestion summary: %d succeeded, %d failed", len(succeeded), len(failed))
     if failed:
-        print(f"Failed sources: {[f['source_id'] for f in failed]}")
+        logger.warning("Failed sources: %s", [f["source_id"] for f in failed])
     
     return {"succeeded": succeeded, "failed": failed}
 

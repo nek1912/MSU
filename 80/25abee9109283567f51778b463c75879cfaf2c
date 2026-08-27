@@ -1,0 +1,33 @@
+frontend/src/components/ui/Card.tsx
+  s_40febea0db80d5::t_676d2653033bfe 14
+  s_185efc110b3583::t_acd39fad007040 1-13,15-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "8025abee9109283567f51778b463c75879cfaf2c",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_185efc110b3583": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd4d9181ffeXJZzLFCnDwfcJg",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_40febea0db80d5": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd01999fffey2ghS4d9g060Xt",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

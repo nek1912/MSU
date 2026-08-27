@@ -34,10 +34,9 @@ def seeds_to_supabase(paths: list[Path], embed_texts, supabase) -> int:
 
 
 if __name__ == "__main__":
-    from supabase import create_client
-
     from app.config import get_settings
     from app.providers.embeddings import get_embedding_provider
+    from supabase import create_client
 
     s = get_settings()
     paths = sorted(SEEDS_DIR.glob("*.md"))

@@ -1,0 +1,27 @@
+frontend/docs/superpowers/plans/2026-08-27-multilingual-coop-legal-services-faq-routes.md
+  s_a30b70f3601eac::t_9a9165f983af00 1-1218,1220-1250,1252-1358
+  s_a30b70f3601eac::t_3dd6d0b8ead779 1251
+  s_a30b70f3601eac::t_1b9b569bc8608c 1359
+  s_a30b70f3601eac::t_704542ea491595 1219
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "7af38aed7ba97e8160c88d0e70a964386e1c3a4a",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_a30b70f3601eac": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbcc52a71ffeg18ASW86EbPgUy",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

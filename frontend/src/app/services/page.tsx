@@ -15,7 +15,7 @@ type Filter = (typeof categories)[number];
 
 export default function ServicesPage() {
   const { t } = useI18n();
-  const all = useMemo(() => getServices(), []);
+  const all = useMemo(() => getServices("en"), []);
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Filter>(CATEGORY_ALL);
 

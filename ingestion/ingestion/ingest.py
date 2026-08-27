@@ -6,6 +6,14 @@ from ingestion.loader import parse_chunk_file
 SEEDS_DIR = Path(__file__).parent.parent / "corpus" / "seeds"
 
 
+def normalize_state(state: str | None) -> str | None:
+    """Normalize state value to lowercase trimmed string or None."""
+    if not state or not isinstance(state, str):
+        return None
+    normalized = state.strip().lower()
+    return normalized if normalized else None
+
+
 def seeds_to_supabase(paths: list[Path], embed_texts, supabase) -> int:
     total = 0
     for path in paths:
@@ -14,7 +22,7 @@ def seeds_to_supabase(paths: list[Path], embed_texts, supabase) -> int:
         doc = supabase.table("documents").insert({
             "source_id": rec["source_id"], "title": rec["title"],
             "organization": rec["organization"], "domain": rec["domain"],
-            "jurisdiction": rec["jurisdiction"], "state": rec.get("state"),
+            "jurisdiction": rec["jurisdiction"], "state": normalize_state(rec.get("state")),
             "document_type": "seed", "source_url": rec["url"],
             "effective_date": rec.get("effective_date"),
             "document_date": rec.get("document_date"),

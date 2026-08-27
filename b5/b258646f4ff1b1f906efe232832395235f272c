@@ -1,0 +1,24 @@
+frontend/src/app/faq/page.tsx
+  s_e226b5440870f4::t_bbd1180689a750 1-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "b5b258646f4ff1b1f906efe232832395235f272c",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_e226b5440870f4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbca5cc2dffeisjPQ9REAI12nR",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

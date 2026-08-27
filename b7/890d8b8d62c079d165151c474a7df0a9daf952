@@ -1,0 +1,24 @@
+frontend/src/lib/translator.test.ts
+  s_a30b70f3601eac::t_4014beb1d511d6 1-38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "b7890d8b8d62c079d165151c474a7df0a9daf952",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_a30b70f3601eac": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbcc52a71ffeg18ASW86EbPgUy",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

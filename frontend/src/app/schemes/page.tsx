@@ -15,7 +15,7 @@ type Filter = (typeof categories)[number];
 
 export default function SchemesPage() {
   const { t } = useI18n();
-  const all = useMemo(() => getSchemes(), []);
+  const all = useMemo(() => getSchemes("en"), []);
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Filter>(CATEGORY_ALL);
 
@@ -31,7 +31,7 @@ export default function SchemesPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-[var(--space-4)] py-[var(--space-8)]">
-      <h1 className="text-[var(--text-2xl)] font-[var(--font-bold)] text-[var(--text-primary)]">{t("schemes.title")}</h1>
+      <h1 className="font-[var(--font-display)] text-[var(--text-3xl)] font-[var(--font-medium)] tracking-tight text-[var(--text-primary)]">{t("schemes.title")}</h1>
       <p className="mt-[var(--space-1)] text-[var(--text-secondary)]">{t("schemes.subtitle")}</p>
       <div className="mt-[var(--space-4)] flex flex-col gap-[var(--space-3)] sm:flex-row sm:items-center">
         <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("schemes.searchPlaceholder")} className="max-w-sm" />

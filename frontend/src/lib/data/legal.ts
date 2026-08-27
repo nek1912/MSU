@@ -18,11 +18,12 @@ export interface LegalDoc {
 export const legalDocs: LegalDoc[] = [
   {
     slug: "mscs-act-2002",
-    title: { en: "Multi-State Cooperative Societies Act, 2002", pa: "ਮਲਟੀ-ਸਟੇਟ ਸਹਿਕਾਰੀ ਸੋਸਾਇਟੀਆਂ ਐਕਟ, 2002", te: "మల్టీ-స్టేట్ సహకార సొసైటీల చట్టం, 2002", kn: "ಮಲ್ಟಿ-ರಾಜ್ಯ ಸಹಕಾರ ಸೊಸೈಟಿಗಳ ಕಾಯಿದೆ, 2002" },
-    badge: { en: "MSCS Act 2002", pa: "MSCS ਐਕਟ 2002", te: "MSCS చట్టం 2002", kn: "MSCS ಕಾಯಿದೆ 2002" },
+    title: { en: "Multi-State Cooperative Societies Act, 2002", gu: "મલ્ટી-રાજ્ય સહકારી સોસાયટી અધિનિયમ, 2002", pa: "ਮਲਟੀ-ਸਟੇਟ ਸਹਿਕਾਰੀ ਸੋਸਾਇਟੀਆਂ ਐਕਟ, 2002", te: "మల్టీ-స్టేట్ సహకార సొసైటీల చట్టం, 2002", kn: "ಮಲ್ಟಿ-ರಾಜ್ಯ ಸಹಕಾರ ಸೊಸೈಟಿಗಳ ಕಾಯಿದೆ, 2002" },
+    badge: { en: "MSCS Act 2002", gu: "MSCS અધિનિયમ 2002", pa: "MSCS ਐਕਟ 2002", te: "MSCS చట్టం 2002", kn: "MSCS ಕಾಯಿದೆ 2002" },
     category: "act",
     overview: {
       en: "The Multi-State Cooperative Societies Act, 2002 governs cooperative societies that operate across more than one state in India. It sets out the legal framework for their registration, management, elections, and governance.",
+      gu: "મલ્ટી-રાજ્ય સહકારી સોસાયટી અધિનિયમ, 2002 ભારતમાં એક કરતાં વધુ રાજ્યોમાં કાર્ય કરતી સહકારી સોસાયટીઓને નિયંત્રિત કરે છે. તે તેમની નોંધણી, સંચાલન, ચૂંટણીઓ અને શાસન માટે કાનૂની માળખો નિર્ધારિત કરે છે.",
       pa: "ਮਲਟੀ-ਸਟੇਟ ਸਹਿਕਾਰੀ ਸੋਸਾਇਟੀਆਂ ਐਕਟ, 2002 ਭਾਰਤ ਵਿੱਚ ਇੱਕ ਤੋਂ ਵੱਧ ਰਾਜਾਂ ਵਿੱਚ ਕੰਮ ਕਰਨ ਵਾਲੀਆਂ ਸਹਿਕਾਰੀ ਸੋਸਾਇਟੀਆਂ ਨੂੰ ਨਿਯੰਤ੍ਰਿਤ ਕਰਦਾ ਹੈ। ਇਹ ਉਨ੍ਹਾਂ ਦੀ ਰਜਿਸਟ੍ਰੇਸ਼ਨ, ਪ੍ਰਬੰਧਨ, ਚੋਣਾਂ ਅਤੇ ਪ੍ਰਸ਼ਾਸਨ ਲਈ ਕਾਨੂੰਨੀ ਢਾਂਚਾ ਨਿਰਧਾਰਤ ਕਰਦਾ ਹੈ।",
       te: "మల్టీ-స్టేట్ సహకార సొసైటీల చట్టం, 2002 భారతదేశంలో ఒకటి కంటే ఎక్కువ రాష్ట్రాల్లో పనిచేసే సహకార సొసైటీలను నియంత్రిస్తుంది. ఇది వాటి నమోదు, నిర్వహణ, ఎన్నికలు మరియు పాలన కోసం చట్టపరమైన ఫ్రేమ్‌వర్క్‌ను నిర్దేశిస్తుంది.",
       kn: "ಮಲ್ಟಿ-ರಾಜ್ಯ ಸಹಕಾರ ಸೊಸೈಟಿಗಳ ಕಾಯಿದೆ, 2002 ಭಾರತದಲ್ಲಿ ಒಂದಕ್ಕಿಂತ ಹೆಚ್ಚು ರಾಜ್ಯಗಳಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುವ ಸಹಕಾರ ಸೊಸೈಟಿಗಳನ್ನು ನಿಯಂತ್ರಿಸುತ್ತದೆ. ಇದು ಅವುಗಳ ನೋಂದಣಿ, ನಿರ್ವಹಣೆ, ಚುನಾವಣೆಗಳು ಮತ್ತು ಆಡಳಿತಕ್ಕಾಗಿ ಕಾನೂನು ಚೌಕಟ್ಟನ್ನು ನಿಗದಿಪಡಿಸುತ್ತದೆ.",
@@ -33,6 +34,12 @@ export const legalDocs: LegalDoc[] = [
         "Membership rights and representation across member states.",
         "Election of the board of directors and tenure of the board.",
         "Reserve fund, audits, and annual returns under the Act.",
+      ],
+      gu: [
+        "કેન્દ્રીય નોંધણિયા સાથે મલ્ટી-રાજ્ય સહકારી સોસાયટીઓની નોંધણી.",
+        "સભ્ય રાજ્યોમાં સભ્યપદ હક્કો અને પ્રતિનિધિત્વ.",
+        "સંચાલક મંડળની ચૂંટણી અને મંડળનો કાર્યકાળ.",
+        "અધિનિયમ હેઠળ અનામત ભંડોળ, ઑડિટ અને વાર્ષિક રિટર્ન.",
       ],
       pa: [
         "ਕੇਂਦਰੀ ਰਜਿਸਟਰਾਰ ਨਾਲ ਮਲਟੀ-ਸਟੇਟ ਸਹਿਕਾਰੀ ਸੋਸਾਇਟੀਆਂ ਦੀ ਰਜਿਸਟ੍ਰੇਸ਼ਨ।",
@@ -53,17 +60,18 @@ export const legalDocs: LegalDoc[] = [
         "ಕಾಯಿದೆಯ ಅಡಿ ಮೀಸಲು ನಿಧಿ, ಲೆಕ್ಕಪರಿಶೋಧನೆಗಳು ಮತ್ತು ವಾರ್ಷಿಕ ವರದಿಗಳು.",
       ],
     },
-    applicability: { en: ["Cooperative societies operating in two or more states."], pa: ["ਦੋ ਜਾਂ ਵੱਧ ਰਾਜਾਂ ਵਿੱਚ ਕੰਮ ਕਰਨ ਵਾਲੀਆਂ ਸਹਿਕਾਰੀ ਸੋਸਾਇਟੀਆਂ।"], te: ["రెండు లేదా అంతకంటే ఎక్కువ రాష్ట్రాల్లో పనిచేసే సహకార సొసైటీలు."], kn: ["ಎರಡು ಅಥವಾ ಹೆಚ್ಚು ರಾಜ್ಯಗಳಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುವ ಸಹಕಾರ ಸೊಸೈಟಿಗಳು."] },
-    byLaws: { en: ["Each society adopts its own by-laws consistent with the Act and its rules."], pa: ["ਹਰ ਸੋਸਾਇਟੀ ਐਕਟ ਅਤੇ ਉਸਦੇ ਨਿਯਮਾਂ ਦੇ ਅਨੁਸਾਰ ਆਪਣੇ ਉਪ-ਨਿਯਮ ਅਪਣਾਉਂਦੀ ਹੈ।"], te: ["ప్రతి సొసైటీ చట్టం మరియు దాని నిబంధనలకు అనుగుణంగా తన స్వంత ఉప-నియమాలను అవలంబిస్తుంది."], kn: ["ಪ್ರತಿ ಸೊಸೈಟಿ ಕಾಯಿದೆ ಮತ್ತು ಅದರ ನಿಯಮಗಳಿಗೆ ಅನುಗುಣವಾಗಿ ತನ್ನದೇ ಆದ ಉಪ-ನಿಯಮಗಳನ್ನು ಅಳವಡಿಸುತ್ತದೆ."] },
-    source: { label: { en: "Ministry of Cooperation", pa: "ਸਹਿਕਾਰਿਤਾ ਮੰਤਰਾਲਾ", te: "సహకార మంత్రిత్వ శాఖ", kn: "ಸಹಕಾರ ಸಚಿವಾಲಯ" }, url: "https://www.moc.gov.in" },
+    applicability: { en: ["Cooperative societies operating in two or more states."], gu: ["બે અથવા વધુ રાજ્યોમાં કાર્ય કરતી સહકારી સોસાયટીઓ."], pa: ["ਦੋ ਜਾਂ ਵੱਧ ਰਾਜਾਂ ਵਿੱਚ ਕੰਮ ਕਰਨ ਵਾਲੀਆਂ ਸਹਿਕਾਰੀ ਸੋਸਾਇਟੀਆਂ।"], te: ["రెండు లేదా అంతకంటే ఎక్కువ రాష్ట్రాల్లో పనిచేసే సహకార సొసైటీలు."], kn: ["ಎರಡು ಅಥವಾ ಹೆಚ್ಚು ರಾಜ್ಯಗಳಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುವ ಸಹಕಾರ ಸೊಸೈಟಿಗಳು."] },
+    byLaws: { en: ["Each society adopts its own by-laws consistent with the Act and its rules."], gu: ["દરેક સોસાયટી અધિનિયમ અને તેના નિયમો સાથે સુસંગત પોતાના ઉપ-નિયમો અપનાવે છે."], pa: ["ਹਰ ਸੋਸਾਇਟੀ ਐਕਟ ਅਤੇ ਉਸਦੇ ਨਿਯਮਾਂ ਦੇ ਅਨੁਸਾਰ ਆਪਣੇ ਉਪ-ਨਿਯਮ ਅਪਣਾਉਂਦੀ ਹੈ।"], te: ["ప్రతి సొసైటీ చట్టం మరియు దాని నిబంధనలకు అనుగుణంగా తన స్వంత ఉప-నియమాలను అవలంబిస్తుంది."], kn: ["ಪ್ರತಿ ಸೊಸೈಟಿ ಕಾಯಿದೆ ಮತ್ತು ಅದರ ನಿಯಮಗಳಿಗೆ ಅನುಗುಣವಾಗಿ ತನ್ನದೇ ಆದ ಉಪ-ನಿಯಮಗಳನ್ನು ಅಳವಡಿಸುತ್ತದೆ."] },
+    source: { label: { en: "Ministry of Cooperation", gu: "સહકાર મંત્રાલય", pa: "ਸਹਿਕਾਰਿਤਾ ਮੰਤਰਾਲਾ", te: "సహకార మంత్రిత్వ శాఖ", kn: "ಸಹಕಾರ ಸಚಿವಾಲಯ" }, url: "https://www.moc.gov.in" },
   },
   {
     slug: "model-pacs-bye-laws",
-    title: { en: "Model Bye-laws of Primary Agricultural Credit Societies", pa: "ਪ੍ਰਾਇਮਰੀ ਐਗਰੀਕਲਚਰਲ ਕ੍ਰੈਡਿਟ ਸੋਸਾਇਟੀਆਂ ਦੇ ਨਮੂਨਾ ਉਪ-ਨਿਯਮ", te: "ప్రాథమిక వ్యవసాయ క్రెడిట్ సొసైటీల నమూనా ఉప-నియమాలు", kn: "ಪ್ರಾಥಮಿಕ ಕೃಷಿ ಕ್ರೆಡಿಟ್ ಸೊಸೈಟಿಗಳ ಮಾದರಿ ಉಪ-ನಿಯಮಗಳು" },
-    badge: { en: "Model PACS Bye-laws", pa: "ਨਮੂਨਾ PACS ਉਪ-ਨਿਯਮ", te: "నమూనా PACS ఉప-నియమాలు", kn: "ಮಾದರಿ PACS ಉಪ-ನಿಯಮಗಳು" },
+    title: { en: "Model Bye-laws of Primary Agricultural Credit Societies", gu: "પ્રાથમિક કૃષિ ક્રેડિટ સોસાયટીઓના મોડેલ ઉપ-નિયમો", pa: "ਪ੍ਰਾਇਮਰੀ ਐਗਰੀਕਲਚਰਲ ਕ੍ਰੈਡਿਟ ਸੋਸਾਇਟੀਆਂ ਦੇ ਨਮੂਨਾ ਉਪ-ਨਿਯਮ", te: "ప్రాథమిక వ్యవసాయ క్రెడిట్ సొసైటీల నమూనా ఉప-నియమాలు", kn: "ಪ್ರಾಥಮಿಕ ಕೃಷಿ ಕ್ರೆಡಿಟ್ ಸೊಸೈಟಿಗಳ ಮಾದರಿ ಉಪ-ನಿಯಮಗಳು" },
+    badge: { en: "Model PACS Bye-laws", gu: "મોડેલ PACS ઉપ-નિયમો", pa: "ਨਮੂਨਾ PACS ਉਪ-ਨਿਯਮ", te: "నమూనా PACS ఉప-నియమాలు", kn: "ಮಾದರಿ PACS ಉಪ-నಿಯಮಗಳು" },
     category: "bye-laws",
     overview: {
       en: "The model bye-laws prescribe the standard constitution and operational rules for Primary Agricultural Credit Societies (PACS) — the village-level cooperatives that provide credit and farm services.",
+      gu: "મોડેલ ઉપ-નિયમો પ્રાથમિક કૃષિ ક્રેડિટ સોસાયટીઓ (PACS) માટે માનક બંધારણ અને ઓપરેશનલ નિયમો નિર્ધારિત કરે છે — એ ગામ-સ્તરની સહકારી સંસ્થાઓ જે ધિરાણ અને કૃષિ સેવાઓ પૂરી પાડે છે.",
       pa: "ਨਮੂਨਾ ਉਪ-ਨਿਯਮ ਪ੍ਰਾਇਮਰੀ ਐਗਰੀਕਲਚਰਲ ਕ੍ਰੈਡਿਟ ਸੋਸਾਇਟੀਆਂ (PACS) — ਜੋ ਕਿਰਜ਼ਾ ਅਤੇ ਖੇਤੀ ਸੇਵਾਵਾਂ ਪ੍ਰਦਾਨ ਕਰਨ ਵਾਲੀਆਂ ਪਿੰਡ-ਪੱਧਰੀ ਸਹਿਕਾਰੀਆਂ ਹਨ — ਲਈ ਮਿਆਰੀ ਸੰਰਚਨਾ ਅਤੇ ਕਾਰਜਸ਼ੀਲ ਨਿਯਮ ਨਿਰਧਾਰਤ ਕਰਦੇ ਹਨ।",
       te: "నమూనా ఉప-నియమాలు ప్రాథమిక వ్యవసాయ క్రెడిట్ సొసైటీల (PACS) ప్రామాణిక రాజ్యాంగం మరియు కార్యాచరణ నిబంధనలను నిర్దేశిస్తాయి — ఇవి అప్పు మరియు వ్యవసాయ సేవలు అందించే గ్రామ స్థాయి సహకార సంస్థలు.",
       kn: "ಮಾದರಿ ಉಪ-ನಿಯಮಗಳು ಪ್ರಾಥಮಿಕ ಕೃಷಿ ಕ್ರೆಡಿಟ್ ಸೊಸೈಟಿಗಳ (PACS) ಪ್ರಮಾಣಿತ ಸಂವಿಧಾನ ಮತ್ತು ಕಾರ್ಯಾಚರಣೆ ನಿಯಮಗಳನ್ನು ನಿಗದಿಪಡಿಸುತ್ತವೆ — ಇವು ಸಾಲ ಮತ್ತು ಕೃಷಿ ಸೇವೆಗಳನ್ನು ಒದಗಿಸುವ ಗ್ರಾಮ ಮಟ್ಟದ ಸಹಕಾರ ಸಂಸ್ಥೆಗಳು.",
@@ -74,6 +82,12 @@ export const legalDocs: LegalDoc[] = [
         "Powers and duties of the board of directors.",
         "Conduct of general body meetings and voting rights.",
         "Appointment of the secretary and staff.",
+      ],
+      gu: [
+        "સભ્યપદ, શેર મૂડી અને પ્રવેશ ફી માટે લાયકાત અને પ્રક્રિયા.",
+        "સંચાલક મંડળની સત્તાઓ અને ફરજો.",
+        "સામાન્ય સભા બેઠકોનું આયોજન અને મતદાન હક્કો.",
+        "મંત્રી (સેક્રેટરી) અને સ્ટાફની નિમણૂક.",
       ],
       pa: [
         "ਮੈਂਬਰਸ਼ਿਪ, ਸ਼ੇਅਰ ਪੂੰਜੀ ਅਤੇ ਦਾਖਲਾ ਫੀਸਾਂ ਲਈ ਯੋਗਤਾ ਅਤੇ ਵਿਧੀ।",
@@ -98,6 +112,9 @@ export const legalDocs: LegalDoc[] = [
       en: [
         "New and existing PACS that adopt the model bye-laws or a state-approved variant.",
       ],
+      gu: [
+        "મોડેલ ઉપ-નિયમો અથવા રાજ્ય-મંજૂર વિકલ્પ અપનાવતી નવી અને હાલની PACS.",
+      ],
       pa: [
         "ਨਮੂਨਾ ਉਪ-ਨਿਯਮ ਜਾਂ ਰਾਜ-ਪ੍ਰਵਾਨਿਤ ਰੂਪ ਅਪਣਾਉਣ ਵਾਲੀਆਂ ਨਵੀਆਂ ਅਤੇ ਮੌਜੂਦਾ PACS।",
       ],
@@ -113,6 +130,10 @@ export const legalDocs: LegalDoc[] = [
         "Borrowing limits and lending rules for members.",
         "Formation of sub-committees for loans, audit and grievances.",
       ],
+      gu: [
+        "સભ્યો માટે ધિરાણ સીમાઓ અને ધિરાણ નિયમો.",
+        "ધિરાણ, ઑડિટ અને ફરિયાદો માટે ઉપ-સમિતિઓની રચના.",
+      ],
       pa: [
         "ਮੈਂਬਰਾਂ ਲਈ ਕਰਜ਼ਾ ਲੈਣ ਦੀਆਂ ਸੀਮਾਵਾਂ ਅਤੇ ਕਰਜ਼ਾ ਦੇਣ ਦੇ ਨਿਯਮ।",
         "ਕਰਜ਼ੇ, ਆਡਿਟ ਅਤੇ ਸ਼ਿਕਾਇਤਾਂ ਲਈ ਉਪ-ਕਮੇਟੀਆਂ ਦਾ ਗਠਨ।",
@@ -126,15 +147,16 @@ export const legalDocs: LegalDoc[] = [
         "ಸಾಲಗಳು, ಲೆಕ್ಕಪರಿಶೋಧನೆ ಮತ್ತು ದೂರುಗಳಿಗಾಗಿ ಉಪ-ಸಮಿತಿಗಳ ರಚನೆ.",
       ],
     },
-    source: { label: { en: "Ministry of Cooperation", pa: "ਸਹਿਕਾਰਿਤਾ ਮੰਤਰਾਲਾ", te: "సహకార మంత్రిత్వ శాఖ", kn: "ಸಹಕಾರ ಸಚಿವಾಲಯ" }, url: "https://www.moc.gov.in" },
+    source: { label: { en: "Ministry of Cooperation", gu: "સહકાર મંત્રાલય", pa: "ਸਹਿਕਾਰਿਤਾ ਮੰਤਰਾਲਾ", te: "సహకార మంత్రిత్వ శాఖ", kn: "ಸಹಕಾರ ಸಚಿವಾಲಯ" }, url: "https://www.moc.gov.in" },
   },
   {
     slug: "board-election-rules",
-    title: { en: "Election of Board of Directors — MSCS Rules, 2011", pa: "ਨਿਰਦੇਸ਼ਕ ਬੋਰਡ ਦੀ ਚੋਣ — MSCS ਨਿਯਮ, 2011", te: "డైరెక్టర్ల బోర్డు ఎన్నిక — MSCS నిబంధనలు, 2011", kn: "ನಿರ್ದೇಶಕರ ಮಂಡಳಿಯ ಚುನಾವಣೆ — MSCS ನಿಯಮಗಳು, 2011" },
-    badge: { en: "Board Elections", pa: "ਬੋਰਡ ਚੋਣਾਂ", te: "బోర్డు ఎన్నికలు", kn: "ಮಂಡಳಿ ಚುನಾವಣೆಗಳು" },
+    title: { en: "Election of Board of Directors — MSCS Rules, 2011", gu: "સંચાલક મંડળની ચૂંટણી — MSCS નિયમો, 2011", pa: "ਨਿਰਦੇਸ਼ਕ ਬੋਰਡ ਦੀ ਚੋਣ — MSCS ਨਿਯਮ, 2011", te: "డైరెక్టర్ల బోర్డు ఎన్నిక — MSCS నిబంధనలు, 2011", kn: "ನಿರ್ದೇಶಕರ ಮಂಡಳಿಯ ಚುನಾವಣೆ — MSCS ನಿಯಮಗಳು, 2011" },
+    badge: { en: "Board Elections", gu: "મંડળ ચૂંટણીઓ", pa: "ਬੋਰਡ ਚੋਣਾਂ", te: "బోర్డు ఎన్నికలు", kn: "ಮಂಡಳಿ ಚುನಾವಣೆಗಳು" },
     category: "provisions",
     overview: {
       en: "The MSCS Rules, 2011 detail how the board of a multi-state cooperative society is elected, including the role of the election authority, the electoral college and the election timetable.",
+      gu: "MSCS નિયમો, 2011 વિગતવાર દર્શાવે છે કે મલ્ટી-રાજ્ય સહકારી સોસાયટીનું મંડળ કેવી રીતે ચૂંટાય છે, જેમાં ચૂંટણી પ્રાધિકરણની ભૂમિકા, ચૂંટણી સમિતિ અને ચૂંટણી સમયપત્રક સામેલ છે.",
       pa: "MSCS ਨਿਯਮ, 2011 ਵਿੱਚ ਵਿਸਥਾਰ ਵਿੱਚ ਦੱਸਿਆ ਗਿਆ ਹੈ ਕਿ ਮਲਟੀ-ਸਟੇਟ ਸਹਿਕਾਰੀ ਸੋਸਾਇਟੀ ਦਾ ਬੋਰਡ ਕਿਵੇਂ ਚੁਣਿਆ ਜਾਂਦਾ ਹੈ, ਜਿਸ ਵਿੱਚ ਚੋਣ ਪ੍ਰਾਧਿਕਰਣ ਦੀ ਭੂਮਿਕਾ, ਚੋਣਕਾਰ ਮੰਡਲ ਅਤੇ ਚੋਣ ਸਮਾਂ-ਸਾਰਣੀ ਸ਼ਾਮਲ ਹੈ।",
       te: "MSCS నిబంధనలు, 2011 మల్టీ-స్టేట్ సహకార సొసైటీ బోర్డు ఎలా ఎన్నుకోబడుతుందో వివరంగా నిర్దేశిస్తాయి, ఇందులో ఎన్నికల అథారిటీ పాత్ర, ఎలక్టోరల్ కాలేజ్ మరియు ఎన్నికల సమయపట్టిక ఉన్నాయి.",
       kn: "MSCS ನಿಯಮಗಳು, 2011 ಮಲ್ಟಿ-ರಾಜ್ಯ ಸಹಕಾರ ಸೊಸೈಟಿಯ ಮಂಡಳಿಯನ್ನು ಹೇಗೆ ಆಯ್ಕೆ ಮಾಡಲಾಗುತ್ತದೆ ಎಂಬುದನ್ನು ವಿವರವಾಗಿ ನಿಗದಿಪಡಿಸುತ್ತವೆ, ಇದರಲ್ಲಿ ಚುನಾವಣಾ ಪ್ರಾಧಿಕಾರದ ಪಾತ್ರ, ಚುನಾವಣಾ ಸಮಿತಿ ಮತ್ತು ಚುನಾವಣಾ ಸಮಯಪಟ್ಟಿ ಸೇರಿವೆ.",
@@ -144,6 +166,11 @@ export const legalDocs: LegalDoc[] = [
         "Appointment of an election authority to conduct elections.",
         "Preparation and certification of the electoral college.",
         "Dates for the e-election/ballot and counting of votes.",
+      ],
+      gu: [
+        "ચૂંટણી યોજવા માટે ચૂંટણી પ્રાધિકરણની નિમણૂક.",
+        "ચૂંટણી સમિતિની તૈયારી અને પ્રમાણીકરણ.",
+        "ઇ-ચૂંટણી / મતપત્ર અને મત ગણતરીની તારીખો.",
       ],
       pa: [
         "ਚੋਣਾਂ ਕਰਨ ਲਈ ਚੋਣ ਪ੍ਰਾਧਿਕਰਣ ਦੀ ਨਿਯੁਕਤੀ।",
@@ -161,17 +188,18 @@ export const legalDocs: LegalDoc[] = [
         "ಇ-ಚುನಾವಣೆ / ಮತಪತ್ರ ಮತ್ತು ಮತ ಎಣಿಕೆಯ ದಿನಾಂಕಗಳು.",
       ],
     },
-    applicability: { en: ["Multi-state cooperative societies governed by MSCS Rules, 2011."], pa: ["MSCS ਨਿਯਮ, 2011 ਦੁਆਰਾ ਨਿਯੰਤ੍ਰਿਤ ਮਲਟੀ-ਸਟੇਟ ਸਹਿਕਾਰੀ ਸੋਸਾਇਟੀਆਂ।"], te: ["MSCS నిబంధనలు, 2011 ద్వారా నియంత్రించబడే మల్టీ-స్టేట్ సహకార సొసైటీలు."], kn: ["MSCS ನಿಯಮಗಳು, 2011 ರಿಂದ ನಿಯಂತ್ರಿಸಲ್ಪಡುವ ಮಲ್ಟಿ-ರಾಜ್ಯ ಸಹಕಾರ ಸೊಸೈಟಿಗಳು."] },
-    byLaws: { en: ["Society bye-laws set the size and composition of the board."], pa: ["ਸੋਸਾਇਟੀ ਦੇ ਉਪ-ਨਿਯਮ ਬੋਰਡ ਦਾ ਆਕਾਰ ਅਤੇ ਗਠਨ ਨਿਰਧਾਰਤ ਕਰਦੇ ਹਨ।"], te: ["సొసైటీ ఉప-నియమాలు బోర్డు పరిమాణం మరియు కూర్పును నిర్దేశిస్తాయి."], kn: ["ಸೊಸೈಟಿ ಉಪ-ನಿಯಮಗಳು ಮಂಡಳಿಯ ಗಾತ್ರ ಮತ್ತು ಸಂಯೋಜನೆಯನ್ನು ನಿಗದಿಪಡಿಸುತ್ತವೆ."] },
-    source: { label: { en: "Ministry of Cooperation", pa: "ਸਹਿਕਾਰਿਤਾ ਮੰਤਰਾਲਾ", te: "సహకార మంత్రిత్వ శాఖ", kn: "ಸಹಕಾರ ಸಚಿವಾಲಯ" }, url: "https://www.moc.gov.in" },
+    applicability: { en: ["Multi-state cooperative societies governed by MSCS Rules, 2011."], gu: ["MSCS નિયમો, 2011 દ્વારા નિયંત્રિત મલ્ટી-રાજ્ય સહકારી સોસાયટીઓ."], pa: ["MSCS ਨਿਯਮ, 2011 ਦੁਆਰਾ ਨਿਯੰਤ੍ਰਿਤ ਮਲਟੀ-ਸਟੇਟ ਸਹਿਕਾਰੀ ਸੋਸਾਇਟੀਆਂ।"], te: ["MSCS నిబంధనలు, 2011 ద్వారా నియంత్రించబడే మల్టీ-స్టేట్ సహకార సొసైటీలు."], kn: ["MSCS ನಿಯಮಗಳು, 2011 ರಿಂದ ನಿಯಂತ್ರಿಸಲ್ಪಡುವ ಮಲ್ಟಿ-ರಾಜ್ಯ ಸಹಕಾರ ಸೊಸೈಟಿಗಳು."] },
+    byLaws: { en: ["Society bye-laws set the size and composition of the board."], gu: ["સોસાયટીના ઉપ-નિયમો મંડળનું કદ અને રચના નિર્ધારિત કરે છે."], pa: ["ਸੋਸਾਇਟੀ ਦੇ ਉਪ-ਨਿਯਮ ਬੋਰਡ ਦਾ ਆਕਾਰ ਅਤੇ ਗਠਨ ਨਿਰਧਾਰਤ ਕਰਦੇ ਹਨ।"], te: ["సొసైటీ ఉప-నియమాలు బోర్డు పరిమాణం మరియు కూర్పును నిర్దేశిస్తాయి."], kn: ["ಸೊಸೈಟಿ ಉಪ-ನಿಯಮಗಳು ಮಂಡಳಿಯ ಗಾತ್ರ ಮತ್ತು ಸಂಯೋಜನೆಯನ್ನು ನಿಗದಿಪಡಿಸುತ್ತವೆ."] },
+    source: { label: { en: "Ministry of Cooperation", gu: "સહકાર મંત્રાલય", pa: "ਸਹਿਕਾਰਿਤਾ ਮੰਤਰਾਲਾ", te: "సహకార మంత్రిత్వ శాఖ", kn: "ಸಹಕಾರ ಸಚಿವಾಲಯ" }, url: "https://www.moc.gov.in" },
   },
   {
     slug: "cooperative-disputes",
-    title: { en: "Cooperative Dispute Resolution", pa: "ਸਹਿਕਾਰੀ ਵਿਵਾਦ ਨਿਵਾਰਣ", te: "సహకార వివాద పరిష్కారం", kn: "ಸಹಕಾರ ವಿವಾದ ಪರಿಹಾರ" },
-    badge: { en: "Disputes", pa: "ਵਿਵਾਦ", te: "వివాదాలు", kn: "ವಿವಾದಗಳು" },
+    title: { en: "Cooperative Dispute Resolution", gu: "સહકારી વિવાદ નિવારણ", pa: "ਸਹਿਕਾਰੀ ਵਿਵਾਦ ਨਿਵਾਰਣ", te: "సహకార వివాద పరిష్కారం", kn: "ಸಹಕಾರ ವಿವಾದ ಪರಿಹಾರ" },
+    badge: { en: "Disputes", gu: "વિવાદો", pa: "ਵਿਵਾਦ", te: "వివాదాలు", kn: "ವಿವಾದಗಳು" },
     category: "provisions",
     overview: {
       en: "Disputes between a cooperative and its members — over loans, share capital, or by-law obligations — are resolved through arbitration or a cooperative dispute authority, not regular civil courts.",
+      gu: "સહકારી અને તેના સભ્યો વચ્ચેના વિવાદો — ધિરાણ, શેર મૂડી, અથવા ઉપ-નિયમ જવાબદારીઓ પર — સામાન્ય દીવાણી અદાલતોને બદલે મધ્યસ્થી અથવા સહકારી વિવાદ પ્રાધિકરણ દ્વારા ઉકેલવામાં આવે છે.",
       pa: "ਸਹਿਕਾਰੀ ਅਤੇ ਉਸਦੇ ਮੈਂਬਰਾਂ ਵਿਚਕਾਰ ਵਿਵਾਦ — ਕਰਜ਼ੇ, ਸ਼ੇਅਰ ਪੂੰਜੀ, ਜਾਂ ਉਪ-ਨਿਯਮ ਦੀਆਂ ਜ਼ਿੰਮੇਵਾਰੀਆਂ ਨੂੰ ਲੈ ਕੇ — ਨਿਯਮਤ ਸਿਵਲ ਅਦਾਲਤਾਂ ਦੀ ਬਜਾਏ ਸਾਲਸੀ (ਆਰਬਿਟ੍ਰੇਸ਼ਨ) ਜਾਂ ਸਹਿਕਾਰੀ ਵਿਵਾਦ ਪ੍ਰਾਧਿਕਰਣ ਰਾਹੀਂ ਸੁਲਝਾਏ ਜਾਂਦੇ ਹਨ।",
       te: "సహకార సంస్థ మరియు దాని సభ్యుల మధ్య వివాదాలు — రుణాలు, షేర్ మూలధనం, లేదా ఉప-నియమ బాధ్యతలపై — సాధారణ సివిల్ కోర్టులకు కాకుండా మధ్యవర్తిత్వం లేదా సహకార వివాద అథారిటీ ద్వారా పరిష్కరించబడతాయి.",
       kn: "ಸಹಕಾರ ಸಂಸ್ಥೆ ಮತ್ತು ಅದರ ಸದಸ್ಯರ ನಡುವಿನ ವಿವಾದಗಳು — ಸಾಲಗಳು, ಪಾಲು ಬಂಡವಾಳ, ಅಥವಾ ಉಪ-ನಿಯಮ ಬಾಧ್ಯತೆಗಳ ಮೇಲೆ — ಸಾಮಾನ್ಯ ನಾಗರಿಕ ನ್ಯಾಯಾಲಯಗಳಿಗಿಂತ ಮಧ್ಯಸ್ಥಿಕೆ ಅಥವಾ ಸಹಕಾರ ವಿವಾದ ಪ್ರಾಧಿಕಾರದ ಮೂಲಕ ಪರಿಹರಿಸಲ್ಪಡುತ್ತವೆ.",
@@ -181,6 +209,11 @@ export const legalDocs: LegalDoc[] = [
         "Matters that are deemed disputes under the Act.",
         "Reference of disputes to arbitration or a designated authority.",
         "Enforceability of arbitration awards.",
+      ],
+      gu: [
+        "અધિનિયમ હેઠળ વિવાદો ગણાતી બાબતો.",
+        "વિવાદોને મધ્યસ્થી અથવા નિયુક્ત પ્રાધિકરણને મોકલવા.",
+        "મધ્યસ્થી નિર્ણયોની અમલ યોગ્યતા.",
       ],
       pa: [
         "ਐਕਟ ਤਹਿਤ ਵਿਵਾਦ ਮੰਨੇ ਜਾਣ ਵਾਲੇ ਮਾਮਲੇ।",
@@ -198,17 +231,18 @@ export const legalDocs: LegalDoc[] = [
         "ಮಧ್ಯಸ್ಥಿಕೆ ತೀರ್ಪುಗಳ ಜಾರಿಯ ಸಾಧ್ಯತೆ.",
       ],
     },
-    applicability: { en: ["Members, former members and cooperatives facing internal disputes."], pa: ["ਅੰਦਰੂਨੀ ਵਿਵਾਦਾਂ ਦਾ ਸਾਹਮਣਾ ਕਰ ਰਹੇ ਮੈਂਬਰ, ਸਾਬਕਾ ਮੈਂਬਰ ਅਤੇ ਸਹਿਕਾਰੀਆਂ।"], te: ["అంతర్గత వివాదాలను ఎదుర్కొంటున్న సభ్యులు, మాజీ సభ్యులు మరియు సహకార సంస్థలు."], kn: ["ಆಂತರಿಕ ವಿವಾದಗಳನ್ನು ಎದುರಿಸುತ್ತಿರುವ ಸದಸ್ಯರು, ಮಾಜಿ ಸದಸ್ಯರು ಮತ್ತು ಸಹಕಾರ ಸಂಸ್ಥೆಗಳು."] },
-    byLaws: { en: ["By-laws may prescribe an internal grievance-cum-dispute resolution committee."], pa: ["ਉਪ-ਨਿਯਮ ਅੰਦਰੂਨੀ ਸ਼ਿਕਾਇਤ-ਸਹਿਤ-ਵਿਵਾਦ ਨਿਵਾਰਣ ਕਮੇਟੀ ਨਿਰਧਾਰਤ ਕਰ ਸਕਦੇ ਹਨ।"], te: ["ఉప-నియమాలు అంతర్గత ఫిర్యాదు-సహిత-వివాద పరిష్కార కమిటీని నిర్దేశించవచ్చు."], kn: ["ಉಪ-ನಿಯಮಗಳು ಆಂತರಿಕ ದೂರು-ಮತ್ತು-ವಿವಾದ ಪರಿಹಾರ ಸಮಿತಿಯನ್ನು ನಿಗದಿಪಡಿಸಬಹುದು."] },
-    source: { label: { en: "Ministry of Cooperation", pa: "ਸਹਿਕਾਰਿਤਾ ਮੰਤਰਾਲਾ", te: "సహకార మంత్రిత్వ శాఖ", kn: "ಸಹಕಾರ ಸಚಿವಾಲಯ" }, url: "https://www.moc.gov.in" },
+    applicability: { en: ["Members, former members and cooperatives facing internal disputes."], gu: ["આંતરિક વિવાદોનો સામનો કરતા સભ્યો, ભૂતપૂર્વ સભ્યો અને સહકારી સંસ્થાઓ."], pa: ["ਅੰਦਰੂਨੀ ਵਿਵਾਦਾਂ ਦਾ ਸਾਹਮਣਾ ਕਰ ਰਹੇ ਮੈਂਬਰ, ਸਾਬਕਾ ਮੈਂਬਰ ਅਤੇ ਸਹਿਕਾਰੀਆਂ।"], te: ["అంతర్గత వివాదాలను ఎదుర్కొంటున్న సభ్యులు, మాజీ సభ్యులు మరియు సహకార సంస్థలు."], kn: ["ಆಂತರಿಕ ವಿವಾದಗಳನ್ನು ಎದುರಿಸುತ್ತಿರುವ ಸದಸ್ಯರು, ಮಾಜಿ ಸದಸ್ಯರು ಮತ್ತು ಸಹಕಾರ ಸಂಸ್ಥೆಗಳು."] },
+    byLaws: { en: ["By-laws may prescribe an internal grievance-cum-dispute resolution committee."], gu: ["ઉપ-નિયમો આંતરિક ફરિયાદ-અને-વિવાદ નિવારણ સમિતિ નિર્ધારિત કરી શકે છે."], pa: ["ਉਪ-ਨਿਯਮ ਅੰਦਰੂਨੀ ਸ਼ਿਕਾਇਤ-ਸਹਿਤ-ਵਿਵਾਦ ਨਿਵਾਰਣ ਕਮੇਟੀ ਨਿਰਧਾਰਤ ਕਰ ਸਕਦੇ ਹਨ।"], te: ["ఉప-నియమాలు అంతర్గత ఫిర్యాదు-సహిత-వివాద పరిష్కార కమిటీని నిర్దేశించవచ్చు."], kn: ["ಉಪ-ನಿಯಮಗಳು ಆಂತರಿಕ ದೂರು-ಮತ್ತು-ವಿವಾದ ಪರಿಹಾರ ಸಮಿತಿಯನ್ನು ನಿಗದಿಪಡಿಸಬಹುದು."] },
+    source: { label: { en: "Ministry of Cooperation", gu: "સહકાર મંત્રાલય", pa: "ਸਹਿਕਾਰਿਤਾ ਮੰਤਰਾਲਾ", te: "సహకార మంత్రిత్వ శాఖ", kn: "ಸಹಕಾರ ಸಚಿವಾಲಯ" }, url: "https://www.moc.gov.in" },
   },
   {
     slug: "pac-model-bye-laws-moc",
-    title: { en: "Model Bye-laws for PACS — Ministry of Cooperation", pa: "PACS ਲਈ ਨਮੂਨਾ ਉਪ-ਨਿਯਮ — ਸਹਿਕਾਰਿਤਾ ਮੰਤਰਾਲਾ", te: "PACS కోసం నమూనా ఉప-నియమాలు — సహకార మంత్రిత్వ శాఖ", kn: "PACS ಗಾಗಿ ಮಾದರಿ ಉಪ-ನಿಯಮಗಳು — ಸಹಕಾರ ಸಚಿವಾಲಯ" },
-    badge: { en: "PACS Bye-laws (MoC)", pa: "PACS ਉਪ-ਨਿਯਮ (MoC)", te: "PACS ఉప-నియమాలు (MoC)", kn: "PACS ಉಪ-ನಿಯಮಗಳು (MoC)" },
+    title: { en: "Model Bye-laws for PACS — Ministry of Cooperation", gu: "PACS માટે મોડેલ ઉપ-નિયમો — સહકાર મંત્રાલય", pa: "PACS ਲਈ ਨਮੂਨਾ ਉਪ-ਨਿਯਮ — ਸਹਿਕਾਰਿਤਾ ਮੰਤਰਾਲਾ", te: "PACS కోసం నమూనా ఉప-నియమాలు — సహకార మంత్రిత్వ శాఖ", kn: "PACS ಗಾಗಿ ಮಾದರಿ ಉಪ-ನಿಯಮಗಳು — ಸಹಕಾರ ಸಚಿವಾಲಯ" },
+    badge: { en: "PACS Bye-laws (MoC)", gu: "PACS ઉપ-નિયમો (MoC)", pa: "PACS ਉਪ-ਨਿਯਮ (MoC)", te: "PACS ఉప-నియమాలు (MoC)", kn: "PACS ಉಪ-ನಿಯಮಗಳು (MoC)" },
     category: "bye-laws",
     overview: {
       en: "The Ministry of Cooperation's revised model bye-laws modernise PACS — enabling them to provide banking, storage, and agro-services while keeping their village-level cooperative character.",
+      gu: "સહકાર મંત્રાલયના સુધારેલા મોડેલ ઉપ-નિયમો PACS ને આધુનિક બનાવે છે — તેમના ગામ-સ્તરના સહકારી સ્વભાવને જાળવી રાખીને બેંકિંગ, સંગ્રહ અને કૃષિ સેવાઓ પૂરી પાડવા સક્ષમ બનાવે છે.",
       pa: "ਸਹਿਕਾਰਿਤਾ ਮੰਤਰਾਲਾ ਦੇ ਸੋਧੇ ਹੋਏ ਨਮੂਨਾ ਉਪ-ਨਿਯਮ PACS ਨੂੰ ਆਧੁਨਿਕ ਬਣਾਉਂਦੇ ਹਨ — ਉਨ੍ਹਾਂ ਦੇ ਪਿੰਡ-ਪੱਧਰੀ ਸਹਿਕਾਰੀ ਸੁਭਾਅ ਨੂੰ ਬਰਕਰਾਰ ਰੱਖਦਿਆਂ ਬੈਂਕਿੰਗ, ਸਟੋਰੇਜ ਅਤੇ ਖੇਤੀ ਸੇਵਾਵਾਂ ਪ੍ਰਦਾਨ ਕਰਨ ਵਿੱਚ ਸਮਰੱਥ ਬਣਾਉਂਦੇ ਹਨ।",
       te: "సహకార మంత్రిత్వ శాఖ సవరించిన నమూనా ఉప-నియమాలు PACSలను ఆధునికీకరిస్తాయి — వాటి గ్రామ స్థాయి సహకార లక్షణాన్ని కొనసాగిస్తూనే బ్యాంకింగ్, నిల్వ మరియు వ్యవసాయ సేవలను అందించేలా చేస్తాయి.",
       kn: "ಸಹಕಾರ ಸಚಿವಾಲಯದ ಪರಿಷ್ಕೃತ ಮಾದರಿ ಉಪ-ನಿಯಮಗಳು PACS ಗಳನ್ನು ಆಧುನೀಕರಿಸುತ್ತವೆ — ಅವುಗಳ ಗ್ರಾಮ ಮಟ್ಟದ ಸಹಕಾರ ಸ್ವಭಾವವನ್ನು ಉಳಿಸಿಕೊಂಡು ಬ್ಯಾಂಕಿಂಗ್, ಶೇಖರಣೆ ಮತ್ತು ಕೃಷಿ ಸೇವೆಗಳನ್ನು ಒದಗಿಸಲು ಅನುವು ಮಾಡಿಕೊಡುತ್ತವೆ.",
@@ -218,6 +252,11 @@ export const legalDocs: LegalDoc[] = [
         "Minimum and maximum share capital for members.",
         "Wider business activities beyond lending (storage, insurance, IT services).",
         "Digital operational requirements and record-keeping.",
+      ],
+      gu: [
+        "સભ્યો માટે લઘુત્તમ અને મહત્તમ શેર મૂડી.",
+        "ધિરાણથી આગળ વ્યાપક વ્યાપાર પ્રવૃત્તિઓ (સંગ્રહ, વીમો, IT સેવાઓ).",
+        "ડિજિટલ ઓપરેશનલ જરૂરિયાતો અને રેકોર્ડ જાળવણી.",
       ],
       pa: [
         "ਮੈਂਬਰਾਂ ਲਈ ਘੱਟੋ-ਘੱਟ ਅਤੇ ਵੱਧ ਤੋਂ ਵੱਧ ਸ਼ੇਅਰ ਪੂੰਜੀ।",
@@ -235,9 +274,9 @@ export const legalDocs: LegalDoc[] = [
         "ಡಿಜಿಟಲ್ ಕಾರ್ಯಾಚರಣೆ ಅವಶ್ಯಕತೆಗಳು ಮತ್ತು ದಾಖಲೆ ನಿರ್ವಹಣೆ.",
       ],
     },
-    applicability: { en: ["PACS registered under the cooperative law of the state."], pa: ["ਰਾਜ ਦੇ ਸਹਿਕਾਰੀ ਕਾਨੂੰਨ ਤਹਿਤ ਰਜਿਸਟਰਡ PACS।"], te: ["రాష్ట్ర సహకార చట్టం కింద నమోదైన PACS."], kn: ["ರಾಜ್ಯದ ಸಹಕಾರ ಕಾಯಿದೆಯ ಅಡಿ ನೋಂದಾಯಿತ PACS."] },
-    byLaws: { en: ["Fees, dividends and reserve allocations set in the bye-laws."], pa: ["ਉਪ-ਨਿਯਮਾਂ ਵਿੱਚ ਸੈੱਟ ਕੀਤੇ ਫੀਸ, ਲਾਭਅੰਸ਼ ਅਤੇ ਰਿਜ਼ਰਵ ਵੰਡ।"], te: ["ఉప-నియమాలలో నిర్దేశించిన రుసుములు, డివిడెండ్‌లు మరియు రిజర్వు కేటాయింపులు."], kn: ["ಉಪ-ನಿಯಮಗಳಲ್ಲಿ ನಿಗದಿಪಡಿಸಿದ ಶುಲ್ಕಗಳು, ಲಾಭಾಂಶಗಳು ಮತ್ತು ಮೀಸಲು ಹಂಚಿಕೆಗಳು."] },
-    source: { label: { en: "Ministry of Cooperation", pa: "ਸਹਿਕਾਰਿਤਾ ਮੰਤਰਾਲਾ", te: "సహకార మంత్రిత్వ శాఖ", kn: "ಸಹಕಾರ ಸಚಿವಾಲಯ" }, url: "https://www.moc.gov.in" },
+    applicability: { en: ["PACS registered under the cooperative law of the state."], gu: ["રાજ્યના સહકારી કાયદા હેઠળ નોંધાયેલી PACS."], pa: ["ਰਾਜ ਦੇ ਸਹਿਕਾਰੀ ਕਾਨੂੰਨ ਤਹਿਤ ਰਜਿਸਟਰਡ PACS।"], te: ["రాష్ట్ర సహకార చట్టం కింద నమోదైన PACS."], kn: ["ರಾಜ್ಯದ ಸಹಕಾರ ಕಾಯಿದೆಯ ಅಡಿ ನೋಂದಾಯಿತ PACS."] },
+    byLaws: { en: ["Fees, dividends and reserve allocations set in the bye-laws."], gu: ["ઉપ-નિયમોમાં નિર્ધારિત ફી, લાભાંશ અને અનામત ફાળવણી."], pa: ["ਉਪ-ਨਿਯਮਾਂ ਵਿੱਚ ਸੈੱਟ ਕੀਤੇ ਫੀਸ, ਲਾਭਅੰਸ਼ ਅਤੇ ਰਿਜ਼ਰਵ ਵੰਡ।"], te: ["ఉప-నియమాలలో నిర్దేశించిన రుసుములు, డివిడెండ్‌లు మరియు రిజర్వు కేటాయింపులు."], kn: ["ಉಪ-ನಿಯಮಗಳಲ್ಲಿ ನಿಗದಿಪಡಿಸಿದ ಶುಲ್ಕಗಳು, ಲಾಭಾಂಶಗಳು ಮತ್ತು ಮೀಸಲು ಹಂಚಿಕೆಗಳು."] },
+    source: { label: { en: "Ministry of Cooperation", gu: "સહકાર મંત્રાલય", pa: "ਸਹਿਕਾਰਿਤਾ ਮੰਤਰਾਲਾ", te: "సహకార మంత్రిత్వ శాఖ", kn: "ಸಹಕಾರ ಸಚಿವಾಲಯ" }, url: "https://www.moc.gov.in" },
   },
 ];
 

@@ -118,5 +118,5 @@
 body {
   background: var(--surface-base);
   color: var(--text-primary);
-  font-family: var(--font-primary);
+  font-family: var(--font-sans);
 }

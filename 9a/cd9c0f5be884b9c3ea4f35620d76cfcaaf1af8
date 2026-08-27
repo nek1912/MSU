@@ -1,0 +1,25 @@
+frontend/docs/superpowers/plans/2026-08-27-full-multilingual-12-locales.md
+  s_a30b70f3601eac::t_c0d07228b9da12 1-275,289-300,302-797
+  s_a30b70f3601eac::t_157f931138b167 276-288,301
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "9acd9c0f5be884b9c3ea4f35620d76cfcaaf1af8",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_a30b70f3601eac": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbcc52a71ffeg18ASW86EbPgUy",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

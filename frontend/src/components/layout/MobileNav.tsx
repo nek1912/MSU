@@ -1,8 +1,10 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useI18n } from "@/lib/i18n/provider";
-import { IconHome, IconChat, IconGrid, IconDoc, IconShield } from "@/components/ui/Icons";
+import { MoreSheet } from "./MoreSheet";
+import { IconHome, IconChat, IconGrid, IconDoc, IconShield, IconMore } from "@/components/ui/Icons";
 
 const LINKS = [
   { href: "/", key: "nav.home", icon: <IconHome className="w-6 h-6" /> },
@@ -15,30 +17,41 @@ const LINKS = [
 export function MobileNav() {
   const { t } = useI18n();
   const pathname = usePathname();
-  const active = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const active = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
   return (
-    <nav
-      aria-label="Primary mobile"
-      className="fixed inset-x-0 bottom-0 z-20 border-t border-[var(--border-default)] bg-[var(--surface-base)] pb-[env(safe-area-inset-bottom)] md:hidden"
-    >
-      <div className="grid grid-cols-5">
-        {LINKS.map((l) => (
-          <Link
-            key={l.href}
-            href={l.href}
-            aria-current={active(l.href) ? "page" : undefined}
-            className={`flex flex-col items-center gap-1 py-2 text-[11px] focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] ${
-              active(l.href)
-                ? "text-[var(--accent-primary)]"
-                : "text-[var(--text-tertiary)]"
-            }`}
+    <>
+      <nav
+        aria-label="Primary mobile"
+        className="fixed inset-x-0 bottom-0 z-20 border-t border-[var(--border-default)] bg-[var(--surface-base)] pb-[env(safe-area-inset-bottom)] md:hidden"
+      >
+        <div className="grid grid-cols-6">
+          {LINKS.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              aria-current={active(l.href) ? "page" : undefined}
+              className={`flex flex-col items-center gap-1 py-2 text-[11px] focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] ${
+                active(l.href) ? "text-[var(--accent-primary)]" : "text-[var(--text-secondary)]"
+              }`}
+            >
+              {l.icon}
+              <span className="truncate">{t(l.key)}</span>
+            </Link>
+          ))}
+          <button
+            type="button"
+            aria-label={t("nav.more")}
+            aria-expanded={moreOpen}
+            onClick={() => setMoreOpen(true)}
+            className="flex flex-col items-center gap-1 py-2 text-[11px] text-[var(--text-secondary)] focus-visible:ring-2 focus-visible:ring-[var(--border-focus)]"
           >
-            {l.icon}
-            <span className="truncate">{t(l.key)}</span>
-          </Link>
-        ))}
-      </div>
-    </nav>
+            <IconMore className="w-6 h-6" />
+            <span className="truncate">{t("nav.more")}</span>
+          </button>
+        </div>
+      </nav>
+      <MoreSheet open={moreOpen} onClose={() => setMoreOpen(false)} />
+    </>
   );
 }

@@ -20,6 +20,7 @@ const en: Record<string, string> = {
   "nav.legal": "Legal",
   "nav.services": "Services",
   "nav.faq": "FAQ",
+  "nav.more": "More",
 
   "common.send": "Send",
   "common.submit": "Submit",
@@ -189,6 +190,7 @@ const hi: Record<string, string> = {
   "nav.legal": "कानून",
   "nav.services": "सेवाएँ",
   "nav.faq": "FAQ",
+  "nav.more": "और",
 
   "common.send": "भेजें",
   "common.submit": "जमा करें",

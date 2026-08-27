@@ -46,8 +46,13 @@ export function ChatWindow() {
   }, [msgs, typing]);
 
   useEffect(() => {
+    const q = sp?.get("q");
     const scheme = sp?.get("scheme");
-    if (scheme) {
+    if (q) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setInput(q);
+      setMsgs([]);
+    } else if (scheme) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setInput(factoryPrompt(scheme));
       setMsgs([]);
@@ -117,7 +122,7 @@ export function ChatWindow() {
         )}
         {msgs.map((m, i) =>
           m.role === "user" ? (
-            <div key={i} className="ml-auto w-fit max-w-[85%] rounded-[var(--radius-lg)] bg-[var(--accent-primary)] px-4 py-2 text-white">{m.text}</div>
+            <div key={i} className="ml-auto w-fit max-w-[85%] rounded-[var(--radius-lg)] bg-[var(--text-primary)] px-4 py-2 text-white">{m.text}</div>
           ) : (
             <div key={i} className="max-w-[90%]">
               <MessageBubble resp={m.resp!} />

@@ -1,0 +1,148 @@
+# MVP corpus manifest
+# PURPOSE:
+#   Smallest currently ingestible corpus using ONLY collected digital-text PDFs.
+#
+# IMPORTANT:
+#   This is a TECHNICAL MVP corpus, not a legally complete Gujarat-law corpus.
+#   Do not claim Gujarat cooperative statutory-law coverage from this corpus.
+#
+# OCR is intentionally excluded from this MVP.
+# Scanned Gujarat Act/Rules documents remain deferred.
+
+manifest_version: "1.2"
+audit_date: "2026-08-27"
+ingest_now: true
+embed_now: true
+
+corpus_root: "corpus/seeds"
+
+sources:
+
+  - source_id: pacs_model_bylaws_2023
+    filename: "Model Byelaws 05.01.2023.pdf"
+    path: "corpus/seeds/Model Byelaws 05.01.2023.pdf"
+    actual_title: "Model Bye-laws for Primary Agricultural Credit Societies (PACS)"
+    issuing_organization: "Ministry of Cooperation, Government of India"
+    document_date: "2023-01-05"
+    effective_date: "2023-01-05"
+    document_type: "model_bye_laws"
+    jurisdiction: "central"
+    state: null
+    official_source_url: "https://www.cooperation.gov.in/sites/default/files/2023-06/Model%20Byelaws%2005.01.02023.pdf"
+    digital_scanned: "digital_text"
+    status: "current_reference"
+    primary_supplementary: "primary"
+    target_domain: "pacs_governance"
+    target_seed: "pacs_model_bylaws"
+    collection_status: "collected"
+    mvp_required: true
+    modifies: null
+    base_incorporates: null
+    legal_note: "Model bye-laws are reference material and are not automatically the operative bye-laws of every Gujarat PACS."
+
+  - source_id: pacs_computerization_guidelines
+    filename: "Revised Scheme guidelines (Computerization of PACS project).pdf"
+    path: "corpus/seeds/Revised Scheme guidelines (Computerization of PACS project).pdf"
+    actual_title: "Revised Scheme Guidelines for Computerization of Primary Agricultural Credit Societies (PACS)"
+    issuing_organization: "Ministry of Cooperation, Government of India"
+    document_date: "2022-06-29"
+    effective_date: "2022-06-29"
+    document_type: "centrally_sponsored_project_guidelines"
+    jurisdiction: "central"
+    state: null
+    official_source_url: "https://www.cooperation.gov.in/sites/default/files/2023-06/Revised%20Scheme%20guidelines%20%28Computerization%20of%20PACS%20project%29.pdf"
+    digital_scanned: "digital_text"
+    status: "current_reference"
+    primary_supplementary: "primary"
+    target_domain: "pacs_computerization"
+    target_seed: "pacs_computerization"
+    collection_status: "collected"
+    mvp_required: true
+    modifies: null
+    base_incorporates: null
+
+  - source_id: pacs_computerization_corrigendum_2023_06_12
+    filename: "Corrigendum and letter Jun 12, 2023.pdf"
+    path: "corpus/seeds/Corrigendum and letter Jun 12, 2023.pdf"
+    actual_title: "Corrigendum dated 12.06.2023 to the Project Guidelines of the Computerization of PACS Project"
+    issuing_organization: "Ministry of Cooperation, Government of India"
+    document_date: "2023-06-12"
+    effective_date: "2023-06-12"
+    document_type: "corrigendum"
+    jurisdiction: "central"
+    state: null
+    official_source_url: "https://www.cooperation.gov.in/sites/default/files/2023-06/Corrigendum%20and%20letter%20Jun%2012%2C%202023%20.pdf"
+    digital_scanned: "digital_text"
+    status: "current_amendment"
+    primary_supplementary: "primary"
+    target_domain: "pacs_computerization"
+    target_seed: "pacs_computerization"
+    collection_status: "collected"
+    mvp_required: true
+    modifies: "pacs_computerization_guidelines"
+    base_incorporates: false
+
+  - source_id: pmfby_operational_guidelines
+    filename: "operational_guidelines_pmfby.pdf"
+    path: "corpus/seeds/operational_guidelines_pmfby.pdf"
+    actual_title: "Operational Guidelines of Pradhan Mantri Fasal Bima Yojana (PMFBY)"
+    issuing_organization: "Department of Agriculture and Farmers Welfare, Ministry of Agriculture and Farmers Welfare, Government of India"
+    document_date: null
+    effective_date: null
+    document_type: "scheme_operational_guidelines"
+    jurisdiction: "central"
+    state: null
+    official_source_url: "https://pmfby.gov.in/guidelines"
+    digital_scanned: "digital_text"
+    status: "current_reference"
+    primary_supplementary: "primary"
+    target_domain: "pmfby"
+    target_seed: "pmfby_guidelines"
+    collection_status: "collected"
+    mvp_required: true
+    modifies: null
+    base_incorporates: null
+    verification_note: "Keep the exact document/version date from the PDF itself; do not infer it from the filename."
+
+  - source_id: nsfi_2025_30
+    filename: "NSFI_2025_30.pdf"
+    path: "corpus/seeds/NSFI_2025_30.pdf"
+    actual_title: "National Strategy for Financial Inclusion (NSFI): 2025-30"
+    issuing_organization: "Reserve Bank of India"
+    document_date: "2025-12"
+    effective_date: "2025-12"
+    document_type: "national_strategy"
+    jurisdiction: "central"
+    state: null
+    official_source_url: "https://m.rbi.org.in/scripts/bs_viewpublicationreport.aspx"
+    digital_scanned: "digital_text"
+    status: "current"
+    primary_supplementary: "primary"
+    target_domain: "financial_inclusion"
+    target_seed: "rbi_financial_inclusion"
+    collection_status: "collected"
+    mvp_required: true
+    modifies: null
+    base_incorporates: null
+    verification_note: "Rename the locally downloaded NSFI PDF to NSFI_2025_30.pdf if its current filename is the long RBI-generated filename."
+
+# ================================================================
+# EXPLICIT MVP LIMITATIONS
+# ================================================================
+
+limitations:
+  gujarat_cooperative_law: "NOT COVERED"
+  gujarat_cooperative_rules: "NOT COVERED"
+  pmjdy: "NOT COVERED"
+  gujarat_specific_pmfby_notifications: "NOT COVERED"
+  dynamic_scheme_data: "NOT COVERED"
+
+safety:
+  - "Do not answer Gujarat statutory-law questions as if this corpus were complete."
+  - "Do not present central PACS model bye-laws as automatically applicable Gujarat PACS bye-laws."
+  - "If retrieved evidence does not support an answer, abstain."
+  - "Do not fetch missing legal facts from the internet during answer generation."
+  - "Internet is used only for source acquisition/update workflows, not as runtime evidence."
+
+promotion_rule:
+  "Deferred documents may be promoted only after content/provenance validation and evaluation coverage review."

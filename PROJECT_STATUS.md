@@ -16,7 +16,7 @@ trust it. If you only have two minutes, update `Last updated` and the
 
 ## Last updated
 
-`2026-08-26 23:00, by task-12`
+`2026-08-27 18:30, by task-10`
 
 ## Current day / plan position
 
@@ -40,7 +40,7 @@ broken`.
 | Repo / CI / deploy pipeline | M4 | not started | |
 | FastAPI skeleton + `/health` | M2 | not started | |
 | Next.js skeleton (chat + grievance screens) | M3 | not started | |
-| Document ingestion (Docling) | M1 | not started | Seed corpus + ingestion pipeline created (task 8) |
+| Document ingestion (Docling) | M1 | in progress | Task 4: Docling PDF extraction added, `pdf_extractor.py` created; awaiting corpus documents for full pipeline test |
 | Embeddings (`gemini-embedding-001`) | M1 | not started | |
 | Retrieval (Supabase pgvector, domain+state filter) | M1 | not started | |
 | `/chat` wired to retrieval | M2 | working | Task 11: session store, evidence gate, citations, abstention all wired |

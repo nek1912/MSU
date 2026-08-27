@@ -11,6 +11,44 @@ logger = logging.getLogger(__name__)
 SEEDS_DIR = Path(__file__).parent.parent / "corpus" / "seeds"
 
 
+def atomic_replace_document(supabase, source_id: str, doc_data: dict, chunks_data: list[dict]) -> str:
+    """Atomically replace a document and its chunks via RPC transaction.
+    
+    This uses a PostgreSQL function to ensure atomicity:
+    - If any step fails, the entire transaction rolls back
+    - Existing valid documents are protected by transaction rollback if replacement fails
+    
+    Args:
+        supabase: Supabase client
+        source_id: Document source ID
+        doc_data: Document metadata dictionary
+        chunks_data: List of chunk dictionaries with 'content' and 'embedding'
+        
+    Returns:
+        Document ID of the new document
+    """
+    # Convert embeddings to strings for JSON serialization
+    chunks_for_rpc = []
+    for chunk in chunks_data:
+        chunks_for_rpc.append({
+            "content": chunk["content"],
+            "embedding": chunk["embedding"],  # Vector as list, Supabase handles serialization
+            "page": chunk.get("page", 0),
+            "section": chunk.get("section", ""),
+        })
+    
+    result = supabase.rpc(
+        "atomic_replace_document",
+        {
+            "p_source_id": source_id,
+            "p_doc_data": doc_data,
+            "p_chunks_data": chunks_for_rpc,  # JSON array
+        }
+    ).execute()
+    
+    return result.data
+
+
 def normalize_state(state: str | None) -> str | None:
     """Normalize state value to lowercase trimmed string or None."""
     if not state or not isinstance(state, str):

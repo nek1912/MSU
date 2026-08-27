@@ -1,0 +1,160 @@
+frontend/src/lib/data/library.ts
+  s_8f202e4d183e3b::t_5b05cdfe987035 18
+  s_8f202e4d183e3b::t_719f3470dca6d9 15-17,19
+frontend/src/lib/data/faq.ts
+  s_8f202e4d183e3b::t_700b119b65d046 17
+  s_8f202e4d183e3b::t_144144477b62a1 87
+  s_8f202e4d183e3b::t_557867343de013 75
+  s_8f202e4d183e3b::t_a5da65b3bd803e 40
+  s_8f202e4d183e3b::t_b629eb1a28351c 47
+  s_8f202e4d183e3b::t_ac5f6e01c3e7c2 80
+  s_8f202e4d183e3b::t_71347c5c3743b2 61
+  s_8f202e4d183e3b::t_d103b3b85d931b 45
+  s_8f202e4d183e3b::t_f92e73905df4f3 24
+  s_8f202e4d183e3b::t_cd1270d2974621 82
+  s_8f202e4d183e3b::t_7ecb31307a8375 73
+  s_8f202e4d183e3b::t_2cbd5d4a02d1a8 54
+  s_8f202e4d183e3b::t_906cf904d85915 52
+  s_8f202e4d183e3b::t_da1a56b1ba2d76 66
+  s_8f202e4d183e3b::t_40fcb2eba0a662 33
+  s_8f202e4d183e3b::t_dfb52fdf73ea37 26
+  s_8f202e4d183e3b::t_e38560b854daa0 89
+  s_8f202e4d183e3b::t_f685ffb684564d 38
+  s_8f202e4d183e3b::t_c7af0f86f0476b 59
+  s_8f202e4d183e3b::t_be260035c98e49 19
+  s_8f202e4d183e3b::t_11acb1f4ca1dec 31
+  s_8f202e4d183e3b::t_d1b6b0281148b6 68
+frontend/src/lib/data/schemes.ts
+  s_8f202e4d183e3b::t_90cdf9d069d9a1 76
+  s_8f202e4d183e3b::t_6ab0ff7844c978 54
+  s_8f202e4d183e3b::t_85f65099a5e463 77
+  s_8f202e4d183e3b::t_6670b44cfd08be 29
+  s_8f202e4d183e3b::t_ce7f96bb9463e6 34
+  s_8f202e4d183e3b::t_244b5f75548f4e 45
+  s_8f202e4d183e3b::t_3f51f86a25816e 66
+  s_8f202e4d183e3b::t_45827de263f5b1 57
+  s_8f202e4d183e3b::t_df65e1d8d8f59c 40
+  s_8f202e4d183e3b::t_3af06a71a2ed80 63
+  s_8f202e4d183e3b::t_f5a1b7ee94ca16 87
+  s_8f202e4d183e3b::t_48f59731785ff6 75
+  s_8f202e4d183e3b::t_5193fe1a5dc80a 42
+  s_8f202e4d183e3b::t_d6e2415a797693 35
+  s_8f202e4d183e3b::t_63a170aaa7b35e 79
+  s_8f202e4d183e3b::t_3ba350f4482ae2 51
+  s_8f202e4d183e3b::t_7295c7cd01c92c 84
+  s_8f202e4d183e3b::t_4446f0b3d30c3b 30
+  s_8f202e4d183e3b::t_0b6c0b6137e7fe 43
+  s_8f202e4d183e3b::t_b604e11a480586 53
+  s_8f202e4d183e3b::t_58d861d6f7db94 89
+  s_8f202e4d183e3b::t_6310509530f19f 64
+  s_8f202e4d183e3b::t_477857c346d3bd 90
+  s_8f202e4d183e3b::t_1cef1061040020 68
+  s_8f202e4d183e3b::t_209ecdcf19ba23 62
+  s_8f202e4d183e3b::t_4e4b019c28b2d7 46
+  s_8f202e4d183e3b::t_e361a62c1de1e7 56
+  s_8f202e4d183e3b::t_9d1a0a81039d27 67
+  s_8f202e4d183e3b::t_83c3781ef34f4d 31
+  s_8f202e4d183e3b::t_6688783ec9abd2 32
+  s_8f202e4d183e3b::t_52d7e917fb99f9 44
+  s_8f202e4d183e3b::t_591848d557a2f9 78
+  s_8f202e4d183e3b::t_b050f3b617d944 85
+  s_8f202e4d183e3b::t_303bc64f6c0587 55
+  s_8f202e4d183e3b::t_2f737d4e213357 86
+  s_8f202e4d183e3b::t_5b74294c5cce82 88
+  s_8f202e4d183e3b::t_2c118f7c690df1 33
+  s_8f202e4d183e3b::t_60fb2e0407ab72 52
+  s_8f202e4d183e3b::t_a59e6243156ff8 65
+  s_8f202e4d183e3b::t_cc81e8407d95ad 41
+  s_8f202e4d183e3b::t_7916e340e05184 73
+  s_8f202e4d183e3b::t_24df0b09ccbe0d 74
+frontend/src/lib/data/services.ts
+  s_8f202e4d183e3b::t_d00c4ff536c983 55
+  s_8f202e4d183e3b::t_be12be34a1272d 64
+  s_8f202e4d183e3b::t_938c264d17beb9 20
+  s_8f202e4d183e3b::t_e9e07abedc0105 60
+  s_8f202e4d183e3b::t_88245e79062751 69
+  s_8f202e4d183e3b::t_67e500c1ff91de 36
+  s_8f202e4d183e3b::t_5b0f22dbc26b02 81
+  s_8f202e4d183e3b::t_8eebde5089b316 77
+  s_8f202e4d183e3b::t_b72034b4525708 44
+  s_8f202e4d183e3b::t_b9fcf292abe11c 80
+  s_8f202e4d183e3b::t_ed19eda7cc0a4b 57
+  s_8f202e4d183e3b::t_1782633cfcab97 48
+  s_8f202e4d183e3b::t_cf28bb7b31633a 47
+  s_8f202e4d183e3b::t_f5075024d5e593 35
+  s_8f202e4d183e3b::t_4ca28373839729 33
+  s_8f202e4d183e3b::t_cd7d379727a0ac 37
+  s_8f202e4d183e3b::t_1e968b30cf6efc 59
+  s_8f202e4d183e3b::t_32cf4f6f656545 68
+  s_8f202e4d183e3b::t_ca72d9d58a5c15 53
+  s_8f202e4d183e3b::t_c164060eb59d7c 24
+  s_8f202e4d183e3b::t_2ebb4da8598ae3 46
+  s_8f202e4d183e3b::t_2e047cf6bc688d 82
+  s_8f202e4d183e3b::t_172fd9f8887136 58
+  s_8f202e4d183e3b::t_ee8ea33fd6f395 42
+  s_8f202e4d183e3b::t_bb03a8285bdbb8 79
+  s_8f202e4d183e3b::t_e24a3250295ce7 66
+  s_8f202e4d183e3b::t_bdc0b220c887a3 38
+  s_8f202e4d183e3b::t_b64b48c1f0d2f2 26
+  s_8f202e4d183e3b::t_b77992b4b4f669 31
+  s_8f202e4d183e3b::t_669ea2d0460c26 22
+  s_8f202e4d183e3b::t_d9ef60d729a8e6 27
+  s_8f202e4d183e3b::t_dedbaf79494718 71
+  s_8f202e4d183e3b::t_391e48f0d46a73 70
+  s_8f202e4d183e3b::t_58f25e11dc0b13 75
+  s_8f202e4d183e3b::t_8c5516c0c1f99f 49
+  s_8f202e4d183e3b::t_416a32822608ba 25
+frontend/src/lib/data/legal.ts
+  s_8f202e4d183e3b::t_d15976bb22b333 71
+  s_8f202e4d183e3b::t_ad40fa255230c0 118-123
+  s_8f202e4d183e3b::t_e048e97f34a654 183-184
+  s_8f202e4d183e3b::t_b1ee587c994ea5 63-68
+  s_8f202e4d183e3b::t_c4d7371e33bfb2 219
+  s_8f202e4d183e3b::t_4bc534a824ee14 175
+  s_8f202e4d183e3b::t_1385bfaef115b0 30
+  s_8f202e4d183e3b::t_b03313d736d803 224
+  s_8f202e4d183e3b::t_9c09edfa3804c7 70
+  s_8f202e4d183e3b::t_57dd9145dd386d 256-265
+  s_8f202e4d183e3b::t_f7c938b2794864 77
+  s_8f202e4d183e3b::t_82fae75de7601f 274
+  s_8f202e4d183e3b::t_174997eadabf92 176
+  s_8f202e4d183e3b::t_3a9725db82afe4 225
+  s_8f202e4d183e3b::t_80545b23a1b0bd 141-143
+  s_8f202e4d183e3b::t_c9b2e73bcffdea 273
+  s_8f202e4d183e3b::t_c5ba9d67996315 316
+  s_8f202e4d183e3b::t_f43833ab97a46f 218
+  s_8f202e4d183e3b::t_235dbdf2c56c15 232-233
+  s_8f202e4d183e3b::t_fcdb1c1667530c 72,171,220,269,318
+  s_8f202e4d183e3b::t_37fc6fcfa8a565 305-314
+  s_8f202e4d183e3b::t_a0103c6bc8da18 166-169
+  s_8f202e4d183e3b::t_5aae0e8a44fe19 76
+  s_8f202e4d183e3b::t_0b1b7765a34b13 85
+  s_8f202e4d183e3b::t_030cd558d6af8d 21
+  s_8f202e4d183e3b::t_5f122a8110b909 281-282
+  s_8f202e4d183e3b::t_affef0cb265cd8 317
+  s_8f202e4d183e3b::t_e064b9d4980769 267
+  s_8f202e4d183e3b::t_473e5b97700732 22
+  s_8f202e4d183e3b::t_e9a6b46b5d2a3c 268
+  s_8f202e4d183e3b::t_67cf755269312c 207-216
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "682fc972095f284357bfe138e1dc6a3bfb7bfaf8",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_8f202e4d183e3b": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbbaf201fffeX28A23VhNeOkTA",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

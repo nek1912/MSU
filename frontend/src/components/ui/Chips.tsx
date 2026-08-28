@@ -5,30 +5,35 @@ export function Chips<T extends string>({
   value,
   onChange,
   render = (x) => x,
+  disabled = false,
 }: {
   options: readonly T[];
   value: T;
   onChange: (v: T) => void;
   render?: (v: T) => ReactNode;
+  disabled?: boolean;
 }) {
   return (
-    <div className="flex flex-wrap gap-2" role="listbox" aria-label="Filters">
-      {options.map((o) => (
-        <button
-          key={o}
-          type="button"
-          role="option"
-          aria-selected={o === value}
-          onClick={() => onChange(o)}
-          className={`rounded-[var(--radius-full)] px-[var(--space-3)] py-[var(--space-1)] text-[var(--text-sm)] font-[var(--font-medium)] transition ${
-            o === value
-              ? "bg-[var(--text-primary)] text-white"
-              : "bg-[var(--surface-overlay)] text-[var(--text-secondary)] hover:bg-[var(--border-hover)]"
-          }`}
-        >
-          {render(o)}
-        </button>
-      ))}
+    <div className="flex flex-wrap gap-2" role="group" aria-label="Filters">
+      {options.map((o) => {
+        const selected = o === value;
+        return (
+          <button
+            key={o}
+            type="button"
+            aria-pressed={selected}
+            disabled={disabled}
+            onClick={() => onChange(o)}
+            className={`inline-flex h-10 items-center rounded-[var(--radius-md)] border px-4 text-sm font-medium transition-all duration-200 ease-[var(--ease-out-cubic)] ${
+              selected
+                ? "border-[var(--dark)] bg-[var(--dark)] text-[var(--on-dark-strong)]"
+                : "border-[var(--border-default)] bg-[var(--cream-2)] text-[var(--text-body)] hover:border-[var(--ink)] hover:text-[var(--ink)]"
+            }`}
+          >
+            {render(o)}
+          </button>
+        );
+      })}
     </div>
   );
 }

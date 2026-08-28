@@ -4,14 +4,21 @@ export function Card({
   children,
   className = "",
   interactive = false,
+  fill = "canvas",
 }: {
   children: ReactNode;
   className?: string;
   interactive?: boolean;
+  fill?: "canvas" | "cream";
 }) {
+  const base = fill === "cream" ? "bg-[var(--cream-2)] border border-[var(--cream-2)]" : "bg-[var(--canvas)] border border-[var(--border-soft)]";
   return (
     <div
-      className={`rounded-[var(--radius-xl)] bg-[var(--surface-overlay)] p-[var(--space-6)] ${interactive ? "transition hover:bg-[var(--surface-tint)] focus-visible:ring-2 focus-visible:ring-[var(--border-focus)]" : ""} ${className}`}
+      className={`rounded-[var(--radius-md)] p-6 ${base} ${
+        interactive
+          ? "transition-all duration-[250ms] ease-[var(--ease-out-cubic)] hover:border-[var(--border-hover)] hover:bg-[var(--cream)] hover:-translate-y-0.5"
+          : ""
+      } ${className}`}
     >
       {children}
     </div>

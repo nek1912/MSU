@@ -8,27 +8,34 @@ export function Stepper({
   current: number;
 }) {
   return (
-    <ol className="flex items-center gap-[var(--space-2)]">
+    <ol className="flex items-start gap-2">
       {steps.map((label, i) => {
         const done = i < current;
         const active = i === current;
+        const last = i === steps.length - 1;
         return (
-          <li key={label} className="flex flex-1 flex-col items-center gap-[var(--space-1)]">
+          <li key={label} className="relative flex flex-1 flex-col items-center gap-1.5">
             <span
-              className={`flex h-7 w-7 items-center justify-center rounded-[var(--radius-full)] text-[var(--text-xs)] font-[var(--font-semibold)] ${
+              className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
                 active
-                  ? "bg-[var(--text-primary)] text-white"
+                  ? "bg-[var(--dark)] text-[var(--on-dark-strong)]"
                   : done
-                    ? "bg-[var(--accent-primary)]/15 text-[var(--accent-primary)]"
-                    : "bg-[var(--surface-overlay)] text-[var(--text-secondary)]"
+                    ? "bg-[var(--cream-2)] text-[var(--ink)]"
+                    : "border border-[var(--border-default)] bg-[var(--canvas)] text-[var(--text-faint)]"
               }`}
               aria-current={active ? "step" : undefined}
             >
               {done ? <IconCheck className="w-4 h-4" /> : i + 1}
             </span>
-            <span className={`text-center text-[var(--text-xs)] ${active ? "text-[var(--accent-primary)] font-[var(--font-medium)]" : "text-[var(--text-secondary)]"}`}>
+            <span className={`max-w-[6rem] text-center text-xs ${active ? "font-medium text-[var(--ink)]" : "text-[var(--text-tertiary)]"}`}>
               {label}
             </span>
+            {!last && (
+              <span
+                aria-hidden="true"
+                className={`absolute left-[calc(50%+1.2rem)] top-3.5 right-[calc(-50%+1.2rem)] h-px ${done ? "bg-[var(--ink)]" : "bg-[var(--border-soft)]"}`}
+              />
+            )}
           </li>
         );
       })}

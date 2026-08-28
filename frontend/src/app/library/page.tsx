@@ -6,6 +6,8 @@ import { useTranslatedFields } from "@/lib/useTranslatedFields";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Reveal } from "@/components/motion/Reveal";
+import { Stagger } from "@/components/motion/Stagger";
 import { IconDoc, IconChevronRight } from "@/components/ui/Icons";
 
 const domains = ["all", "cropInsurance", "law", "financial", "grievance"] as const;
@@ -32,29 +34,33 @@ export default function LibraryPage() {
   });
 
   return (
-    <div className="mx-auto max-w-4xl px-[var(--space-4)] py-[var(--space-8)] bg-[var(--surface-base)] text-[var(--text-primary)]">
-      <h1 className="font-[var(--font-display)] text-[var(--text-3xl)] font-[var(--font-medium)] tracking-tight text-[var(--text-primary)]">{t("library.title")}</h1>
-      <p className="mt-1 text-[var(--text-secondary)]">{t("library.subtitle")}</p>
-      <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("library.searchPlaceholder")} className="mt-4 max-w-sm" />
-      <div className="mt-4 flex flex-wrap gap-2">
+    <div className="px-4 py-[var(--space-8)] md:px-6">
+      <Reveal trigger="load">
+        <h1 className="display text-3xl tracking-tight text-[var(--ink)] md:text-4xl">{t("library.title")}</h1>
+        <p className="mt-1 text-[var(--text-body)]">{t("library.subtitle")}</p>
+        <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("library.searchPlaceholder")} className="mt-4 max-w-sm" />
+        <div className="mt-5 flex flex-wrap gap-2">
         {domains.map((d) => (
           <button
             key={d}
+            type="button"
+            aria-pressed={d === domain}
             onClick={() => setDomain(d)}
-            className={`rounded-full px-3 py-1.5 text-sm font-medium ${
-            d === domain
-              ? "bg-[var(--text-primary)] text-white"
-              : "bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:bg-[var(--surface-overlay)]"
+            className={`inline-flex h-10 items-center rounded-[var(--radius-md)] border px-4 text-sm font-medium transition-all duration-200 ease-[var(--ease-out-cubic)] ${
+              d === domain
+                ? "border-[var(--dark)] bg-[var(--dark)] text-[var(--on-dark-strong)]"
+                : "border-[var(--border-default)] bg-[var(--cream-2)] text-[var(--text-body)] hover:border-[var(--ink)] hover:text-[var(--ink)]"
             }`}
           >
             {d === "all" ? t("common.all") : d}
           </button>
         ))}
-      </div>
+        </div>
+      </Reveal>
       {filtered.length === 0 ? (
         <EmptyState title={t("library.empty")} />
       ) : (
-        <ul className="mt-6 space-y-3">
+        <Stagger as="ul" className="mt-6 space-y-3">
           {filtered.map((d) => (
             <li key={d.id}>
               <a href={d.url} target="_blank" rel="noopener noreferrer" className="block">
@@ -71,7 +77,7 @@ export default function LibraryPage() {
               </a>
             </li>
           ))}
-        </ul>
+        </Stagger>
       )}
     </div>
   );

@@ -1,10 +1,20 @@
 import type { SelectHTMLAttributes } from "react";
 
-export function Select({ className = "", children, ...rest }: SelectHTMLAttributes<HTMLSelectElement>) {
+export function Select({
+  className = "",
+  invalid = false,
+  children,
+  ...rest
+}: SelectHTMLAttributes<HTMLSelectElement> & { invalid?: boolean }) {
   return (
     <select
       {...rest}
-      className={`rounded-[var(--radius-md)] border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3 py-2 text-[var(--text-base)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--border-focus)] focus:border-[var(--border-focus)] disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      aria-invalid={invalid || undefined}
+      className={`h-11 w-full rounded-[var(--radius-cta)] border bg-[var(--canvas)] px-3.5 text-[var(--text-base)] text-[var(--ink)] transition-colors duration-[250ms] disabled:opacity-45 disabled:cursor-not-allowed ${
+        invalid
+          ? "border-[var(--state-error)] focus:border-[var(--state-error)]"
+          : "border-[var(--border-default)] hover:border-[var(--border-hover)] focus:border-[var(--accent-primary)]"
+      } ${className}`}
     >
       {children}
     </select>

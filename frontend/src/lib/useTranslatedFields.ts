@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Locale } from "@/lib/i18n/i18n";
 import { createTranslator } from "./translator";
 
@@ -10,6 +10,13 @@ type RawEntry = Record<string, unknown>;
  * (i.e. they fell back to English) via Azure, then returns the translated copy.
  * Falls back to the original values when Azure is unavailable or a translation
  * already exists for the locale. Results are cached by the translator.
+ *
+ * The effect is keyed on a stable JSON signature of its inputs rather than on
+ * the input references. Callers commonly pass fresh array/object literals every
+ * render; depending on their identity would re-run the effect on each render
+ * and hit "Maximum update depth exceeded". Two equal-content arrays produce the
+ * same signature, so a re-render with identical data is a no-op, while a real
+ * content change (e.g. switching slug or locale) re-runs the translation.
  */
 export function useTranslatedFields<T>(opts: {
   locale: Locale;
@@ -21,12 +28,17 @@ export function useTranslatedFields<T>(opts: {
   const { locale, items, rawItems, textFields, listFields } = opts;
   const [out, setOut] = useState<T[]>(items);
 
+  const signature = useMemo(
+    () => JSON.stringify([locale, items, rawItems, textFields, listFields]),
+    [locale, items, rawItems, textFields, listFields],
+  );
+
   useEffect(() => {
     let cancelled = false;
 
     async function run() {
       if (locale === "en") {
-        setOut(items);
+        setOut((prev) => (Object.is(prev, items) ? prev : items));
         return;
       }
       const t = createTranslator();
@@ -77,14 +89,15 @@ export function useTranslatedFields<T>(opts: {
         });
       }
 
-      if (!cancelled) setOut(next);
+      if (!cancelled) setOut((prev) => (Object.is(prev, next) ? prev : next));
     }
 
     run();
     return () => {
       cancelled = true;
     };
-  }, [locale, items, rawItems, textFields, listFields]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signature]);
 
   return out;
 }

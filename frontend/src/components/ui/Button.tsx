@@ -1,28 +1,66 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-type Variant = "primary" | "secondary" | "ghost" | "icon";
+type Variant = "primary" | "secondary" | "dark" | "ghost" | "icon";
+type Size = "sm" | "md" | "lg";
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: Variant;
+  size?: Size;
+  loading?: boolean;
+  full?: boolean;
   children: ReactNode;
 };
 
 const STYLES: Record<Variant, string> = {
   primary:
-    "bg-[var(--text-primary)] text-white hover:bg-[var(--text-secondary)] active:bg-[#0d0d0d] disabled:opacity-50 disabled:cursor-not-allowed",
+    "bg-[var(--accent-primary)] text-[var(--accent-contrast)] border border-[var(--accent-primary)] hover:bg-[var(--accent-hover)] hover:border-[var(--accent-hover)] active:bg-[var(--accent-active)]",
   secondary:
-    "bg-[var(--color-pill)] text-[var(--text-primary)] hover:bg-[var(--surface-overlay)] active:bg-[#e0e0e0] disabled:opacity-50 disabled:cursor-not-allowed",
+    "bg-[var(--canvas)] text-[var(--ink)] border border-[var(--ink)] hover:bg-[var(--cream)] hover:border-[var(--text-body)] active:bg-[var(--cream-2)]",
+  dark:
+    "bg-[var(--dark)] text-[var(--on-dark-strong)] border border-[var(--dark)] hover:bg-[#3a2c2c] active:bg-[#2c2020]",
   ghost:
-    "text-[var(--text-primary)] hover:bg-[var(--color-pill)] active:bg-[var(--surface-overlay)] disabled:opacity-50 disabled:cursor-not-allowed",
-  icon: "flex items-center justify-center rounded-full p-2 text-[var(--text-primary)] hover:bg-[var(--color-pill)] disabled:opacity-50 disabled:cursor-not-allowed",
+    "bg-transparent text-[var(--ink)] border border-transparent hover:bg-[var(--cream)] hover:text-[var(--dark)] active:bg-[var(--cream-2)]",
+  icon: "bg-transparent text-[var(--ink)] border border-transparent hover:bg-[var(--cream)] hover:text-[var(--dark)] active:bg-[var(--cream-2)]",
 };
 
-export function Button({ variant = "primary", className = "", children, ...rest }: Props) {
+const SIZE: Record<Size, string> = {
+  sm: "h-9 px-3.5 text-[var(--text-sm)]",
+  md: "h-11 px-5 text-[var(--text-base)]",
+  lg: "h-12 px-6 text-[var(--text-lg)]",
+};
+
+const ICON_SIZE: Record<Size, string> = {
+  sm: "h-9 w-9",
+  md: "h-11 w-11",
+  lg: "h-12 w-12",
+};
+
+function Spinner() {
+  return (
+    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
+  );
+}
+
+export function Button({
+  variant = "primary",
+  size = "md",
+  loading = false,
+  full = false,
+  className = "",
+  children,
+  disabled,
+  ...rest
+}: Props) {
+  const square = variant === "icon";
   return (
     <button
       {...rest}
-      className={`inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[var(--text-base)] font-[var(--font-medium)] transition focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] focus-visible:ring-offset-2 disabled:cursor-not-allowed ${STYLES[variant]} ${className}`}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      className={`inline-flex items-center justify-center gap-2 font-semibold transition-all duration-[250ms] ease-[var(--ease-out-cubic)] active:scale-[0.99] disabled:opacity-45 disabled:cursor-not-allowed ${
+        square ? `${ICON_SIZE[size]} rounded-[var(--radius-cta)] p-0` : `${SIZE[size]} rounded-[var(--radius-cta)]`
+      } ${STYLES[variant]} ${full ? "w-full" : ""} ${className}`}
     >
-      {children}
+      {loading ? <Spinner /> : children}
     </button>
   );
 }

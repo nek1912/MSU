@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import {
-  Geist,
+  Inter,
+  Space_Grotesk,
   Geist_Mono,
   Noto_Serif_Devanagari,
   Noto_Serif_Bengali,
@@ -17,7 +18,8 @@ import { LanguageProvider } from "@/lib/i18n/provider";
 import { TopNav } from "@/components/layout/TopNav";
 import { MobileNav } from "@/components/layout/MobileNav";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
+const grotesk = Space_Grotesk({ variable: "--font-display-latin", subsets: ["latin"], weight: ["500"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 const devanagari = Noto_Serif_Devanagari({
   variable: "--font-devanagari",
@@ -71,16 +73,28 @@ export const metadata: Metadata = {
     "Multilingual AI assistant for cooperative governance, PMFBY, PACS, financial literacy and grievance redressal.",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${devanagari.variable} ${bengali.variable} ${tamil.variable} ${telugu.variable} ${kannada.variable} ${gurmukhi.variable} ${gujarati.variable} ${odia.variable} ${malayalam.variable} h-full antialiased`}
+      className={`${inter.variable} ${grotesk.variable} ${geistMono.variable} ${devanagari.variable} ${bengali.variable} ${tamil.variable} ${telugu.variable} ${kannada.variable} ${gurmukhi.variable} ${gujarati.variable} ${odia.variable} ${malayalam.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
+        <a href="#content" className="skip-link">
+          Skip to content
+        </a>
         <LanguageProvider>
           <TopNav />
-          <main className="flex-1 pb-16 md:pb-0">{children}</main>
+          <main id="content" className="flex flex-1 pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
+            <div className="rail-frame mx-auto w-full max-w-[1440px]">
+              {children}
+            </div>
+          </main>
           <MobileNav />
         </LanguageProvider>
       </body>

@@ -6,6 +6,8 @@ import { useTranslatedFields } from "@/lib/useTranslatedFields";
 import { Input } from "@/components/ui/Input";
 import { Chips } from "@/components/ui/Chips";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Reveal } from "@/components/motion/Reveal";
+import { Stagger } from "@/components/motion/Stagger";
 import Link from "next/link";
 import { IconChevronRight } from "@/components/ui/Icons";
 
@@ -44,39 +46,44 @@ export default function FaqPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-[var(--space-4)] py-[var(--space-8)]">
-      <h1 className="font-[var(--font-display)] text-[var(--text-3xl)] font-[var(--font-medium)] tracking-tight text-[var(--text-primary)]">{t("faq.title")}</h1>
-      <p className="mt-[var(--space-1)] text-[var(--text-secondary)]">{t("faq.subtitle")}</p>
-      <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("faq.searchPlaceholder")} className="mt-4 max-w-sm" />
-      <div className="mt-4">
-        <Chips<Filter>
-          options={categories}
-          value={cat}
-          onChange={setCat}
-          render={(c) => (c === "all" ? t("common.all") : t(`faqCategory.${c}`))}
-        />
-      </div>
+    <div className="px-4 py-[var(--space-8)] md:px-6">
+      <Reveal trigger="load">
+        <h1 className="display text-3xl tracking-tight text-[var(--ink)] md:text-4xl">{t("faq.title")}</h1>
+        <p className="mt-1 text-[var(--text-body)]">{t("faq.subtitle")}</p>
+        <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("faq.searchPlaceholder")} className="mt-4 max-w-sm" />
+        <div className="mt-4">
+          <Chips<Filter>
+            options={categories}
+            value={cat}
+            onChange={setCat}
+            render={(c) => (c === "all" ? t("common.all") : t(`faqCategory.${c}`))}
+          />
+        </div>
+      </Reveal>
       {filtered.length === 0 ? (
         <div className="mt-6"><EmptyState title={t("faq.empty")} /></div>
       ) : (
-        <ul className="mt-6 space-y-3">
+        <Stagger as="ul" className="mt-6 space-y-3">
           {filtered.map((f) => {
             const isOpen = open.has(f.id);
             return (
-              <li key={f.id} className="rounded-[var(--radius-xl)] border border-[var(--border-default)] bg-[var(--surface-overlay)]">
+              <li key={f.id} className={`rounded-[var(--radius-md)] border transition-colors duration-[200ms] ${isOpen ? "border-[var(--border-hover)] bg-[var(--cream)]" : "border-[var(--border-soft)] bg-[var(--canvas)]"}`}>
                 <button
                   type="button"
                   aria-expanded={isOpen}
                   onClick={() => toggle(f.id)}
-                  className="flex w-full items-center justify-between gap-2 px-[var(--space-4)] py-[var(--space-4)] text-left focus-visible:ring-2 focus-visible:ring-[var(--border-focus)]"
+                  className="flex w-full items-center justify-between gap-3 px-[var(--space-4)] py-[var(--space-4)] text-left font-answer"
                 >
-                  <span className="font-[var(--font-semibold)] text-[var(--text-primary)]">{f.question}</span>
-                  <IconChevronRight className={`w-5 h-5 shrink-0 text-[var(--text-tertiary)] transition ${isOpen ? "rotate-90" : ""}`} />
+                  <span className="font-medium text-[var(--ink)]">{f.question}</span>
+                  <IconChevronRight className={`h-5 w-5 shrink-0 text-[var(--text-faint)] transition-transform duration-[200ms] ${isOpen ? "rotate-90" : ""}`} />
                 </button>
                 {isOpen && (
                   <div className="px-[var(--space-4)] pb-[var(--space-4)]">
-                    <p className="text-sm text-[var(--text-secondary)]">{f.answer}</p>
-                    <Link href={`/chat?q=${encodeURIComponent(f.question)}`} className="mt-3 inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[var(--text-base)] font-[var(--font-medium)] transition focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] bg-[var(--color-pill)] text-[var(--text-primary)] hover:bg-[var(--surface-overlay)]">
+                    <p className="font-answer text-[var(--text-base)] leading-relaxed text-[var(--text-body)]">{f.answer}</p>
+                    <Link
+                      href={`/chat?q=${encodeURIComponent(f.question)}`}
+                      className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-[var(--radius-cta)] border border-[var(--ink)] bg-[var(--canvas)] px-4 text-sm font-semibold text-[var(--ink)] transition-colors duration-[200ms] hover:bg-[var(--cream-2)]"
+                    >
                       {t("faq.askInChat")}
                     </Link>
                   </div>
@@ -84,7 +91,7 @@ export default function FaqPage() {
               </li>
             );
           })}
-        </ul>
+        </Stagger>
       )}
     </div>
   );

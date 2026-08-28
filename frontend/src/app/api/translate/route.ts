@@ -41,7 +41,7 @@ export async function POST(req: Request) {
         "Ocp-Apim-Subscription-Region": process.env.AZURE_TRANSLATOR_REGION ?? "global",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ text: texts as string[] }),
+      body: JSON.stringify((texts as string[]).map((text) => ({ text }))),
     });
 
     if (!res.ok) {

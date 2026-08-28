@@ -24,24 +24,28 @@ export function MoreSheet({ open, onClose }: { open: boolean; onClose: () => voi
   if (!open) return null;
   return (
     <>
-      <div className="fixed inset-0 z-30 bg-black/50" aria-hidden="true" onClick={onClose} />
+      <div className="fixed inset-0 z-30 bg-[#201515]/45" aria-hidden="true" onClick={onClose} />
       <div
         role="dialog"
+        aria-modal="true"
         aria-label="More"
-        className="fixed inset-x-0 bottom-0 z-40 rounded-t-[var(--radius-xl)] border-t border-[var(--border-default)] bg-[var(--surface-base)] pb-[env(safe-area-inset-bottom)]"
+        className="fixed inset-x-0 bottom-0 z-40 rounded-t-[var(--radius-md)] border-t border-[var(--border-soft)] bg-[var(--canvas)] pb-[env(safe-area-inset-bottom)]"
       >
-        <div className="grid grid-cols-3 gap-2 px-[var(--space-4)] py-[var(--space-4)] md:hidden">
-          {MORE_LINKS.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              onClick={onClose}
-              className="flex flex-col items-center gap-1 rounded-[var(--radius-lg)] py-[var(--space-3)] text-[var(--text-sm)] text-[var(--text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--border-focus)]"
-            >
-              {l.icon}
-              <span>{t(l.key)}</span>
-            </Link>
-          ))}
+        <div className="mx-auto max-w-[1440px] px-4 py-5 lg:hidden">
+          <div className="mb-3 h-[3px] w-10 rounded-full bg-[var(--border-default)]" aria-hidden="true" />
+          <div className="grid grid-cols-3 gap-2">
+            {MORE_LINKS.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                onClick={onClose}
+                className="flex flex-col items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--cream)] py-4 text-sm text-[var(--ink)] transition-colors hover:bg-[var(--cream-2)]"
+              >
+                {l.icon}
+                <span>{t(l.key)}</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </>

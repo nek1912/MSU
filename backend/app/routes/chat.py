@@ -83,7 +83,7 @@ def chat(req: ChatRequest) -> dict:
     lang = normalize_language(req.language, req.question)
     try:
         provider = get_embedding_provider()          # cached singleton (P0-1)
-        embedding = provider.embed_texts([req.question])[0]
+        embedding = provider.embed_texts([req.question], task="retrieval.query")[0]
         domain, _score = get_anchor_store().classify(req.question, embedding)
         # Session is authoritative for jurisdiction (P1-7): explicit request
         # state updates it; a null state continues the session's prior state.

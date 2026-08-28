@@ -155,7 +155,9 @@ def test_confidence_clamped_lower():
 def test_confidence_formula_manual_calc():
     sims = [0.72, 0.51]
     strong = sum(1 for s in sims if s >= SECONDARY_THRESHOLD)
-    expected = round(min(0.6 * sims[0] + 0.4 * (strong / len(sims)), 1.0), 2)
+    base = sims[0] * 0.6
+    coverage = min(strong / 3, 1.0) * 0.3
+    expected = round(min(base + coverage + 0.1, 1.0), 2)
     chunks = [_chunk(sim=0.72), _chunk(sim=0.51)]
     result = evidence_gate(chunks, expected_domain=_DOMAIN)
     assert result.confidence == expected

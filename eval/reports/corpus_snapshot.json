@@ -1,8 +1,16 @@
 {
-  "corpus_hash": "a4464db296cb847114af888743edd0e85a6d9400717eec6fa2b4f1cd0e1049aa",
-  "source_count": 10,
-  "document_count": 12,
-  "chunk_count": 0,
-  "ingestion_timestamp": "2026-08-26T18:52:38.323791+00:00",
-  "seeds_dir": "D:\\Downloads\\New folder\\corpus\\seeds"
+  "corpus_hash": "2fc08e7d9e959de4",
+  "document_count": 5,
+  "chunk_count": 226,
+  "source_ids": [
+    "nsfi_2025_30",
+    "pacs_computerization_corrigendum_2023_06_12",
+    "pacs_computerization_guidelines",
+    "pacs_model_bylaws_2023",
+    "pmfby_operational_guidelines"
+  ],
+  "embedding_model": "jina-embeddings-v3",
+  "embedding_dimension": 768,
+  "git_commit": "861bae9",
+  "timestamp": "2026-08-28"
 }

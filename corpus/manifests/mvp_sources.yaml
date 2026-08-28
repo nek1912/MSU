@@ -62,8 +62,8 @@ sources:
     base_incorporates: null
 
   - source_id: pacs_computerization_corrigendum_2023_06_12
-    filename: "Corrigendum and letter Jun 12, 2023.pdf"
-    path: "corpus/seeds/Corrigendum and letter Jun 12, 2023.pdf"
+    filename: "Corrigendum and letter Jun 12, 2023.md"
+    path: "corpus/seeds/Corrigendum and letter Jun 12, 2023.md"
     actual_title: "Corrigendum dated 12.06.2023 to the Project Guidelines of the Computerization of PACS Project"
     issuing_organization: "Ministry of Cooperation, Government of India"
     document_date: "2023-06-12"
@@ -105,12 +105,12 @@ sources:
     verification_note: "Keep the exact document/version date from the PDF itself; do not infer it from the filename."
 
   - source_id: nsfi_2025_30
-    filename: "NSFI_2025_30.pdf"
-    path: "corpus/seeds/NSFI_2025_30.pdf"
+    filename: "NSFI_2025_30.md"
+    path: "corpus/seeds/NSFI_2025_30.md"
     actual_title: "National Strategy for Financial Inclusion (NSFI): 2025-30"
     issuing_organization: "Reserve Bank of India"
-    document_date: "2025-12"
-    effective_date: "2025-12"
+    document_date: "2025-12-01"
+    effective_date: "2025-12-01"
     document_type: "national_strategy"
     jurisdiction: "central"
     state: null

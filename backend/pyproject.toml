@@ -24,3 +24,7 @@ line-length = 100
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+markers = [
+    "integration: requires live Supabase (deselect with '-m not integration')",
+]
+addopts = "-m 'not integration'"

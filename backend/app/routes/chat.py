@@ -18,7 +18,9 @@ from app.citation_verifier import verify_citations as verify_citations_v2
 from app.db import get_supabase
 from app.domains import get_anchor_store
 from app.evidence_gate import evidence_gate_v2
-from app.generation import SYSTEM_PROMPT, CitationError, build_user_prompt, verify_citations
+from app.generation import (CitationError, build_general_prompt, build_system_prompt,
+                            build_user_prompt, general_disclaimer, verify_citations,
+                            GENERAL_SYSTEM_PROMPT)
 from app.hybrid_retrieval import retrieve_hybrid
 from app.language import normalize_language
 from app.llm_fallback import AllProvidersFailedError, grounded_answer
@@ -90,18 +92,30 @@ def chat(req: ChatRequest) -> dict:
         resolved_state = req.state if req.state is not None else get_state(req.session_id)
         touch_session(req.session_id, resolved_state, lang)
         if domain == "out_of_scope":
-            return _abstain(lang, "out_of_scope")
+            # Out-of-scope: let the LLM answer from its own knowledge rather
+            # than abstain. Not grounded in official sources — flagged as such.
+            general_answer = grounded_answer(
+                GroqLLMProvider(settings), GeminiLLMProvider(settings),
+                GENERAL_SYSTEM_PROMPT, build_general_prompt(req.question, lang))
+            return {"answer": f"{general_answer}\n\n{general_disclaimer(lang)}",
+                    "language": lang, "domain": "out_of_scope",
+                    "confidence": 0.0, "citations": [], "abstained": False,
+                    "follow_up_question": None}
 
         # --- Hybrid retrieval (Stage 5) ---
+        # When the reranker is enabled, pull a larger candidate pool (top 25)
+        # so the reranker can re-order and the final top-5/6 reflects true
+        # relevance rather than just dense/lexical score.
+        k = 25 if settings.RERANKER_ENABLED else 6
         chunks = retrieve_hybrid(
-            get_supabase(), embedding, req.question, domain, resolved_state,
+            get_supabase(), embedding, req.question, domain, resolved_state, k=k,
         )
 
-        # Optional reranker (Stage 6)
+        # Optional reranker (Stage 6): hybrid top-25 -> rerank -> top-6 -> gate
         if settings.RERANKER_ENABLED:
             reranker = JinaReranker()
             docs_for_rerank = [{"chunk_id": c.chunk_id, "content": c.content} for c in chunks]
-            reranked = reranker.rerank(req.question, docs_for_rerank)
+            reranked = reranker.rerank(req.question, docs_for_rerank, top_n=6)
             chunks_by_id = {c.chunk_id: c for c in chunks}
             chunks = [chunks_by_id[r["chunk_id"]] for r in reranked if r["chunk_id"] in chunks_by_id]
 
@@ -115,7 +129,8 @@ def chat(req: ChatRequest) -> dict:
 
         prompt = build_user_prompt(req.question, chunks)
         answer = grounded_answer(GroqLLMProvider(settings),
-                                 GeminiLLMProvider(settings), SYSTEM_PROMPT, prompt)
+                                 GeminiLLMProvider(settings),
+                                 build_system_prompt(lang), prompt)
 
         # --- Citation verification v2 (Stage 8) ---
         chunk_ids = [c.chunk_id for c in chunks]

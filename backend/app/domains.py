@@ -44,11 +44,17 @@ def load_anchor_store(embed_texts, rules_path: Path = DATA_DIR / "keyword_rules.
     return AnchorStore(load_rules(rules_path), domain_vectors)
 
 
+_anchor_store_singleton: "AnchorStore | None" = None
+
+
 def get_anchor_store() -> AnchorStore:
     """Process-wide singleton. The route MUST call THIS, never
     `load_anchor_store(provider.embed_texts)` directly — a fresh bound method
     per request would defeat the cache and re-embed all ~70 anchors on every
     `/chat` (P0-1). First call costs ~70 embedding requests; the FastAPI
     startup hook (Task 11) warms it so no user request ever pays for it."""
-    from app.providers.embeddings import get_embedding_provider
-    return load_anchor_store(get_embedding_provider().embed_texts)
+    global _anchor_store_singleton
+    if _anchor_store_singleton is None:
+        from app.providers.embeddings import get_embedding_provider
+        _anchor_store_singleton = load_anchor_store(get_embedding_provider().embed_texts)
+    return _anchor_store_singleton

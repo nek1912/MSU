@@ -1,4 +1,5 @@
 import time
+from collections import deque
 from functools import lru_cache
 
 import httpx
@@ -7,14 +8,39 @@ from app.config import EMBED_DIMS, REQUEST_TIMEOUT_S, Settings, get_settings
 
 _RETRYABLE_STATUS = {429, 500, 502, 503, 504}
 
+# Jina free tier: 100k tokens/minute. Pace below that to avoid persistent 429s.
+_TPM_LIMIT = 85_000
+_TPM_WINDOW_S = 60.0
+
+
+def _approx_tokens(text: str) -> int:
+    # Rough tokenizer-free estimate (~4 chars/token) for client-side throttling.
+    return max(1, len(text) // 4)
+
 
 class JinaEmbeddingProvider:
     def __init__(self, settings: Settings):
         self._key = settings.jina_api_key
         self._endpoint = "https://api.jina.ai/v1/embeddings"
         self._model = settings.jina_embed_model
-        self._max_attempts = 3
-        self._base_delay = 1.0
+        self._max_attempts = 5
+        self._base_delay = 2.0
+        self._token_log: deque[tuple[float, int]] = deque()
+
+    def _throttle(self, n_tokens: int) -> None:
+        """Block until sending `n_tokens` keeps us under the TPM budget."""
+        now = time.monotonic()
+        cutoff = now - _TPM_WINDOW_S
+        while self._token_log and self._token_log[0][0] < cutoff:
+            self._token_log.popleft()
+        used = sum(t for _, t in self._token_log)
+        if used + n_tokens > _TPM_LIMIT:
+            wait = _TPM_WINDOW_S - (now - self._token_log[0][0]) + 0.5
+            if wait > 0:
+                time.sleep(min(wait, _TPM_WINDOW_S))
+            self._throttle(n_tokens)
+        else:
+            self._token_log.append((time.monotonic(), n_tokens))
 
     def _embed_batch(self, texts: list[str], client: httpx.Client, task: str = "retrieval.passage") -> list[list[float]]:
         last_exc: Exception | None = None
@@ -31,8 +57,11 @@ class JinaEmbeddingProvider:
                         "input": texts,
                         "dimensions": EMBED_DIMS,
                         "task": task,
+                        "truncate": True,
                     },
                 )
+                if r.status_code >= 400:
+                    raise RuntimeError(f"Jina embedding HTTP {r.status_code}: {r.text[:600]}")
                 r.raise_for_status()
                 data = r.json()["data"]
                 # Sort by index to maintain order
@@ -50,15 +79,17 @@ class JinaEmbeddingProvider:
     def embed_texts(self, texts: list[str], task: str = "retrieval.passage") -> list[list[float]]:
         if not texts:
             return []
-        # Jina supports batch embedding - process in chunks of 100
+        # Jina supports batch embedding - process in chunks of 100.
+        # Pace batches by approximate tokens to stay under the free-tier TPM cap.
         all_embeddings = []
         with httpx.Client(timeout=60.0) as client:
             for i in range(0, len(texts), 100):
                 batch = texts[i:i+100]
+                self._throttle(sum(_approx_tokens(t) for t in batch))
                 embeddings = self._embed_batch(batch, client, task=task)
                 all_embeddings.extend(embeddings)
                 if i + 100 < len(texts):
-                    time.sleep(0.5)  # Small delay between batches
+                    time.sleep(0.2)
         return all_embeddings
 
 

@@ -11,3 +11,15 @@ coverage/
 *.egg-info/
 build/
 dist/
+
+# Scratch / debug / one-off eval outputs (not project logic)
+debug_*.py
+check_*.py
+quick_test.py
+*.log
+NOTES.md
+PROJECT_CONTEXT.md
+RAG-SKILL.md
+artifacts/
+references/
+supabase/.temp/

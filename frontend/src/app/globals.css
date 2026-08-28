@@ -1,26 +1,380 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+
+  /* --------------------------------------------------------------------
+     Zapier warm-editorial palette — paper & ink, no cool gray anywhere.
+     Every neutral is warmed toward brown; the accent is a single orange.
+     -------------------------------------------------------------------- */
+
+  /* Canvas & surfaces */
+  --background: #fffefb;
+  --foreground: #201515;
+  --ink: #201515;
+
+  --surface-base: #fffefb;        /* page canvas (warm off-white) */
+  --surface-underlay: #f8f4f0;    /* cream band */
+  --surface-elevated: #fffefb;    /* cards: canvas fill, separated by rails */
+  --surface-overlay: #f8f4f0;     /* inputs, hover, chips rest */
+
+  /* Canonical Zapier surface names */
+  --canvas: #fffefb;
+  --cream: #f8f4f0;
+  --cream-2: #eceae3;             /* card fill, rail hairline, tab rest */
+  --dark: #201515;                /* inverted full-bleed sections / filled buttons */
+  --plum: #381933;                /* skip-link chip */
+
+  /* Text — warm ink ramp */
+  --text-primary: #201515;
+  --text-body: #36342e;
+  --text-secondary: #36342e;      /* body copy (most common) */
+  --text-tertiary: #605d52;       /* eyebrow / muted */
+  --text-faint: #939084;          /* meta / caption */
+  --text-inverse: #fffefb;        /* on dark / filled */
+  --on-dark: #eceae3;             /* body on inverted */
+  --on-dark-strong: #fffefb;      /* headings on inverted */
+  --on-dark-muted: #c5c0b1;       /* muted on dark */
+
+  /* Accent — Zapier orange. One accent only. */
+  --accent-primary: #ff4f00;
+  --accent-hover: #e64500;
+  --accent-active: #cc3d00;
+  --accent-contrast: #fffefb;     /* text on solid orange */
+  --accent-tint-soft: rgba(255, 79, 0, 0.07);
+  --accent-tint-strong: rgba(255, 79, 0, 0.14);
+
+  /* Borders */
+  --border-default: #c5c0b1;
+  --border-medium: #c5c0b1;
+  --border-hover: #9a9483;
+  --border-focus: #ff4f00;
+  --border-soft: #eceae3;         /* rails + hairline */
+
+  /* State — warmed, reserved for functional badges/bands only */
+  --state-error: #b0302f;
+  --state-success: #2f7d43;
+  --state-warning: #a8611a;
+
+  /* Typography - Font Family */
+  --font-primary: var(--font-inter), var(--font-script), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-latin), var(--font-script), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+
+  /* Answer serif: Georgia for Latin, the locale's Noto Serif script for Indic */
+  --font-answer: Georgia, "Times New Roman", var(--font-script), ui-serif, serif;
+
+  /* Decoration palette — reserved for source & category tags only */
+  --deco-teal: #16828f;
+  --deco-blue: #3f6fa3;
+  --deco-green: #4f8043;
+  --deco-gold: #a9791f;
+  --deco-indigo: #5d6fc4;
+  --deco-lime: #7c8a2c;
+  --deco-magenta: #a54d8c;
+  --deco-orange: #c15c2a;
+  --deco-pink: #b04b5f;
+  --deco-purple: #7e5aa6;
+
+  /* Typography - Font Size */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-4xl: 40px;
+
+  /* Typography - Line Height */
+  --leading-tight: 1.1;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.7;
+
+  /* Typography - Font Weight */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 550;
+  --font-bold: 600;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radius — in-page CTAs are near-square, nav pill is the exception */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+  --radius-cta: 4px;              /* every in-page CTA */
+  --radius-pill: 18px;            /* nav sign-up pill only */
+
+  /* Motion easing */
+  --ease-out-cubic: cubic-bezier(0.33, 1, 0.68, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-soft: cubic-bezier(0.36, 1.3, 0.64, 1);
+
+  /* Signature ask-input / focus glow — animated outward orange */
+  --ask-glow: 0 0 0 4px rgba(255, 79, 0, 0.25), 0 0 36px 4px rgba(255, 79, 0, 0.12);
+  --focus-glow: 0 0 0 3px rgba(255, 79, 0, 0.32);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-primary);
+  --font-display: var(--font-display);
+  --font-answer: var(--font-answer);
+  --font-mono: var(--font-mono);
+
+  /* Surface */
+  --color-surface-base: var(--surface-base);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-overlay: var(--surface-overlay);
+
+  /* Text */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-inverse: var(--text-inverse);
+
+  /* Accent */
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-active: var(--accent-active);
+
+  /* Border */
+  --color-border-default: var(--border-default);
+  --color-border-hover: var(--border-hover);
+  --color-border-focus: var(--border-focus);
+
+  /* State */
+  --color-state-error: var(--state-error);
+  --color-state-success: var(--state-success);
+  --color-state-warning: var(--state-warning);
+
+  /* Tints & fills */
+  --color-accent-tint: var(--accent-tint-soft);
+  --color-pill: var(--cream);
+  --color-surface-tint: var(--cream);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Typography - Script Font Mapping (answers fall to the locale's serif script) */
+:root,
+[lang="hi"],
+[lang="mr"] {
+  --font-script: var(--font-devanagari);
+}
+html[data-locale="bn"] { --font-script: var(--font-bengali); }
+html[data-locale="ta"] { --font-script: var(--font-tamil); }
+html[data-locale="te"] { --font-script: var(--font-telugu); }
+html[data-locale="kn"] { --font-script: var(--font-kannada); }
+html[data-locale="pa"] { --font-script: var(--font-gurmukhi); }
+html[data-locale="gu"] { --font-script: var(--font-gujarati); }
+html[data-locale="or"] { --font-script: var(--font-odia); }
+html[data-locale="ml"] { --font-script: var(--font-malayalam); }
+
+@layer base {
+  body {
+    background: var(--surface-base);
+    color: var(--text-primary);
+    font-family: var(--font-primary);
+    font-size: 16px;
+    line-height: var(--leading-normal);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Tailwind v4 preflight sets buttons to cursor:default — restore affordance. */
+  button,
+  [role="button"],
+  summary,
+  a,
+  select,
+  input[type="checkbox"],
+  input[type="radio"] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
+  /* Default visible focus — warm ink outline, keeps contrast on any fill. */
+  :focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Editorial display defaults */
+.display {
+  font-family: var(--font-display);
+  font-weight: var(--font-medium);
+  letter-spacing: -0.01em;
 }
+
+/* Eyebrow — the one tracked, uppercase role */
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: var(--font-medium);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+/* Vertical rail grid — the page's primary structural device.
+   Apply to a full-height wrapper to draw 1px rails at the container edges. */
+.rail-frame {
+  position: relative;
+  border-inline: 1px solid var(--border-soft);
+}
+
+/* Accessible skip link — plum chip, sits on the canvas */
+.skip-link {
+  position: absolute;
+  left: var(--space-3);
+  top: calc(-1 * var(--space-16));
+  z-index: 100;
+  display: inline-flex;
+  align-items: center;
+  height: 33px;
+  padding: 4px 16px;
+  border-radius: 0 0 6px 6px;
+  background: var(--plum);
+  color: var(--on-dark-strong);
+  font-size: 14px;
+  font-weight: var(--font-normal);
+  transition: top var(--ease-out-cubic) 0.2s;
+}
+.skip-link:focus-visible {
+  top: 0;
+  outline: none;
+}
+
+/* Signature glowing ask-input */
+.ask-input-wrap {
+  transition:
+    box-shadow 0.35s var(--ease-out-soft),
+    border-color 0.35s var(--ease-out-soft),
+    background-color 0.35s var(--ease-out-soft);
+}
+.ask-input-wrap:focus-within {
+  box-shadow: var(--ask-glow);
+  border-color: var(--accent-primary);
+}
+
+/* Hide scrollbars on horizontally-scrolling chip rows (keep scrollability) */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Plain text link */
+.link {
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--border-hover);
+  transition: color 0.2s var(--ease-out-cubic), text-decoration-color 0.2s var(--ease-out-cubic);
+}
+.link:hover {
+  color: var(--accent-hover);
+  text-decoration-color: var(--accent-hover);
+}
+
+/* Animated Floating Label Input Component */
+.input-container {
+  position: relative;
+  width: 100%;
+  padding-top: 20px;
+  padding-bottom: 4px;
+}
+
+.input-field {
+  display: block;
+  width: 100%;
+  padding: 8px 0;
+  font-size: 16px;
+  color: var(--ink);
+  border: none;
+  border-bottom: 2px solid var(--border-default);
+  outline: none;
+  background-color: transparent;
+  transition: border-color 0.3s ease;
+}
+
+.input-label {
+  position: absolute;
+  top: 28px;
+  left: 0;
+  font-size: 15px;
+  color: var(--text-tertiary);
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.input-highlight {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  height: 2px;
+  width: 0;
+  background-color: var(--accent-primary);
+  transition: all 0.3s ease;
+}
+
+/* Input field:focus & filled styles */
+.input-field:focus + .input-label,
+.input-field:not(:placeholder-shown) + .input-label {
+  top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-primary);
+}
+
+.input-field:focus + .input-label + .input-highlight {
+  width: 100%;
+}
+
+.input-field[aria-invalid="true"] {
+  border-bottom-color: var(--state-error);
+}
+
+.input-field[aria-invalid="true"] + .input-label {
+  color: var(--state-error);
+}
+
+.input-field[aria-invalid="true"] + .input-label + .input-highlight {
+  background-color: var(--state-error);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ask-input-wrap,
+  .ask-input-wrap:focus-within,
+  .input-label,
+  .input-highlight {
+    transition: none;
+  }
+  .skip-link {
+    transition: none;
+  }
+  .animate-spin {
+    animation: none;
+  }
+}
+
+

@@ -1,0 +1,76 @@
+"use client";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useI18n } from "@/lib/i18n/provider";
+import { getLegalDoc, legalDocs as rawLegalDocs } from "@/lib/data";
+import { useTranslatedFields } from "@/lib/useTranslatedFields";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Reveal } from "@/components/motion/Reveal";
+import { Stagger } from "@/components/motion/Stagger";
+import { IconChevronRight } from "@/components/ui/Icons";
+import { deco } from "@/lib/data/deco";
+
+const SECTIONS = ["keyProvisions", "applicability", "byLaws"] as const;
+
+export default function LegalDetailPage() {
+  const { slug } = useParams<{ slug: string }>();
+  const { t, locale } = useI18n();
+  const doc = getLegalDoc(locale, slug);
+  const rawItem = doc ? rawLegalDocs.find((d) => d.slug === slug) : undefined;
+  const translated = useTranslatedFields({
+    locale,
+    items: doc ? [doc] : [],
+    rawItems: (rawItem ? [rawItem] : []) as never,
+    textFields: ["title", "badge", "overview"],
+    listFields: ["keyProvisions", "applicability", "byLaws"],
+  });
+  const sc = translated[0] ?? doc;
+  if (!sc) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-[var(--space-8)] md:px-6">
+        <EmptyState title={t("legal.notFound")} action={<Link href="/legal" className="text-sm text-[var(--accent-primary)] underline">{t("nav.legal")}</Link>} />
+      </div>
+    );
+  }
+  return (
+    <div className="mx-auto max-w-4xl px-4 py-[var(--space-8)] md:px-6">
+      <Reveal trigger="load">
+        <div className="rounded-[var(--radius-md)] border border-[var(--border-soft)] border-l-[3px] border-l-[var(--accent-primary)] bg-[var(--cream)] p-6 md:p-8">
+          <Badge deco={deco(sc.category)}>{t(`legalCategory.${sc.category}`)}</Badge>
+          <h1 className="mt-3 display text-3xl tracking-tight text-[var(--ink)]">{sc.title}</h1>
+          <p className="mt-1 text-[var(--text-body)]">{sc.overview}</p>
+          <Link href={`/chat?q=${encodeURIComponent("Tell me about " + sc.title)}`}>
+            <Button className="mt-4">
+              {t("legal.askThisLaw")}
+              <IconChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
+        </div>
+      </Reveal>
+      <Stagger className="mt-6 space-y-6">
+        <section className="rounded-[var(--radius-xl)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-[var(--space-6)]">
+          <h2 className="font-[var(--font-semibold)] text-[var(--text-primary)]">{t("legal.overview")}</h2>
+          <p className="mt-2 font-[var(--font-answer)] text-[var(--text-base)] leading-relaxed text-[var(--text-secondary)]">{sc.overview}</p>
+        </section>
+        {SECTIONS.map((s) => (
+          <section key={s} className="rounded-[var(--radius-xl)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-[var(--space-6)]">
+            <h2 className="font-[var(--font-semibold)] text-[var(--text-primary)]">{t(`legal.${s}`)}</h2>
+            <ul className="mt-2 font-[var(--font-answer)] list-disc space-y-1 pl-5 text-[var(--text-base)] leading-relaxed text-[var(--text-secondary)]">
+              {sc[s].map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ul>
+          </section>
+        ))}
+        <section className="rounded-[var(--radius-xl)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-[var(--space-6)]">
+          <h2 className="font-[var(--font-semibold)] text-[var(--text-primary)]">{t("legal.source")}</h2>
+          <a href={sc.source.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm text-[var(--accent-primary)] underline">
+            {sc.source.label}
+          </a>
+        </section>
+      </Stagger>
+    </div>
+  );
+}

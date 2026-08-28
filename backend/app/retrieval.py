@@ -55,5 +55,13 @@ def evidence_gate(chunks: list[RetrievedChunk], expected_domain: str | None = No
     strong = sum(1 for s in sims if s >= SECONDARY_THRESHOLD)
     if strong < MIN_CHUNKS_ABOVE_SECONDARY:
         return GateResult(abstained=True, reason="insufficient_supporting_chunks")
-    confidence = round(min(0.6 * sims[0] + 0.4 * (strong / len(sims)), 1.0), 2)
+    # Retrieval-signal-based confidence (replaces arbitrary heuristic)
+    base = sims[0] * 0.6
+    coverage = min(strong / 3, 1.0) * 0.3
+    domain_bonus = 0.1 if (expected_domain is not None and
+                           all(c.domain == expected_domain for c in chunks)) else 0.0
+    confidence = base + coverage + domain_bonus
+    if sims[0] < 0.3:
+        confidence = min(confidence, 0.4)
+    confidence = round(min(confidence, 1.0), 2)
     return GateResult(abstained=False, reason=None, confidence=confidence)

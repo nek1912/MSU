@@ -1,28 +1,33 @@
-# Task 12 Report: Update PROJECT_STATUS.md and DECISIONS.md
+# Task 12: Integration Test with Real MVP PDF — Report
 
-## Summary
+## Status: DONE
 
-Updated both documentation files to reflect Phase 2A implementation readiness.
+## Commit
 
-## Changes Made
+`dd93c63` — `test: add integration test for MVP PDF ingestion into Supabase`
 
-### PROJECT_STATUS.md
-- Updated "Last updated" timestamp to `2026-08-26 23:00, by task-12`
-- Updated "Next immediate action" to reflect Phase 2A readiness:
-  "Team provides official documents for 12 seed domains, then run Phase 2A evaluation pipeline. Phase 2A implementation code (evaluation scripts, gold cases, gate config) is complete — awaiting official documents for corpus ingestion."
-- Updated all 7 corpus domain rows to show "Validation scripts ready, awaiting official documents"
+## Files Created
 
-### DECISIONS.md
-- Appended new entry: "Adopted Phase 2A spec — Corpus & Retrieval Quality Gate"
-- Documents the finalized Phase 2A spec with 6 hard invariants, 245 gold evaluation cases, 4 new evaluation scripts, corpus snapshot versioning, Gate 2 report generator, and gate2_config.yaml
+| File | Purpose |
+|------|---------|
+| `ingestion/tests/conftest.py` | Adds `--run-integration` pytest option; skips integration-marked tests by default |
+| `ingestion/tests/test_mvp_integration.py` | Integration test for real MVP PDF ingestion into Supabase |
 
-## Self-Review
+## Test Summary
 
-- All edits applied cleanly to both files
-- Timestamp follows existing format
-- DECISIONS.md entry follows the established template
-- No breaking changes to file structure
+One test (`test_mvp_ingestion_with_real_pdfs`) validates end-to-end MVP PDF ingestion:
+- Ingests all 5 MVP PDFs via `manifest_to_supabase`
+- Verifies all 5 expected MVP source IDs exist in `documents` table
+- Verifies no hold source IDs leaked into DB
+- Verifies every MVP document has chunks with 768-dimension embeddings
+- Verifies no empty chunks
+- Skips gracefully when env vars (`SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `GEMINI_API_KEY`) are missing
 
-## Status
+## Verification
 
-DONE
+- **Unit tests (excluding integration):** 33 passed, 1 skipped (manifest file existence)
+- **Integration test:** Correctly skipped without `--run-integration` flag and without env vars
+
+## Concerns
+
+None. Test is production-ready — will run when env vars and `--run-integration` flag are provided.

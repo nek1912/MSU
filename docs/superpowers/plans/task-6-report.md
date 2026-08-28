@@ -1,30 +1,35 @@
-# Task 6: Create unsupported-query evaluation script + 30 cases
+# Task 6 Report: Extraction Validation (Fail-Loud)
 
-**Status:** DONE
+## Status: DONE
 
-## Files Created
+## What was done
 
-1. `eval/unsupported_cases.yaml` — 30 deliberately unanswerable questions
-2. `eval/run_unsupported_eval.py` — evaluation script for Invariant 5
+Added `validate_extraction()` to the PDF extraction pipeline that fails loudly when extracted content is empty, whitespace-only, or shorter than 50 characters.
 
-## Test Cases
+## Files modified
 
-- 28 out-of-scope questions (completely outside corpus scope)
-- 2 ambiguous questions (agriculture/finlit domain but unanswerable from corpus)
+| File | Change |
+|------|--------|
+| `ingestion/ingestion/pdf_extractor.py` | Added `validate_extraction(content, filename, min_length=50)` function |
+| `ingestion/ingestion/ingest.py` | Added import + validation call after `extract_pdf_to_markdown` |
+| `ingestion/tests/test_extraction_validation.py` | **Created** — 4 new tests |
+| `ingestion/tests/test_error_isolation.py` | Updated mock returns to pass 50-char minimum |
 
-## Script Features
+## Tests added (4)
 
-- Calls `POST /chat` for each question via `--api-url` (default: `http://localhost:8000`)
-- Measures `unsafe_answer_rate`: queries that produced an answer but should have abstained
-- Measures `abstention_rate` as diagnostic metric
-- Hard gate: returns exit code 1 if any unsafe answers detected
-- Writes JSON report to `eval/reports/unsupported_eval.json`
-
-## Verification
-
-- `python eval/run_unsupported_eval.py --help` — shows usage ✓
-- `python -c "import yaml; print(len(yaml.safe_load(open('eval/unsupported_cases.yaml'))), 'cases')"` — prints "30 cases" ✓
+- `test_validate_extraction_empty_raises` — empty string raises ValueError
+- `test_validate_extraction_too_short_raises` — content < 50 chars raises ValueError
+- `test_validate_extraction_valid` — valid content passes through
+- `test_validate_extraction_whitespace_only_raises` — whitespace-only raises ValueError
 
 ## Commit
 
-`feat: add unsupported-query evaluation script and 30 test cases (Invariant 5)`
+`2f21255` — `feat: add extraction validation with fail-loud behavior`
+
+## Test summary
+
+All 26 tests pass (1 skipped: MVP files not present; 2 deselected: slow PDF extraction tests).
+
+## Concerns
+
+None. The existing `test_error_isolation.py` tests needed minor updates because their mocks returned very short strings (e.g. `"# content"`, `"# ok"`) which now correctly fail validation. This is the intended behavior — the validation is doing its job.

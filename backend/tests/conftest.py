@@ -15,6 +15,7 @@ def env_and_route_stubs(monkeypatch):
     monkeypatch.setenv("GEMINI_API_KEY", "test")
     monkeypatch.setenv("SUPABASE_URL", "http://testsupa")
     monkeypatch.setenv("SUPABASE_SERVICE_KEY", "test")
+    monkeypatch.setenv("JINA_API_KEY", "")  # force Gemini provider in tests
     get_settings.cache_clear()
     import app.routes.chat as chat_route
     monkeypatch.setattr(chat_route, "get_anchor_store", lambda: _FakeStore())

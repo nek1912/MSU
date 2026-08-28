@@ -9,10 +9,25 @@ def _load_yaml(relative_path):
         return yaml.safe_load(f)
 
 
-def test_all_source_ids_exist():
-    """Every source_id in gold_cases must exist in sources.yaml."""
+def _get_all_source_ids():
+    """Get all valid source_ids from both sources.yaml and MVP manifest."""
     sources = _load_yaml("sources.yaml")
     source_ids = {s["id"] for s in sources.get("sources", [])}
+    
+    # Also include MVP manifest source_ids
+    try:
+        manifest = _load_yaml("corpus/manifests/mvp_sources.yaml")
+        for s in manifest.get("sources", []):
+            source_ids.add(s["source_id"])
+    except FileNotFoundError:
+        pass
+    
+    return source_ids
+
+
+def test_all_source_ids_exist():
+    """Every source_id in gold_cases must exist in sources.yaml or MVP manifest."""
+    source_ids = _get_all_source_ids()
     cases = _load_yaml("eval/gold_cases.yaml")
 
     missing = set()
@@ -20,7 +35,7 @@ def test_all_source_ids_exist():
         for sid in case.get("relevant_source_ids", []):
             if sid not in source_ids:
                 missing.add(sid)
-    assert not missing, f"Missing source_ids in sources.yaml: {missing}"
+    assert not missing, f"Missing source_ids: {missing}"
 
 
 def test_answerable_has_nonempty_source_ids():

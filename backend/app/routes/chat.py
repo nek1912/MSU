@@ -23,6 +23,7 @@ from app.hybrid_retrieval import retrieve_hybrid
 from app.language import normalize_language
 from app.llm_fallback import AllProvidersFailedError, grounded_answer
 from app.providers.embeddings import get_embedding_provider
+from app.providers.reranker import JinaReranker
 from app.providers.gemini_llm import GeminiLLMProvider
 from app.providers.groq_llm import GroqLLMProvider
 from app.retrieval import RetrievedChunk, retrieve
@@ -95,6 +96,14 @@ def chat(req: ChatRequest) -> dict:
         chunks = retrieve_hybrid(
             get_supabase(), embedding, req.question, domain, resolved_state,
         )
+
+        # Optional reranker (Stage 6)
+        if settings.RERANKER_ENABLED:
+            reranker = JinaReranker()
+            docs_for_rerank = [{"chunk_id": c.chunk_id, "content": c.content} for c in chunks]
+            reranked = reranker.rerank(req.question, docs_for_rerank)
+            chunks_by_id = {c.chunk_id: c for c in chunks}
+            chunks = [chunks_by_id[r["chunk_id"]] for r in reranked if r["chunk_id"] in chunks_by_id]
 
         # --- Evidence gate v2 (Stage 7) ---
         candidates = [_to_candidate(c, resolved_state) for c in chunks]

@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
     groq_api_key: str
     gemini_api_key: str
+    jina_api_key: str = ""
     supabase_url: str
     supabase_service_key: str
     allowed_origins: str = "http://localhost:3000"
@@ -17,6 +18,8 @@ class Settings(BaseSettings):
     groq_model: str = "llama-3.3-70b-versatile"
     gemini_model: str = "gemini-2.5-flash"
     embed_model: str = "gemini-embedding-2"
+    jina_embed_model: str = "jina-embeddings-v3"
+    RERANKER_ENABLED: bool = False  # Feature flag, disabled by default
 
     @property
     def origins(self) -> list[str]:

@@ -108,17 +108,9 @@ def chat(req: ChatRequest) -> dict:
         if domain == "out_of_scope":
             # Controlled out-of-scope response. Invariant #9: out-of-scope
             # queries must NOT receive an ungrounded factual LLM answer. Return
-            # a scoped message rather than generating from general knowledge.
-            return {
-                "answer": ABSTAIN_TEXT.get(lang, ABSTAIN_TEXT["en"]),
-                "language": lang,
-                "domain": "out_of_scope",
-                "confidence": 0.0,
-                "confidence_level": "none",
-                "citations": [],
-                "abstained": True,
-                "follow_up_question": None,
-            }
+            # the standard controlled abstain rather than generating from
+            # general knowledge.
+            return _abstain(lang, "out_of_scope")
 
         # --- Hybrid retrieval (Stage 5) ---
         # When the reranker is enabled, pull a larger candidate pool (top 25)
@@ -160,6 +152,7 @@ def chat(req: ChatRequest) -> dict:
         _band_to_confidence = {"high": 0.9, "medium": 0.7, "low": 0.4}
         confidence = _band_to_confidence.get(band.value, 0.4)
         return {"answer": answer, "language": lang, "domain": domain,
+                "intent": domain, "entities": [],
                 "confidence": confidence,
                 "confidence_level": _confidence_level(confidence),
                 "citations": citations, "abstained": False,
@@ -185,29 +178,35 @@ def _citations_from(answer: str, chunks: list[RetrievedChunk]) -> list[dict]:
     by_uuid = {c.chunk_id: c for c in chunks}
     # Enrich stable metadata (stable_chunk_id, document_id, source_file, page
     # range, section/subsection/clause) from the chunks table — the retrieval
-    # path may not populate all of these fields.
-    supabase = get_supabase()
-    rows = (
-        supabase.table("chunks")
-        .select("id, chunk_id, document_id, section, metadata")
-        .in_("id", list(valid_ids))
-        .execute()
-        .data
-        or []
-    )
+    # path may not populate all of these fields. Best-effort: if the lookup is
+    # unavailable (e.g. mocked test environment or a transient outage) we fall
+    # back to the provenance already carried on the retrieved chunks so citation
+    # construction never hard-fails.
     meta_by_id: dict[str, dict] = {}
-    for r in rows:
-        m = r.get("metadata") or {}
-        meta_by_id[str(r["id"])] = {
-            "stable_chunk_id": r.get("chunk_id"),
-            "document_id": r.get("document_id"),
-            "source_file": m.get("source_file", "") or "",
-            "page_start": m.get("page_start") or r.get("page_start"),
-            "page_end": m.get("page_end") or r.get("page_end"),
-            "section": r.get("section") or m.get("section", ""),
-            "subsection": m.get("subsection", "") or "",
-            "clause": m.get("clause", "") or "",
-        }
+    try:
+        supabase = get_supabase()
+        rows = (
+            supabase.table("chunks")
+            .select("id, chunk_id, document_id, section, metadata")
+            .in_("id", list(valid_ids))
+            .execute()
+            .data
+            or []
+        )
+        for r in rows:
+            m = r.get("metadata") or {}
+            meta_by_id[str(r["id"])] = {
+                "stable_chunk_id": r.get("chunk_id"),
+                "document_id": r.get("document_id"),
+                "source_file": m.get("source_file", "") or "",
+                "page_start": m.get("page_start") or r.get("page_start"),
+                "page_end": m.get("page_end") or r.get("page_end"),
+                "section": r.get("section") or m.get("section", ""),
+                "subsection": m.get("subsection", "") or "",
+                "clause": m.get("clause", "") or "",
+            }
+    except Exception:
+        meta_by_id = {}
     citations: list[dict] = []
     for uid in valid_ids:
         c = by_uuid.get(uid)

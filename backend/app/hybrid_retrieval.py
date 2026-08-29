@@ -289,7 +289,10 @@ def retrieve_hybrid(supabase, query_embedding: list[float], query_text: str,
             source_id="",
             dense_rank=i + 1,
             dense_score=chunk.similarity,
-            filter_decisions={"domain": True, "active": True},
+            filter_decisions={
+                "domain": chunk.domain == domain,
+                "active": True,
+            },
         ))
 
     lexical_candidates = []
@@ -300,7 +303,10 @@ def retrieve_hybrid(supabase, query_embedding: list[float], query_text: str,
             source_id="",
             lexical_rank=i + 1,
             lexical_score=0.5,
-            filter_decisions={"domain": True, "active": True},
+            filter_decisions={
+                "domain": chunk.domain == domain,
+                "active": True,
+            },
         ))
 
     # RRF fusion

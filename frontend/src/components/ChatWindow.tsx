@@ -30,6 +30,24 @@ type Msg = { role: "user" | "assistant"; text?: string; resp?: ChatResponse };
 
 const MODELS = ["Sahakarita-v2.5", "GPT-4o", "Claude 3.5 Sonnet"];
 
+// Re-translate a previously received answer into the current UI language via the
+// server-side /api/translate proxy (Azure Translator). Falls back to the original
+// text if translation is unavailable/unconfigured so the UI stays functional.
+async function translate(text: string, locale: Locale): Promise<string> {
+  try {
+    const res = await fetch("/api/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ texts: [text], to: locale }),
+    });
+    if (!res.ok) return text;
+    const data = (await res.json()) as { translations?: string[] };
+    return data.translations?.[0] ?? text;
+  } catch {
+    return text;
+  }
+}
+
 function fallback(lang: Locale): ChatResponse {
   return {
     answer:

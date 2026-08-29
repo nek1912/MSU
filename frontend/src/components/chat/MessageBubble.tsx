@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/Badge";
 import { IconSpeaker, IconChevronRight, IconDoc, IconBot } from "@/components/ui/Icons";
 import { deco } from "@/lib/data/deco";
 import { createSpeechService } from "@/lib/speech";
+import { EvidenceBand } from "@/components/EvidenceBand";
+import { evidenceBand } from "@/lib/band";
 
 const CONFIDENCE_TONE: Record<string, "strong" | "moderate" | "weak"> = {
   high: "strong",
@@ -70,7 +72,7 @@ export function MessageBubble({ resp }: { resp: ChatResponse }) {
           <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
               <Badge deco={deco(resp.domain)}>{domainLabel}</Badge>
-              <EvidenceBand confidence={resp.confidence} label={t(`evidence.${evidenceTone(resp.confidence)}`)} />
+              <EvidenceBand confidence={resp.confidence} label={t(`evidence.${evidenceBand(resp.confidence)}`)} />
             </div>
             <span className="text-[11px] sm:text-xs text-[var(--text-faint)]">{(resp.confidence * 100).toFixed(0)}% match</span>
           </div>

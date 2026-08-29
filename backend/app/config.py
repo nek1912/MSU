@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     # Azure Speech Services (PHASE 13 — voice I/O)
     azure_speech_key: str = ""
     azure_speech_region: str = ""
+    # Azure Translator (Phase 10 — multilingual query normalization)
+    azure_translator_key: str = ""
+    azure_translator_region: str = ""
+    azure_translator_endpoint: str = ""
     # TTS voice names per language — configurable, not hardcoded
     azure_tts_voices: str = "en:en-IN-NeerjaNeural,hi:hi-IN-SwaraNeural,gu:gu-IN-DhwaniNeural"
 

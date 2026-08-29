@@ -27,6 +27,7 @@ from app.providers.embeddings import get_embedding_provider
 from app.providers.reranker import JinaReranker
 from app.providers.gemini_llm import GeminiLLMProvider
 from app.providers.groq_llm import GroqLLMProvider
+from app.providers.translator import AzureTranslator
 from app.retrieval import RetrievedChunk, retrieve
 from app.session_store import get_state, touch_session
 from app.ui import get_abstain_text
@@ -77,17 +78,25 @@ def _confidence_level(score: float) -> str:
     return "none"
 
 
-def _to_candidate(chunk: RetrievedChunk, expected_state: str | None) -> RetrievalCandidate:
-    """Convert a RetrievedChunk to a RetrievalCandidate for evidence_gate_v2."""
+def _to_candidate(chunk: RetrievedChunk, expected_domain: str | None,
+                  expected_state: str | None) -> RetrievalCandidate:
+    """Convert a RetrievedChunk to a RetrievalCandidate for evidence_gate_v2.
+
+    The domain filter decision is DERIVED from the candidate's own metadata
+    (``chunk.domain``) compared against the requested ``expected_domain`` — it is
+    never hardcoded. A candidate whose domain is missing/unknown or mismatched is
+    marked ``domain=False`` so the evidence gate rejects it (fail-closed).
+    """
     is_central = chunk.jurisdiction == "central"
     state_match = is_central or chunk.state == expected_state
+    domain_match = expected_domain is None or chunk.domain == expected_domain
     return RetrievalCandidate(
         chunk_id=chunk.chunk_id,
         document_id="",
         source_id="",
         dense_score=chunk.similarity,
         filter_decisions={
-            "domain": True,
+            "domain": domain_match,
             "active": True,
             "is_central": is_central,
             "state_match": state_match,
@@ -99,10 +108,20 @@ def _to_candidate(chunk: RetrievedChunk, expected_state: str | None) -> Retrieva
 def chat(req: ChatRequest) -> dict:
     settings = get_settings()
     lang = normalize_language(req.language, req.question)
+    # Phase 10: the authoritative corpus is English, so translate a non-English
+    # query to English for retrieval-side representations only. The original
+    # question (and ``lang``) is preserved for answer generation.
+    retrieval_query = req.question
+    if lang != "en":
+        try:
+            retrieval_query = AzureTranslator(settings).translate(
+                req.question, to="en", source=lang)
+        except Exception:
+            retrieval_query = req.question
     try:
         provider = get_embedding_provider()          # cached singleton (P0-1)
-        embedding = provider.embed_texts([req.question], task="retrieval.query")[0]
-        domain, _score = get_anchor_store().classify(req.question, embedding)
+        embedding = provider.embed_texts([retrieval_query], task="retrieval.query")[0]
+        domain, _score = get_anchor_store().classify(retrieval_query, embedding)
         resolved_state = req.state if req.state is not None else get_state(req.session_id)
         touch_session(req.session_id, resolved_state, lang)
         if domain == "out_of_scope":
@@ -118,7 +137,7 @@ def chat(req: ChatRequest) -> dict:
         # relevance rather than just dense/lexical score.
         k = 25 if settings.reranker_enabled else 6
         chunks = retrieve_hybrid(
-            get_supabase(), embedding, req.question, domain, resolved_state, k=k,
+            get_supabase(), embedding, retrieval_query, domain, resolved_state, k=k,
         )
 
         # Optional reranker (Stage 6): hybrid top-25 -> rerank -> top-6 -> gate
@@ -130,7 +149,7 @@ def chat(req: ChatRequest) -> dict:
             chunks = [chunks_by_id[r["chunk_id"]] for r in reranked if r["chunk_id"] in chunks_by_id]
 
         # --- Evidence gate v2 (Stage 7) ---
-        candidates = [_to_candidate(c, resolved_state) for c in chunks]
+        candidates = [_to_candidate(c, domain, resolved_state) for c in chunks]
         abstained, reason, band = evidence_gate_v2(
             candidates, expected_domain=domain, expected_state=resolved_state,
         )

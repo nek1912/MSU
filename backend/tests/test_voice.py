@@ -224,60 +224,70 @@ class TestAzureTTS:
 # ═══════════════════════════════════════════════════════════════════════════
 
 class TestVoiceRoutes:
-    """Voice route integration tests using FastAPI TestClient."""
+    """Voice route integration tests using FastAPI TestClient.
 
-    def _get_client(self, azure_key="", azure_region=""):
+    OBSOLETE-INTERFACE NOTE: the voice route was refactored to delegate STT/TTS
+    to the ``app.services.voice_service`` layer (routes -> service, the intended
+    architecture from the integration task). These tests now drive the route via
+    a mocked ``voice_service`` (mirroring ``tests/test_voice_routes.py``). The
+    real Azure STT/TTS provider behaviour is covered by ``TestAzureSTT`` /
+    ``TestAzureTTS`` above.
+    """
+
+    def _get_client(self):
         from fastapi import FastAPI
         from fastapi.testclient import TestClient
         from app.routes.voice import router as voice_router
         app = FastAPI()
         app.include_router(voice_router)
-        # Patch settings so the route sees configured/not-configured
-        settings = get_settings()
-        settings.azure_speech_key = azure_key
-        settings.azure_speech_region = azure_region
         return TestClient(app)
 
     def test_transcribe_not_configured(self):
+        from app.services.voice_service import VoiceUnavailableError
+        from unittest.mock import AsyncMock, patch
         client = self._get_client()
-        response = client.post(
-            "/voice/transcribe",
-            files={"audio": ("test.wav", b"fake-audio", "audio/wav")},
-            data={"language": "en-IN"},
-        )
-        assert response.status_code == 200
-        data = response.json()
-        assert data["text"] == ""
-        assert data["error"] is not None
+        with patch("app.routes.voice.voice_service") as mock_vs:
+            mock_vs.speech_to_text = AsyncMock(
+                side_effect=VoiceUnavailableError("No voice providers available"))
+            response = client.post(
+                "/voice/transcribe",
+                json={"audio": "ZmFrZS1hdWRpbw==", "language": "en"},
+            )
+            assert response.status_code == 503
+            assert "No voice providers available" in response.json()["detail"]
 
     def test_speak_not_configured(self):
+        from app.services.voice_service import VoiceUnavailableError
+        from unittest.mock import AsyncMock, patch
         client = self._get_client()
-        response = client.post(
-            "/voice/speak",
-            data={"text": "Hello", "language": "en"},
-        )
-        assert response.status_code == 503
+        with patch("app.routes.voice.voice_service") as mock_vs:
+            mock_vs.text_to_speech = AsyncMock(
+                side_effect=VoiceUnavailableError("No voice providers available"))
+            response = client.post(
+                "/voice/speak", json={"text": "Hello", "language": "en"})
+            assert response.status_code == 503
+            assert "No voice providers available" in response.json()["detail"]
 
     def test_voice_chat_not_configured(self):
+        from app.services.voice_service import VoiceUnavailableError
+        from unittest.mock import AsyncMock, patch
         client = self._get_client()
-        response = client.post(
-            "/voice",
-            files={"audio": ("test.wav", b"fake-audio", "audio/wav")},
-            data={"language": "en-IN"},
-        )
-        assert response.status_code == 200
-        data = response.json()
-        assert data["error"] is not None
+        with patch("app.routes.voice.voice_service") as mock_vs:
+            mock_vs.speech_to_text = AsyncMock(
+                side_effect=VoiceUnavailableError("No voice providers available"))
+            response = client.post(
+                "/voice",
+                files={"audio": ("test.wav", b"fake-audio", "audio/wav")},
+                data={"language": "en-IN"},
+            )
+            assert response.status_code == 200
+            assert response.json()["error"] is not None
 
     def test_voice_chat_no_speech(self):
-        client = self._get_client(azure_key="test-key", azure_region="test-region")
-
-        mock_sdk = MagicMock()
-        mock_result = MagicMock()
-        mock_result.reason = mock_sdk.ResultReason.NoMatch
-        mock_sdk.SpeechRecognizer.return_value.recognize_once.return_value = mock_result
-
-        with patch.dict("sys.modules", _azure_modules(mock_sdk)):
+        from unittest.mock import AsyncMock, patch
+        client = self._get_client()
+        with patch("app.routes.voice.voice_service") as mock_vs:
+            mock_vs.speech_to_text = AsyncMock(return_value="")
             response = client.post(
                 "/voice",
                 files={"audio": ("test.wav", b"fake-audio", "audio/wav")},
@@ -289,20 +299,7 @@ class TestVoiceRoutes:
             assert data["transcribed_text"] == ""
 
     def test_voice_chat_full_pipeline(self):
-        client = self._get_client(azure_key="test-key", azure_region="test-region")
-
-        mock_sdk = MagicMock()
-        # STT result
-        mock_stt_result = MagicMock()
-        mock_stt_result.reason = mock_sdk.ResultReason.RecognizedSpeech
-        mock_stt_result.text = "What is PMFBY?"
-        mock_sdk.SpeechRecognizer.return_value.recognize_once.return_value = mock_stt_result
-        # TTS result
-        mock_tts_result = MagicMock()
-        mock_tts_result.reason = mock_sdk.ResultReason.SynthesizingAudioCompleted
-        mock_tts_result.audio_data = b"fake-wav-audio"
-        mock_sdk.SpeechSynthesizer.return_value.speak_text_async.return_value.get.return_value = mock_tts_result
-
+        from unittest.mock import AsyncMock, patch
         mock_chat_result = {
             "answer": "PMFBY is the Pradhan Mantri Fasal Bima Yojana.",
             "language": "en",
@@ -312,23 +309,25 @@ class TestVoiceRoutes:
             "citations": [],
             "abstained": False,
         }
-
-        with patch.dict("sys.modules", _azure_modules(mock_sdk)):
-            with patch("app.routes.voice.chat_handler", return_value=mock_chat_result):
-                response = client.post(
-                    "/voice",
-                    files={"audio": ("test.wav", b"fake-audio", "audio/wav")},
-                    data={"language": "en-IN", "session_id": "test-session"},
-                )
-                assert response.status_code == 200
-                data = response.json()
-                assert data["transcribed_text"] == "What is PMFBY?"
-                assert data["answer"] == "PMFBY is the Pradhan Mantri Fasal Bima Yojana."
-                assert data["domain"] == "pmfby"
-                assert data["confidence_level"] == "high"
-                assert data["audio_base64"] is not None
-                assert data["abstained"] is False
-                assert data["error"] is None
+        client = self._get_client()
+        with patch("app.routes.voice.voice_service") as mock_vs, \
+                patch("app.routes.voice.chat_handler", return_value=mock_chat_result):
+            mock_vs.speech_to_text = AsyncMock(return_value="What is PMFBY?")
+            mock_vs.text_to_speech = AsyncMock(return_value=b"fake-wav-audio")
+            response = client.post(
+                "/voice",
+                files={"audio": ("test.wav", b"fake-audio", "audio/wav")},
+                data={"language": "en-IN", "session_id": "test-session"},
+            )
+            assert response.status_code == 200
+            data = response.json()
+            assert data["transcribed_text"] == "What is PMFBY?"
+            assert data["answer"] == "PMFBY is the Pradhan Mantri Fasal Bima Yojana."
+            assert data["domain"] == "pmfby"
+            assert data["confidence_level"] == "high"
+            assert data["audio_base64"] is not None
+            assert data["abstained"] is False
+            assert data["error"] is None
 
 
 # ═══════════════════════════════════════════════════════════════════════════

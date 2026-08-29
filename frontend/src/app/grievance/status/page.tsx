@@ -79,7 +79,7 @@ export default function GrievanceStatusPage() {
                           {t(`status.${s}`)}
                         </p>
                         {reached && record.timeline.find((tl) => tl.status === s) && (
-                          <p className="text-xs text-[var(--text-secondary)]">{record.timeline.find((tl) => tl.status === s)!.at}</p>
+                          <p className="text-xs text-[var(--text-secondary)]">{record.timeline.find((tl) => tl.status === s)!.timestamp}</p>
                         )}
                       </div>
                     </li>

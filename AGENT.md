@@ -15,8 +15,8 @@ Input (text, or transcribed voice in Tier 2)
       ↓
 1. Language detection        → detect hi / en
       ↓
-2. Domain classification     → cooperative | pacs | schemes | pmfby |
-                                agriculture | finlit | grievance | out_of_scope
+2. Domain classification     → pacs_governance | pacs_computerization | pmfby |
+                                 financial_inclusion | schemes | agriculture | grievance | out_of_scope
       ↓
 3. Jurisdiction resolution   → central / selected state
       ↓

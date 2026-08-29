@@ -12,8 +12,8 @@
     Intro provides context
   question: What are the byelaws for a cooperative society?
   relevant_chunk_ids:
-  - 5c363d8d-4c43-4a28-a186-b9510ec5d439
-  - 39efefba-e8d2-416a-a2dc-45039ca47fac
+  - 0b3e94c9-7cb6-4b7a-8784-74da12c4bc52
+  - dd4e1fcc-ce41-4785-a643-aa87086c06ca
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -30,8 +30,8 @@
     nominal member voting restrictions
   question: Voting rights in a cooperative society
   relevant_chunk_ids:
-  - 6ef4f3d8-f4fd-47d9-94a5-ec1e9738adbc
-  - 0f7d8aa3-6728-4aa2-8cff-cd364c676ca8
+  - 8633e68b-4f4b-4aa2-8728-fca3deb3a20d
+  - 6e52fc6c-5226-42aa-a8d0-337b85eb71a6
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -66,8 +66,8 @@
     provisions, 8afc52a3 defines General Body composition
   question: Quorum requirements for cooperative society meetings
   relevant_chunk_ids:
-  - 6ef4f3d8-f4fd-47d9-94a5-ec1e9738adbc
-  - 0ced6236-aeed-493a-96ef-d69fd8108215
+  - 8633e68b-4f4b-4aa2-8728-fca3deb3a20d
+  - 8c31c0ed-c467-439b-8330-2e566dee254e
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: true
@@ -78,8 +78,8 @@
     member terms
   question: How to become a member of a cooperative society?
   relevant_chunk_ids:
-  - 5933f10d-c8df-46ab-8847-13b8b07db87c
-  - 959b18d6-4414-4cb0-96a5-788fad88d2d7
+  - cff94806-afd6-4efe-94e0-4cfed1ea5b06
+  - 715aadb3-549d-47fc-a322-fffeec0c327d
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -102,8 +102,8 @@
     transfer provisions
   question: Share transfer rules in cooperative society
   relevant_chunk_ids:
-  - 9eebfd84-536f-465b-b705-346e96e5d863
-  - 01f94f0b-4dde-4185-b14f-77b5444957f5
+  - c37b0334-88e7-4b10-a1ef-a8a5d56e8e7f
+  - fc7970df-f319-49d5-bed3-3ac1b5664399
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: true
@@ -114,8 +114,8 @@
     Body authority
   question: Election process for cooperative society committee
   relevant_chunk_ids:
-  - 6ef4f3d8-f4fd-47d9-94a5-ec1e9738adbc
-  - 44ccbb8d-d63c-4554-a9f1-00f1e56c0535
+  - 8633e68b-4f4b-4aa2-8728-fca3deb3a20d
+  - f014cc4d-977e-48be-944c-c888ce409b32
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -143,8 +143,8 @@
   gold_rationale: 9b01036d includes borrowing and financial decision powers
   question: Restrictions on cooperative society borrowing
   relevant_chunk_ids:
-  - c7d37a4a-a3a0-4d95-a695-e7e24600c7b8
-  - 0700d451-9959-41ea-8be3-5a0a2e9b4cf9
+  - fa822ae3-38ff-41f4-9d66-0c49ac31537a
+  - 72a812ac-1124-4f04-8f72-b6466ed3035c
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -161,8 +161,8 @@
     duties
   question: Managing committee powers under cooperative act
   relevant_chunk_ids:
-  - 6ef4f3d8-f4fd-47d9-94a5-ec1e9738adbc
-  - 9eebfd84-536f-465b-b705-346e96e5d863
+  - 8633e68b-4f4b-4aa2-8728-fca3deb3a20d
+  - 9085bf20-33a8-4f16-aa8e-4914d00f6bfb
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -178,8 +178,8 @@
   gold_rationale: 294d77e1 includes surplus/dividend distribution powers
   question: Surplus distribution in cooperative society
   relevant_chunk_ids:
-  - 87b3540a-725c-46c5-bd7a-ca44d207d2e5
-  - d3c067f8-9b3f-40ed-8ab8-4fff63620dbe
+  - e4a25b32-23a0-457d-a479-7f3530e5a3fa
+  - 7131413c-7e7f-48ab-b02e-c8a34d3e5388
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -201,8 +201,8 @@
   gold_rationale: 5ba71f1e defines grounds for member expulsion/disqualification
   question: Member expulsion from cooperative society
   relevant_chunk_ids:
-  - 173a8fe8-52a4-446a-94e6-67636e7910df
-  - c8f4896e-2e1b-430e-89f1-db895b9dd231
+  - 24c6e385-3a59-4092-b742-ddd68666768f
+  - 12b2f56b-5a03-4f0c-8d1f-f192f5790120
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: true
@@ -213,8 +213,8 @@
     amend byelaws
   question: Cooperative society bylaw amendment process
   relevant_chunk_ids:
-  - a2e95666-004c-46de-8b76-e58d97f2472b
-  - 173a8fe8-52a4-446a-94e6-67636e7910df
+  - 6a57ce2a-1a36-42b7-9ec4-6471c7888e45
+  - 24c6e385-3a59-4092-b742-ddd68666768f
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -230,8 +230,8 @@
   gold_rationale: Services section covers surplus/dividend distribution
   question: Dividend declaration rules for cooperative
   relevant_chunk_ids:
-  - 2b1fc0ba-ecd9-4724-af1f-5ba88d0fee05
-  - ca3db287-a976-4e68-858e-6769830b7c33
+  - 2e0a0ec8-d063-4163-b067-ab0f02b9d95c
+  - 1a24450c-9c74-422a-ac2f-627aecd62027
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: true
@@ -242,8 +242,8 @@
     shows resolution usage
   question: Cooperative society special resolution requirements
   relevant_chunk_ids:
-  - 173a8fe8-52a4-446a-94e6-67636e7910df
-  - 0a6b77ed-77a1-4f3b-b5ab-ea28e5e34b84
+  - 24c6e385-3a59-4092-b742-ddd68666768f
+  - 9085bf20-33a8-4f16-aa8e-4914d00f6bfb
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -284,8 +284,8 @@
     duties
   question: Election of the PACS managing committee
   relevant_chunk_ids:
-  - 47e6f701-c6e6-42cd-b5ca-f62689e47edf
-  - 61f22d5a-72ef-4858-823b-6433c99efadd
+  - fd021aa4-dfbd-4672-9eef-423c3c1dc226
+  - 15ac735f-aeca-441d-b92b-9f8da362a542
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -367,8 +367,8 @@
   gold_rationale: General Body section defines meeting requirements
   question: PACS meeting frequency requirements
   relevant_chunk_ids:
-  - 61f22d5a-72ef-4858-823b-6433c99efadd
-  - cdb722af-9bc5-4292-8ad7-9726306a2b28
+  - 15ac735f-aeca-441d-b92b-9f8da362a542
+  - 437f3b9e-00ac-4efd-8892-077bb843d5ab
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -421,8 +421,8 @@
     amend byelaws
   question: PACS bylaw amendment procedure
   relevant_chunk_ids:
-  - 47e6f701-c6e6-42cd-b5ca-f62689e47edf
-  - 2c33edbf-df74-447a-b377-eb7234b66ae1
+  - fd021aa4-dfbd-4672-9eef-423c3c1dc226
+  - f80708d8-42b7-48e2-a001-f9f6e64535c6
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -438,8 +438,8 @@
   gold_rationale: General Body section defines annual meeting rules
   question: PACS annual general meeting rules
   relevant_chunk_ids:
-  - 3eccf8a5-9814-4d13-86c8-abd87f15b883
-  - 1a4a4258-c4da-42f0-aae1-52b62e540c93
+  - 18bce0e8-0f9a-449c-803d-ad01c3a94d60
+  - 613fc46e-1c48-41ce-b2fb-c6f106181cc0
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -647,8 +647,8 @@
   gold_rationale: f945e35d directly covers risk coverage under PMFBY
   question: What risks does PMFBY cover for standing crops?
   relevant_chunk_ids:
-  - 0b7786e3-e529-455c-a683-3287b528f503
-  - 4f521ef5-3894-41c4-aca1-f3bda7df1b27
+  - fdc569dd-a7a7-426c-8f63-d8615311fefe
+  - 7e330934-aa95-4eb6-9a48-0bc3fd93906a
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
@@ -658,8 +658,8 @@
   gold_rationale: 589fe861 covers premium and subsidy
   question: PMFBY premium rates for food crops
   relevant_chunk_ids:
-  - 90ce9f92-ec2a-4f22-ad20-81c8040689ec
-  - 0b7786e3-e529-455c-a683-3287b528f503
+  - bf6c23a5-7fa1-46b4-a64b-c6fe7e14e568
+  - fdc569dd-a7a7-426c-8f63-d8615311fefe
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: false
@@ -675,8 +675,8 @@
   gold_rationale: 'Semantically corrected: eligible for PMFBY'
   question: Who is eligible for PMFBY coverage?
   relevant_chunk_ids:
-  - 0b7786e3-e529-455c-a683-3287b528f503
-  - 122a507d-70b5-41cc-b6c9-1e71a7aca2c8
+  - fdc569dd-a7a7-426c-8f63-d8615311fefe
+  - 9e380f21-228c-41dd-af99-5f8d73146cf1
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
@@ -686,8 +686,8 @@
   gold_rationale: 'Semantically corrected: PMFBY enrollment deadline'
   question: PMFBY enrollment deadline for kharif crops
   relevant_chunk_ids:
-  - 0364cc7e-1d43-410e-90b6-aef755437cae
-  - 0b7786e3-e529-455c-a683-3287b528f503
+  - 00c5fecb-4dd7-4159-917a-dd3efcfd2056
+  - fdc569dd-a7a7-426c-8f63-d8615311fefe
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: false
@@ -703,8 +703,8 @@
   gold_rationale: 'Semantically corrected: Gujarat PMFBY crop insurance portal'
   question: Gujarat PMFBY crop insurance portal
   relevant_chunk_ids:
-  - 0b7786e3-e529-455c-a683-3287b528f503
-  - 9feda988-0932-42df-a74b-058c90c0ef94
+  - fdc569dd-a7a7-426c-8f63-d8615311fefe
+  - 46adbe0d-6d59-4b20-bb99-eb9ff3e4e456
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
@@ -714,8 +714,8 @@
   gold_rationale: f945e35d covers PMFBY risk coverage
   question: PMFBY coverage for horticultural crops
   relevant_chunk_ids:
-  - 0b7786e3-e529-455c-a683-3287b528f503
-  - 4f521ef5-3894-41c4-aca1-f3bda7df1b27
+  - fdc569dd-a7a7-426c-8f63-d8615311fefe
+  - 7e330934-aa95-4eb6-9a48-0bc3fd93906a
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
@@ -725,8 +725,8 @@
   gold_rationale: 'FIXED: Question asks about preventive sowing'
   question: PMFBY preventive sowing provision
   relevant_chunk_ids:
-  - 0b7786e3-e529-455c-a683-3287b528f503
-  - 4f521ef5-3894-41c4-aca1-f3bda7df1b27
+  - fdc569dd-a7a7-426c-8f63-d8615311fefe
+  - 7e330934-aa95-4eb6-9a48-0bc3fd93906a
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: false
@@ -742,8 +742,8 @@
   gold_rationale: f945e35d covers PMFBY risk coverage (default for general PMFBY questions)
   question: PMFBY add-on coverage options
   relevant_chunk_ids:
-  - c4d98211-f3e9-4f9e-9061-1f3483cbf146
-  - 0b7786e3-e529-455c-a683-3287b528f503
+  - e81fcf35-e750-4903-b724-4b8e9c7d945e
+  - 9590de53-fd26-41b0-aea3-8aac20bb743f
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
@@ -753,8 +753,8 @@
   gold_rationale: 'Semantically corrected: PMFBY use of technology'
   question: PMFBY use of technology for crop cutting experiments
   relevant_chunk_ids:
-  - 3deabd65-6e3d-44e9-a84d-71f57dca9473
-  - 4514c08a-0ce8-492f-97d8-576361dd5c45
+  - f5bb1c01-4da9-4232-9da2-e4164a207dcc
+  - 3e12dec5-02a7-4bb7-aec7-dcecc33ad0cc
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: false
@@ -770,8 +770,8 @@
   gold_rationale: 589fe861 covers premium and subsidy
   question: PMFBY premium subsidy by state government
   relevant_chunk_ids:
-  - 0b7786e3-e529-455c-a683-3287b528f503
-  - c1323134-c217-4c30-bbe2-88ecb49cb928
+  - fdc569dd-a7a7-426c-8f63-d8615311fefe
+  - 39b9fc96-091b-481b-b189-76100669ae3d
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
@@ -781,8 +781,8 @@
   gold_rationale: 'Semantically corrected: Gujarat PMFBY farmer enrollment'
   question: Gujarat PMFBY farmer enrollment drive
   relevant_chunk_ids:
-  - 216711a3-ff7b-4cfc-a4da-e0cef81f6679
-  - 0b7786e3-e529-455c-a683-3287b528f503
+  - e436a13f-34f3-4c51-8596-3aa93f04aedc
+  - fdc569dd-a7a7-426c-8f63-d8615311fefe
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
@@ -792,8 +792,8 @@
   gold_rationale: 'Semantically corrected: PMFBY coverage for perennial crops'
   question: PMFBY coverage for perennial crops
   relevant_chunk_ids:
-  - 0b7786e3-e529-455c-a683-3287b528f503
-  - 4f521ef5-3894-41c4-aca1-f3bda7df1b27
+  - fdc569dd-a7a7-426c-8f63-d8615311fefe
+  - 7e330934-aa95-4eb6-9a48-0bc3fd93906a
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
@@ -803,8 +803,8 @@
   gold_rationale: 'Semantically corrected: PMFBY insurance company empanelment'
   question: PMFBY insurance company empanelment
   relevant_chunk_ids:
-  - 2b15f6a7-6a58-4a4d-ac1d-42aba48fb77f
-  - bef4f320-8ec8-4b0f-a062-31b6bfef10dc
+  - a79a2b94-521e-49b8-8d27-528c5b93a421
+  - 5207928c-23e6-4efb-8746-36cc9f81a9df
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: false
@@ -820,8 +820,8 @@
   gold_rationale: 'FIXED: Question asks about coverage area'
   question: PMFBY coverage area definition
   relevant_chunk_ids:
-  - 0b7786e3-e529-455c-a683-3287b528f503
-  - 122a507d-70b5-41cc-b6c9-1e71a7aca2c8
+  - fdc569dd-a7a7-426c-8f63-d8615311fefe
+  - 9e380f21-228c-41dd-af99-5f8d73146cf1
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: false
@@ -843,8 +843,8 @@
   gold_rationale: 'FIXED: Question asks about private companies'
   question: PMFBY private crop insurance companies list
   relevant_chunk_ids:
-  - 31e14263-3f69-48d2-be86-8878bbe903fa
-  - 3595bf97-c175-4a1e-8ed2-cb0d240c4be2
+  - b9d4ce3e-c76c-41e3-bfc0-9a87e6791df2
+  - 5f55cfb2-c417-463c-9d6f-93a885cb0896
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
@@ -854,8 +854,8 @@
   gold_rationale: 'FIXED: Question asks about weather-based scheme'
   question: PMFBY restructured weather-based scheme
   relevant_chunk_ids:
-  - 0b7786e3-e529-455c-a683-3287b528f503
-  - ae6a269c-6070-4c8e-954a-25331f267711
+  - fdc569dd-a7a7-426c-8f63-d8615311fefe
+  - 31dbd091-fa30-4b9f-a500-843f8b6e69e3
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
@@ -865,8 +865,8 @@
   gold_rationale: 'FIXED: Question asks about premium rates'
   question: Gujarat PMFBY district-wise premium rates
   relevant_chunk_ids:
-  - 0b7786e3-e529-455c-a683-3287b528f503
-  - 90ce9f92-ec2a-4f22-ad20-81c8040689ec
+  - fdc569dd-a7a7-426c-8f63-d8615311fefe
+  - bf6c23a5-7fa1-46b4-a64b-c6fe7e14e568
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
@@ -876,8 +876,8 @@
   gold_rationale: 'FIXED: Question asks about indemnity calculation'
   question: PMFBY indemnity level calculation
   relevant_chunk_ids:
-  - 29bc5679-3800-46d4-841a-485f5896399c
-  - 8d8d5901-0311-465d-bf9a-86f9f73bdd13
+  - 81d4e63f-b9df-4f46-b78b-4915953b3628
+  - 19d9121c-a372-4214-af8d-6e3803aed0af
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
@@ -887,8 +887,8 @@
   gold_rationale: 'FIXED: Question asks about exclusion period'
   question: PMFBY exclusion period for prevented sowing
   relevant_chunk_ids:
-  - ae6a269c-6070-4c8e-954a-25331f267711
-  - da184398-e989-4422-b33d-4e39917c649b
+  - 31dbd091-fa30-4b9f-a500-843f8b6e69e3
+  - dccae059-452e-4287-a719-b1870c0ecc58
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
@@ -898,8 +898,8 @@
   gold_rationale: 4b146fd4 covers claim settlement
   question: PMFBY claim amount based on yield estimation
   relevant_chunk_ids:
-  - 4f521ef5-3894-41c4-aca1-f3bda7df1b27
-  - e5010ac0-42fd-4586-8292-4b50c8dc22c4
+  - 7e330934-aa95-4eb6-9a48-0bc3fd93906a
+  - 348c51fa-f5c5-42fb-ab17-2a64e30eb8ca
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: false
@@ -915,8 +915,8 @@
   gold_rationale: 'Semantically corrected: PMFBY notification date'
   question: PMFBY notification date for each season
   relevant_chunk_ids:
-  - 0b7786e3-e529-455c-a683-3287b528f503
-  - c87a474b-b21f-4b08-a646-9979b7df7e66
+  - fdc569dd-a7a7-426c-8f63-d8615311fefe
+  - 1f64b93a-3d4c-42af-be5e-eda525455567
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: false
@@ -1599,8 +1599,8 @@
   note: 'adversarial: cooperative keyword wins over finlit'
   question: Cooperative society deposit insurance coverage
   relevant_chunk_ids:
-  - e5dccb3c-f134-4c60-a8f7-f06573edf476
-  - 87b3540a-725c-46c5-bd7a-ca44d207d2e5
+  - 72b35412-d2c6-477c-bec1-b4b0fa59d406
+  - e4a25b32-23a0-457d-a479-7f3530e5a3fa
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -1618,8 +1618,8 @@
   note: 'adversarial: pmfby keyword wins over pacs'
   question: PMFBY premium subsidy through PACS
   relevant_chunk_ids:
-  - c1323134-c217-4c30-bbe2-88ecb49cb928
-  - 6d4c6537-f4c6-4c03-a0f5-7a8facaac863
+  - 39b9fc96-091b-481b-b189-76100669ae3d
+  - 62d379d7-fe01-487e-82be-cface91b98a9
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: false

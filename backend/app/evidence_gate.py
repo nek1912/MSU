@@ -21,12 +21,19 @@ def check_domain_match(
     candidates: list[RetrievalCandidate],
     expected_domain: str,
 ) -> AbstentionReason | None:
-    """Check all candidates match expected domain."""
+    """Check all candidates match the expected domain.
+
+    The per-candidate domain decision lives in ``filter_decisions["domain"]`` and
+    is derived by the caller from the candidate's metadata vs the request filter
+    (see ``app.routes.chat._to_candidate``). A candidate is treated as in-domain
+    ONLY when that decision is explicitly ``True``.
+
+    A ``False`` *or missing* decision fails closed (treated as a mismatch) per the
+    enforced safety policy: an unknown/missing domain must never be silently
+    accepted as matching, because that would let cross-domain evidence reach the LLM.
+    """
     for c in candidates:
-        if c.filter_decisions.get("domain") is True:
-            continue  # explicitly passed domain filter
-        # If no filter decision recorded, check via source metadata
-        if hasattr(c, "domain") and c.domain != expected_domain:
+        if c.filter_decisions.get("domain") is not True:
             return AbstentionReason.DOMAIN_MISMATCH
     return None
 

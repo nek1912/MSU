@@ -114,6 +114,27 @@ describe("ChatWindow ui_language_explicit", () => {
     );
   });
 
+  it("first message after switching away from default (no prior send) is explicit", async () => {
+    const { rerender } = render(<ChatWindow />);
+
+    // Switch to "hi" BEFORE any send (no prior message in another locale).
+    await act(async () => {
+      mockLocale = "hi";
+      rerender(<ChatWindow />);
+    });
+
+    fireEvent.change(screen.getByPlaceholderText(/chat\.placeholder/i), {
+      target: { value: "namaste" },
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText(/send/i));
+    });
+
+    expect(api.sendChat).toHaveBeenCalledWith(
+      expect.objectContaining({ language: "hi", ui_language_explicit: true }),
+    );
+  });
+
   it("stays non-explicit when locale is unchanged after a switch", async () => {
     const { rerender } = render(<ChatWindow />);
 

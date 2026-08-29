@@ -7,8 +7,12 @@ from app.services.lang_memory import (
 )
 
 
-def test_default_is_english():
-    assert get_session_language("sess-default") == DEFAULT_LANGUAGE
+def test_unset_session_returns_none():
+    assert get_session_language("sess-unset") is None
+
+
+def test_default_language_constant_is_english():
+    assert DEFAULT_LANGUAGE == "en"
 
 
 def test_set_then_get():
@@ -19,7 +23,7 @@ def test_set_then_get():
 def test_clear():
     set_session_language("sess-2", "bn")
     clear_session_language("sess-2")
-    assert get_session_language("sess-2") == DEFAULT_LANGUAGE
+    assert get_session_language("sess-2") is None
 
 
 def test_empty_session_id_rejected():

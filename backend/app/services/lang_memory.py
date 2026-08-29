@@ -14,9 +14,9 @@ _lock = Lock()
 DEFAULT_LANGUAGE = "en"
 
 
-def get_session_language(session_id: str) -> str:
+def get_session_language(session_id: str) -> str | None:
     with _lock:
-        return _session_language.get(session_id, DEFAULT_LANGUAGE)
+        return _session_language.get(session_id)
 
 
 def set_session_language(session_id: str, language: str) -> None:

@@ -3,6 +3,7 @@
 No hardcoded script ranges, stopwords, or language lists in this file.
 """
 import json
+import re
 from functools import lru_cache
 from pathlib import Path
 
@@ -30,23 +31,27 @@ def _load_config() -> dict:
     }
 
 
-def _script_ratios(text: str) -> tuple[float, float]:
-    """Return (devanagari_ratio, gujarati_ratio) among alphabetic chars."""
+def _script_ratios(text: str) -> dict[str, float]:
+    """Return {script_name: ratio} among alphabetic chars for every configured script."""
     cfg = _load_config()
     letters = [c for c in text if c.isalpha()]
     if not letters:
-        return 0.0, 0.0
-    dev = sum(1 for c in letters if ord(c) in cfg["scripts"]["devanagari"]) / len(letters)
-    guj = sum(1 for c in letters if ord(c) in cfg["scripts"]["gujarati"]) / len(letters)
-    return dev, guj
+        return {name: 0.0 for name in cfg["scripts"]}
+    ratios = {}
+    for name, charset in cfg["scripts"].items():
+        ratios[name] = sum(1 for c in letters if ord(c) in charset) / len(letters)
+    return ratios
 
 
-def _latin_stopword_bias(text: str, hi_sw: set, gu_sw: set) -> tuple[int, int]:
+def _stopword_bias(text: str, lang: str) -> int:
+    """Return (lang_stopwords - english_stopwords) count overlap for `lang`."""
     cfg = _load_config()
+    sw = cfg["stopwords"].get(lang)
+    if not sw:
+        return 0
     en_sw = cfg["stopwords"]["en"]
     words = {w.lower() for w in text.split()}
-    return (len(words & hi_sw) - len(words & en_sw),
-            len(words & gu_sw) - len(words & en_sw))
+    return len(words & sw) - len(words & en_sw)
 
 
 def normalize_language(selected: str, text: str) -> str:
@@ -58,23 +63,148 @@ def normalize_language(selected: str, text: str) -> str:
     cfg = _load_config()
     if selected not in cfg["supported"]:
         raise ValueError(f"unsupported language: {selected}")
-    dev_ratio, guj_ratio = _script_ratios(text)
-    hi_sw = cfg["stopwords"]["hi"]
-    gu_sw = cfg["stopwords"]["gu"]
-    hi_bias, gu_bias = _latin_stopword_bias(text, hi_sw, gu_sw)
+    ratios = _script_ratios(text)
     threshold = cfg["script_threshold"]
     latin_thresh = cfg["latin_threshold"]
 
-    # Devanagari script → Hindi
-    if dev_ratio >= threshold:
-        return "hi"
+    # Devanagari covers both Hindi and Marathi; disambiguate by stopword bias.
+    if ratios.get("devanagari", 0.0) >= threshold:
+        return "mr" if _stopword_bias(text, "mr") > _stopword_bias(text, "hi") else "hi"
+    # Bengali script → Bengali
+    if ratios.get("bengali", 0.0) >= threshold:
+        return "bn"
     # Gujarati script → Gujarati
-    if guj_ratio >= threshold:
+    if ratios.get("gujarati", 0.0) >= threshold:
         return "gu"
-    # Latin script with Hindi stopword bias → Hindi
-    if selected == "hi" and dev_ratio <= latin_thresh and hi_bias > 0:
-        return "hi"
-    # Latin script with Gujarati stopword bias → Gujarati
-    if selected == "gu" and dev_ratio <= latin_thresh and guj_ratio <= latin_thresh and gu_bias > 0:
-        return "gu"
+    # Latin script: trust the selected language when its stopwords appear.
+    if selected in cfg["stopwords"] and _stopword_bias(text, selected) > 0:
+        return selected
     return selected
+
+
+# Explicit "respond/explain in <lang>" detection. Name -> code, including native terms.
+_EXPLICIT_LANG_NAMES = {
+    "english": "en", "angrezi": "en",
+    "hindi": "hi", "हिंदी": "hi",
+    "gujarati": "gu", "ગુજરાતી": "gu",
+    "marathi": "mr", "मराठी": "mr",
+    "bengali": "bn", "bangla": "bn", "বাংলা": "bn",
+}
+_EXPLICIT_RE = re.compile(
+    r"(?:respond|reply|answer|explain|समझाओ|समजावो|बताओ|समझाएं|in|में|मां)\s+"
+    r"(english|angrezi|hindi|हिंदी|gujarati|ગુજરાતી|marathi|मराठी|bengali|bangla|বাংলা)",
+    re.IGNORECASE,
+)
+
+
+def _detect_explicit_request(text: str) -> str | None:
+    m = _EXPLICIT_RE.search(text)
+    if m:
+        return _EXPLICIT_LANG_NAMES.get(m.group(1).lower())
+    return None
+
+
+def detect_query_languages(text: str) -> dict:
+    """Detect languages present in a (possibly mixed) query.
+
+    Devanagari is NOT mapped to Hindi for input — hi/mr stay distinguishable
+    via stopword bias (reusing normalize_language on the devanagari run).
+    """
+    cfg = _load_config()
+    languages: set[str] = set()
+    ratios = _script_ratios(text)
+    if ratios.get("gujarati", 0.0) >= cfg["script_threshold"]:
+        languages.add("gu")
+    if ratios.get("bengali", 0.0) >= cfg["script_threshold"]:
+        languages.add("bn")
+    if ratios.get("devanagari", 0.0) >= cfg["script_threshold"]:
+        # distinguish hi/mr via stopword bias (never force Hindi)
+        languages.add("mr" if _stopword_bias(text, "mr") > _stopword_bias(text, "hi") else "hi")
+    latin_letters = [c for c in text if c.isalpha() and c.isascii()]
+    if latin_letters:
+        languages.add("en")
+    # dominant = script with highest alphabetic ratio (hi/mr kept distinguishable)
+    best, best_r = None, 0.0
+    for name, r in ratios.items():
+        if name in ("gujarati", "bengali", "devanagari") and r > best_r:
+            best, best_r = name, r
+    if best == "gujarati":
+        dominant = "gu"
+    elif best == "bengali":
+        dominant = "bn"
+    elif best == "devanagari":
+        dominant = "mr" if _stopword_bias(text, "mr") > _stopword_bias(text, "hi") else "hi"
+    elif latin_letters:
+        dominant = "en"
+    else:
+        dominant = None
+    return {
+        "languages": languages,
+        "dominant": dominant,
+        "explicit_request": _detect_explicit_request(text),
+    }
+
+
+_SCRIPT_TO_LANG = {"gujarati": "gu", "bengali": "bn", "devanagari": "hi"}
+
+
+def _script_runs(text: str) -> list[tuple[str, str]]:
+    """Split text into (script_label, text) runs for run-aware translation."""
+    cfg = _load_config()
+    scripts = cfg["scripts"]
+
+    def label(c: str) -> str:
+        cp = ord(c)
+        for name, charset in scripts.items():
+            if cp in charset:
+                return name
+        if c.isascii() and c.isalpha():
+            return "latin"
+        return "other"
+
+    runs: list[tuple[str, str]] = []
+    cur_script: str | None = None
+    cur_chars: list[str] = []
+    for c in text:
+        if c.isspace():
+            if cur_chars:
+                cur_chars.append(c)
+            continue
+        s = label(c)
+        if s != cur_script:
+            if cur_chars:
+                runs.append((cur_script or "other", "".join(cur_chars)))
+            cur_script = s
+            cur_chars = [c]
+        else:
+            cur_chars.append(c)
+    if cur_chars:
+        runs.append((cur_script or "other", "".join(cur_chars)))
+    return runs
+
+
+def english_retrieval_query(text: str, detected: dict | None, settings) -> str:
+    """Build an English retrieval representation (run-aware).
+
+    Latin runs (scheme names, acronyms, numbers, dates, English words) are
+    preserved verbatim; only Indic-script runs are translated via the
+    already-wired AzureTranslator. This preserves the terminology the design
+    requires to stay intact, rather than translating the whole query. Falls
+    back to the original text on any failure (never fabricates).
+    """
+    from app.providers.translator import AzureTranslator
+
+    dom = (detected or {}).get("dominant")
+    if not dom or dom == "en":
+        return text
+    try:
+        translator = AzureTranslator(settings)
+        out: list[str] = []
+        for script, run_text in _script_runs(text):
+            if script in ("latin", "other"):
+                out.append(run_text)
+            else:
+                out.append(translator.translate(run_text, to="en", source=_SCRIPT_TO_LANG[script]))
+        return "".join(out)
+    except Exception:
+        return text

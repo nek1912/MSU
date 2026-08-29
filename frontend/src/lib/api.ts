@@ -1,5 +1,10 @@
 import type { Locale } from "@/lib/i18n/i18n";
 
+export interface SpeechSegment {
+  text: string;
+  language: string;
+}
+
 export interface ChatResponse {
   answer: string;
   language: Locale;
@@ -22,6 +27,8 @@ export interface ChatResponse {
     url: string;
   }[];
   abstained: boolean;
+  speech_text?: string;
+  speech_segments?: SpeechSegment[];
   follow_up_question: string | null;
 }
 
@@ -30,6 +37,7 @@ export async function sendChat(payload: {
   session_id: string;
   language: Locale;
   state: string | null;
+  ui_language_explicit?: boolean;
 }): Promise<ChatResponse> {
   const r = await fetch("/api/chat", {
     method: "POST",
@@ -37,5 +45,17 @@ export async function sendChat(payload: {
     body: JSON.stringify(payload),
   });
   if (!r.ok) throw new Error(`API ${r.status}`);
+  return r.json();
+}
+
+export async function fetchVoiceSpeak(
+  segments: SpeechSegment[],
+): Promise<{ audio: string; language: string }> {
+  const r = await fetch("/api/voice/speak", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ segments }),
+  });
+  if (!r.ok) throw new Error(`Voice speak API ${r.status}`);
   return r.json();
 }

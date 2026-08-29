@@ -21,7 +21,7 @@ from app.evidence_gate import evidence_gate_v2
 from app.generation import (CitationError, build_system_prompt,
                             build_user_prompt, verify_citations)
 from app.hybrid_retrieval import retrieve_hybrid
-from app.language import normalize_language
+from app.language import detect_query_languages
 from app.llm_fallback import AllProvidersFailedError, grounded_answer
 from app.providers.embeddings import get_embedding_provider
 from app.providers.reranker import JinaReranker
@@ -29,6 +29,8 @@ from app.providers.gemini_llm import GeminiLLMProvider
 from app.providers.groq_llm import GroqLLMProvider
 from app.providers.translator import AzureTranslator
 from app.retrieval import RetrievedChunk, retrieve
+from app.resolve_response_language import resolve_and_remember
+from app.speech_text import prepare_speech_text, segment_speech
 from app.session_store import get_state, touch_session
 from app.ui import get_abstain_text
 
@@ -41,6 +43,15 @@ ABSTAIN_TEXT = {
     "hi": "मुझे आधिकारिक स्रोतों में इसका उत्तर नहीं मिला, इसलिए अनुमान नहीं लगाऊंगा। "
           "कृपया प्रश्न दूसरे शब्दों में पूछें या सहकारिता, पीएसीएस, योजनाओं, "
           "पीएएमएफबीवाई, कृषि या वित्तीय साक्षरता के बारे में पूछें।",
+    "gu": "મને અધિકૃત સ્રોતોમાં આનો જવાબ ન મળ્યો, તેથી હું અનુમાન નહીં લગાવું. "
+          "કૃપા કરીને પ્રશ્નને અલગ શબ્દોમાં પૂછો અથવા સહકારી નિયમો, પીએસીએસ, "
+          "યોજનાઓ, પીએમએફબીવાઈ, કૃષિ અથવા નાણાકીય સાક્ષરતા વિશે પૂછો.",
+    "mr": "मला अधिकृत स्रोतांमध्ये याचे उत्तर सापडले नाही, म्हणून मी अंदाज लावणार नाही. "
+          "कृपया प्रश्न वेगळ्या शब्दांत विचारा किंवा सहकारी नियम, पीएसीएस, योजना, "
+          "पीएमएफबीवाय, कृषी किंवा वित्तीय साक्षरता याबद्दल विचारा.",
+    "bn": "আমি কর্তৃপক্ষের উৎসে এর উত্তর খুঁজে পাইনি, তাই আমি অনুমান করব না। "
+          "অনুগ্রহ করে ভিন্ন শব্দে প্রশ্ন করুন বা সহকারিতা, পিএসিএস, প্রকল্প, "
+          "পিএমএফবি঵াই, কৃষি বা আর্থিক সাক্ষরতা সম্পর্কে জিজ্ঞাসা করুন.",
 }
 
 # Exceptions that represent expected dependency failures (not programmer bugs)
@@ -58,7 +69,8 @@ _SAFE_FAILURES = (
 class ChatRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
     session_id: str
-    language: Literal["en", "hi", "gu"]
+    language: Literal["en", "hi", "gu", "mr", "bn"]
+    ui_language_explicit: bool = False
     state: str | None = None
     as_of_date: str | None = None  # Optional date filter (YYYY-MM-DD)
 
@@ -107,15 +119,20 @@ def _to_candidate(chunk: RetrievedChunk, expected_domain: str | None,
 @router.post("/chat")
 def chat(req: ChatRequest) -> dict:
     settings = get_settings()
-    lang = normalize_language(req.language, req.question)
-    # Phase 10: the authoritative corpus is English, so translate a non-English
-    # query to English for retrieval-side representations only. The original
-    # question (and ``lang``) is preserved for answer generation.
+    # Response language resolved solely by the resolver (detection + session
+    # memory). ui_language_explicit is a BOOL: pass the UI code only when the
+    # user explicitly changed language this turn (never as a default).
+    ui_code = req.language if req.ui_language_explicit else None
+    lang = resolve_and_remember(req.session_id, req.question, ui_code)
+    # Retrieval-side translation uses the DETECTED INPUT language, not the
+    # response language (they can differ, e.g. Hindi question -> English answer).
+    detected = detect_query_languages(req.question)
+    input_lang = detected.get("dominant") or "en"
     retrieval_query = req.question
-    if lang != "en":
+    if input_lang != "en":
         try:
             retrieval_query = AzureTranslator(settings).translate(
-                req.question, to="en", source=lang)
+                req.question, to="en", source=input_lang)
         except Exception:
             retrieval_query = req.question
     try:
@@ -170,11 +187,17 @@ def chat(req: ChatRequest) -> dict:
         citations = _citations_from(answer, chunks)
         _band_to_confidence = {"high": 0.9, "medium": 0.7, "low": 0.4}
         confidence = _band_to_confidence.get(band.value, 0.4)
+        # Speech-only copy: citation markers/URLs stripped AFTER verification.
+        # TTS must consume this, never the raw `answer` (which carries [chunk:ID]).
+        speech_text = prepare_speech_text(answer)
+        speech_segments = segment_speech(answer, lang)
         return {"answer": answer, "language": lang, "domain": domain,
                 "intent": domain, "entities": [],
                 "confidence": confidence,
                 "confidence_level": _confidence_level(confidence),
                 "citations": citations, "abstained": False,
+                "speech_text": speech_text,
+                "speech_segments": speech_segments,
                 "follow_up_question": None}
     except _SAFE_FAILURES:
         # Known dependency failures → contract-valid abstention
@@ -249,8 +272,11 @@ def _citations_from(answer: str, chunks: list[RetrievedChunk]) -> list[dict]:
 
 
 def _abstain(lang: str, _reason: str | None) -> dict:
-    return {"answer": get_abstain_text(lang), "language": lang, "domain": "unknown",
+    answer = get_abstain_text(lang)
+    return {"answer": answer, "language": lang, "domain": "unknown",
             "intent": "unknown", "entities": [],
             "confidence": 0.0, "confidence_level": "none",
             "citations": [], "abstained": True,
+            "speech_text": prepare_speech_text(answer),
+            "speech_segments": [],
             "follow_up_question": None}

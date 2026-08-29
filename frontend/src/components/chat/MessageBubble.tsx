@@ -3,13 +3,26 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import type { ChatResponse } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
-import { EvidenceBand } from "@/components/EvidenceBand";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { IconSpeaker, IconChevronRight, IconDoc, IconBot } from "@/components/ui/Icons";
 import { deco } from "@/lib/data/deco";
 import { createSpeechService } from "@/lib/speech";
+
+const CONFIDENCE_TONE: Record<string, "strong" | "moderate" | "weak"> = {
+  high: "strong",
+  moderate: "moderate",
+  low: "weak",
+  none: "weak",
+};
+
+const CONFIDENCE_LABEL: Record<string, string> = {
+  high: "evidence.strong",
+  moderate: "evidence.moderate",
+  low: "evidence.weak",
+  none: "evidence.weak",
+};
 
 export function MessageBubble({ resp }: { resp: ChatResponse }) {
   const { t } = useI18n();
@@ -43,6 +56,9 @@ export function MessageBubble({ resp }: { resp: ChatResponse }) {
       </Alert>
     );
   }
+
+  const tone = CONFIDENCE_TONE[resp.confidence_level] ?? "weak";
+  const labelKey = CONFIDENCE_LABEL[resp.confidence_level] ?? "evidence.weak";
 
   return (
     <div className="flex items-start gap-2.5 sm:gap-3">
@@ -134,10 +150,4 @@ export function MessageBubble({ resp }: { resp: ChatResponse }) {
       </div>
     </div>
   );
-}
-
-function evidenceTone(confidence: number): "strong" | "moderate" | "weak" {
-  if (confidence >= 0.65) return "strong";
-  if (confidence >= 0.45) return "moderate";
-  return "weak";
 }

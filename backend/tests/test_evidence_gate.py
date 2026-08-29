@@ -10,8 +10,10 @@ def _chunk(sim: float, domain: str = _DOMAIN, jurisdiction: str = "central",
            state: str | None = None) -> RetrievedChunk:
     return RetrievedChunk(
         chunk_id="aaaa1111-bbbb-cccc-dddd-eeeeeeeeeeee",
-        title="Test", page=1, section="s", content="c",
-        similarity=sim, source_url="http://x", domain=domain,
+        stable_chunk_id="test:p1:c0",
+        document_id="dddd1111-2222-3333-4444-555555555555",
+        title="Test", page=1, page_start=1, page_end=1, section="s",
+        content="c", similarity=sim, source_url="http://x", domain=domain,
         jurisdiction=jurisdiction, state=state)
 
 

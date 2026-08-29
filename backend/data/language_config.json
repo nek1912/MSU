@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "devanagari": [2304, 2431],
+    "gujarati": [2688, 2815]
+  },
+  "stopwords": {
+    "hi": ["ka", "ki", "ke", "kaise", "kya", "hai", "mein", "meri", "mera",
+           "kitna", "nahi", "aur"],
+    "gu": ["ma", "ne", "nu", "na", "che", "e", "thay", "haya", "ke",
+           "su", "ketla", "nathi", "ane"],
+    "en": ["the", "is", "at", "which", "on", "in", "how", "what", "do",
+           "does", "of", "and", "to", "for"]
+  },
+  "supported_languages": ["en", "hi", "gu"],
+  "script_threshold": 0.7,
+  "latin_threshold": 0.05
+}

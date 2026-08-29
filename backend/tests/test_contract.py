@@ -16,17 +16,24 @@ GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5
 _SUCCESSFUL_CHUNKS = [
     {
         "chunk_id": "aaaaaaaa-1111-2222-3333-444444444444",
-        "title": "PMFBY FAQ", "page": 1, "section": "Eligibility",
+        "stable_chunk_id": "pmfby-faq:p1:c0",
+        "document_id": "dddd1111-2222-3333-4444-555555555555",
+        "title": "PMFBY FAQ", "page": 1, "page_start": 1, "page_end": 1,
+        "section": "Eligibility", "subsection": None, "clause": None,
         "content": "Eligible farmers are covered.", "similarity": 0.72,
-        "source_url": "https://pmfby.gov.in/faq", "domain": "pmfby",
-        "jurisdiction": "central", "state": None,
+        "source_url": "https://pmfby.gov.in/faq", "source_file": "pmfby.gov.in/faq",
+        "domain": "pmfby", "jurisdiction": "central", "state": None,
     },
     {
         "chunk_id": "bbbbbbbb-5555-6666-7777-888888888888",
-        "title": "PMFBY Guidelines", "page": 4, "section": "Coverage",
+        "stable_chunk_id": "pmfby-guidelines:p4:c0",
+        "document_id": "eeee1111-2222-3333-4444-555555555555",
+        "title": "PMFBY Guidelines", "page": 4, "page_start": 4, "page_end": 4,
+        "section": "Coverage", "subsection": None, "clause": None,
         "content": "Coverage extends to notified crops.", "similarity": 0.51,
-        "source_url": "https://pmfby.gov.in/guidelines", "domain": "pmfby",
-        "jurisdiction": "central", "state": None,
+        "source_url": "https://pmfby.gov.in/guidelines",
+        "source_file": "pmfby.gov.in/guidelines",
+        "domain": "pmfby", "jurisdiction": "central", "state": None,
     },
 ]
 
@@ -43,19 +50,21 @@ def _valid_payload(**overrides) -> dict:
 
 
 def _assert_shape(body: dict):
-    assert set(body) == {"answer", "language", "domain", "confidence",
-                         "citations", "abstained", "follow_up_question"}
-    assert len(body) == 7
+    assert set(body) == {"answer", "language", "domain", "intent", "entities",
+                         "confidence", "confidence_level", "citations",
+                         "abstained", "follow_up_question"}
+    assert len(body) == 10
     assert isinstance(body["answer"], str) and body["answer"]
     assert isinstance(body["language"], str)
     assert body["language"] in ("en", "hi")
     assert isinstance(body["confidence"], float)
     assert 0.0 <= body["confidence"] <= 1.0
+    assert body["confidence_level"] in ("high", "moderate", "low", "none")
     assert isinstance(body["citations"], list)
     assert isinstance(body["abstained"], bool)
     assert body["follow_up_question"] is None
     for c in body["citations"]:
-        assert set(c) == {"title", "page", "url"}
+        assert set(c) == {"chunk_id", "document_id", "title", "page", "url"}
 
 
 def _assert_abstained(body: dict):
@@ -70,7 +79,7 @@ def _assert_answered(body: dict):
     assert body["abstained"] is False
     assert len(body["citations"]) >= 1
     for c in body["citations"]:
-        assert set(c) == {"title", "page", "url"}
+        assert set(c) == {"chunk_id", "document_id", "title", "page", "url"}
 
 
 def _mock_successful_route(respx_mock):

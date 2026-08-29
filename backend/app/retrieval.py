@@ -4,13 +4,20 @@ from app.config import MIN_CHUNKS_ABOVE_SECONDARY, SECONDARY_THRESHOLD, TOP1_THR
 
 
 class RetrievedChunk(BaseModel):
-    chunk_id: str
+    chunk_id: str            # internal database UUID (kept for citation matching)
+    stable_chunk_id: str     # deterministic application-level ID
+    document_id: str
     title: str
     page: int
+    page_start: int
+    page_end: int
     section: str
+    subsection: str | None = None
+    clause: str | None = None
     content: str
     similarity: float
     source_url: str
+    source_file: str | None = None
     domain: str
     jurisdiction: str
     state: str | None = None
@@ -23,16 +30,34 @@ class GateResult(BaseModel):
 
 
 def retrieve(supabase, query_embedding: list[float], domain: str,
-             state: str | None, k: int = 6) -> list[RetrievedChunk]:
-    rows = supabase.rpc("match_chunks", {
+             state: str | None, k: int = 6,
+             as_of_date: str | None = None) -> list[RetrievedChunk]:
+    params = {
         "query_embedding": query_embedding, "match_domain": domain,
-        "match_state": state, "match_count": k}).execute().data or []
-    return [RetrievedChunk(chunk_id=str(r["chunk_id"]), title=r["title"],
-                           page=r["page"], section=r["section"],
-                           content=r["content"], similarity=r["similarity"],
-                           source_url=r["source_url"], domain=r["domain"],
-                           jurisdiction=r["jurisdiction"],
-                           state=r.get("state")) for r in rows]
+        "match_state": state, "match_count": k,
+    }
+    if as_of_date is not None:
+        params["as_of_date"] = as_of_date
+    rows = supabase.rpc("match_chunks", params).execute().data or []
+    return [RetrievedChunk(
+        chunk_id=str(r.get("chunk_id") or r["id"]),
+        stable_chunk_id=r.get("stable_chunk_id") or str(r.get("chunk_id") or r["id"]),
+        document_id=str(r["document_id"]),
+        title=r["title"],
+        page=r.get("page") or 0,
+        page_start=r.get("page_start") or r.get("page") or 0,
+        page_end=r.get("page_end") or r.get("page") or 0,
+        section=r.get("section") or "",
+        subsection=r.get("subsection"),
+        clause=r.get("clause"),
+        content=r["content"],
+        similarity=r["similarity"],
+        source_url=r.get("source_url") or "",
+        source_file=r.get("source_file"),
+        domain=r.get("domain") or domain,
+        jurisdiction=r.get("jurisdiction") or "central",
+        state=r.get("state"),
+    ) for r in rows]
 
 
 def _jurisdiction_ok(chunk: RetrievedChunk, expected_state: str | None) -> bool:

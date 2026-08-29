@@ -126,15 +126,27 @@ def main() -> int:
             else:
                 total_citations += len(all_cited_ids)
                 # Build set of retrieved chunk IDs from the response
+                # The LLM cites using8-char UUID prefixes; the API returns
+                # stable_chunk_id. We check fabrication by testing whether
+                # each8-char prefix is a prefix of any stable_chunk_id or
+                # matches any document_id prefix.
                 retrieved_ids = set()
+                retrieved_prefixes = set()
                 for c in citations_from_response:
                     rid = c.get("chunk_id")
                     if rid:
                         retrieved_ids.add(str(rid))
+                        retrieved_prefixes.add(str(rid)[:8].lower())
+                    did = c.get("document_id")
+                    if did:
+                        retrieved_prefixes.add(str(did)[:8].lower())
 
                 for cid in all_cited_ids:
-                    # Check 1: Cited chunk was actually retrieved for this request
-                    if cid not in retrieved_ids:
+                    # Check 1: Cited chunk was actually retrieved for this request.
+                    # Match by full ID or by8-char prefix against retrieved IDs.
+                    is_retrieved = (cid in retrieved_ids or
+                                    cid[:8].lower() in retrieved_prefixes)
+                    if not is_retrieved:
                         fabrication_count += 1
                         case_result["violations"].append(f"not_retrieved: {cid}")
                         continue

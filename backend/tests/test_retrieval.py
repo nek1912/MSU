@@ -3,7 +3,9 @@ from app.retrieval import GateResult, RetrievedChunk, evidence_gate
 
 def mk(sim: float, domain: str = "pmfby", jurisdiction: str = "central",
        state: str | None = None) -> RetrievedChunk:
-    return RetrievedChunk(chunk_id="c1", title="T", page=1, section="S",
+    return RetrievedChunk(chunk_id="c1", stable_chunk_id="test:p1:c0",
+                          document_id="d1", title="T", page=1,
+                          page_start=1, page_end=1, section="S",
                           content="C", similarity=sim, source_url="https://x",
                           domain=domain, jurisdiction=jurisdiction, state=state)
 

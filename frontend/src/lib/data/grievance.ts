@@ -5,43 +5,52 @@ export interface GrievanceCategory {
   labelKey: string;
 }
 
-export interface GrievanceSubmission {
-  categoryId: string;
-  details: string;
-  name?: string;
-  contact?: string;
+export interface GrievanceTimelineEntry {
+  status: string;
+  timestamp: string;
 }
 
 export interface GrievanceRecord {
   id: string;
   categoryId: string;
   details: string;
-  status: GrievanceStatus;
-  submittedAt: string;
-  timeline: { status: GrievanceStatus; at: string }[];
+  name?: string;
+  contact?: string;
+  status: string;
+  timeline: GrievanceTimelineEntry[];
 }
+
+const CATEGORIES: GrievanceCategory[] = [
+  { id: "insurance", labelKey: "grievance.category.insurance" },
+  { id: "pacs", labelKey: "grievance.category.pacs" },
+  { id: "service", labelKey: "grievance.category.service" },
+  { id: "other", labelKey: "grievance.category.other" },
+];
 
 const store = new Map<string, GrievanceRecord>();
+let counter = 0;
 
 export function getGrievanceCategories(): GrievanceCategory[] {
-  return [
-    { id: "insurance", labelKey: "grievance.category.insurance" },
-    { id: "pacs", labelKey: "grievance.category.pacs" },
-    { id: "service", labelKey: "grievance.category.service" },
-    { id: "other", labelKey: "grievance.category.other" },
-  ];
+  return CATEGORIES;
 }
 
-export function submitGrievance(sub: GrievanceSubmission): GrievanceRecord {
-  const id = `GRV-${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
+export function submitGrievance(input: {
+  categoryId: string;
+  details: string;
+  name?: string;
+  contact?: string;
+}): GrievanceRecord {
+  counter++;
+  const id = `GRV-${String(counter).padStart(5, "0")}`;
   const now = new Date().toISOString();
   const record: GrievanceRecord = {
     id,
-    categoryId: sub.categoryId,
-    details: sub.details,
+    categoryId: input.categoryId,
+    details: input.details,
+    name: input.name,
+    contact: input.contact,
     status: "submitted",
-    submittedAt: now,
-    timeline: [{ status: "submitted", at: now }],
+    timeline: [{ status: "submitted", timestamp: now }],
   };
   store.set(id, record);
   return record;

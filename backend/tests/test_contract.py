@@ -51,9 +51,10 @@ def _valid_payload(**overrides) -> dict:
 
 def _assert_shape(body: dict):
     assert set(body) == {"answer", "language", "domain", "intent", "entities",
-                         "confidence", "confidence_level", "citations",
-                         "abstained", "follow_up_question"}
-    assert len(body) == 10
+                          "confidence", "confidence_level", "citations",
+                          "abstained", "speech_text", "speech_segments",
+                          "follow_up_question"}
+    assert len(body) == 12
     assert isinstance(body["answer"], str) and body["answer"]
     assert isinstance(body["language"], str)
     assert body["language"] in ("en", "hi")

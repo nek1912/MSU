@@ -381,7 +381,8 @@ class TestMultilingualContract:
         body = r.json()
         assert set(body) == {"answer", "language", "domain", "intent", "entities",
                              "confidence", "confidence_level", "citations",
-                             "abstained", "follow_up_question"}
+                             "abstained", "speech_text", "speech_segments",
+                             "follow_up_question"}
         assert body["language"] == "en"
 
     @respx.mock
@@ -398,7 +399,8 @@ class TestMultilingualContract:
         body = r.json()
         assert set(body) == {"answer", "language", "domain", "intent", "entities",
                              "confidence", "confidence_level", "citations",
-                             "abstained", "follow_up_question"}
+                             "abstained", "speech_text", "speech_segments",
+                             "follow_up_question"}
         assert body["language"] == "hi"
 
     @respx.mock
@@ -415,5 +417,6 @@ class TestMultilingualContract:
         body = r.json()
         assert set(body) == {"answer", "language", "domain", "intent", "entities",
                              "confidence", "confidence_level", "citations",
-                             "abstained", "follow_up_question"}
+                             "abstained", "speech_text", "speech_segments",
+                             "follow_up_question"}
         assert body["language"] == "gu"

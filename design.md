@@ -27,7 +27,7 @@ Turn pipeline:
 
 ## Domain taxonomy
 
-`cooperative | pacs | schemes | pmfby | agriculture | finlit | grievance | out_of_scope`
+`pacs_governance | pacs_computerization | pmfby | financial_inclusion | schemes | agriculture | grievance | out_of_scope`
 
 ## Retrieval design
 
@@ -56,11 +56,27 @@ Reference format: `DEMO-<DOMAIN>-<5digits>`. `is_official_submission` is always
   "language": "en|hi",
   "domain": "string",
   "confidence": 0.0,
-  "citations": [{ "title": "string", "page": 0, "url": "string" }],
+  "citations": [{
+    "chunk_id": "string (stable app id)",
+    "document_id": "uuid",
+    "source_file": "string",
+    "title": "string",
+    "page": 0,
+    "page_start": 0,
+    "page_end": 0,
+    "section": "string",
+    "subsection": "string",
+    "clause": "string",
+    "url": "string"
+  }],
   "abstained": false,
   "follow_up_question": null
 }
 ```
+
+Out-of-scope queries return `domain: "out_of_scope"`, `abstained: true`, and a
+controlled scope message (no factual LLM answer). Retrieval is hybrid
+(dense + lexical RRF); the reranker is wired but disabled pending curated eval.
 
 ## Prompting rules
 

@@ -21,6 +21,18 @@ class RetrievedChunk(BaseModel):
     domain: str
     jurisdiction: str
     state: str | None = None
+    # Stable application identity + provenance (Task 2). `chunk_id` remains the
+    # internal DB uuid (used for [chunk:id] citation markers); `stable_chunk_id`
+    # is the deterministic, re-ingestion-safe application id (e.g.
+    # "operational_guidelines_pmfby_00012") needed to resolve citations to the
+    # exact source page.
+    stable_chunk_id: str | None = None
+    document_id: str | None = None
+    source_file: str = ""
+    page_start: int | None = None
+    page_end: int | None = None
+    subsection: str = ""
+    clause: str = ""
 
 
 class GateResult(BaseModel):

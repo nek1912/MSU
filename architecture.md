@@ -70,14 +70,20 @@ an answer and is not trusted to supply facts on its own.
 
 ```
 question → language detection → domain classification → jurisdiction
-resolution → metadata-filtered retrieval (domain + state) → vector search
-→ evidence threshold check → grounded LLM generation → citation
-verification → structured response
+resolution → hybrid retrieval (dense vector + lexical, RRF fusion,
+domain + state filter applied before candidate ranking) → [reranker if
+enabled, currently OFF] → evidence gate v2 (abstain if insufficient) →
+grounded LLM generation → citation verification (every [chunk:id] must map
+to a retrieved chunk) → structured response
 ```
+
+Out-of-scope queries return a controlled scope response (no factual LLM
+answer). The frontend `/api/chat` proxy has NO static fallback — a backend
+failure returns 502/503, never an ungrounded answer.
 
 ## 4. Domain taxonomy
 
-`cooperative | pacs | schemes | pmfby | agriculture | finlit | grievance | out_of_scope`
+`pacs_governance | pacs_computerization | pmfby | financial_inclusion | schemes | agriculture | grievance | out_of_scope`
 
 ## 5. Jurisdiction
 
@@ -112,9 +118,13 @@ Groq Whisper for STT. Final fallback: text-only mode. This is a Tier 2 (post-MVP
 component — the MVP ships text-only.
 
 ### 6.4 Retrieval layer
-Supabase Postgres + pgvector, HNSW index. Must support semantic similarity,
-domain filtering, jurisdiction filtering, state filtering, document filtering.
-Metadata filters apply *before* vector search to prevent cross-domain matches.
+Supabase Postgres + pgvector, HNSW index (cosine). Retrieval is **hybrid**:
+dense vector search (`match_chunks` RPC, 768-d Jina embeddings) fused with
+Postgres lexical search via weighted Reciprocal Rank Fusion (RRF). Domain and
+jurisdiction/state filters are applied *inside* both candidate queries before
+ranking to prevent cross-domain matches (contamination = 0). A Jina reranker
+is wired but **disabled** (`RERANKER_ENABLED=false`) until a curated eval shows
+it helps.
 
 ### 6.5 LLM layer
 Provider abstraction — application logic must not depend directly on one
@@ -169,9 +179,14 @@ Grievance submission always contains `is_official_submission: false`.
 
 ## 10. Citation flow
 
-Retrieved chunks carry `chunk_id, document_id, document_title, page, section,
-source_url`. The LLM returns chunk references. Backend validates: `citation chunk
-exists AND citation chunk was retrieved this turn`. Invalid citation → `ABSTAIN`.
+Retrieved chunks carry a stable application `chunk_id` (e.g.
+`operational_guidelines_pmfby_00012`) plus the internal DB `id`, `document_id`,
+`source_file`, `page_start`, `page_end`, `section`, `subsection`, `clause`, and
+`text`. The LLM returns `[chunk:<id>]` markers. Backend validates: `citation
+chunk exists AND was retrieved this turn` (stable `chunk_id` resolves
+deterministically to the row → document → source page). Invalid/fabricated
+citation → `ABSTAIN`. Confidence is an internal diagnostic, not a stated
+probability.
 
 ## 11. Fallback chains
 

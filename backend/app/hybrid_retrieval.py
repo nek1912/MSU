@@ -222,6 +222,43 @@ def _lexical_retrieve(supabase, query_text: str, domain: str,
     return results
 
 
+def _enrich_chunks(supabase, chunks: list[RetrievedChunk]) -> list[RetrievedChunk]:
+    """Attach the stable application chunk_id + provenance metadata (Task 2).
+
+    ``RetrievedChunk.chunk_id`` stays the internal DB uuid (used for the
+    ``[chunk:id]`` citation markers and citation verification). This adds the
+    deterministic, re-ingestion-safe ``stable_chunk_id`` and the fields needed
+    to resolve a citation deterministically to a source page.
+    """
+    if not chunks:
+        return chunks
+    uuids = [c.chunk_id for c in chunks]
+    try:
+        rows = (
+            supabase.table("chunks")
+            .select("id, chunk_id, document_id, section, metadata")
+            .in_("id", uuids)
+            .execute()
+            .data or []
+        )
+    except Exception:  # noqa: BLE001
+        return chunks
+    by_id = {str(r["id"]): r for r in rows}
+    for c in chunks:
+        r = by_id.get(c.chunk_id)
+        if not r:
+            continue
+        meta = r.get("metadata") or {}
+        c.stable_chunk_id = r.get("chunk_id")
+        c.document_id = r.get("document_id")
+        c.source_file = meta.get("source_file", "") or ""
+        c.page_start = meta.get("page_start") or c.page
+        c.page_end = meta.get("page_end") or c.page
+        c.subsection = meta.get("subsection", "") or ""
+        c.clause = meta.get("clause", "") or ""
+    return chunks
+
+
 def retrieve_hybrid(supabase, query_embedding: list[float], query_text: str,
                     domain: str, state: str | None,
                     k: int = 6) -> list[RetrievedChunk]:
@@ -241,7 +278,7 @@ def retrieve_hybrid(supabase, query_embedding: list[float], query_text: str,
 
     # If no lexical results, fall back to dense-only
     if not lexical_chunks:
-        return dense_chunks
+        return _enrich_chunks(supabase, dense_chunks)
 
     # Convert to RetrievalCandidate for fusion
     dense_candidates = []
@@ -279,4 +316,4 @@ def retrieve_hybrid(supabase, query_embedding: list[float], query_text: str,
             chunk.similarity = max(chunk.similarity, candidate.fused_score or 0.0)
             result.append(chunk)
 
-    return result
+    return _enrich_chunks(supabase, result)

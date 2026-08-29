@@ -18,9 +18,8 @@ from app.citation_verifier import verify_citations as verify_citations_v2
 from app.db import get_supabase
 from app.domains import get_anchor_store
 from app.evidence_gate import evidence_gate_v2
-from app.generation import (CitationError, build_general_prompt, build_system_prompt,
-                            build_user_prompt, general_disclaimer, verify_citations,
-                            GENERAL_SYSTEM_PROMPT)
+from app.generation import (CitationError, build_system_prompt,
+                            build_user_prompt, verify_citations)
 from app.hybrid_retrieval import retrieve_hybrid
 from app.language import normalize_language
 from app.llm_fallback import AllProvidersFailedError, grounded_answer
@@ -107,15 +106,19 @@ def chat(req: ChatRequest) -> dict:
         resolved_state = req.state if req.state is not None else get_state(req.session_id)
         touch_session(req.session_id, resolved_state, lang)
         if domain == "out_of_scope":
-            # Out-of-scope: let the LLM answer from its own knowledge rather
-            # than abstain. Not grounded in official sources — flagged as such.
-            general_answer = grounded_answer(
-                GroqLLMProvider(settings), GeminiLLMProvider(settings),
-                GENERAL_SYSTEM_PROMPT, build_general_prompt(req.question, lang))
-            return {"answer": f"{general_answer}\n\n{general_disclaimer(lang)}",
-                    "language": lang, "domain": "out_of_scope",
-                    "confidence": 0.0, "citations": [], "abstained": False,
-                    "follow_up_question": None}
+            # Controlled out-of-scope response. Invariant #9: out-of-scope
+            # queries must NOT receive an ungrounded factual LLM answer. Return
+            # a scoped message rather than generating from general knowledge.
+            return {
+                "answer": ABSTAIN_TEXT.get(lang, ABSTAIN_TEXT["en"]),
+                "language": lang,
+                "domain": "out_of_scope",
+                "confidence": 0.0,
+                "confidence_level": "none",
+                "citations": [],
+                "abstained": True,
+                "follow_up_question": None,
+            }
 
         # --- Hybrid retrieval (Stage 5) ---
         # When the reranker is enabled, pull a larger candidate pool (top 25)
@@ -155,8 +158,10 @@ def chat(req: ChatRequest) -> dict:
 
         citations = _citations_from(answer, chunks)
         _band_to_confidence = {"high": 0.9, "medium": 0.7, "low": 0.4}
+        confidence = _band_to_confidence.get(band.value, 0.4)
         return {"answer": answer, "language": lang, "domain": domain,
-                "confidence": _band_to_confidence.get(band.value, 0.4),
+                "confidence": confidence,
+                "confidence_level": _confidence_level(confidence),
                 "citations": citations, "abstained": False,
                 "follow_up_question": None}
     except _SAFE_FAILURES:
@@ -164,6 +169,65 @@ def chat(req: ChatRequest) -> dict:
         return _abstain(lang, "dependency_failure")
     except Exception:
         raise
+
+
+def _citations_from(answer: str, chunks: list[RetrievedChunk]) -> list[dict]:
+    """Build citation objects from the answer's valid ``[chunk:id]`` markers.
+
+    Validates each citation resolves to a chunk that was actually retrieved
+    (citation_verifier), then enriches it with stable provenance from the
+    database so the citation traces back to the official source page.
+    """
+    verification = verify_citations_v2(answer, [c.chunk_id for c in chunks])
+    valid_ids = [c.chunk_id for c in verification.valid_citations]
+    if not valid_ids:
+        return []
+    by_uuid = {c.chunk_id: c for c in chunks}
+    # Enrich stable metadata (stable_chunk_id, document_id, source_file, page
+    # range, section/subsection/clause) from the chunks table — the retrieval
+    # path may not populate all of these fields.
+    supabase = get_supabase()
+    rows = (
+        supabase.table("chunks")
+        .select("id, chunk_id, document_id, section, metadata")
+        .in_("id", list(valid_ids))
+        .execute()
+        .data
+        or []
+    )
+    meta_by_id: dict[str, dict] = {}
+    for r in rows:
+        m = r.get("metadata") or {}
+        meta_by_id[str(r["id"])] = {
+            "stable_chunk_id": r.get("chunk_id"),
+            "document_id": r.get("document_id"),
+            "source_file": m.get("source_file", "") or "",
+            "page_start": m.get("page_start") or r.get("page_start"),
+            "page_end": m.get("page_end") or r.get("page_end"),
+            "section": r.get("section") or m.get("section", ""),
+            "subsection": m.get("subsection", "") or "",
+            "clause": m.get("clause", "") or "",
+        }
+    citations: list[dict] = []
+    for uid in valid_ids:
+        c = by_uuid.get(uid)
+        if c is None:
+            continue
+        meta = meta_by_id.get(uid) or {}
+        citations.append({
+            "chunk_id": meta.get("stable_chunk_id") or c.stable_chunk_id or c.chunk_id,
+            "document_id": meta.get("document_id") or c.document_id or "",
+            "title": c.title,
+            "page": c.page,
+            "page_start": meta.get("page_start") or c.page_start or c.page,
+            "page_end": meta.get("page_end") or c.page_end or c.page,
+            "section": meta.get("section") or c.section or "",
+            "subsection": meta.get("subsection") or (c.subsection or ""),
+            "clause": meta.get("clause") or (c.clause or ""),
+            "source_file": meta.get("source_file") or (c.source_file or ""),
+            "url": c.source_url,
+        })
+    return citations
 
 
 def _abstain(lang: str, _reason: str | None) -> dict:

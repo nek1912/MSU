@@ -8,7 +8,19 @@ export interface ChatResponse {
   entities: string[];
   confidence: number;
   confidence_level: "high" | "moderate" | "low" | "none";
-  citations: { chunk_id: string; document_id: string; title: string; page: number; url: string }[];
+  citations: {
+    chunk_id: string | null;
+    document_id: string | null;
+    source_file: string;
+    title: string;
+    page: number;
+    page_start: number | null;
+    page_end: number | null;
+    section: string;
+    subsection: string;
+    clause: string;
+    url: string;
+  }[];
   abstained: boolean;
   follow_up_question: string | null;
 }

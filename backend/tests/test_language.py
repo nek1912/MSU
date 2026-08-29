@@ -55,7 +55,7 @@ def test_english_retrieval_preserves_latin_entities(monkeypatch):
             # only Indic runs reach here; Latin runs are never passed to translate
             return t.replace("શું", "WHAT").replace("કેટલું", "HOWMUCH")
 
-    monkeypatch.setattr("app.language.AzureTranslator", lambda s: _FakeT())
-    out = english_retrieval_query("PMFBY શું છે and farmer premium 500", None, settings)
+    monkeypatch.setattr("app.providers.translator.AzureTranslator", lambda s: _FakeT())
+    out = english_retrieval_query("PMFBY શું કેટલું and farmer premium 500", None, settings)
     assert "PMFBY" in out and "farmer" in out and "premium" in out and "500" in out
     assert "WHAT" in out and "HOWMUCH" in out  # Indic runs were translated

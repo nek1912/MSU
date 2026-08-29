@@ -91,8 +91,13 @@ _EXPLICIT_LANG_NAMES = {
     "bengali": "bn", "bangla": "bn", "বাংলা": "bn",
 }
 _EXPLICIT_RE = re.compile(
-    r"(?:respond|reply|answer|explain|समझाओ|समजावो|बताओ|समझाएं|in|में|मां)\s+"
-    r"(english|angrezi|hindi|हिंदी|gujarati|ગુજરાતી|marathi|मराठी|bengali|bangla|বাংলা)",
+    r"(?:respond|reply|answer|explain|समझाओ|समजावो|बताओ|समझाएं|in|में|मां|માં)"
+    r"\s+"
+    r"(english|angrezi|hindi|हिंदी|gujarati|ગુજરાતી|marathi|मराठी|bengali|bangla|বাংলা)"
+    r"|"
+    r"(english|angrezi|hindi|हिंदी|gujarati|ગુજરાતી|marathi|मराठी|bengali|bangla|বাংলা)"
+    r"\s+"
+    r"(?:respond|reply|answer|explain|समझाओ|समजावो|बताओ|समझाएं|in|में|मां|માં)",
     re.IGNORECASE,
 )
 
@@ -100,7 +105,8 @@ _EXPLICIT_RE = re.compile(
 def _detect_explicit_request(text: str) -> str | None:
     m = _EXPLICIT_RE.search(text)
     if m:
-        return _EXPLICIT_LANG_NAMES.get(m.group(1).lower())
+        name = m.group(1) or m.group(2)
+        return _EXPLICIT_LANG_NAMES.get(name.lower())
     return None
 
 
@@ -113,31 +119,32 @@ def detect_query_languages(text: str) -> dict:
     cfg = _load_config()
     languages: set[str] = set()
     ratios = _script_ratios(text)
-    if ratios.get("gujarati", 0.0) >= cfg["script_threshold"]:
+    # PRESENCE: any non-trivial script presence counts (mixed queries).
+    if ratios.get("gujarati", 0.0) > 0:
         languages.add("gu")
-    if ratios.get("bengali", 0.0) >= cfg["script_threshold"]:
+    if ratios.get("bengali", 0.0) > 0:
         languages.add("bn")
-    if ratios.get("devanagari", 0.0) >= cfg["script_threshold"]:
+    if ratios.get("devanagari", 0.0) > 0:
         # distinguish hi/mr via stopword bias (never force Hindi)
         languages.add("mr" if _stopword_bias(text, "mr") > _stopword_bias(text, "hi") else "hi")
     latin_letters = [c for c in text if c.isalpha() and c.isascii()]
     if latin_letters:
         languages.add("en")
-    # dominant = script with highest alphabetic ratio (hi/mr kept distinguishable)
+    # DOMINANT: highest-ratio Indic script above the configured threshold.
+    dominant = None
     best, best_r = None, 0.0
     for name, r in ratios.items():
         if name in ("gujarati", "bengali", "devanagari") and r > best_r:
             best, best_r = name, r
-    if best == "gujarati":
-        dominant = "gu"
-    elif best == "bengali":
-        dominant = "bn"
-    elif best == "devanagari":
-        dominant = "mr" if _stopword_bias(text, "mr") > _stopword_bias(text, "hi") else "hi"
+    if best is not None and best_r >= cfg["script_threshold"]:
+        if best == "gujarati":
+            dominant = "gu"
+        elif best == "bengali":
+            dominant = "bn"
+        elif best == "devanagari":
+            dominant = "mr" if _stopword_bias(text, "mr") > _stopword_bias(text, "hi") else "hi"
     elif latin_letters:
         dominant = "en"
-    else:
-        dominant = None
     return {
         "languages": languages,
         "dominant": dominant,
@@ -194,13 +201,13 @@ def english_retrieval_query(text: str, detected: dict | None, settings) -> str:
     """
     from app.providers.translator import AzureTranslator
 
-    dom = (detected or {}).get("dominant")
-    if not dom or dom == "en":
+    runs = _script_runs(text)
+    if not any(script in ("gujarati", "bengali", "devanagari") for script, _ in runs):
         return text
     try:
         translator = AzureTranslator(settings)
         out: list[str] = []
-        for script, run_text in _script_runs(text):
+        for script, run_text in runs:
             if script in ("latin", "other"):
                 out.append(run_text)
             else:

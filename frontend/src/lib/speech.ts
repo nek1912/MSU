@@ -13,6 +13,7 @@ export interface SpeechService {
 // or the user stops. Incrementing this invalidates any pending utterance/audio.
 let _speakToken = 0;
 let _activeAudio: HTMLAudioElement | null = null;
+let _activeAudioResolve: (() => void) | null = null;
 
 function stopAllPlayback(): void {
   _speakToken++;
@@ -30,6 +31,11 @@ function stopAllPlayback(): void {
       /* noop */
     }
     _activeAudio = null;
+  }
+  if (_activeAudioResolve) {
+    const r = _activeAudioResolve;
+    _activeAudioResolve = null;
+    r();
   }
 }
 
@@ -105,10 +111,12 @@ function playAzure(hex: string, token: number): Promise<void> {
       return reject(e);
     }
     _activeAudio = audio;
+    _activeAudioResolve = resolve;
     const cleanup = () => {
       audio.onended = null;
       audio.onerror = null;
       if (_activeAudio === audio) _activeAudio = null;
+      if (_activeAudioResolve === resolve) _activeAudioResolve = null;
     };
     audio.onended = () => {
       cleanup();
@@ -135,23 +143,9 @@ export async function speakSegments(
   segments: SpeechSegment[],
   opts?: { onToken?: (token: number) => void },
 ): Promise<void> {
+  stopAllPlayback();
   const token = ++_speakToken;
   opts?.onToken?.(token);
-  if (typeof window !== "undefined" && window.speechSynthesis) {
-    try {
-      window.speechSynthesis.cancel();
-    } catch {
-      /* noop */
-    }
-  }
-  if (_activeAudio) {
-    try {
-      _activeAudio.pause();
-    } catch {
-      /* noop */
-    }
-    _activeAudio = null;
-  }
 
   const runs = partitionRuns(segments || []);
   for (const run of runs) {

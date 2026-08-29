@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import * as api from "../api";
-import { partitionRuns, hasVoice, pickVoice, speakSegments } from "../speech";
+import { partitionRuns, hasVoice, pickVoice, speakSegments, createSpeechService } from "../speech";
 
 // Minimal WAV hex (doesn't need to be valid audio for the test; we stub Audio).
 const FAKE_HEX = "000000";
@@ -73,5 +73,51 @@ describe("speakSegments", () => {
     expect(spy).toHaveBeenCalledTimes(2);
     expect(spy).toHaveBeenCalledWith([{ text: "Hello world", language: "en" }]);
     expect(spy).toHaveBeenCalledWith([{ text: "नमस्ते", language: "hi" }]);
+  });
+});
+
+describe("speakSegments cancellation", () => {
+  // Stub Audio whose play() resolves but whose onended NEVER fires — this
+  // reproduces the dangling-promise bug where pause() does not settle the
+  // awaiting playAzure promise.
+  beforeEach(() => {
+    vi.resetAllMocks();
+    class NonEndingAudio {
+      onended: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      constructor(_src?: string) {
+        void _src;
+      }
+      play() {
+        return Promise.resolve();
+      }
+    }
+    (globalThis as unknown as { Audio: typeof NonEndingAudio }).Audio =
+      NonEndingAudio;
+  });
+
+  it("settles the in-flight Azure promise when a newer call cancels it", async () => {
+    vi.spyOn(api, "fetchVoiceSpeak").mockResolvedValue({
+      audio: FAKE_HEX,
+      language: "hi",
+    });
+
+    const first = speakSegments([{ text: "नमस्ते", language: "hi" }]);
+    // Second call cancels the first via stopAllPlayback().
+    speakSegments([{ text: "अलविदा", language: "hi" }]);
+
+    await expect(first).resolves.toBeUndefined();
+  });
+
+  it("settles the in-flight Azure promise when stopSpeaking is called", async () => {
+    vi.spyOn(api, "fetchVoiceSpeak").mockResolvedValue({
+      audio: FAKE_HEX,
+      language: "hi",
+    });
+
+    const first = speakSegments([{ text: "नमस्ते", language: "hi" }]);
+    createSpeechService().stopSpeaking();
+
+    await expect(first).resolves.toBeUndefined();
   });
 });

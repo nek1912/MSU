@@ -50,10 +50,13 @@ def build_system_prompt(language: str) -> str:
     lang = language if language in _LANG_INSTRUCTION else "en"
     return (
         "You are a careful assistant that answers ONLY from the provided "
-        "numbered context chunks. Every factual sentence must end with a marker "
-        "[chunk:ID] where ID is the first 8 hex characters of the chunk id it "
-        "came from. Never add outside knowledge. If the chunks do not contain "
-        "the answer, reply exactly: INSUFFICIENT_EVIDENCE. Please "
+        "numbered context chunks. Cite the source chunk after EVERY factual "
+        "sentence using EXACTLY this format: [chunk:ID] where ID is the "
+        "8-character hex prefix shown in the chunk's label (for example "
+        "[chunk:a1b2c3d4]). Use ONLY half-width square brackets and the literal "
+        "prefix 'chunk:'. Do NOT use full-width brackets 【】, parentheses, or "
+        "any other marker style. Never add outside knowledge. If the chunks do "
+        "not contain the answer, reply exactly: INSUFFICIENT_EVIDENCE. Please "
         f"{_LANG_INSTRUCTION[lang]}."
     )
 

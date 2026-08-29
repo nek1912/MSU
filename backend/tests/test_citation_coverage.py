@@ -100,6 +100,25 @@ class TestCitationVerifierCoverage:
         assert result.is_valid is False
         assert result.repair_attempted is True
 
+    def test_verifier_accepts_fullwidth_citation(self):
+        """Full-width 【ID】 markers matching evidence are normalised and accepted."""
+        from app.citation_verifier import verify_citations
+
+        answer = "PMFBY is insurance 【abc12345】 for farmers."
+        evidence_ids = ["abc12345def"]
+        result = verify_citations(answer, evidence_ids)
+        assert result.is_valid is True
+        assert len(result.valid_citations) == 1
+
+    def test_verifier_rejects_fullwidth_non_retrieved(self):
+        """Full-width 【ID】 NOT in evidence is still rejected."""
+        from app.citation_verifier import verify_citations
+
+        answer = "Claim 【ffffffff】 something."
+        evidence_ids = ["abc12345def"]
+        result = verify_citations(answer, evidence_ids)
+        assert result.is_valid is False
+
 
 class TestChatRouteVerificationIntegration:
     """Prove the chat route integrates with the verifier."""

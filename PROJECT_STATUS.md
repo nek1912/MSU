@@ -252,6 +252,59 @@ opened from it. No re-chunk / re-ingest / re-embed — corpus frozen at 2,188.
   tests now pass. This is a documented smallest-test-correction, not a masking of
   a real failure.
 
+## Citation verification fix (4th session — blocker #1)
+
+**Root cause (traced, not guessed):** The citation verifier only recognised the
+exact half-width marker `[chunk:ID]`. Groq (Llama-3.3-70b) frequently emits the
+correct chunk-ID *prefix* but in the wrong *format* — full-width brackets
+`【ID】` (e.g. `【fdc569dd】`) or a bare half-width hex bracket `[ID]` missing the
+`chunk:` prefix. `extract_citations_from_answer` therefore found **zero**
+markers → `valid_ids=[]` → verifier failed closed → `/chat` abstained for
+in-domain queries. This is a model-output-format / parser gap, NOT a retrieval
+or evidence-gate problem (retrieval, domain routing, and the gate were all
+working — the chunks and correct prefixes were present).
+
+**Fix (smallest generic, gate not weakened):** `backend/app/citation_verifier.py`
+now normalises recognised citation-format variants to the canonical `[chunk:ID]`
+before validation:
+- `【chunk:ID】` / `【ID】` (full-width) → `[chunk:ID]`
+- `[ID]` (half-width, missing `chunk:` prefix) → `[chunk:ID]`
+Only the *format* changes; validity is still decided against the retrieved
+evidence set, so a non-retrieved or fabricated ID remains rejected. The regex
+bug that required the literal `chunk` prefix (`chunk:?`) was corrected to
+`(?:chunk:)?` so the bare full-width form is also handled.
+
+`backend/app/generation.py:build_system_prompt` was strengthened to specify the
+exact `[chunk:ID]` format with a placeholder example and to forbid full-width
+brackets / other marker styles (generic — no hardcoded document/query IDs).
+
+**Behavior now matches the required contract:**
+- valid retrieved citation (`【id】` / `[id]` matching evidence) → accepted
+- missing required citation → rejected / abstained
+- citation for a chunk NOT retrieved → rejected
+- fabricated citation → rejected (LLM can never invent source IDs)
+
+**Tests:** added `tests/test_citation_coverage.py` (full-width accept + reject)
+and `tests/test_chat_route.py` (route-level full-width accept → grounded answer;
+full-width non-retrieved → abstain). Full backend suite: **354 passed, 0 failed**
+(incl. 4 new). Frontend unaffected.
+
+**Actual `/chat` results (real Groq + real Supabase, session_store stubbed only
+for the test — sessions-400 is the separate blocker #2):**
+- **PMFBY (in-domain):** `abstained=false`, `confidence_level=high`, **4 valid
+  citations** (real stable chunk IDs, titles, pages). FIX PROVEN end-to-end.
+- **PACS (in-domain):** `abstained=true` — but at the **evidence gate**, not
+  citations: `n_cands=0`, reason `NO_ELIGIBLE_SOURCE`. Retrieval returned zero
+  eligible chunks for `pacs_computerization` + state `gujarat`. This is a
+  **retrieval / state-filter issue, separate from the citation blocker** (likely
+  the computerization corpus is filtered out by the `gujarat` state/jurisdiction
+  filter). Tracked as a follow-up, not part of this fix.
+- **Off-topic:** `abstained=true`, controlled rejection (no factual answer). ✓
+- **Insufficient evidence:** `abstained=true`, safe abstention. ✓
+
+**Corpus / database:** untouched — no re-chunk, re-ingest, re-embed, or schema
+change. Jina v3 768d, retrieval.passage/query, reranker-off all unchanged.
+
 ## Corpus status
 
 All 5 seed documents re-ingested from `corpus/seeds/json_files/*_content_list_v2.json`

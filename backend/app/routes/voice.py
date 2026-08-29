@@ -33,7 +33,7 @@ class TranscribeRequest(BaseModel):
 
 
 class SpeakRequest(BaseModel):
-    text: str
+    text: str = ""
     language: str = "en"
     segments: list["SpeechSegment"] | None = None
 

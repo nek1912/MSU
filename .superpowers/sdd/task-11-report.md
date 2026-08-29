@@ -81,3 +81,16 @@ explicit switch was NOT flagged. This is exactly the case that must be flagged.
   introduced by this task and outside its scope.
 - Pre-existing lint `error`s (set-state-in-effect) remain; not addressed here to keep the
   change focused, but worth a separate cleanup pass.
+
+## Test-Only Follow-Up (commit `a9c6746`)
+- **Status:** DONE. No source changes — only the Task 11 test file and this report.
+- **Commit:** `a9c674604e5742ced68949ad0e8de2d4a4925936` (branch `integration/stabilization`).
+- **Change:** Added a 4th test `first message after switching away from default (no prior
+  send) is explicit` that renders in the default `en`, switches the UI locale to `hi`
+  **before any send**, sends the first message, and asserts
+  `sendChat` was called with `{ language: "hi", ui_language_explicit: true }`. This
+  proves the effect-based fix (commit `fe00b21`): a switch with no prior send still
+  yields `explicit: true`, which the old `lastSentLocaleRef`-null logic would have missed.
+- **Test summary:** `npx vitest run` → **14 files / 38 tests passed** (37 existing + 1 new).
+  The new test, plus the 3 prior Task 11 tests, all pass. `tsc --noEmit` and lint
+  unchanged from prior status (no new errors introduced by this test-only change).

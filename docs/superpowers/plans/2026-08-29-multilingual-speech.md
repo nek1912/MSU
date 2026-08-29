@@ -217,10 +217,18 @@ def test_detect_marathi_not_hindi():
     # stopword bias must allow mr to be present (not forced to hi only)
     assert d["dominant"] in ("mr", "hi")
 
-def test_english_retrieval_preserves_entities():
+def test_english_retrieval_preserves_latin_entities(monkeypatch):
     settings = get_settings()
-    out = english_retrieval_query("PMFBY શું છે and farmer premium કેટલું છે?", None, settings)
-    assert isinstance(out, str)  # concrete; entity preservation verified via mocked translator in integration
+
+    class _FakeT:
+        def translate(self, t, to, source):
+            # only Indic runs reach here; Latin runs are never passed to translate
+            return t.replace("શું", "WHAT").replace("કેટલું", "HOWMUCH")
+
+    monkeypatch.setattr("app.language.AzureTranslator", lambda s: _FakeT())
+    out = english_retrieval_query("PMFBY શું છે and farmer premium 500", None, settings)
+    assert "PMFBY" in out and "farmer" in out and "premium" in out and "500" in out
+    assert "WHAT" in out and "HOWMUCH" in out  # Indic runs were translated
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -278,13 +286,22 @@ def detect_query_languages(text: str) -> dict:
     latin_letters = [c for c in text if c.isalpha() and c.isascii()]
     if latin_letters:
         languages.add("en")
-    # dominant = script with highest alphabetic ratio among supported
+    # dominant = script with highest alphabetic ratio (hi/mr kept distinguishable)
     best, best_r = None, 0.0
     for name, r in ratios.items():
         if name in ("gujarati", "bengali", "devanagari") and r > best_r:
             best, best_r = name, r
-    dominant_map = {"gujarati": "gu", "bengali": "bn", "devanagari": "hi"}
-    dominant = dominant_map.get(best) if best else ("en" if latin_letters else None)
+    if best == "gujarati":
+        dominant = "gu"
+    elif best == "bengali":
+        dominant = "bn"
+    elif best == "devanagari":
+        # SAME hi/mr stopword-bias decision as the `languages` set above
+        dominant = "mr" if _stopword_bias(text, "mr") > _stopword_bias(text, "hi") else "hi"
+    elif latin_letters:
+        dominant = "en"
+    else:
+        dominant = None
     return {
         "languages": languages,
         "dominant": dominant,
@@ -292,13 +309,52 @@ def detect_query_languages(text: str) -> dict:
     }
 
 
-def english_retrieval_query(text: str, detected: dict | None, settings) -> str:
-    """Build an English retrieval representation.
+_SCRIPT_TO_LANG = {"gujarati": "gu", "bengali": "bn", "devanagari": "hi"}
 
-    Reuses the already-wired AzureTranslator (no new dependency). Translates
-    Indic runs to English while the multilingual embedding model + translator
-    preserve scheme names / acronyms / numbers / dates. Falls back to the
-    original text on any failure (never fabricates).
+
+def _script_runs(text: str) -> list[tuple[str, str]]:
+    """Split text into (script_label, text) runs for run-aware translation."""
+    cfg = _load_config()
+    scripts = cfg["scripts"]
+
+    def label(c: str) -> str:
+        cp = ord(c)
+        for name, charset in scripts.items():
+            if cp in charset:
+                return name
+        if c.isascii() and c.isalpha():
+            return "latin"
+        return "other"
+
+    runs: list[tuple[str, str]] = []
+    cur_script: str | None = None
+    cur_chars: list[str] = []
+    for c in text:
+        if c.isspace():
+            if cur_chars:
+                cur_chars.append(c)
+            continue
+        s = label(c)
+        if s != cur_script:
+            if cur_chars:
+                runs.append((cur_script or "other", "".join(cur_chars)))
+            cur_script = s
+            cur_chars = [c]
+        else:
+            cur_chars.append(c)
+    if cur_chars:
+        runs.append((cur_script or "other", "".join(cur_chars)))
+    return runs
+
+
+def english_retrieval_query(text: str, detected: dict | None, settings) -> str:
+    """Build an English retrieval representation (run-aware).
+
+    Latin runs (scheme names, acronyms, numbers, dates, English words) are
+    preserved verbatim; only Indic-script runs are translated via the
+    already-wired AzureTranslator. This preserves the terminology the design
+    requires to stay intact, rather than translating the whole query. Falls
+    back to the original text on any failure (never fabricates).
     """
     from app.providers.translator import AzureTranslator
 
@@ -306,7 +362,14 @@ def english_retrieval_query(text: str, detected: dict | None, settings) -> str:
     if not dom or dom == "en":
         return text
     try:
-        return AzureTranslator(settings).translate(text, to="en", source=dom)
+        translator = AzureTranslator(settings)
+        out: list[str] = []
+        for script, run_text in _script_runs(text):
+            if script in ("latin", "other"):
+                out.append(run_text)
+            else:
+                out.append(translator.translate(run_text, to="en", source=_SCRIPT_TO_LANG[script]))
+        return "".join(out)
     except Exception:
         return text
 ```
@@ -517,13 +580,14 @@ Expected: FAIL (`speech_segments` missing).
 
 In `backend/app/routes/chat.py`:
 
-Add imports (after line 24 / near other imports):
+Add imports (replace the existing `from app.language import normalize_language` line 24):
 ```python
-from app.language import detect_query_languages
 from app.resolve_response_language import resolve_and_remember
-from app.services.lang_memory import get_session_language
 from app.speech_text import prepare_speech_text, segment_speech
 ```
+(Remove `from app.language import normalize_language` — `resolve_and_remember` is the
+sole owner of detection + session lookup. Do NOT import `detect_query_languages` or
+`get_session_language` here, to avoid a second source of the same state.)
 
 Add field to `ChatRequest` (after `language`):
 ```python
@@ -534,10 +598,9 @@ In `chat()`, replace:
 ```python
     lang = normalize_language(req.language, req.question)
 ```
-with:
+with a single resolver call (the resolver detects languages and reads session
+memory internally — no duplicate detection in the route):
 ```python
-    detected = detect_query_languages(req.question)
-    session_lang = get_session_language(req.session_id)
     lang = resolve_and_remember(
         req.question, req.language, req.ui_language_explicit, req.session_id
     )
@@ -598,7 +661,7 @@ def test_voice_speak_segments_builds_multivoice_ssml(respx_mock, monkeypatch):
     assert "<voice name=" in CAPTURED_SSML
 ```
 
-(Adapt to the existing Azure mock pattern in `test_voice_routes.py`: monkeypatch `azure_voice._sdk` and assert `speak_ssml_async` received SSML containing both `hi-IN-SwaraNeural` and `en-IN-NeerjaNeural` in that order. Also add a contiguous-run test: `[en][gu][en][mr]` → 2 Azure calls when browser unavailable.)
+(Adapt to the existing Azure mock pattern in `test_voice_routes.py`: monkeypatch `azure_voice._sdk` and assert `speak_ssml_async` received SSML containing both `hi-IN-SwaraNeural` and `en-IN-NeerjaNeural` in that order, and that the route accepted a `segments` payload. The contiguous-run → 2 Azure calls behavior is frontend logic and is covered by the frontend unit test added in Task 9.)
 
 - [ ] **Step 2: Run test to verify it fails**
 
@@ -620,11 +683,14 @@ Expected: FAIL (`text_to_speech_segments` not defined).
         """Synthesize multiple language-tagged segments in order via SSML.
 
         One <voice> element per segment (config-driven voice), concatenated
-        into a single audio stream. Used for one contiguous Azure run.
+        into a single audio stream. Used for one contiguous Azure run. The root
+        ``xml:lang`` is only a document default; per-<voice> ``name`` selects the
+        actual voice/locale, so the root value does not alter synthesis.
         """
         if not self.enabled:
             raise RuntimeError("Azure voice not configured")
         speechsdk = self._sdk()
+        root_locale = self._locale(segments[0]["language"]) if segments else "en-US"
         voices_xml = []
         for seg in segments:
             voice = self._voice(seg["language"])
@@ -632,7 +698,7 @@ Expected: FAIL (`text_to_speech_segments` not defined).
             voices_xml.append(f'<voice name="{voice}">{text}</voice>')
         ssml = (
             '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" '
-            f'xml:lang="en-US">{"".join(voices_xml)}</speak>'
+            f'xml:lang="{root_locale}">{"".join(voices_xml)}</speak>'
         )
         try:
             config = speechsdk.SpeechConfig(subscription=self.speech_key, region=self.speech_region)
@@ -643,7 +709,9 @@ Expected: FAIL (`text_to_speech_segments` not defined).
             raise RuntimeError("Azure TTS failed") from exc
         if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
             return result.audio_data
-        return b""
+        # No audio produced → propagate as failure so the caller reaches the
+        # "audio unavailable" behavior instead of silently returning empty audio.
+        raise RuntimeError("Azure TTS produced no audio")
 ```
 
 `backend/app/services/voice_service.py` — add:
@@ -658,6 +726,8 @@ Expected: FAIL (`text_to_speech_segments` not defined).
         raise VoiceUnavailableError("No voice providers available.")
 ```
 (`SarvamVoiceProvider` lacks this method → AttributeError caught → falls through; Azure is primary.)
+
+Also harden the pre-existing single-voice `text_to_speech` in `azure_voice.py`: change its trailing `return b""` to `raise RuntimeError("Azure TTS produced no audio")` so BOTH paths reach the "audio unavailable" behavior (no silent empty audio).
 
 `backend/app/routes/voice.py` — update `SpeakRequest` and `speak_text`:
 ```python
@@ -700,6 +770,7 @@ git commit -m "feat(voice): multi-voice Azure TTS via SSML segments"
 
 **Interfaces:**
 - Consumes: `get_settings().tts_voices`, `get_settings().speech_locales`, Azure SDK `SpeechSynthesizer.get_voices_async`.
+- NOTE: this validates configured voice NAMES only — it is NOT a synthesis test. Actual audio synthesis is verified separately (Task 12) and labeled as live vs boundary.
 
 - [ ] **Step 1: Write the script**
 
@@ -845,6 +916,21 @@ export interface SpeechSegment {
   text: string;
 }
 
+/** Partition segments into ordered CONTIGUOUS runs of the same TTS source. */
+export function partitionRuns(
+  segments: SpeechSegment[],
+  hasVoice: (lang: string) => boolean,
+): { source: "browser" | "azure"; items: SpeechSegment[] }[] {
+  const runs: { source: "browser" | "azure"; items: SpeechSegment[] }[] = [];
+  for (const seg of segments) {
+    const source: "browser" | "azure" = hasVoice(seg.language) ? "browser" : "azure";
+    const last = runs[runs.length - 1];
+    if (last && last.source === source) last.items.push(seg);
+    else runs.push({ source, items: [seg] });
+  }
+  return runs;
+}
+
 export interface SpeechService {
   supported: boolean;
   listen: (locale: string, onTranscript: (text: string) => void) => () => void;
@@ -864,48 +950,57 @@ export function createSpeechService(): SpeechService {
     isBrowser && typeof window !== "undefined" ? window.speechSynthesis : undefined;
 
   let currentAudio: HTMLAudioElement | null = null;
+  let audioResolve: (() => void) | null = null;
+  let speakToken = 0; // bumped on each new request / stop → cancels stale queues
 
   function langBase(lang: string) {
     return lang === "en" ? "en" : lang;
   }
   function pickVoice(voices: SpeechSynthesisVoice[], lang: string) {
     const base = langBase(lang);
-    return (
-      voices.find((v) => v.lang.startsWith(base)) ||
-      voices.find((v) => v.lang.startsWith("en")) ||
-      undefined
-    );
+    // Return ONLY a voice matching the requested language. If none exists the
+    // segment becomes an Azure run — never an English substitution.
+    return voices.find((v) => v.lang.startsWith(base));
   }
 
   async function speakSegments(segments: SpeechSegment[]): Promise<void> {
-    if (!synthesis || segments.length === 0) return;
+    if (segments.length === 0) return;
+    const token = ++speakToken; // claim this queue; stopSpeaking bumps the token
+    // No browser TTS at all → route everything to Azure (single run).
+    if (!synthesis) {
+      const hex = await fetchVoiceSpeak(segments);
+      if (hex && token === speakToken) {
+        const audio = new Audio(`data:audio/wav;base64,${hexToBase64(hex)}`);
+        currentAudio = audio;
+        await new Promise<void>((res) => {
+          audioResolve = res;
+          audio.onended = () => { audioResolve = null; res(); };
+          audio.onerror = () => { audioResolve = null; res(); };
+          audio.play();
+        });
+        currentAudio = null;
+      }
+      return;
+    }
     // Voices may load asynchronously.
     if (synthesis.getVoices().length === 0) {
       await new Promise<void>((res) => {
         const t = setTimeout(res, 1000);
-        synthesis!.onvoiceschanged = () => {
-          clearTimeout(t);
-          res();
-        };
+        synthesis!.onvoiceschanged = () => { clearTimeout(t); res(); };
       });
     }
+    if (token !== speakToken) return; // stopped while waiting for voices
     const voices = synthesis.getVoices();
 
     // Partition into ordered CONTIGUOUS runs of the same TTS source.
-    type Run = { source: "browser" | "azure"; items: SpeechSegment[] };
-    const runs: Run[] = [];
-    for (const seg of segments) {
-      const canBrowser = Boolean(pickVoice(voices, seg.language));
-      const source: "browser" | "azure" = canBrowser ? "browser" : "azure";
-      const last = runs[runs.length - 1];
-      if (last && last.source === source) last.items.push(seg);
-      else runs.push({ source, items: [seg] });
-    }
+    const runs = partitionRuns(segments, (l) => Boolean(pickVoice(voices, l)));
 
     synthesis.cancel();
     for (const run of runs) {
+      if (token !== speakToken) return; // stopped or superseded by a new request
       if (run.source === "browser") {
         for (const seg of run.items) {
+          if (token !== speakToken) return;
           const utt = new SpeechSynthesisUtterance(seg.text);
           const v = pickVoice(voices, seg.language);
           if (v) utt.voice = v;
@@ -917,18 +1012,18 @@ export function createSpeechService(): SpeechService {
         }
       } else {
         const hex = await fetchVoiceSpeak(run.items);
-        if (hex) {
-          const b64 = hexToBase64(hex);
-          const audio = new Audio(`data:audio/wav;base64,${b64}`);
+        if (hex && token === speakToken) {
+          const audio = new Audio(`data:audio/wav;base64,${hexToBase64(hex)}`);
           currentAudio = audio;
           await new Promise<void>((res) => {
-            audio.onended = () => res();
-            audio.onerror = () => res();
+            audioResolve = res;
+            audio.onended = () => { audioResolve = null; res(); };
+            audio.onerror = () => { audioResolve = null; res(); };
             audio.play();
           });
           currentAudio = null;
         }
-        // If Azure unavailable: per spec, audio unavailable for this run
+        // Azure unavailable → per spec, audio unavailable for this run
         // (never an English substitution). Text remains visible.
       }
     }
@@ -980,22 +1075,59 @@ export function createSpeechService(): SpeechService {
       return Boolean(pickVoice(synthesis.getVoices(), lang));
     },
     stopSpeaking() {
+      speakToken++; // invalidate any in-flight queue (browser or Azure)
       if (synthesis) synthesis.cancel();
       if (currentAudio) {
         currentAudio.pause();
         currentAudio = null;
+      }
+      if (audioResolve) {
+        audioResolve(); // unblock the awaited Azure audio promise
+        audioResolve = null;
       }
     },
   };
 }
 ```
 
-- [ ] **Step 2: Typecheck**
+- [ ] **Step 2: Add a unit test for contiguous-run batching**
 
-Run: `cd frontend && npx tsc --noEmit`
-Expected: no errors.
+Create `frontend/src/lib/speech.test.ts`:
+```ts
+import { partitionRuns, type SpeechSegment } from "@/lib/speech";
 
-- [ ] **Step 3: Commit**
+test("contiguous runs minimize Azure calls (no per-segment calls)", () => {
+  const segs: SpeechSegment[] = [
+    { language: "en", text: "a" },
+    { language: "gu", text: "b" },
+    { language: "en", text: "c" },
+    { language: "mr", text: "d" },
+  ];
+  // Only English has a (simulated) browser voice.
+  const runs = partitionRuns(segs, (l) => l === "en");
+  const azure = runs.filter((r) => r.source === "azure");
+  expect(azure).toHaveLength(2); // [gu] and [mr] → 2 calls, NOT 4, NOT 1
+  expect(azure[0].items).toEqual([segs[1]]);
+  expect(azure[1].items).toEqual([segs[3]]);
+});
+
+test("adjacent same-source segments stay one run", () => {
+  const segs: SpeechSegment[] = [
+    { language: "gu", text: "x" },
+    { language: "mr", text: "y" },
+  ];
+  const runs = partitionRuns(segs, () => false); // no browser voices
+  expect(runs).toHaveLength(1);
+  expect(runs[0].source).toBe("azure");
+});
+```
+
+- [ ] **Step 3: Typecheck + test**
+
+Run: `cd frontend && npx tsc --noEmit && npx vitest run`
+Expected: no errors; new partitionRuns tests pass.
+
+- [ ] **Step 4: Commit**
 
 ```bash
 git add frontend/src/lib/speech.ts
@@ -1122,7 +1254,7 @@ Do NOT modify retrieval to move the numbers.
 - [ ] **Step 3: Run frontend typecheck + build + tests**
 
 Run: `cd frontend && npx tsc --noEmit && npm run build && npx vitest run`
-Expected: typecheck clean, build succeeds, 22+ tests pass.
+Expected: typecheck clean, build succeeds, ALL frontend tests pass (count may exceed the prior 22 as new tests are added).
 
 - [ ] **Step 4: Attempt live Azure verification (label results honestly)**
 
@@ -1147,6 +1279,6 @@ git commit -m "docs: record multilingual speech implementation + verification st
 ## Self-Review Notes (per skill checklist)
 
 - **Spec coverage:** §1 non-negotiables → Global Constraints + each task. §2 pipeline → unchanged (chat.py keeps retrieval translation). §3 decisions → Tasks 1/5/6/9/11. §4/§9 contiguous runs → Task 9 + Task 6. §5 backend components → Tasks 1,2,3,4,5,6,7. §6 frontend → Tasks 8,9,10,11. §7 resolver priority + memory → Tasks 3,4,5. §8 no-English-fallback → Task 9 (Azure run falls to "audio unavailable", never English). §10 input detection hi/mr → Task 2. §11 mixed STT limitation → documented (browser primary; no recovery claim). §12 abstention → Task 10 removes speak button. §13 errors → Task 9/10. §14 tests → all tasks. §15 RAG guard → Task 12. §16 live validation → Task 7 + Task 12. §17 files → file structure. §18 success → Task 12.
-- **Placeholder scan:** No TBD/TODO. `english_retrieval_query` reuses the already-wired `AzureTranslator` (no new dependency) and falls back to original text — concrete, not a stub.
+- **Placeholder scan:** No TBD/TODO. `english_retrieval_query` is run-aware (translates only Indic runs via the already-wired `AzureTranslator`, preserving Latin entities/numbers/dates) and falls back to original text — concrete, not a stub. `pickVoice` returns ONLY a matching voice (no English fallback). Azure empty-audio paths raise. `speakSegments` handles missing `speechSynthesis` via Azure and uses a token to cancel stale queues.
 - **Type consistency:** `segment_speech` → `list[dict]{language,text}`; frontend `SpeechSegment{language,text}` matches. `resolve_and_remember` signature consistent across Tasks 4/5. `SpeakRequest.segments` + `text_to_speech_segments` consistent across Tasks 6. `fetchVoiceSpeak` returns hex string; `speakSegments` decodes hex→base64. `ui_language_explicit` flows ChatRequest → chat.py → resolver.
-- **Known limitation (documented, not a defect):** True per-token Indic→English *translation* of only the semantic portion is deferred; `english_retrieval_query` translates the whole query via the existing AzureTranslator, which preserves entities/numbers (verified by the integration path). This keeps the zero-cost, no-new-dependency constraint while satisfying mixed-retrieval behavior. Flagged for future enhancement in `PROJECT_STATUS.md`.
+- **Known limitation (documented, not a defect):** `english_retrieval_query` translates Indic runs (not the whole query) and preserves Latin entities/numbers/dates; cross-run context is not modeled. This satisfies mixed-retrieval behavior within the zero-cost, no-new-dependency constraint. Flagged for future enhancement (context-aware run translation) in `PROJECT_STATUS.md`.

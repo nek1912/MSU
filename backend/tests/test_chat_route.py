@@ -20,15 +20,22 @@ def test_answered_with_valid_citation(respx_mock):
     respx_mock.post(httpx.URL("http://testsupa" + RPC_PATH)).mock(
         return_value=httpx.Response(200, json=[{
             "chunk_id": "aaaaaaaa-1111-2222-3333-444444444444",
-            "title": "PMFBY FAQ", "page": 1, "section": "Eligibility",
+            "stable_chunk_id": "pmfby-faq:p1:c0",
+            "document_id": "dddd1111-2222-3333-4444-555555555555",
+            "title": "PMFBY FAQ", "page": 1, "page_start": 1, "page_end": 1,
+            "section": "Eligibility", "subsection": None, "clause": None,
             "content": "Eligible farmers are covered.", "similarity": 0.72,
-            "source_url": "https://pmfby.gov.in/faq", "domain": "pmfby",
-            "jurisdiction": "central", "state": None}, {
+            "source_url": "https://pmfby.gov.in/faq", "source_file": "pmfby.gov.in/faq",
+            "domain": "pmfby", "jurisdiction": "central", "state": None}, {
             "chunk_id": "bbbbbbbb-5555-6666-7777-888888888888",
-            "title": "PMFBY Guidelines", "page": 4, "section": "Coverage",
+            "stable_chunk_id": "pmfby-guidelines:p4:c0",
+            "document_id": "eeee1111-2222-3333-4444-555555555555",
+            "title": "PMFBY Guidelines", "page": 4, "page_start": 4, "page_end": 4,
+            "section": "Coverage", "subsection": None, "clause": None,
             "content": "Coverage extends to notified crops.", "similarity": 0.51,
-            "source_url": "https://pmfby.gov.in/guidelines", "domain": "pmfby",
-            "jurisdiction": "central", "state": None}]))
+            "source_url": "https://pmfby.gov.in/guidelines",
+            "source_file": "pmfby.gov.in/guidelines",
+            "domain": "pmfby", "jurisdiction": "central", "state": None}]))
     respx_mock.post("https://api.groq.com/openai/v1/chat/completions").mock(
         return_value=httpx.Response(200, json={"choices": [{"message": {
             "content": "Farmers growing notified crops are eligible [chunk:aaaaaaaa]."}}]}))
@@ -37,8 +44,9 @@ def test_answered_with_valid_citation(respx_mock):
     body = r.json()
     assert body["abstained"] is False and body["confidence"] > 0
     assert body["citations"][0]["title"] == "PMFBY FAQ"
-    assert set(body) == {"answer", "language", "domain", "confidence",
-                         "citations", "abstained", "follow_up_question"}
+    assert set(body) == {"answer", "language", "domain", "intent", "entities",
+                         "confidence", "confidence_level", "citations",
+                         "abstained", "follow_up_question"}
 
 
 @respx.mock
@@ -61,15 +69,22 @@ def test_abstains_when_both_llms_fail(respx_mock):
     respx_mock.post(httpx.URL("http://testsupa" + RPC_PATH)).mock(
         return_value=httpx.Response(200, json=[{
             "chunk_id": "aaaaaaaa-1111-2222-3333-444444444444",
-            "title": "PMFBY FAQ", "page": 1, "section": "Eligibility",
+            "stable_chunk_id": "pmfby-faq:p1:c0",
+            "document_id": "dddd1111-2222-3333-4444-555555555555",
+            "title": "PMFBY FAQ", "page": 1, "page_start": 1, "page_end": 1,
+            "section": "Eligibility", "subsection": None, "clause": None,
             "content": "Eligible farmers are covered.", "similarity": 0.72,
-            "source_url": "https://pmfby.gov.in/faq", "domain": "pmfby",
-            "jurisdiction": "central", "state": None}, {
+            "source_url": "https://pmfby.gov.in/faq", "source_file": "pmfby.gov.in/faq",
+            "domain": "pmfby", "jurisdiction": "central", "state": None}, {
             "chunk_id": "bbbbbbbb-5555-6666-7777-888888888888",
-            "title": "PMFBY Guidelines", "page": 4, "section": "Coverage",
+            "stable_chunk_id": "pmfby-guidelines:p4:c0",
+            "document_id": "eeee1111-2222-3333-4444-555555555555",
+            "title": "PMFBY Guidelines", "page": 4, "page_start": 4, "page_end": 4,
+            "section": "Coverage", "subsection": None, "clause": None,
             "content": "Coverage extends to notified crops.", "similarity": 0.51,
-            "source_url": "https://pmfby.gov.in/guidelines", "domain": "pmfby",
-            "jurisdiction": "central", "state": None}]))
+            "source_url": "https://pmfby.gov.in/guidelines",
+            "source_file": "pmfby.gov.in/guidelines",
+            "domain": "pmfby", "jurisdiction": "central", "state": None}]))
     # Both LLMs return 429
     respx_mock.post("https://api.groq.com/openai/v1/chat/completions").mock(
         return_value=httpx.Response(429, json={"error": "rate limited"}))

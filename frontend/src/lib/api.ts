@@ -4,8 +4,11 @@ export interface ChatResponse {
   answer: string;
   language: Locale;
   domain: string;
+  intent: string;
+  entities: string[];
   confidence: number;
-  citations: { title: string; page: number; url: string }[];
+  confidence_level: "high" | "moderate" | "low" | "none";
+  citations: { chunk_id: string; document_id: string; title: string; page: number; url: string }[];
   abstained: boolean;
   follow_up_question: string | null;
 }

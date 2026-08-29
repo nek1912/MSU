@@ -19,7 +19,25 @@ class Settings(BaseSettings):
     gemini_model: str = "gemini-2.5-flash"
     embed_model: str = "gemini-embedding-2"
     jina_embed_model: str = "jina-embeddings-v3"
-    RERANKER_ENABLED: bool = False  # Feature flag, disabled by default
+    # Reranker config (Phase 4/5) — disabled until curated eval proves value
+    reranker_model: str = "jina-reranker-v2-base-multilingual"
+    reranker_enabled: bool = False
+    retrieval_strategy: str = "dense"  # dense | hybrid | hybrid_reranked
+    # Azure Speech Services (PHASE 13 — voice I/O)
+    azure_speech_key: str = ""
+    azure_speech_region: str = ""
+    # TTS voice names per language — configurable, not hardcoded
+    azure_tts_voices: str = "en:en-IN-NeerjaNeural,hi:hi-IN-SwaraNeural,gu:gu-IN-DhwaniNeural"
+
+    @property
+    def tts_voices(self) -> dict[str, str]:
+        """Parse azure_tts_voices into a dict."""
+        result: dict[str, str] = {}
+        for pair in self.azure_tts_voices.split(","):
+            if ":" in pair:
+                lang, voice = pair.split(":", 1)
+                result[lang.strip()] = voice.strip()
+        return result
 
     @property
     def origins(self) -> list[str]:

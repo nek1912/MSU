@@ -30,6 +30,7 @@ from app.providers.gemini_llm import GeminiLLMProvider
 from app.providers.groq_llm import GroqLLMProvider
 from app.retrieval import RetrievedChunk, retrieve
 from app.session_store import get_state, touch_session
+from app.ui import get_abstain_text
 
 router = APIRouter()
 
@@ -57,8 +58,24 @@ _SAFE_FAILURES = (
 class ChatRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
     session_id: str
-    language: Literal["en", "hi"]
+    language: Literal["en", "hi", "gu"]
     state: str | None = None
+    as_of_date: str | None = None  # Optional date filter (YYYY-MM-DD)
+
+
+def _confidence_level(score: float) -> str:
+    """Convert raw confidence score to a human-readable diagnostic level.
+
+    PHASE 9: Until calibrated, this is an internal diagnostic — NOT a probability.
+    Levels: high / moderate / low / none
+    """
+    if score >= 0.7:
+        return "high"
+    elif score >= 0.5:
+        return "moderate"
+    elif score > 0.0:
+        return "low"
+    return "none"
 
 
 def _to_candidate(chunk: RetrievedChunk, expected_state: str | None) -> RetrievalCandidate:
@@ -87,8 +104,6 @@ def chat(req: ChatRequest) -> dict:
         provider = get_embedding_provider()          # cached singleton (P0-1)
         embedding = provider.embed_texts([req.question], task="retrieval.query")[0]
         domain, _score = get_anchor_store().classify(req.question, embedding)
-        # Session is authoritative for jurisdiction (P1-7): explicit request
-        # state updates it; a null state continues the session's prior state.
         resolved_state = req.state if req.state is not None else get_state(req.session_id)
         touch_session(req.session_id, resolved_state, lang)
         if domain == "out_of_scope":
@@ -106,13 +121,13 @@ def chat(req: ChatRequest) -> dict:
         # When the reranker is enabled, pull a larger candidate pool (top 25)
         # so the reranker can re-order and the final top-5/6 reflects true
         # relevance rather than just dense/lexical score.
-        k = 25 if settings.RERANKER_ENABLED else 6
+        k = 25 if settings.reranker_enabled else 6
         chunks = retrieve_hybrid(
             get_supabase(), embedding, req.question, domain, resolved_state, k=k,
         )
 
         # Optional reranker (Stage 6): hybrid top-25 -> rerank -> top-6 -> gate
-        if settings.RERANKER_ENABLED:
+        if settings.reranker_enabled:
             reranker = JinaReranker()
             docs_for_rerank = [{"chunk_id": c.chunk_id, "content": c.content} for c in chunks]
             reranked = reranker.rerank(req.question, docs_for_rerank, top_n=6)
@@ -148,18 +163,12 @@ def chat(req: ChatRequest) -> dict:
         # Known dependency failures → contract-valid abstention
         return _abstain(lang, "dependency_failure")
     except Exception:
-        # Unknown failures (programmer bugs) → let FastAPI return 500
         raise
 
 
 def _abstain(lang: str, _reason: str | None) -> dict:
-    return {"answer": ABSTAIN_TEXT[lang], "language": lang, "domain": "unknown",
-            "confidence": 0.0, "citations": [], "abstained": True,
+    return {"answer": get_abstain_text(lang), "language": lang, "domain": "unknown",
+            "intent": "unknown", "entities": [],
+            "confidence": 0.0, "confidence_level": "none",
+            "citations": [], "abstained": True,
             "follow_up_question": None}
-
-
-def _citations_from(answer: str, chunks: list[RetrievedChunk]) -> list[dict]:
-    valid, _invalid = verify_citations(answer, [c.chunk_id for c in chunks])
-    by_id = {c.chunk_id: c for c in chunks}
-    return [{"title": by_id[i].title, "page": by_id[i].page,
-             "url": by_id[i].source_url} for i in valid]

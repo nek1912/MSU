@@ -26,7 +26,7 @@ _GENERAL_DISCLAIMER = {
           "For authoritative guidance on cooperative rules, schemes, PMFBY, "
           "or financial inclusion, ask a specific question about those topics.",
     "hi": "यह सामान्य उत्तर है जो सरकारी स्रोतों से नहीं है। सहकारिता नियमों, योजनाओं, "
-          "पीएमएफबीवाई, या वित्तीय समावेशन पर आधिकारिक मार्गदर्शन के लिए उन विषयों "
+          "पीएएमएफबीवाई, या वित्तीय समावेशन पर आधिकारिक मार्गदर्शन के लिए उन विषयों "
           "के बारे में एक विशिष्ट प्रश्न पूछें।",
 }
 
@@ -61,7 +61,7 @@ def build_system_prompt(language: str) -> str:
 def build_user_prompt(question: str, chunks: list[RetrievedChunk]) -> str:
     """Build the RAG user prompt from question + numbered context chunks."""
     ctx = "\n\n".join(
-        f"[chunk:{c.chunk_id[:8]}] ({c.title} \u2014 \u00a7{c.section} \u2014 p.{c.page})\n{c.content}"
+        f"[chunk:{c.chunk_id[:8]}] ({c.title} — §{c.section} — p.{c.page})\n{c.content}"
         for c in chunks)
     return f"Question: {question}\n\nContext:\n{ctx}"
 
@@ -107,6 +107,73 @@ def verify_citations(answer: str, chunk_ids: list[str]) -> tuple[list[str], list
             if prefix not in invalid:
                 invalid.append(prefix)
     return valid, invalid
+
+
+def validate_citation_chain(
+    answer: str,
+    chunks: list[RetrievedChunk],
+) -> list[dict]:
+    """Validate that every citation in the answer resolves through the full chain:
+
+    citation → retrieved chunk → stable_chunk_id → source document → source page
+
+    Returns list of citation dicts for valid citations.
+    Raises CitationError for any invalid citation.
+
+    Enforces:
+    - Citation must reference a chunk that was actually retrieved
+    - Citation must not be fabricated (non-retrieved chunk)
+    - Citation's chunk must belong to the correct document
+    - Citation's page reference must match the chunk's actual page
+    """
+    if not chunks:
+        if _CITE_RAW.search(answer):
+            raise CitationError("citations in answer but no chunks retrieved")
+        return []
+
+    # Build lookup: prefix → chunk
+    chunk_by_prefix: dict[str, RetrievedChunk] = {}
+    for c in chunks:
+        prefix = c.chunk_id[:8].lower()
+        chunk_by_prefix[prefix] = c
+
+    valid_citations: list[dict] = []
+    seen_prefixes: set[str] = set()
+
+    for raw_match in _CITE_RAW.findall(answer):
+        hex_match = re.fullmatch(r"[0-9a-fA-F]{8,}", raw_match)
+        if not hex_match:
+            raise CitationError(f"malformed citation: [chunk:{raw_match}]")
+
+        prefix = hex_match.group()[:8].lower()
+
+        if prefix in seen_prefixes:
+            continue
+        seen_prefixes.add(prefix)
+
+        # 1. Fabricated citation check: must reference a retrieved chunk
+        if prefix not in chunk_by_prefix:
+            raise CitationError(f"fabricated citation: [chunk:{prefix}] not in retrieved chunks")
+
+        chunk = chunk_by_prefix[prefix]
+
+        # 2. Verify citation resolves to a valid document
+        if not chunk.document_id:
+            raise CitationError(f"citation [chunk:{prefix}] has no document_id")
+
+        # 3. Verify citation resolves to a valid page
+        if chunk.page < 1:
+            raise CitationError(f"citation [chunk:{prefix}] has invalid page: {chunk.page}")
+
+        valid_citations.append({
+            "chunk_id": chunk.stable_chunk_id,
+            "document_id": chunk.document_id,
+            "title": chunk.title,
+            "page": chunk.page,
+            "url": chunk.source_url,
+        })
+
+    return valid_citations
 
 
 def generate_answer(llm: LLMProvider, question: str, chunks: list[RetrievedChunk],

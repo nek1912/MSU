@@ -14,11 +14,6 @@ logging.basicConfig(level=logging.INFO,
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    try:
-        from app.domains import get_anchor_store
-        get_anchor_store()
-    except Exception as exc:  # noqa: BLE001 – catch-all is intentional
-        logging.getLogger(__name__).warning("anchor warmup deferred: %r", exc)
     yield
 
 
@@ -45,4 +40,5 @@ def health_providers() -> dict:
         "gemini": "configured" if s.gemini_api_key else "missing",
         "supabase": "configured" if s.supabase_url else "missing",
         "bhashini": "stub",
+        "azure_speech": "configured" if s.azure_speech_key else "missing",
     }

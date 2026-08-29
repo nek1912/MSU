@@ -59,15 +59,7 @@ def prepare_speech_text(answer: str) -> str:
     return text.strip()
 
 
-# Generic citation-marker stripping for speech segmentation. Kept language
-# agnostic: it never inspects content, only removes the marker envelope.
-# (The length-agnostic form here complements prepare_speech_text so that any
-# [chunk:ID]-style marker is dropped before segmentation, regardless of length.)
-_MARKER = re.compile(r"\[chunk:[^\[\]]*\]|【[^】]*】|\[\s*[0-9a-fA-F]{0,}\s*\]")
-_URL_SPEECH = re.compile(r"https?://\S+")
-
-
-def _char_script(ch: str, answer_language: str):
+def _char_script(ch: str, answer_language: str) -> str | None:
     """Map a character to a language bucket for segmentation.
 
     Gujarati/Bengali/Latin are script-unique. Devanagari is mapped to the
@@ -95,7 +87,8 @@ def segment_speech(answer: str, answer_language: str) -> list[dict]:
     """
     if not answer:
         return []
-    text = _URL_SPEECH.sub("", _MARKER.sub("", answer))
+    answer = prepare_speech_text(answer)
+    text = answer
     segments: list[dict] = []
     current_lang: str | None = None
     current_text: list[str] = []

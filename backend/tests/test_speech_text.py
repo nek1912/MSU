@@ -115,7 +115,7 @@ def test_segment_speech_devanagari_uses_answer_language():
 
 def test_segment_speech_strips_markers_before_segmenting():
     from app.speech_text import segment_speech
-    ans = "Eligible farmers [chunk:abc123] are covered."
+    ans = "Eligible farmers [chunk:abcdef12] are covered."
     segs = segment_speech(ans, "en")
     assert "[chunk:" not in segs[0]["text"]
 

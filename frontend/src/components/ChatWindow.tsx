@@ -88,7 +88,8 @@ export function ChatWindow() {
   const [sessionId] = useState(() => crypto.randomUUID());
   const cancelListen = useRef<(() => void) | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const lastSentLocaleRef = useRef<Locale | null>(null);
+  const [explicitPending, setExplicitPending] = useState(false);
+  const prevLocaleRef = useRef<Locale>(locale);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const lang: Locale = locale;
 
@@ -99,6 +100,16 @@ export function ChatWindow() {
       setSidebarOpen(true);
     }
   }, []);
+
+  // Flag the next message as an explicit language choice when the UI language
+  // changes (covers the first switch away from the default too). Consumed + cleared
+  // by ask().
+  useEffect(() => {
+    if (prevLocaleRef.current !== lang) {
+      prevLocaleRef.current = lang;
+      setExplicitPending(true);
+    }
+  }, [lang]);
 
   const initialHistory = useMemo(
     () => [t("chat.starter1"), t("chat.starter2"), t("chat.starter3"), t("chat.starter4")],
@@ -199,9 +210,8 @@ export function ChatWindow() {
     // by the user since the last sent message. The default UI language must NOT
     // be sent as an explicit choice (so it can never override a remembered
     // Hindi session, per the design priority chain).
-    const uiLanguageExplicit =
-      lastSentLocaleRef.current !== null && lastSentLocaleRef.current !== lang;
-    lastSentLocaleRef.current = lang;
+    const uiLanguageExplicit = explicitPending;
+    setExplicitPending(false);
 
     setTyping(true);
     try {

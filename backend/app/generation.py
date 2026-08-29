@@ -19,6 +19,9 @@ _CITE_RAW = re.compile(r"\[chunk:(.*?)\]")
 _LANG_INSTRUCTION = {
     "en": "answer in English",
     "hi": "answer in Hindi (Devanagari script)",
+    "gu": "answer in Gujarati (Gujarati script)",
+    "mr": "answer in Marathi (Devanagari script)",
+    "bn": "answer in Bengali (Bengali script)",
 }
 
 _GENERAL_DISCLAIMER = {
@@ -28,6 +31,15 @@ _GENERAL_DISCLAIMER = {
     "hi": "यह सामान्य उत्तर है जो सरकारी स्रोतों से नहीं है। सहकारिता नियमों, योजनाओं, "
           "पीएएमएफबीवाई, या वित्तीय समावेशन पर आधिकारिक मार्गदर्शन के लिए उन विषयों "
           "के बारे में एक विशिष्ट प्रश्न पूछें।",
+    "gu": "આ સામાન્ય જવાબ છે જે સરકારી સ્રોતોમાંથી નથી. સહકારી નિયમો, યોજનાઓ, "
+          "પીએમએફબીવાઈ, અથવા નાણાકીય સમાવેશન પર આધિકારિક માર્ગદર્શન માટે તે વિષયો "
+          "વિશે એક ચોક્કસ પ્રશ્ન પૂછો.",
+    "mr": "हे सामान्य उत्तर आहे जे सरकारी स्रोतांमधून नाही. सहकारी नियम, योजना, "
+          "पीएमएफबीवाय, किंवा वित्तीय साक्षरता यावर अधिकृत मार्गदर्शनासाठी त्या "
+          "विषयांवर एक विशिष्ट प्रश्न विचारा.",
+    "bn": "এটি একটি সাধারণ উত্তর যা সরকারি উৎস থেকে নয়। সহকারিতা নিয়ম, প্রকল্প, "
+          "পিএমএফবি঵াই, বা আর্থিক অন্তর্ভুক্তি সম্পর্কে আধিকারিক নির্দেশনার জন্য "
+          "এই বিষয়গুলোতে একটি নির্দিষ্ট প্রশ্ন করুন.",
 }
 
 GENERAL_SYSTEM_PROMPT = (
@@ -50,10 +62,13 @@ def build_system_prompt(language: str) -> str:
     lang = language if language in _LANG_INSTRUCTION else "en"
     return (
         "You are a careful assistant that answers ONLY from the provided "
-        "numbered context chunks. Every factual sentence must end with a marker "
-        "[chunk:ID] where ID is the first 8 hex characters of the chunk id it "
-        "came from. Never add outside knowledge. If the chunks do not contain "
-        "the answer, reply exactly: INSUFFICIENT_EVIDENCE. Please "
+        "numbered context chunks. Cite the source chunk after EVERY factual "
+        "sentence using EXACTLY this format: [chunk:ID] where ID is the "
+        "8-character hex prefix shown in the chunk's label (for example "
+        "[chunk:a1b2c3d4]). Use ONLY half-width square brackets and the literal "
+        "prefix 'chunk:'. Do NOT use full-width brackets 【】, parentheses, or "
+        "any other marker style. Never add outside knowledge. If the chunks do "
+        "not contain the answer, reply exactly: INSUFFICIENT_EVIDENCE. Please "
         f"{_LANG_INSTRUCTION[lang]}."
     )
 

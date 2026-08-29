@@ -31,7 +31,14 @@ class Settings(BaseSettings):
     azure_translator_region: str = ""
     azure_translator_endpoint: str = ""
     # TTS voice names per language — configurable, not hardcoded
-    azure_tts_voices: str = "en:en-IN-NeerjaNeural,hi:hi-IN-SwaraNeural,gu:gu-IN-DhwaniNeural"
+    # Voice IDs are the documented Azure neural voices for each locale; verify
+    # against the live Azure Speech voice list before relying on a specific ID.
+    azure_tts_voices: str = (
+        "en:en-IN-NeerjaNeural,hi:hi-IN-SwaraNeural,gu:gu-IN-DhwaniNeural,"
+        "mr:mr-IN-AarohiNeural,bn:bn-IN-TanishaaNeural"
+    )
+    # BCP-47 recognition/synthesis locale per language — configurable, not hardcoded
+    azure_speech_locales: str = "en:en-IN,hi:hi-IN,gu:gu-IN,mr:mr-IN,bn:bn-IN"
 
     @property
     def tts_voices(self) -> dict[str, str]:
@@ -41,6 +48,16 @@ class Settings(BaseSettings):
             if ":" in pair:
                 lang, voice = pair.split(":", 1)
                 result[lang.strip()] = voice.strip()
+        return result
+
+    @property
+    def speech_locales(self) -> dict[str, str]:
+        """Parse azure_speech_locales into a dict {language: BCP-47 locale}."""
+        result: dict[str, str] = {}
+        for pair in self.azure_speech_locales.split(","):
+            if ":" in pair:
+                lang, loc = pair.split(":", 1)
+                result[lang.strip()] = loc.strip()
         return result
 
     @property

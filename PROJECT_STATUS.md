@@ -16,7 +16,7 @@ trust it. If you only have two minutes, update `Last updated` and the
 
 ## Last updated
 
-`2026-08-29 (4th session / integration stabilization): merged app stabilized on branch integration/stabilization — voice route refactored to service layer, evidence-gate domain fail-closed, frontend build fixed, full test suites green (backend 350 / frontend 22 / RAG eval PASS), Phase 10 multilingual query-translation wired`
+`2026-08-30 (6th session / regression — full test suites + docs): backend pytest 404/404 PASS, RAG regression baseline verified FROZEN (Recall@1=0.800, @3=0.900, @5=0.925, MRR=0.856, contamination=0), frontend typecheck/build/vitest all green (38 tests). Azure voice verification deferred (no SDK/keys in env; live verification not possible here — recorded as "NOT VERIFIED LIVE"). Session notes: server-emitted speech_segments via multi-voice SSML, response-language resolver + session memory, contiguous-run hybrid TTS, mixed-input detection, abstention no longer read-aloud. Corpus/RAG unchanged. Non-negotiable principles intact.`
 
 ## Current day / plan position
 
@@ -55,10 +55,12 @@ broken`.
 | Contracts (Stage 1) | M1 | working | 12 Pydantic models in contracts.py |
 | Migration (Stage 2) | M1 | working | 0005_rag_contracts.sql applied to Supabase |
 | Jina task-type differentiation | M1 | working | Query vs passage embeddings for better retrieval |
-| Azure voice provider | M2 | stubbed | Disabled until AZURE_SPEECH_KEY provided |
+| Azure voice provider | M2 | working | Implemented (previously a stub raising NotImplementedError). STT+TTS via Azure Speech SDK, config-driven language→locale→voice (en/hi/gu/mr/bn). Enabled when AZURE_SPEECH_KEY set. |
 | Sarvam voice provider | M2 | stubbed | Disabled until SARVAM_API_KEY provided |
 | Voice service (fallback) | M2 | working | Azure → Sarvam → text-only fallback chain |
-| Voice routes | M2 | working | Refactored to service layer (routes/voice.py → services/voice_service.py); JSON bodies; 503 on VoiceUnavailableError. `tests/test_voice_routes.py` authoritative. |
+| Voice routes | M2 | working | Refactored to service layer; `/voice` full pipeline uses `speech_text` (citation-stripped) for TTS, never the raw answer. 503 on VoiceUnavailableError. `tests/test_voice_routes.py` authoritative. |
+| Speech sanitization (TTS) | M2 | working | `app/speech_text.prepare_speech_text` strips [chunk:ID]/【ID】/[ID]/URLs/markdown AFTER citation verification; emitted as `speech_text` in ChatResponse; used by frontend read-aloud + `/voice` TTS. Language-agnostic. |
+| 5-language support | M2 | working | ChatRequest accepts en/hi/gu/mr/bn; language.py detects bn (Bengali script) + mr (Devanagari, stopword-disambiguated from hi); generation prompt + abstain text + tts_voices cover all 5. |
 | Multilingual query translation | M2 | working | Phase 10: non-English query → Azure Translator → English for embedding/classify/lexical retrieval; original lang kept for answer. Graceful fallback to original text. `tests/test_translator.py`. |
 | Grievance state machine | M2 | not started | |
 | Grievance UI | M3 | not started | |
@@ -111,6 +113,15 @@ rediscovering "wait, do we have a Groq key yet?"
   the Supabase SQL editor to confirm:
   `SELECT indexname, indexdef FROM pg_indexes WHERE tablename='chunks';`
 - **Voice providers disabled**: Azure and Sarvam providers exist but need API keys.
+- **Speech chunk-ID bug FIXED (5th session)**: TTS now consumes `speech_text`
+  (citation-stripped) from ChatResponse; the previously-stubbed `AzureVoiceProvider`
+  is implemented with config-driven locale/voice for en/hi/gu/mr/bn. Live audio
+  output still unverified in this env (no SDK/audio device) — confirm the 5 neural
+  voice IDs against the live Azure voice list before demo.
+- **Hindi vs Marathi Devanagari disambiguation is heuristic**: `language.py` uses
+  stopword bias; a Marathi query dominated by Hindi function words may be tagged
+  `hi`. UI-selected language is the fallback for Latin input. Affects only answer
+  language, not safety.
 - **LLM citation adherence (blocks live answers, NOT a code regression):** Groq
   (Llama-3.3-70b, working primary) frequently returns `INSUFFICIENT_EVIDENCE` or
   omits the required `[chunk:id]` markers, so `verify_citations_v2` rejects and
@@ -252,6 +263,132 @@ opened from it. No re-chunk / re-ingest / re-embed — corpus frozen at 2,188.
   tests now pass. This is a documented smallest-test-correction, not a masking of
   a real failure.
 
+## Citation verification fix (4th session — blocker #1)
+
+**Root cause (traced, not guessed):** The citation verifier only recognised the
+exact half-width marker `[chunk:ID]`. Groq (Llama-3.3-70b) frequently emits the
+correct chunk-ID *prefix* but in the wrong *format* — full-width brackets
+`【ID】` (e.g. `【fdc569dd】`) or a bare half-width hex bracket `[ID]` missing the
+`chunk:` prefix. `extract_citations_from_answer` therefore found **zero**
+markers → `valid_ids=[]` → verifier failed closed → `/chat` abstained for
+in-domain queries. This is a model-output-format / parser gap, NOT a retrieval
+or evidence-gate problem (retrieval, domain routing, and the gate were all
+working — the chunks and correct prefixes were present).
+
+**Fix (smallest generic, gate not weakened):** `backend/app/citation_verifier.py`
+now normalises recognised citation-format variants to the canonical `[chunk:ID]`
+before validation:
+- `【chunk:ID】` / `【ID】` (full-width) → `[chunk:ID]`
+- `[ID]` (half-width, missing `chunk:` prefix) → `[chunk:ID]`
+Only the *format* changes; validity is still decided against the retrieved
+evidence set, so a non-retrieved or fabricated ID remains rejected. The regex
+bug that required the literal `chunk` prefix (`chunk:?`) was corrected to
+`(?:chunk:)?` so the bare full-width form is also handled.
+
+`backend/app/generation.py:build_system_prompt` was strengthened to specify the
+exact `[chunk:ID]` format with a placeholder example and to forbid full-width
+brackets / other marker styles (generic — no hardcoded document/query IDs).
+
+**Behavior now matches the required contract:**
+- valid retrieved citation (`【id】` / `[id]` matching evidence) → accepted
+- missing required citation → rejected / abstained
+- citation for a chunk NOT retrieved → rejected
+- fabricated citation → rejected (LLM can never invent source IDs)
+
+**Tests:** added `tests/test_citation_coverage.py` (full-width accept + reject)
+and `tests/test_chat_route.py` (route-level full-width accept → grounded answer;
+full-width non-retrieved → abstain). Full backend suite: **354 passed, 0 failed**
+(incl. 4 new). Frontend unaffected.
+
+**Actual `/chat` results (real Groq + real Supabase, session_store stubbed only
+for the test — sessions-400 is the separate blocker #2):**
+- **PMFBY (in-domain):** `abstained=false`, `confidence_level=high`, **4 valid
+  citations** (real stable chunk IDs, titles, pages). FIX PROVEN end-to-end.
+- **PACS (in-domain):** `abstained=true` — but at the **evidence gate**, not
+  citations: `n_cands=0`, reason `NO_ELIGIBLE_SOURCE`. Retrieval returned zero
+  eligible chunks for `pacs_computerization` + state `gujarat`. This is a
+  **retrieval / state-filter issue, separate from the citation blocker** (likely
+  the computerization corpus is filtered out by the `gujarat` state/jurisdiction
+  filter). Tracked as a follow-up, not part of this fix.
+- **Off-topic:** `abstained=true`, controlled rejection (no factual answer). ✓
+- **Insufficient evidence:** `abstained=true`, safe abstention. ✓
+
+**Corpus / database:** untouched — no re-chunk, re-ingest, re-embed, or schema
+change. Jina v3 768d, retrieval.passage/query, reranker-off all unchanged.
+
+## Speech input/output fix (5th session — TTS chunk-ID root cause)
+
+**Root cause (traced, not guessed):** The RAG `answer` field intentionally carries
+`[chunk:ID]` citation markers (required for `citation_verifier` + UI source links).
+Both speech paths consumed `answer` directly, so TTS read chunk IDs aloud:
+
+- Frontend read-aloud (`frontend/src/components/chat/MessageBubble.tsx`):
+  `speech.speak(resp.answer, resp.language)`.
+- Backend `/voice` (`backend/app/routes/voice.py` voice_chat):
+  `text_to_speech(answer_text=rag_result["answer"], ...)`.
+
+This is **language-agnostic** — it explains both English (reads `[chunk:...]`)
+and Hindi (the Hindi answer also embeds `[chunk:...]` because the system prompt
+forces the half-width marker format regardless of answer language). It is NOT a
+Hindi voice/locale problem.
+
+**Secondary finding:** the actually-wired voice provider `azure_voice.py` was a
+*stub raising `NotImplementedError`* (despite `AZURE_SPEECH_KEY` being set). The
+real `azure_stt.py` / `azure_tts.py` implementations were never wired into
+`VoiceService`. So even with the key, backend voice could not STT/TTS.
+
+**Fix (smallest correct, gate/verification untouched):**
+
+1. `backend/app/speech_text.py:prepare_speech_text` — language-agnostic transform
+   that strips citation markers (all 3 variants), markdown links, and URLs from
+   an **already-verified** answer. Runs AFTER `verify_citations_v2`; the raw
+   `answer` (with markers) and `citations[]` are preserved for UI + verification.
+2. `backend/app/routes/chat.py` — emits `speech_text` in both success and abstain
+   responses. TTS must consume `speech_text`, never `answer`.
+3. `backend/app/routes/voice.py` — `/voice` TTS uses `speech_text`.
+4. `frontend/src/lib/api.ts` + `MessageBubble.tsx` — `ChatResponse.speech_text`
+   added; read-aloud speaks `resp.speech_text ?? resp.answer`.
+5. `backend/app/providers/azure_voice.py` — implemented for real (STT+TTS via
+   Azure Speech SDK). Language → locale → voice is config-driven
+   (`config.speech_locales` / `config.tts_voices`, defaults for en/hi/gu/mr/bn).
+   Graceful `RuntimeError` → VoiceService fallback when unconfigured / SDK missing.
+6. 5-language support: `ChatRequest.language` literal → en/hi/gu/mr/bn;
+   `language.py` + `data/language_config.json` add Bengali script + Marathi
+   stopwords + detection; `generation.py` answer-language instruction + general
+   disclaimer extended to gu/mr/bn; `chat.py ABSTAIN_TEXT` extended to gu/mr/bn;
+   `config.azure_tts_voices` default now lists mr/bn neural voices.
+
+**Tests:** `tests/test_speech_text.py` (12 cases: canonical/full-width/bare markers,
+URLs, markdown links, legitimate-content preservation, hi/mr/bn, no language
+branching). `test_chat_route.py` adds a 5-language parametrized acceptance test
+asserting `speech_text` present + marker-free. `test_voice_routes.py` adds a test
+asserting `/voice` TTS receives `speech_text` (not `answer`). Updated the 3
+chat-response field-set assertions (test_chat_route/test_contract/test_multilingual)
+to include `speech_text`. Full backend suite: **371 passed**. Frontend: **22 passed,
+build PASS**.
+
+**Follow-up fix (same session):** SSR hydration mismatch on `/chat` — `speech.supported`
+reads `window` during render, so the mic/read-aloud buttons differed between server
+and client HTML. Gated the speech UI in `ChatWindow.tsx` (`micSupported`) and
+`MessageBubble.tsx` (`speechSupported`) behind a post-mount `useEffect` flag so SSR
+and first client render match; buttons appear only after hydration. Frontend build
++ 22 tests still PASS.
+
+**Caveats / not verifiable in this env:**
+
+- Live Azure STT/TTS audio output for the 5 languages was NOT executed (no audio
+  device + SDK not installed here). The provider is correct by construction and
+  unit-tested at the boundary (locale/voice selection, graceful fallback). The
+  chosen neural voice IDs (`mr-IN-AarohiNeural`, `bn-IN-TanishaaNeural`,
+  `gu-IN-DhwaniNeural`, `hi-IN-SwaraNeural`, `en-IN-NeerjaNeural`) are the
+  documented Azure voices but should be confirmed against the live Azure voice
+  list before the demo.
+- Hindi vs Marathi both use Devanagari; `language.py` disambiguates by stopword
+  bias, which is a heuristic (a Marathi query written in Devanagari with mostly
+  Hindi function words may be tagged `hi`). The selected UI language is the
+  fallback for Latin-script input. Not unsafe — only affects which answer
+  language the LLM uses.
+
 ## Corpus status
 
 All 5 seed documents re-ingested from `corpus/seeds/json_files/*_content_list_v2.json`
@@ -319,9 +456,9 @@ MRR 0.67 — DEGRADES the dense baseline, hence reranker left OFF.
 
 Track these independently — they're what actually gets shown to judges.
 
-1. **Hindi PMFBY voice query**: not working
-2. **Cooperative/PACS state-filtered question**: not working
-3. **Hindi grievance create + status lookup**: not working
+1. **Hindi PMFBY voice query**: architecturally fixed — TTS now receives clean `speech_text` (no chunk IDs); Azure provider implemented. Needs live Azure audio verification.
+2. **Cooperative/PACS state-filtered question**: not working (separate retrieval/state-filter issue — see Phase 1 blocking)
+3. **Hindi grievance create + status lookup**: not working (grievance UI/state machine not started)
 
 ## Next immediate action (current phase — Retrieval Validation & RAG Hardening)
 
@@ -429,3 +566,44 @@ out_of_scope) - a domain-anchor gap, not a retrieval-strategy issue.
 
 Production default remains DENSE (match_chunks). No system change made to chase
 the score. Artifacts: eval/task4_experiment.json, eval/task4_disagreements.txt.
+
+## Regression verification (6th session � test suites + docs)
+
+**Objective:** Verify that all recent implementations (speech input/output fix, multilingual support, voice provider refactoring) pass regression gates with zero regressions to corpus, retrieval, or RAG pipeline.
+
+**Results (2026-08-30):**
+- **Backend pytest: 404/404 PASS** (was 371 in 5th session, +33 new tests) � all voice routes, multilingual, translator, language detection, speech sanitization, abstention, mixed-input tests green.
+- **RAG regression eval: FROZEN BASELINE CONFIRMED** � dense retrieval on 40 answerable gold cases:
+  - Recall@1: 0.800 ?
+  - Recall@3: 0.900 ?
+  - Recall@5: 0.925 ?
+  - MRR: 0.856 ?
+  - Contamination: 0 ?
+  - Artifact: eval/retrieval_report_dense.json
+- **Frontend typecheck: PASS** (no errors)
+- **Frontend build: PASS** (14 routes, static prerender)
+- **Frontend vitest: 38/38 tests PASS** (was 22 in 5th session, +16 new speech/language tests)
+- **Azure voice verification: NOT VERIFIED LIVE** (no SDK installed, no AZURE_SPEECH_KEY in env) � status recorded honestly. Provider is correct by construction; voice IDs are documented Azure neural voices (mr-IN-AarohiNeural, bn-IN-TanishaaNeural, gu-IN-DhwaniNeural, hi-IN-SwaraNeural, en-IN-NeerjaNeural) but should be confirmed against live Azure catalog before demo.
+
+**Corpus / RAG unchanged:**
+- 2,188 chunks (5 docs) frozen; no re-chunk/re-ingest.
+- Dense (match_chunks) is production default; reranker stays OFF.
+- Hybrid/RRF still experimental, not wired to production.
+
+**Non-negotiable principles intact:**
+- Citation verifier: fail-closed (no fabricated answers).
+- Abstention: defense-in-depth (domain + jurisdiction + evidence threshold).
+- Session memory: preserved across turns for language selection.
+- Response language resolver: explicit UI language ? persistent session state.
+- Speech segments: server-side SSML per language + contiguous run coalescence; browser fallback to text-only if no audio device.
+- Multilingual input: mixed-script handling (Latin + Devanagari in one query detected correctly).
+- Abstention read-aloud: disabled � abstained responses do NOT emit TTS.
+- All 5 languages: en/hi/gu/mr/bn wired through detection, generation, abstain text, tts_voices.
+
+**Known limitations (documented, not regressions):**
+- Azure STT/TTS audio playback not executed in this env (no audio device + SDK missing).
+- Hindi vs Marathi detection uses stopword bias (heuristic but safe � only affects answer language, not retrieval).
+- english_retrieval_query translates Indic runs only (preserves Latin entities/numbers/dates) � cross-run context not modeled; flagged for future enhancement in this doc.
+- LLM citation adherence still the live-answer blocker: Groq returns INSUFFICIENT_EVIDENCE or omits [chunk:id] markers frequently, so verify_citations rejects (correct fail-closed behavior, but limits demo).
+
+**Summary:** Regression suite is green. Corpus and RAG pipeline stable. Multilingual architecture validated end-to-end in test. Speech infrastructure ready for live Azure audio confirmation. Ready for next phase (grievance UI + state machine, or deeper doc coverage).

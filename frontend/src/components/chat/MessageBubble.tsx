@@ -4,11 +4,10 @@ import Link from "next/link";
 import type { ChatResponse } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
 import { Alert } from "@/components/ui/Alert";
-import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { IconSpeaker, IconChevronRight, IconDoc, IconBot } from "@/components/ui/Icons";
 import { deco } from "@/lib/data/deco";
-import { createSpeechService } from "@/lib/speech";
+import { createSpeechService, speakSegments } from "@/lib/speech";
 import { EvidenceBand } from "@/components/EvidenceBand";
 import { evidenceBand } from "@/lib/band";
 
@@ -31,30 +30,32 @@ export function MessageBubble({ resp }: { resp: ChatResponse }) {
   const speech = useMemo(() => createSpeechService(), []);
   const [speaking, setSpeaking] = useState(false);
   const [open, setOpen] = useState(false);
+  const segments = resp.speech_segments ?? [];
+  const hasSegments = segments.length > 0;
   const domainKey = `domain.${resp.domain}`;
   const domainLabel = t(domainKey).startsWith("domain.") ? resp.domain : t(domainKey);
 
-  function handleSpeak() {
+  async function handleSpeak() {
     if (speaking) {
       speech.stopSpeaking();
       setSpeaking(false);
-    } else {
-      speech.speak(resp.answer, resp.language);
-      setSpeaking(true);
+      return;
+    }
+    setSpeaking(true);
+    try {
+      // Hybrid read-aloud: browser voices when available, else Azure per run.
+      // Consumes verified, citation-stripped speech_segments — never the raw answer.
+      await speakSegments(segments);
+    } finally {
+      setSpeaking(false);
     }
   }
 
   if (resp.abstained) {
+    // Abstention → NO read-aloud button (per design: no spoken guess).
     return (
       <Alert tone="warn">
-        <div className="flex items-center justify-between gap-2 text-xs sm:text-sm">
-          <span>{t("abstained.title")}</span>
-          {speech.supported && (
-            <Button variant="icon" aria-label={t("common.readAloud")} onClick={handleSpeak}>
-              <IconSpeaker className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
-          )}
-        </div>
+        <span>{t("abstained.title")}</span>
       </Alert>
     );
   }
@@ -79,7 +80,6 @@ export function MessageBubble({ resp }: { resp: ChatResponse }) {
 
           <p className="font-answer text-sm sm:text-base leading-relaxed text-[var(--ink)]">{resp.answer}</p>
 
-          {/* Action CTA inside message if relevant */}
           {resp.domain === "schemes" && (
             <div className="mt-3.5 sm:mt-4">
               <Link href="/schemes">
@@ -109,8 +109,8 @@ export function MessageBubble({ resp }: { resp: ChatResponse }) {
           )}
 
           <div className="mt-3.5 sm:mt-4 flex flex-wrap items-center justify-between border-t border-[var(--border-soft)] pt-2.5 sm:pt-3 text-xs text-[var(--text-tertiary)]">
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-              {speech.supported && (
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                {hasSegments && (
                 <button
                   type="button"
                   onClick={handleSpeak}
@@ -119,21 +119,21 @@ export function MessageBubble({ resp }: { resp: ChatResponse }) {
                   <IconSpeaker className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   <span>{speaking ? t("common.stopReadAloud") : t("common.readAloud")}</span>
                 </button>
-              )}
-              {resp.citations.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setOpen((o) => !o)}
-                  aria-expanded={open}
-                  className="inline-flex items-center gap-1.5 font-medium transition-colors hover:text-[var(--ink)]"
-                >
-                  <IconDoc className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span>{resp.citations.length} {t("common.source")}</span>
-                  <IconChevronRight className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-90" : ""}`} />
-                </button>
-              )}
-            </div>
-            <span className="text-[10px] sm:text-[11px] text-[var(--text-faint)]">Just now</span>
+                )}
+                {resp.citations.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setOpen((o) => !o)}
+                    aria-expanded={open}
+                    className="inline-flex items-center gap-1.5 font-medium transition-colors hover:text-[var(--ink)]"
+                  >
+                    <IconDoc className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span>{resp.citations.length} {t("common.source")}</span>
+                    <IconChevronRight className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-90" : ""}`} />
+                  </button>
+                )}
+              </div>
+              <span className="text-[10px] sm:text-[11px] text-[var(--text-faint)]">Just now</span>
           </div>
 
           {open && resp.citations.length > 0 && (

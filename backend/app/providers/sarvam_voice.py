@@ -32,3 +32,11 @@ class SarvamVoiceProvider:
 
         # TODO: Implement when SARVAM_API_KEY is provided
         raise NotImplementedError("Sarvam TTS not yet implemented")
+
+    async def text_to_speech_segments(self, segments: list[dict]) -> bytes:
+        """Convert text segments to multi-voice speech."""
+        if not self.enabled:
+            raise RuntimeError("Sarvam voice not configured")
+
+        # TODO: Implement when SARVAM_API_KEY is provided
+        raise NotImplementedError("Sarvam TTS not yet implemented")

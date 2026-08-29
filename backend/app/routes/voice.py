@@ -33,8 +33,14 @@ class TranscribeRequest(BaseModel):
 
 
 class SpeakRequest(BaseModel):
-    text: str
+    text: str = ""
     language: str = "en"
+    segments: list["SpeechSegment"] | None = None
+
+
+class SpeechSegment(BaseModel):
+    text: str
+    language: str
 
 
 class VoiceChatRequest(BaseModel):
@@ -67,10 +73,17 @@ async def speak_text(req: SpeakRequest) -> dict:
     Delegates to the voice_service provider fallback chain.
     """
     try:
-        audio_bytes = await voice_service.text_to_speech(req.text, req.language)
+        if req.segments:
+            audio_bytes = await voice_service.text_to_speech_segments(
+                [s.model_dump() for s in req.segments]
+            )
+            language = req.segments[0].language
+        else:
+            audio_bytes = await voice_service.text_to_speech(req.text, req.language)
+            language = req.language
     except VoiceUnavailableError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
-    return {"audio": audio_bytes.hex(), "language": req.language}
+    return {"audio": audio_bytes.hex(), "language": language}
 
 
 @router.post("")
@@ -113,10 +126,13 @@ async def voice_chat(
     rag_result = chat_handler(chat_request)
 
     answer_text = rag_result.get("answer", "")
+    # TTS must consume the citation-stripped speech copy, never the raw answer
+    # (which carries [chunk:ID] markers). speech_text is produced post-verification.
+    speech_text = rag_result.get("speech_text") or answer_text
     audio_b64 = None
     try:
         answer_audio = await voice_service.text_to_speech(
-            answer_text, language.split("-")[0]
+            speech_text, language.split("-")[0]
         )
         if answer_audio:
             audio_b64 = base64.b64encode(answer_audio).decode("ascii")

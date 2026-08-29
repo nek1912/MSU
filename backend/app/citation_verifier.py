@@ -28,6 +28,29 @@ from app.contracts import (
 
 _CITE_PATTERN = re.compile(r"\[chunk:([0-9a-fA-F]{8,})\]")
 
+# LLMs (esp. Llama-3.3-70b on Groq) sometimes emit the right chunk-ID prefix
+# in the wrong *format* — full-width brackets 【ID】 or a bare half-width hex
+# bracket [ID] missing the `chunk:` prefix. These are normalised to the
+# canonical [chunk:ID] form. Only the *format* changes; which IDs are valid is
+# still decided against the retrieved evidence set, so a non-retrieved or
+# fabricated ID remains rejected (never silently accepted).
+_FULLWIDTH_CITE = re.compile(r"【\s*(?:chunk:)?\s*([0-9a-fA-F]{8,})\s*】")
+_BARE_HEX_CITE = re.compile(r"\[\s*([0-9a-fA-F]{8,})\s*\]")
+
+
+def normalize_citation_markers(answer: str) -> str:
+    """Rewrite recognised citation-format variants into ``[chunk:ID]``.
+
+    Handles full-width brackets (【ID】 / 【chunk:ID】) and bare half-width hex
+    brackets ([ID]) that omit the ``chunk:`` prefix. IDs are lower-cased so the
+    verifier's prefix match is case-insensitive. The acceptable-ID set is NOT
+    expanded here — the verifier still rejects anything not in the retrieved
+    evidence.
+    """
+    answer = _FULLWIDTH_CITE.sub(lambda m: f"[chunk:{m.group(1).lower()}]", answer)
+    answer = _BARE_HEX_CITE.sub(lambda m: f"[chunk:{m.group(1).lower()}]", answer)
+    return answer
+
 
 @dataclass
 class VerificationResult:
@@ -45,6 +68,7 @@ def extract_citations_from_answer(answer: str) -> list[tuple[str, str]]:
 
     Returns list of (full_match, prefix) tuples.
     """
+    answer = normalize_citation_markers(answer)
     results = []
     for match in _CITE_PATTERN.finditer(answer):
         full = match.group(0)
@@ -132,6 +156,12 @@ def verify_citations(
     Returns:
         VerificationResult with validity status and details
     """
+    # Normalise common citation-format variants (e.g. full-width 【ID】) into
+    # the canonical [chunk:ID] form before validation. Validity is still
+    # decided against the retrieved evidence set below, so this does not
+    # weaken the gate or accept arbitrary IDs.
+    answer = normalize_citation_markers(answer)
+
     # 1. Verify citation IDs map to evidence
     valid_ids, invalid_prefixes = verify_citation_ids(answer, evidence_chunk_ids)
 

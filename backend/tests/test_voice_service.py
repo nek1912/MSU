@@ -194,6 +194,50 @@ async def test_tts_all_providers_fail():
     mock_provider2.text_to_speech.assert_called_once()
 
 
+@pytest.mark.asyncio
+async def test_tts_segments_fallback_to_second_provider():
+    """Test that TTS segments falls back to second provider when first fails."""
+    service = VoiceService()
+
+    mock_provider1 = AsyncMock()
+    mock_provider1.text_to_speech_segments.side_effect = RuntimeError("Provider 1 failed")
+
+    mock_provider2 = AsyncMock()
+    mock_provider2.text_to_speech_segments.return_value = b"segments audio"
+
+    service.providers = [
+        ("provider1", mock_provider1),
+        ("provider2", mock_provider2),
+    ]
+
+    result = await service.text_to_speech_segments([{"text": "hi", "language": "en"}])
+
+    assert result == b"segments audio"
+    mock_provider2.text_to_speech_segments.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_tts_segments_all_providers_fail():
+    """Test that TTS segments raises VoiceUnavailableError when all providers fail."""
+    service = VoiceService()
+
+    mock_provider1 = AsyncMock()
+    mock_provider1.text_to_speech_segments.side_effect = RuntimeError("Provider 1 failed")
+
+    mock_provider2 = AsyncMock()
+    mock_provider2.text_to_speech_segments.side_effect = NotImplementedError("no impl")
+
+    service.providers = [
+        ("provider1", mock_provider1),
+        ("provider2", mock_provider2),
+    ]
+
+    with pytest.raises(VoiceUnavailableError) as exc_info:
+        await service.text_to_speech_segments([{"text": "hi", "language": "en"}])
+
+    assert "No voice providers available" in str(exc_info.value)
+
+
 def test_voice_unavailable_error_is_exception():
     """Test that VoiceUnavailableError is a proper exception."""
     error = VoiceUnavailableError("test message")

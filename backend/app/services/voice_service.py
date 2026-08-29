@@ -42,6 +42,17 @@ class VoiceService:
 
         raise VoiceUnavailableError("No voice providers available.")
 
+    async def text_to_speech_segments(self, segments: list[dict]) -> bytes:
+        """Convert text segments to multi-voice speech with fallback."""
+        for name, provider in self.providers:
+            try:
+                return await provider.text_to_speech_segments(segments)
+            except Exception as e:
+                logger.warning(f"{name} TTS segments failed: {e}")
+                continue
+
+        raise VoiceUnavailableError("No voice providers available.")
+
 
 class VoiceUnavailableError(Exception):
     """Raised when all voice providers fail."""

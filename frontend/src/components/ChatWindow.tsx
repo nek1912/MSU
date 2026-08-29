@@ -72,6 +72,11 @@ export function ChatWindow() {
   const { t, locale } = useI18n();
   const speech = useMemo(() => createSpeechService(), []);
   const sp = useSearchParams();
+  // speech.supported reads `window` (browser-only), so it differs between SSR and
+  // the client. Gate the mic UI on a mounted flag so SSR and the first client
+  // render match, then reveal it after hydration (avoids hydration mismatch).
+  const [micSupported, setMicSupported] = useState(false);
+  useEffect(() => setMicSupported(speech.supported), [speech]);
   const [input, setInput] = useState("");
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [typing, setTyping] = useState(false);
@@ -83,6 +88,7 @@ export function ChatWindow() {
   const [sessionId] = useState(() => crypto.randomUUID());
   const cancelListen = useRef<(() => void) | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const lastSentLocaleRef = useRef<Locale | null>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const lang: Locale = locale;
 
@@ -189,9 +195,23 @@ export function ChatWindow() {
       setSidebarOpen(false);
     }
 
+    // Only flag an explicit language choice when the UI language was *changed*
+    // by the user since the last sent message. The default UI language must NOT
+    // be sent as an explicit choice (so it can never override a remembered
+    // Hindi session, per the design priority chain).
+    const uiLanguageExplicit =
+      lastSentLocaleRef.current !== null && lastSentLocaleRef.current !== lang;
+    lastSentLocaleRef.current = lang;
+
     setTyping(true);
     try {
-      const resp = await sendChat({ question, session_id: sessionId, language: lang, state: null });
+      const resp = await sendChat({
+        question,
+        session_id: sessionId,
+        language: lang,
+        state: null,
+        ui_language_explicit: uiLanguageExplicit,
+      });
       setMsgs((m) => [...m, { role: "assistant", resp }]);
     } catch {
       setMsgs((m) => [...m, { role: "assistant", resp: fallback(lang) }]);
@@ -480,7 +500,7 @@ export function ChatWindow() {
           <div className="mx-auto max-w-4xl">
             <div className="ask-input-wrap flex items-center gap-2 sm:gap-3 rounded-[var(--radius-cta)] border border-[var(--border-default)] bg-[var(--cream)] px-3 sm:px-4 py-2 sm:py-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-all focus-within:border-[var(--accent-primary)] focus-within:ring-1 focus-within:ring-[var(--accent-primary)]">
               {/* Mic Button */}
-              {speech.supported && (
+              {micSupported && (
                 <Button
                   variant="icon"
                   size="sm"

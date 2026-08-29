@@ -1,0 +1,206 @@
+backend/app/routes/chat.py
+  s_972ceef7e21d8c::t_d6673091448411 81
+  s_972ceef7e21d8c::t_5d98f511784362 94,96
+  s_972ceef7e21d8c::t_270b3542565217 20
+  s_972ceef7e21d8c::t_f7cd7fb13398a6 41
+  s_972ceef7e21d8c::t_b72b283a636d81 95
+  s_972ceef7e21d8c::t_773f24701c6c4c 103
+  s_972ceef7e21d8c::t_f76b3e63f0be5d 39
+  s_972ceef7e21d8c::t_353182150de6a5 11
+  s_972ceef7e21d8c::t_23ebf163890f4b 12
+  s_972ceef7e21d8c::t_4d0feded029aa2 44-56,82-85,90-93,105-106
+  s_1e594c20569958::t_4a42ab47c0a24e 42-43
+  s_972ceef7e21d8c::t_1c016f91c9da80 64,66,86-87,104
+  s_972ceef7e21d8c::t_c5ce953cfafc9c 65,88-89
+  s_972ceef7e21d8c::t_5b89bea60ac380 72-73
+backend/tests/test_retrieval.py
+  s_1e594c20569958::t_e8e71dae784c6e 6-8
+backend/app/language.py
+  s_972ceef7e21d8c::t_cd46e0b99aa111 1,3-7,9-35,38-41,44-46,48-49,53-59,61-79
+backend/migrations/0002_chunk_identity.sql
+  s_1e594c20569958::t_a8424fdd7c13f3 1-88
+eval/run_strategy_eval.py
+  s_1e594c20569958::t_ffc999573540bb 1-295
+scripts/ingest_direct.py
+  s_972ceef7e21d8c::t_7f61d870d7be45 1-54
+backend/tests/test_contract.py
+  s_1e594c20569958::t_635897f83af1d3 19-22,24-25,29-32,34-36
+  s_1e594c20569958::t_ca5d47fcbb3bf5 67,82
+  s_972ceef7e21d8c::t_ee7412639f8860 53-56
+  s_972ceef7e21d8c::t_e2bb91a4414d73 62
+backend/tests/test_generation.py
+  s_1e594c20569958::t_02d91c31312bb5 70-75
+  s_1e594c20569958::t_4535d52ac579dd 41-46
+  s_1e594c20569958::t_f705250c9c4106 56-61
+backend/migrations/0003_hybrid_search.sql
+  s_1e594c20569958::t_4fb61cf8689d73 1-29
+  s_1e594c20569958::t_9903e3b1d546bc 30-89
+backend/app/ui.py
+  s_972ceef7e21d8c::t_dce1399a1b666e 1-24
+backend/app/routes/voice.py
+  s_972ceef7e21d8c::t_00ea6d9ee8bf51 1-135
+backend/app/retrieval_strategies.py
+  s_972ceef7e21d8c::t_b3463f3d407b9b 23-24,27
+  s_1e594c20569958::t_17a932737fa96e 1-22,25-26,28-61,64-70,72-77,79-83,86-95,97-106,108-154
+  s_972ceef7e21d8c::t_9eab00767527fc 62-63,71
+  s_972ceef7e21d8c::t_78b987005dec1b 78,84-85
+  s_972ceef7e21d8c::t_f9277a9a332bb1 96,107
+backend/app/retrieval.py
+  s_1e594c20569958::t_b476f0367281dd 42,45-46,51-54,56,59-60
+  s_972ceef7e21d8c::t_4d61bc5e204634 43-44
+  s_972ceef7e21d8c::t_f3ce5090cc2aa2 47-50,55,57-58
+  s_972ceef7e21d8c::t_ad6be76a60637e 33-34,37
+  s_1e594c20569958::t_b753b45451f063 7-9,12-13,15-16,20
+  s_972ceef7e21d8c::t_c4322c595e273f 35,38-41
+frontend/src/lib/data/grievance.ts
+  s_972ceef7e21d8c::t_bf3f85af612bb5 1-59
+backend/migrations/0004_effective_date_filter.sql
+  s_972ceef7e21d8c::t_cfc370e4a4f4f6 1-123
+backend/app/providers/azure_stt.py
+  s_972ceef7e21d8c::t_8091216efb5965 1-38,42-79
+  s_972ceef7e21d8c::t_9aa1680080501c 39-40
+  s_972ceef7e21d8c::t_e8bc9cd4031e8b 41
+backend/tests/test_chat_route.py
+  s_1e594c20569958::t_65b6b763ddae6e 23-26,28-29,31-34,36-38
+  s_972ceef7e21d8c::t_bd03be50d3763c 47-49
+  s_1e594c20569958::t_6d44e133515e61 72-75,77-78,80-83,85-87
+backend/tests/test_multilingual.py
+  s_972ceef7e21d8c::t_c5cef4dadb1734 416-418
+  s_972ceef7e21d8c::t_15e793f2b1f367 382-384,399-401
+  s_972ceef7e21d8c::t_b3f247a3f28939 1-244,250-261,263-266,268-275,288-290,292-299,312-381,385-398,402-415,419
+  s_972ceef7e21d8c::t_f49be7fc36b3c3 245-249,262,267,276-287,291,300-311
+backend/tests/test_evidence_gate.py
+  s_1e594c20569958::t_2c54f27cc170b2 13-16
+backend/app/intelligence.py
+  s_972ceef7e21d8c::t_22dea3377ef40f 1-13,17,19-20,26-27,41-66,68-73,76-78,80,82-84,86-89,92-97,100-132
+  s_972ceef7e21d8c::t_0b0fe3cad82d75 14-16,18,21-25,28-40,67,74-75,79,81,85,90-91,98-99
+eval/run_eval.py
+  s_1e594c20569958::t_a03679011790bd 1-178
+scripts/test_chat2.py
+  s_972ceef7e21d8c::t_9f648b6ff9a99d 1-25
+backend/eval/multilingual_cases.py
+  s_972ceef7e21d8c::t_de4b988ce8f63d 1-178
+backend/app/main.py
+  s_972ceef7e21d8c::t_5987da78cf5113 43
+  s_972ceef7e21d8c::t_7a5ac0eebf246c 9
+  s_972ceef7e21d8c::t_ac11b64761ee29 27
+backend/schema.sql
+  s_972ceef7e21d8c::t_41f247a1eca580 1-130
+scripts/apply_schema.py
+  s_972ceef7e21d8c::t_6f5ec34c463c86 1-119
+backend/tests/test_voice.py
+  s_972ceef7e21d8c::t_69c5bbef1f4670 13,15-16,21,23-32,34,62,72,74,76,78,88,90-91,93,103,105,107,109,119-120,122,154,164,166,168,170,180,182,184,186,196-197,199,229,235-238,251,270,273,275,277-278,280,292,294-295,297,299-300,302,304-316
+  s_972ceef7e21d8c::t_57e44e122e1373 44-45
+  s_972ceef7e21d8c::t_ace32be6d77ea8 204-207,210-213,216-219
+  s_972ceef7e21d8c::t_16310b27722b75 1-12,14,17-20,22,33,35-43,46-61,63-71,73,75,77,79-87,89,92,94-102,104,106,108,110-118,121,123-135,138-153,155-163,165,167,169,171-179,181,183,185,187-195,198,200-203,208-209,214-215,220-228,230-234,239-250,252-269,271-272,274,276,279,281-291,293,296,298,301,303,317-352
+  s_972ceef7e21d8c::t_2528de58b0edfb 136-137
+frontend/src/components/ChatWindow.tsx
+  s_972ceef7e21d8c::t_c33084333b2250 21-22,24,73-74
+frontend/src/components/chat/MessageBubble.tsx
+  s_972ceef7e21d8c::t_7fe370e89465f7 11-24,58-60,66-75
+scripts/test_domain.py
+  s_972ceef7e21d8c::t_29dd6247f0300a 1-20
+scripts/test_retrieval.py
+  s_972ceef7e21d8c::t_8d35e9b58acdf0 1-38
+backend/app/generation.py
+  s_972ceef7e21d8c::t_ac47cef65ecb7e 56-122
+backend/tests/test_citation_correctness.py
+  s_972ceef7e21d8c::t_983691cbfcb0bf 1-101,103-107,109-113,115-234
+  s_972ceef7e21d8c::t_19892545213dd5 102,108,114
+eval/run_citation_eval.py
+  s_1e594c20569958::t_bdded4730880d6 145-149
+  s_1e594c20569958::t_0daa806ab90895 129-132,134,139-142
+scripts/test_e2e_final.py
+  s_972ceef7e21d8c::t_7c02c6a599f140 3-31
+  s_972ceef7e21d8c::t_abcd32c4e0e3e8 1-2
+backend/data/language_config.json
+  s_972ceef7e21d8c::t_d84717cf244c7f 1-17
+backend/app/config.py
+  s_972ceef7e21d8c::t_83cb714b432e7f 25-27
+  s_1e594c20569958::t_c3c7877eb94040 20-24
+  s_972ceef7e21d8c::t_9d5428b997b67d 28-39
+scripts/test_chat_e2e.py
+  s_972ceef7e21d8c::t_2cda8c1fd82e37 1-37
+frontend/src/lib/api.ts
+  s_972ceef7e21d8c::t_c139e300643ab9 4-13
+backend/tests/test_confidence.py
+  s_972ceef7e21d8c::t_ebabddef1c7091 1-287
+backend/app/providers/reranker.py
+  s_1e594c20569958::t_8864d6188cda99 1-77
+backend/tests/test_intelligence.py
+  s_972ceef7e21d8c::t_a99947d3a05358 1-258,261-264,266-271
+  s_972ceef7e21d8c::t_048d99a4964592 259-260,265
+scripts/test_chunk_insert.py
+  s_972ceef7e21d8c::t_f02ce638b5eac3 1-45
+backend/tests/test_metadata_filtering.py
+  s_972ceef7e21d8c::t_327a524a4b8c31 1-90,96-97,100-103,107-140,147-148,156-171,173-214,217-254
+  s_972ceef7e21d8c::t_dd910f25bd61b4 172
+  s_972ceef7e21d8c::t_bce6db0f7f37b8 141-146,149-155
+  s_972ceef7e21d8c::t_8264fca2aeb6f7 215-216
+  s_972ceef7e21d8c::t_986a987910f3cb 91-95,98-99,104-106
+backend/data/intelligence_patterns.json
+  s_972ceef7e21d8c::t_e3e6be607bbc45 1-49
+backend/tests/test_evidence_gate_pipeline.py
+  s_972ceef7e21d8c::t_f9ba239668c462 197-199,203
+  s_972ceef7e21d8c::t_9e8ed7676d67fa 1-196,200-202,204-343
+ingestion/ingestion/ingest.py
+  s_972ceef7e21d8c::t_593c27a0967017 35-36,39,46
+  s_972ceef7e21d8c::t_6e1ffaf62612bb 9-17,25-30,38,40-45,47,49
+backend/app/confidence_eval.py
+  s_972ceef7e21d8c::t_36ff9dbb2295e5 1-160
+backend/data/ui_strings.json
+  s_972ceef7e21d8c::t_2089d42a647c61 3-5
+  s_972ceef7e21d8c::t_821ea978aad8d4 1-2,6-7
+backend/demo.py
+  s_972ceef7e21d8c::t_3ff0fb49d9ea15 89-90,93-94
+  s_972ceef7e21d8c::t_dfcaa5146d41b2 3-4,8-10
+  s_972ceef7e21d8c::t_6773969b2a70a4 56-59
+  s_972ceef7e21d8c::t_254af7fc30e50a 88,91-92
+  s_972ceef7e21d8c::t_3c6e3ecf8101c1 49
+  s_972ceef7e21d8c::t_fd76a72cd5c175 1-2,5-7,11-48,50-55,60-87,95
+backend/app/providers/azure_tts.py
+  s_972ceef7e21d8c::t_89020d2f28bc8b 42-44
+  s_972ceef7e21d8c::t_25fdf096aa4e6c 5-6,21,49-51
+  s_972ceef7e21d8c::t_5d1f2ede7cecfe 1-4,7-20,22-41,45-48,52-71
+scripts/check_db.py
+  s_972ceef7e21d8c::t_161b67ffd37979 1-29
+backend/app/providers/embeddings.py
+  s_972ceef7e21d8c::t_ae9f31240feabc 19
+  s_972ceef7e21d8c::t_22f6fb0ad063ed 24
+  s_972ceef7e21d8c::t_99c8cd83bc6d4a 15,18,20-23,25-34
+scripts/setup_db.py
+  s_972ceef7e21d8c::t_c771544cab5aaa 1-133
+.env.example
+  s_1e594c20569958::t_7dbb76d6ea7a3c 10-14
+eval/eval_cases.yaml
+  s_1e594c20569958::t_5461cb1988175a 1-392
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "27fc7501d65c5b12b259818567e7356881f061e3",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_1e594c20569958": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fb412be16ffeP7l4C9NkTrZZFj",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_972ceef7e21d8c": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fb3f3d948ffe0gAWxFtD6as34H",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

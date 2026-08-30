@@ -248,9 +248,12 @@ export function ChatWindow() {
     setTyping(true);
     try {
       const history = msgs
-        .filter((m): m is Msg & { text: string } => !!m.text)
-        .slice(-5)
-        .map(m => ({ role: m.role, content: m.text }));
+        .map((m) => {
+          const content = m.role === "user" ? m.text : m.resp?.answer || m.text;
+          return content ? { role: m.role, content } : null;
+        })
+        .filter((m): m is { role: "user" | "assistant"; content: string } => m !== null)
+        .slice(-8);
 
       const resp = await sendChat({ question, session_id: sessionId, language: lang, state: null, history });
       const assistantMsg: Msg = { role: "assistant", resp };
@@ -500,11 +503,18 @@ export function ChatWindow() {
               </div>
               <div className="space-y-0.5">
                 {pinnedConversations.map((conv) => (
-                  <button
+                  <div
                     key={conv.id}
-                    type="button"
+                    role="button"
+                    tabIndex={0}
                     onClick={() => loadConversation(conv)}
-                    className={`group flex w-full items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-left text-xs font-medium transition-colors hover:bg-[var(--cream-2)] ${
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        loadConversation(conv);
+                      }
+                    }}
+                    className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-left text-xs font-medium transition-colors hover:bg-[var(--cream-2)] ${
                       activeConvId === conv.id
                         ? "bg-[var(--cream-2)] font-semibold text-[var(--ink)] border-l-2 border-[var(--accent-primary)]"
                         : "text-[var(--ink)]"
@@ -522,7 +532,7 @@ export function ChatWindow() {
                     >
                       <IconPin className="h-3 w-3" />
                     </button>
-                  </button>
+                  </div>
                 ))}
               </div>
             </div>
@@ -560,11 +570,18 @@ export function ChatWindow() {
               )}
 
               {recentConversations.map((conv) => (
-                <button
+                <div
                   key={conv.id}
-                  type="button"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => loadConversation(conv)}
-                  className={`group flex w-full items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-left text-xs font-medium transition-colors hover:bg-[var(--cream-2)] ${
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      loadConversation(conv);
+                    }
+                  }}
+                  className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-left text-xs font-medium transition-colors hover:bg-[var(--cream-2)] ${
                     activeConvId === conv.id
                       ? "bg-[var(--cream-2)] font-semibold text-[var(--ink)] border-l-2 border-[var(--accent-primary)]"
                       : "text-[var(--ink)]"
@@ -595,7 +612,7 @@ export function ChatWindow() {
                       <IconTrash className="h-3 w-3" />
                     </button>
                   </div>
-                </button>
+                </div>
               ))}
             </div>
           </div>

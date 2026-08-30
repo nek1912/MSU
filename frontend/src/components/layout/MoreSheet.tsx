@@ -31,7 +31,7 @@ export function MoreSheet({ open, onClose }: { open: boolean; onClose: () => voi
         aria-label="More"
         className="fixed inset-x-0 bottom-0 z-40 rounded-t-[var(--radius-md)] border-t border-[var(--border-soft)] bg-[var(--canvas)] pb-[env(safe-area-inset-bottom)]"
       >
-        <div className="mx-auto max-w-[1440px] px-4 py-5 lg:hidden">
+        <div className="mx-auto w-full px-4 py-5 lg:hidden">
           <div className="mb-3 h-[3px] w-10 rounded-full bg-[var(--border-default)]" aria-hidden="true" />
           <div className="grid grid-cols-3 gap-2">
             {MORE_LINKS.map((l) => (

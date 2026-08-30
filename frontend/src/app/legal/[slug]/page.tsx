@@ -29,13 +29,13 @@ export default function LegalDetailPage() {
   const sc = translated[0] ?? doc;
   if (!sc) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-[var(--space-8)] md:px-6">
+      <div className="rail-frame page-container">
         <EmptyState title={t("legal.notFound")} action={<Link href="/legal" className="text-sm text-[var(--accent-primary)] underline">{t("nav.legal")}</Link>} />
       </div>
     );
   }
   return (
-    <div className="mx-auto max-w-4xl px-4 py-[var(--space-8)] md:px-6">
+    <div className="rail-frame page-container">
       <Reveal trigger="load">
         <div className="rounded-[var(--radius-md)] border border-[var(--border-soft)] border-l-[3px] border-l-[var(--accent-primary)] bg-[var(--cream)] p-6 md:p-8">
           <Badge deco={deco(sc.category)}>{t(`legalCategory.${sc.category}`)}</Badge>

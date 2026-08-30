@@ -26,7 +26,7 @@ export default function GrievanceStatusPage() {
   const currentIdx = record ? ORDER.indexOf(record.status as (typeof ORDER)[number]) : -1;
 
   return (
-    <div className="px-4 py-[var(--space-8)] md:px-6">
+    <div className="rail-frame page-container">
       <Reveal trigger="load">
         <h1 className="display text-3xl tracking-tight text-[var(--ink)] md:text-4xl">{t("grievance.statusTitle")}</h1>
         <p className="mt-1 text-[var(--text-body)]">{t("grievance.statusSubtitle")}</p>
@@ -79,7 +79,7 @@ export default function GrievanceStatusPage() {
                           {t(`status.${s}`)}
                         </p>
                         {reached && record.timeline.find((tl) => tl.status === s) && (
-                          <p className="text-xs text-[var(--text-secondary)]">{record.timeline.find((tl) => tl.status === s)!.at}</p>
+                          <p className="text-xs text-[var(--text-secondary)]">{record.timeline.find((tl) => tl.status === s)!.timestamp}</p>
                         )}
                       </div>
                     </li>

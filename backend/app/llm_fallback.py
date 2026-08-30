@@ -19,7 +19,5 @@ def grounded_answer(primary: LLMProvider, fallback: LLMProvider,
         try:
             return provider.generate(system, user)
         except Exception as exc:
-            if not _retryable(exc):
-                raise
             errors.append(f"{name}: {exc!r}")
     raise AllProvidersFailedError("; ".join(errors))

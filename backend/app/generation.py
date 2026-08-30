@@ -87,12 +87,19 @@ def build_user_prompt(
     return f"{hist_text}Question: {question}\n\nContext:\n{ctx}"
 
 
-def build_general_prompt(question: str, language: str) -> str:
+def build_general_prompt(question: str, language: str, history: list[dict] | None = None) -> str:
     """User prompt for an out-of-scope question answered from general knowledge."""
     lang = language if language in _LANG_INSTRUCTION else "en"
+    hist_text = ""
+    if history:
+        turns = "\n".join(
+            f"{'User' if h['role'] == 'user' else 'Assistant'}: {h['content']}"
+            for h in history
+        )
+        hist_text = f"Previous conversation:\n{turns}\n\n"
     return (
         f"{_LANG_INSTRUCTION[lang]} "
-        f"Question: {question}\n\n"
+        f"{hist_text}Question: {question}\n\n"
         "Answer the question helpfully and accurately from your general "
         "knowledge. Do not invent "
         "specific Indian government scheme amounts, deadlines, or legal clauses; "

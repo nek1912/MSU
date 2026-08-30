@@ -21,7 +21,7 @@ export function TopNav() {
     href === "/" ? pathname === "/" : pathname.startsWith(href);
   return (
     <header className="sticky top-0 z-20 border-b border-[var(--border-soft)] bg-[var(--canvas)]">
-      <div className="mx-auto flex h-14 max-w-[1440px] items-center justify-between gap-4 px-4 md:px-6">
+      <div className="mx-auto flex h-14 w-full items-center justify-between gap-4 px-4 md:px-6">
         <Link href="/" className="group flex shrink-0 flex-col leading-none">
           <span className="display text-xl text-[var(--ink)]">सहकारिता</span>
           <span className="mt-0.5 h-[2px] w-[22px] bg-[var(--accent-primary)] transition-all duration-[250ms] ease-[var(--ease-out-cubic)] group-hover:w-9" aria-hidden="true" />

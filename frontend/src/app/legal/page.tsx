@@ -38,7 +38,7 @@ export default function LegalPage() {
   });
 
   return (
-    <div className="px-4 py-[var(--space-8)] md:px-6">
+    <div className="rail-frame page-container">
       <Reveal trigger="load">
         <h1 className="display text-3xl tracking-tight text-[var(--ink)] md:text-4xl">{t("legal.title")}</h1>
         <p className="mt-1 text-[var(--text-body)]">{t("legal.subtitle")}</p>

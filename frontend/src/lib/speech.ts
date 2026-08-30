@@ -5,6 +5,21 @@ export interface SpeechService {
   stopSpeaking: () => void;
 }
 
+let currentAudio: HTMLAudioElement | null = null;
+let currentObjectUrl: string | null = null;
+
+function stopAll() {
+  if (currentAudio) {
+    try { currentAudio.pause(); } catch { /* noop */ }
+    currentAudio = null;
+  }
+  if (currentObjectUrl) {
+    try { URL.revokeObjectURL(currentObjectUrl); } catch { /* noop */ }
+    currentObjectUrl = null;
+  }
+  window.speechSynthesis?.cancel();
+}
+
 export function createSpeechService(): SpeechService {
   const isBrowser = typeof window !== "undefined";
   const SpeechRecognition =
@@ -14,8 +29,6 @@ export function createSpeechService(): SpeechService {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (window as any).webkitSpeechRecognition)
       : undefined;
-  const synthesis =
-    isBrowser && typeof window !== "undefined" ? window.speechSynthesis : undefined;
 
   return {
     get supported() {
@@ -42,18 +55,63 @@ export function createSpeechService(): SpeechService {
       };
     },
     speak(text, locale) {
-      if (!synthesis) return;
-      const utterance = new SpeechSynthesisUtterance(text);
-      const voices = synthesis.getVoices();
-      const match =
-        voices.find((v) => v.lang.startsWith(locale === "en" ? "en" : locale)) ||
-        voices.find((v) => v.lang.startsWith("en"));
-      if (match) utterance.voice = match;
-      synthesis.cancel();
-      synthesis.speak(utterance);
+      stopAll();
+
+      const cleanText = text
+        .replace(/\[chunk:[a-f0-9]+\]/g, "")
+        .replace(/\*\*([^*]+)\*\*/g, "$1")
+        .replace(/\n+/g, ". ")
+        .trim();
+      if (!cleanText) return;
+
+      // For Indian languages, fetch backend Sarvam TTS and play the result
+      if (locale !== "en") {
+        const ttsText = cleanText.slice(0, 500);
+        const formData = new FormData();
+        formData.append("text", ttsText);
+        formData.append("language", locale);
+
+        fetch("/api/speak", { method: "POST", body: formData })
+          .then((res) => (res.ok ? res.blob() : Promise.reject()))
+          .then((blob) => {
+            if (blob.size < 500) return Promise.reject();
+            const url = URL.createObjectURL(blob);
+            const audio = new Audio(url);
+            currentAudio = audio;
+            currentObjectUrl = url;
+            audio.onended = () => stopAll();
+            audio.onerror = () => stopAll();
+            // Fire play() — user gesture is still active in this microtask
+            audio.play().catch(() => {
+              stopAll();
+              // Final fallback: browser TTS
+              speakBrowser(cleanText, locale);
+            });
+          })
+          .catch(() => {
+            speakBrowser(cleanText, locale);
+          });
+        return;
+      }
+
+      // English: browser TTS directly
+      speakBrowser(cleanText, locale);
     },
     stopSpeaking() {
-      if (synthesis) synthesis.cancel();
+      stopAll();
     },
   };
+}
+
+function speakBrowser(text: string, locale: string) {
+  const synthesis = window.speechSynthesis;
+  if (!synthesis) return;
+  const utterance = new SpeechSynthesisUtterance(text);
+  const voices = synthesis.getVoices();
+  const match =
+    voices.find((v) => v.lang.startsWith(locale === "en" ? "en" : locale)) ||
+    voices.find((v) => v.lang.startsWith("en"));
+  if (match) utterance.voice = match;
+  synthesis.cancel();
+  synthesis.speak(utterance);
 }

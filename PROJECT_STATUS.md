@@ -16,7 +16,7 @@ trust it. If you only have two minutes, update `Last updated` and the
 
 ## Last updated
 
-`2026-08-30 (3rd session), by data-expansion task: 5 new schemes added to frontend`
+`2026-08-30 (4th session), by conversation-memory implementation: messages table + history prompt flow verified`
 
 ## Current day / plan position
 
@@ -49,6 +49,7 @@ broken`.
 | Reranker (Stage 6) | M2 | working | Wired into chat route, disabled by default (RERANKER_ENABLED=False) |
 | Citation verifier (Stage 8) | M2 | working | citation_verifier.py, all responses routed through verification |
 | `/chat` wired to retrieval | M2 | working | Session store, evidence gate v2, citations, abstention wired |
+| Conversation memory / session history | M2 | working | `messages` table + last-5-turn history prepended to prompt; frontend sends history with each request |
 | Citation verification | M2 | working | Set-membership based, routed through verifier |
 | Abstention logic | M2 | working | Defense-in-depth: domain + jurisdiction + thresholds |
 | Confidence calibration | M2 | working | Retrieval-signal-based scoring (not heuristic) |
@@ -145,6 +146,11 @@ rediscovering "wait, do we have a Groq key yet?"
   e-nam, soil-health, rganidhi, pmjdj) with English, Hindi, and Gujarati translations.
   Fixed corrupted nrcf entry that was incorrectly placed inside LocalizedScheme
   interface. Total schemes: 15 (was 10). Tests pass (22/22).
+- **Conversation memory implemented**: `messages` table added, `session_store.py`
+  now persists and fetches last-turn history, `build_user_prompt()` prepends prior
+  turns, `/chat` persists user/assistant turns, and frontend `sendChat()` sends the
+  last 5 turns with each request. Verified: 12 backend history tests pass; frontend
+  TypeScript compile returns no errors.
 
 ## Corpus status
 

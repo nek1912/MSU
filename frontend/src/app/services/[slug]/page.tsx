@@ -27,13 +27,13 @@ export default function ServiceDetailPage() {
   const sc = translated[0] ?? service;
   if (!sc) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-[var(--space-8)] md:px-6">
+      <div className="rail-frame page-container">
         <EmptyState title={t("services.notFound")} action={<Link href="/services" className="text-sm text-[var(--accent-primary)] underline">{t("nav.services")}</Link>} />
       </div>
     );
   }
   return (
-    <div className="mx-auto max-w-4xl px-4 py-[var(--space-8)] md:px-6">
+    <div className="rail-frame page-container">
       <Reveal trigger="load">
         <div className="rounded-[var(--radius-md)] border border-[var(--border-soft)] border-l-[3px] border-l-[var(--accent-primary)] bg-[var(--cream)] p-6 md:p-8">
           <Badge deco={deco(sc.category)}>{t(`serviceCategory.${sc.category}`)}</Badge>

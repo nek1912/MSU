@@ -45,7 +45,7 @@ def save_message(session_id: str, role: str, content: str) -> None:
         pass  # Non-UUID session IDs or missing table — silently skip
 
 
-def get_history(session_id: str, limit: int = 5) -> list[dict]:
+def get_history(session_id: str, limit: int = 8) -> list[dict]:
     """Retrieve the last N messages for a session, oldest first."""
     try:
         resp = (

@@ -1,19 +1,18 @@
-"""PHASE 13: Voice I/O route.
+"""Voice I/O route — Sarvam (primary) → Azure (fallback) → text-only.
 
-Architecture: One RAG core, no separate voice RAG.
 Pipeline: audio → STT → text → existing chat RAG → answer → TTS → audio
-
-The voice route is a thin adapter around the same RAG pipeline used by /chat.
-It does NOT duplicate retrieval, generation, or evidence gating logic.
 """
+
 import logging
+import base64
 
 from fastapi import APIRouter, UploadFile, File, Form
 from fastapi.responses import Response
 
-from app.config import get_settings
+from app.providers.sarvam_voice import SarvamSTTProvider, SarvamTTSProvider
 from app.providers.azure_stt import AzureSTTProvider
 from app.providers.azure_tts import AzureTTSProvider
+from app.config import get_settings
 from app.routes.chat import chat as chat_handler
 from app.routes.chat import ChatRequest
 
@@ -21,79 +20,88 @@ _log = logging.getLogger(__name__)
 router = APIRouter(prefix="/voice", tags=["voice"])
 
 
+def _lang_short(lang: str) -> str:
+    """'hi-IN' → 'hi', 'en-IN' → 'en'."""
+    return lang.split("-")[0] if "-" in lang else lang
+
+
+async def _stt(audio_bytes: bytes, language: str) -> str:
+    """STT with fallback: Sarvam → Azure."""
+    # Try Sarvam first
+    sarvam = SarvamSTTProvider()
+    if sarvam.enabled:
+        try:
+            return await sarvam.transcribe(audio_bytes, language)
+        except Exception as e:
+            _log.warning("Sarvam STT failed, trying Azure: %s", e)
+
+    # Fallback to Azure
+    settings = get_settings()
+    azure = AzureSTTProvider(settings)
+    if azure.configured:
+        try:
+            return azure.transcribe(audio_bytes, language)
+        except Exception as e:
+            _log.warning("Azure STT failed: %s", e)
+
+    return ""
+
+
+async def _tts(text: str, language: str) -> bytes | None:
+    """TTS with fallback: Sarvam → Azure → None."""
+    # Try Sarvam first
+    sarvam = SarvamTTSProvider()
+    if sarvam.enabled:
+        try:
+            return await sarvam.synthesize(text, language)
+        except Exception as e:
+            _log.warning("Sarvam TTS failed, trying Azure: %s", e)
+
+    # Fallback to Azure
+    settings = get_settings()
+    azure = AzureTTSProvider(settings)
+    if azure.configured:
+        try:
+            return azure.synthesize(text, language)
+        except Exception as e:
+            _log.warning("Azure TTS failed: %s", e)
+
+    return None
+
+
 @router.post("/transcribe")
 async def transcribe_audio(
     audio: UploadFile = File(...),
-    language: str = Form(default="en-IN"),
+    language: str = Form(default="hi"),
 ) -> dict:
-    """STT: Convert uploaded audio to text.
-
-    This is a pure STT endpoint — no RAG, no generation.
-    Returns the transcribed text for the client to use.
-    """
-    settings = get_settings()
-    stt = AzureSTTProvider(settings)
-
-    if not stt.configured:
-        return {
-            "text": "",
-            "error": "Azure Speech Services not configured",
-            "language": language,
-        }
-
+    """STT: Convert uploaded audio to text (no RAG)."""
     audio_bytes = await audio.read()
-    text = stt.transcribe(audio_bytes, language)
-
-    return {"text": text, "language": language, "error": None}
+    text = await _stt(audio_bytes, language)
+    return {"text": text, "language": language, "error": None if text else "no_speech"}
 
 
 @router.post("/speak")
 async def speak_text(
     text: str = Form(...),
-    language: str = Form(default="en"),
+    language: str = Form(default="hi"),
 ) -> Response:
-    """TTS: Convert text to speech audio.
-
-    This is a pure TTS endpoint — no RAG, no generation.
-    Returns WAV audio bytes.
-    """
-    settings = get_settings()
-    tts = AzureTTSProvider(settings)
-
-    if not tts.configured:
-        return Response(content=b"", media_type="audio/wav", status_code=503)
-
-    audio_bytes = tts.synthesize(text, language)
-    return Response(content=audio_bytes, media_type="audio/wav")
+    """TTS: Convert text to speech audio (no RAG). Returns WAV."""
+    audio = await _tts(text, language)
+    if audio:
+        return Response(content=audio, media_type="audio/wav")
+    return Response(content=b"", media_type="audio/wav", status_code=503)
 
 
 @router.post("")
 async def voice_chat(
     audio: UploadFile = File(...),
-    language: str = Form(default="en-IN"),
+    language: str = Form(default="hi"),
     session_id: str = Form(default=""),
     state: str | None = Form(default=None),
 ) -> dict:
-    """Full voice pipeline: audio → STT → RAG → TTS → audio.
-
-    One RAG core (same as /chat), no separate voice RAG.
-    Pipeline: STT → chat handler → TTS
-    """
-    settings = get_settings()
-    stt = AzureSTTProvider(settings)
-    tts = AzureTTSProvider(settings)
-
-    if not stt.configured:
-        return {
-            "answer": "Voice input is not configured.",
-            "transcribed_text": "",
-            "audio_base64": None,
-            "error": "Azure Speech Services not configured",
-        }
-
-    # Step 1: STT — convert audio to text
+    """Full voice pipeline: audio → STT → RAG → TTS → audio."""
     audio_bytes = await audio.read()
-    transcribed = stt.transcribe(audio_bytes, language)
+    transcribed = await _stt(audio_bytes, language)
 
     if not transcribed:
         return {
@@ -103,22 +111,21 @@ async def voice_chat(
             "error": "no_speech",
         }
 
-    # Step 2: RAG — pass transcribed text through existing chat pipeline
+    # RAG via existing chat pipeline
     chat_request = ChatRequest(
         question=transcribed,
-        language=language.split("-")[0],  # "en-IN" → "en"
+        language=_lang_short(language),
         session_id=session_id,
         state=state,
     )
     rag_result = chat_handler(chat_request)
 
-    # Step 3: TTS — convert answer to speech
+    # TTS
     answer_text = rag_result.get("answer", "")
     audio_b64 = None
-    if tts.configured and answer_text:
-        answer_audio = tts.synthesize(answer_text, language.split("-")[0])
+    if answer_text:
+        answer_audio = await _tts(answer_text, _lang_short(language))
         if answer_audio:
-            import base64
             audio_b64 = base64.b64encode(answer_audio).decode("ascii")
 
     return {

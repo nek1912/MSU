@@ -45,6 +45,7 @@ def extract_citations_from_answer(answer: str) -> list[tuple[str, str]]:
 
     Returns list of (full_match, prefix) tuples.
     """
+    answer = answer.replace("【", "[").replace("】", "]")
     results = []
     for match in _CITE_PATTERN.finditer(answer):
         full = match.group(0)
@@ -132,6 +133,7 @@ def verify_citations(
     Returns:
         VerificationResult with validity status and details
     """
+    answer = answer.replace("【", "[").replace("】", "]")
     # 1. Verify citation IDs map to evidence
     valid_ids, invalid_prefixes = verify_citation_ids(answer, evidence_chunk_ids)
 

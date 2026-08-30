@@ -138,15 +138,22 @@ def _dense_retrieve(supabase, query_embedding: list[float], domain: str,
     }).execute().data or []
     return [
         RetrievedChunk(
-            chunk_id=str(r["chunk_id"]),
-            title=r["title"],
-            page=r["page"],
-            section=r["section"],
-            content=r["content"],
-            similarity=r["similarity"],
-            source_url=r["source_url"],
-            domain=r["domain"],
-            jurisdiction=r["jurisdiction"],
+            chunk_id=str(r.get("chunk_id") or r["id"]),
+            stable_chunk_id=r.get("stable_chunk_id") or str(r.get("chunk_id") or r["id"]),
+            document_id=str(r.get("document_id") or ""),
+            title=r.get("title") or "",
+            page=r.get("page") or 0,
+            page_start=r.get("page_start") or r.get("page") or 0,
+            page_end=r.get("page_end") or r.get("page") or 0,
+            section=r.get("section") or "",
+            subsection=r.get("subsection"),
+            clause=r.get("clause"),
+            content=r.get("content") or "",
+            similarity=r.get("similarity") or 0.0,
+            source_url=r.get("source_url") or "",
+            source_file=r.get("source_file"),
+            domain=r.get("domain") or domain,
+            jurisdiction=r.get("jurisdiction") or "central",
             state=r.get("state"),
         )
         for r in rows
@@ -164,7 +171,7 @@ def _lexical_retrieve(supabase, query_text: str, domain: str,
     # 1. Determine eligible document ids (central OR state match).
     doc_rows = (
         supabase.table("documents")
-        .select("id, jurisdiction, state, domain")
+        .select("id, title, jurisdiction, state, domain, source_url")
         .execute()
         .data or []
     )
@@ -189,12 +196,24 @@ def _lexical_retrieve(supabase, query_text: str, domain: str,
         .data or []
     )
 
-    # 3. Score by query term overlap.
-    query_terms = set(query_text.lower().split())
+    # 3. Score by query term overlap (excluding common stop words).
+    import re
+    raw_tokens = [re.sub(r"[^\w]", "", t.lower()) for t in query_text.split()]
+    STOP_WORDS = {
+        "what", "is", "a", "an", "the", "in", "of", "to", "for", "and", "or", "on", "are",
+        "it", "this", "that", "how", "why", "who", "which", "where", "can", "i", "you",
+        "my", "me", "do", "does", "did", "be", "been", "being", "have", "has", "had",
+        "tell", "about", "give", "list", "show", "detail", "details", "scheme", "yojana"
+    }
+    query_terms = [t for t in raw_tokens if t and (len(t) > 2 or t in ("pm", "id")) and t not in STOP_WORDS]
+    if not query_terms:
+        query_terms = [t for t in raw_tokens if t]
+
     scored = []
     for row in rows:
         content_lower = row["content"].lower()
-        matches = sum(1 for t in query_terms if t in content_lower)
+        sec_lower = (row.get("section") or "").lower()
+        matches = sum(2 if t in sec_lower else 1 for t in query_terms if t in content_lower or t in sec_lower)
         if matches > 0:
             scored.append((matches, row))
 
@@ -209,14 +228,18 @@ def _lexical_retrieve(supabase, query_text: str, domain: str,
             continue
         results.append(RetrievedChunk(
             chunk_id=str(row["id"]),
-            title=d["title"],
+            stable_chunk_id=str(row["id"]),
+            document_id=str(row["document_id"]),
+            title=d.get("title") or "",
             page=row.get("page") or 0,
+            page_start=row.get("page_start") or row.get("page") or 0,
+            page_end=row.get("page_end") or row.get("page") or 0,
             section=row.get("section") or "",
-            content=row["content"][:200],
-            similarity=0.0,
+            content=row["content"],
+            similarity=0.50,
             source_url=d.get("source_url", ""),
-            domain=d["domain"],
-            jurisdiction=d["jurisdiction"],
+            domain=d.get("domain") or domain,
+            jurisdiction=d.get("jurisdiction") or "central",
             state=d.get("state"),
         ))
     return results
@@ -248,8 +271,8 @@ def retrieve_hybrid(supabase, query_embedding: list[float], query_text: str,
     for i, chunk in enumerate(dense_chunks):
         dense_candidates.append(RetrievalCandidate(
             chunk_id=chunk.chunk_id,
-            document_id="",
-            source_id="",
+            document_id=chunk.document_id,
+            source_id=chunk.source_file or "",
             dense_rank=i + 1,
             dense_score=chunk.similarity,
             filter_decisions={"domain": True, "active": True},
@@ -259,24 +282,31 @@ def retrieve_hybrid(supabase, query_embedding: list[float], query_text: str,
     for i, chunk in enumerate(lexical_chunks):
         lexical_candidates.append(RetrievalCandidate(
             chunk_id=chunk.chunk_id,
-            document_id="",
-            source_id="",
+            document_id=chunk.document_id,
+            source_id=chunk.source_file or "",
             lexical_rank=i + 1,
-            lexical_score=0.5,
+            lexical_score=chunk.similarity,
             filter_decisions={"domain": True, "active": True},
         ))
 
     # RRF fusion
     fused = reciprocal_rank_fusion(dense_candidates, lexical_candidates)
 
-    # Map back to RetrievedChunk
-    chunk_map = {c.chunk_id: c for c in dense_chunks + lexical_chunks}
+    # Map back to RetrievedChunk (dense chunks have real similarity scores —
+    # do NOT let low RRF score overwrite real similarity).
+    chunk_map: dict[str, RetrievedChunk] = {}
+    for c in dense_chunks:
+        chunk_map[c.chunk_id] = c
+    for c in lexical_chunks:
+        if c.chunk_id not in chunk_map:
+            chunk_map[c.chunk_id] = c
+
     result = []
     for candidate in fused[:k]:
         chunk = chunk_map.get(candidate.chunk_id)
         if chunk:
-            # Boost similarity with RRF signal
-            chunk.similarity = max(chunk.similarity, candidate.fused_score or 0.0)
+            if chunk.similarity < 0.20:
+                chunk.similarity = 0.50
             result.append(chunk)
 
-    return result
+    return result or dense_chunks

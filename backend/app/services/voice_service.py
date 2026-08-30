@@ -1,9 +1,8 @@
 """Voice service with provider fallback chain."""
 
 import logging
-from typing import Optional
 from app.providers.azure_voice import AzureVoiceProvider
-from app.providers.sarvam_voice import SarvamVoiceProvider
+from app.providers.sarvam_voice import SarvamSTTProvider, SarvamTTSProvider
 
 logger = logging.getLogger(__name__)
 
@@ -11,20 +10,24 @@ logger = logging.getLogger(__name__)
 class VoiceService:
     """Manages voice providers with fallback chain.
 
-    Fallback order: Azure → Sarvam → text-only
+    Fallback order: Sarvam → Azure → text-only
     """
 
     def __init__(self):
-        self.providers = [
+        self.stt_providers = [
+            ("sarvam", SarvamSTTProvider()),
             ("azure", AzureVoiceProvider()),
-            ("sarvam", SarvamVoiceProvider()),
+        ]
+        self.tts_providers = [
+            ("sarvam", SarvamTTSProvider()),
+            ("azure", AzureVoiceProvider()),
         ]
 
     async def speech_to_text(self, audio_bytes: bytes, language: str = "en") -> str:
         """Convert speech to text with fallback."""
-        for name, provider in self.providers:
+        for name, provider in self.stt_providers:
             try:
-                return await provider.speech_to_text(audio_bytes, language)
+                return await provider.transcribe(audio_bytes, language)
             except Exception as e:
                 logger.warning(f"{name} STT failed: {e}")
                 continue
@@ -33,9 +36,9 @@ class VoiceService:
 
     async def text_to_speech(self, text: str, language: str = "en") -> bytes:
         """Convert text to speech with fallback."""
-        for name, provider in self.providers:
+        for name, provider in self.tts_providers:
             try:
-                return await provider.text_to_speech(text, language)
+                return await provider.synthesize(text, language)
             except Exception as e:
                 logger.warning(f"{name} TTS failed: {e}")
                 continue

@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   // 1. Try forwarding to Python backend on port 8000 if available
   try {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 2000);
+    const timer = setTimeout(() => controller.abort(), 30000);
     const backendRes = await fetch(backendUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -18,9 +18,7 @@ type I18nContextValue = {
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
-const VALID_LOCALES: Locale[] = [
-  "en", "hi", "mr", "bn", "ta", "te", "kn", "pa", "gu", "or", "ml", "ur",
-];
+const VALID_LOCALES: Locale[] = ["en", "hi", "gu"];
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("en");

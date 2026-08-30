@@ -49,9 +49,9 @@ def check_jurisdiction(
 
 def check_evidence_sufficient(
     candidates: list[RetrievalCandidate],
-    min_top1: float = 0.35,
-    min_secondary: float = 0.30,
-    min_supporting: int = 2,
+    min_top1: float = 0.20,
+    min_secondary: float = 0.15,
+    min_supporting: int = 1,
 ) -> AbstentionReason | None:
     """Check evidence meets minimum thresholds."""
     if not candidates:
@@ -74,8 +74,8 @@ def check_evidence_sufficient(
 
 def compute_confidence_band(
     candidates: list[RetrievalCandidate],
-    min_top1: float = 0.35,
-    min_secondary: float = 0.30,
+    min_top1: float = 0.20,
+    min_secondary: float = 0.15,
 ) -> ConfidenceBand:
     """Compute confidence band from evidence features.
 

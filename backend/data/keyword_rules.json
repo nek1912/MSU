@@ -2,7 +2,7 @@
   "pmfby": ["pmfby", "crop insurance", "fasal bima", "pradhan mantri fasal"],
   "pacs_computerization": ["computerization", "digitization", "digital", "pacspl", "ncip", "ict", "erp", "pmu", "micro-atm", "core banking", "pacs project", "data readiness"],
   "pacs_governance": ["cooperative society", "co-operative society", "byelaws", "by-laws", "sahkari", "pacs", "primary agricultural credit society", "primary agriculture credit"],
-  "financial_inclusion": ["rbi", "bank account", "pmjdy", "jan dhan", "financial literacy", "deposit insurance", "rupay"],
+  "financial_inclusion": ["rbi", "bank account", "pmjdy", "jan dhan", "financial literacy", "deposit insurance", "rupay", "kcc", "kisan credit card", "credit card", "kisan credit"],
   "schemes": ["scheme", "yojana", "yojna", "ministry of cooperation"],
   "agriculture": ["sowing", "harvest", "mandi", "msp", "fertilizer", "seed variety"],
   "grievance": ["complaint", "grievance", "shikayat", "report corruption"]

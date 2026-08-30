@@ -7,6 +7,6 @@ test("getSchemes returns localized data for a locale", () => {
   expect(all[0]).toHaveProperty("slug");
   expect(all[0].name).toBeTypeOf("string");
   expect(getScheme("en", "pmfby")).toBeDefined();
-  expect(getSchemes("te")[0].name).not.toBe(getSchemes("en")[0].name);
+  expect(getSchemes("gu")[0].name).not.toBe(getSchemes("en")[0].name);
   expect(getScheme("en", "nope")).toBeUndefined();
 });

@@ -1,0 +1,24 @@
+frontend/src/lib/data/services.ts
+  s_208ad7019f54b7::t_c22962a42311b3 84-113
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "e8c29a2653016628db004b72fb17b2d4e5a51fbe",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_208ad7019f54b7": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fad54658affeEhfrgMAPRpt33F",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

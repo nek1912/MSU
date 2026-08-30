@@ -16,7 +16,7 @@ trust it. If you only have two minutes, update `Last updated` and the
 
 ## Last updated
 
-`2026-08-29 (2nd session), by retrieval-validation pass on the frozen 2,188-chunk Jina-v3 corpus`
+`2026-08-30 (3rd session), by data-expansion task: 5 new schemes added to frontend`
 
 ## Current day / plan position
 
@@ -141,6 +141,10 @@ rediscovering "wait, do we have a Groq key yet?"
   now routes to `pacs_computerization` with 0 contamination.
 - **Reranker wired into `/chat`** (hybrid top-25 -> rerank -> top-6 -> evidence gate),
   but left OFF by default after eval showed it lowers proxy recall (see Blocking).
+- **Frontend schemes.ts expanded**: Added 5 new cooperative scheme entries (nrcf,
+  e-nam, soil-health, rganidhi, pmjdj) with English, Hindi, and Gujarati translations.
+  Fixed corrupted nrcf entry that was incorrectly placed inside LocalizedScheme
+  interface. Total schemes: 15 (was 10). Tests pass (22/22).
 
 ## Corpus status
 

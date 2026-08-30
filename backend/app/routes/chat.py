@@ -10,7 +10,7 @@ from typing import Literal
 import httpx
 from fastapi import APIRouter
 from postgrest.exceptions import APIError as PostgrestAPIError
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from app.config import get_settings
 from app.contracts import RetrievalCandidate
@@ -29,7 +29,7 @@ from app.providers.reranker import JinaReranker
 from app.providers.gemini_llm import GeminiLLMProvider
 from app.providers.groq_llm import GroqLLMProvider
 from app.retrieval import RetrievedChunk, retrieve
-from app.session_store import get_state, touch_session
+from app.session_store import get_history, get_state, save_message, touch_session, trim_messages
 from app.ui import get_abstain_text
 
 router = APIRouter()
@@ -41,6 +41,9 @@ ABSTAIN_TEXT = {
     "hi": "मुझे आधिकारिक स्रोतों में इसका उत्तर नहीं मिला, इसलिए अनुमान नहीं लगाऊंगा। "
           "कृपया प्रश्न दूसरे शब्दों में पूछें या सहकारिता, पीएसीएस, योजनाओं, "
           "पीएएमएफबीवाई, कृषि या वित्तीय साक्षरता के बारे में पूछें।",
+    "gu": "મને આધિકારિક સ્રોતોમાં આ ન મળ્યું, તેથી હું અનુમાન નહીં કરું. "
+          "કૃપા કરીને ફરીથી પૂછો અથવા સહકારિતા, PACS, યોજનાઓ, "
+          "PMFBY, કૃષિ અથવા નાણાકીય સાક્ષરતા વિશે પૂછો.",
 }
 
 # Exceptions that represent expected dependency failures (not programmer bugs)
@@ -52,6 +55,7 @@ _SAFE_FAILURES = (
     httpx.ConnectError,
     httpx.HTTPStatusError,
     PostgrestAPIError,
+    ValidationError,
 )
 
 
@@ -61,6 +65,7 @@ class ChatRequest(BaseModel):
     language: Literal["en", "hi", "gu"]
     state: str | None = None
     as_of_date: str | None = None  # Optional date filter (YYYY-MM-DD)
+    history: list[dict] | None = None  # [{role: "user"|"assistant", content: str}]
 
 
 def _confidence_level(score: float) -> str:
@@ -78,14 +83,46 @@ def _confidence_level(score: float) -> str:
     return "none"
 
 
+import re
+
+
+_CITE_PATTERN = re.compile(r"\[chunk:([0-9a-fA-F]{8,})\]")
+
+
+def _citations_from(answer: str, chunks: list[RetrievedChunk]) -> list[dict]:
+    """Extract citations from answer text and map to chunk metadata."""
+    chunk_map = {}
+    for c in chunks:
+        prefix = c.chunk_id[:8].lower()
+        chunk_map[prefix] = c
+
+    seen = set()
+    citations = []
+    for match in _CITE_PATTERN.finditer(answer):
+        prefix = match.group(1)[:8].lower()
+        if prefix in seen:
+            continue
+        seen.add(prefix)
+        chunk = chunk_map.get(prefix)
+        if chunk:
+            citations.append({
+                "chunk_id": chunk.chunk_id,
+                "document_id": chunk.document_id,
+                "title": chunk.title,
+                "page": chunk.page,
+                "url": chunk.source_url,
+            })
+    return citations
+
+
 def _to_candidate(chunk: RetrievedChunk, expected_state: str | None) -> RetrievalCandidate:
     """Convert a RetrievedChunk to a RetrievalCandidate for evidence_gate_v2."""
     is_central = chunk.jurisdiction == "central"
     state_match = is_central or chunk.state == expected_state
     return RetrievalCandidate(
         chunk_id=chunk.chunk_id,
-        document_id="",
-        source_id="",
+        document_id=chunk.document_id,
+        source_id=chunk.source_file or "",
         dense_score=chunk.similarity,
         filter_decisions={
             "domain": True,
@@ -101,7 +138,7 @@ def chat(req: ChatRequest) -> dict:
     settings = get_settings()
     lang = normalize_language(req.language, req.question)
     try:
-        provider = get_embedding_provider()          # cached singleton (P0-1)
+        provider = get_embedding_provider()
         embedding = provider.embed_texts([req.question], task="retrieval.query")[0]
         domain, _score = get_anchor_store().classify(req.question, embedding)
         resolved_state = req.state if req.state is not None else get_state(req.session_id)
@@ -112,21 +149,27 @@ def chat(req: ChatRequest) -> dict:
             general_answer = grounded_answer(
                 GroqLLMProvider(settings), GeminiLLMProvider(settings),
                 GENERAL_SYSTEM_PROMPT, build_general_prompt(req.question, lang))
-            return {"answer": f"{general_answer}\n\n{general_disclaimer(lang)}",
+            out_of_scope_answer = f"{general_answer}\n\n{general_disclaimer(lang)}"
+
+            # --- Persist conversation turns (out-of-scope) ---
+            save_message(req.session_id, "user", req.question)
+            save_message(req.session_id, "assistant", out_of_scope_answer)
+            trim_messages(req.session_id, keep=50)
+
+            return {"answer": out_of_scope_answer,
                     "language": lang, "domain": "out_of_scope",
-                    "confidence": 0.0, "citations": [], "abstained": False,
+                    "intent": "general", "entities": [],
+                    "confidence": 0.0, "confidence_level": "none",
+                    "citations": [], "abstained": False,
                     "follow_up_question": None}
 
         # --- Hybrid retrieval (Stage 5) ---
-        # When the reranker is enabled, pull a larger candidate pool (top 25)
-        # so the reranker can re-order and the final top-5/6 reflects true
-        # relevance rather than just dense/lexical score.
         k = 25 if settings.reranker_enabled else 6
         chunks = retrieve_hybrid(
             get_supabase(), embedding, req.question, domain, resolved_state, k=k,
         )
 
-        # Optional reranker (Stage 6): hybrid top-25 -> rerank -> top-6 -> gate
+        # Optional reranker (Stage 6)
         if settings.reranker_enabled:
             reranker = JinaReranker()
             docs_for_rerank = [{"chunk_id": c.chunk_id, "content": c.content} for c in chunks]
@@ -142,7 +185,10 @@ def chat(req: ChatRequest) -> dict:
         if abstained:
             return _abstain(lang, reason.value if reason else None)
 
-        prompt = build_user_prompt(req.question, chunks)
+        # --- Conversation history (Stage 8b) ---
+        history = get_history(req.session_id, limit=5)
+
+        prompt = build_user_prompt(req.question, chunks, history=history)
         answer = grounded_answer(GroqLLMProvider(settings),
                                  GeminiLLMProvider(settings),
                                  build_system_prompt(lang), prompt)
@@ -155,12 +201,19 @@ def chat(req: ChatRequest) -> dict:
 
         citations = _citations_from(answer, chunks)
         _band_to_confidence = {"high": 0.9, "medium": 0.7, "low": 0.4}
+        conf = _band_to_confidence.get(band.value, 0.4)
+
+        # --- Persist conversation turns ---
+        save_message(req.session_id, "user", req.question)
+        save_message(req.session_id, "assistant", answer)
+        trim_messages(req.session_id, keep=50)
+
         return {"answer": answer, "language": lang, "domain": domain,
-                "confidence": _band_to_confidence.get(band.value, 0.4),
+                "intent": "rag", "entities": [],
+                "confidence": conf, "confidence_level": _confidence_level(conf),
                 "citations": citations, "abstained": False,
                 "follow_up_question": None}
     except _SAFE_FAILURES:
-        # Known dependency failures → contract-valid abstention
         return _abstain(lang, "dependency_failure")
     except Exception:
         raise
@@ -172,3 +225,37 @@ def _abstain(lang: str, _reason: str | None) -> dict:
             "confidence": 0.0, "confidence_level": "none",
             "citations": [], "abstained": True,
             "follow_up_question": None}
+
+
+# ---------------------------------------------------------------------------
+# /translate — translate existing answer text when user switches language
+# ---------------------------------------------------------------------------
+
+class TranslateRequest(BaseModel):
+    texts: list[str]
+    source_language: str = "en"
+    target_language: str = "hi"
+
+
+class TranslatedItem(BaseModel):
+    original: str
+    translated: str
+
+
+class TranslateResponse(BaseModel):
+    translations: list[TranslatedItem]
+
+
+@router.post("/translate", response_model=TranslateResponse)
+async def translate_texts(req: TranslateRequest):
+    """Translate answer text between languages using Sarvam Mayura v1."""
+    from app.providers.sarvam_translate import SarvamTranslationProvider
+
+    provider = SarvamTranslationProvider()
+    results: list[TranslatedItem] = []
+
+    for text in req.texts:
+        translated = await provider.translate(text, req.source_language, req.target_language)
+        results.append(TranslatedItem(original=text, translated=translated))
+
+    return TranslateResponse(translations=results)

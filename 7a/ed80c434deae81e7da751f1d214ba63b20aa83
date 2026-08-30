@@ -1,0 +1,61 @@
+frontend/src/components/ChatWindow.tsx
+  s_0f797f94ab2d33::t_98f77724a47b67 22
+  s_3b9dbeee37dc70::t_e9336177e4c3ee 250-255
+  s_17988d804e03af::t_038351b07b760c 418-450
+  s_17988d804e03af::t_7b89f6c6b8413f 681
+  s_17988d804e03af::t_b3301f859dbd35 219-224
+  s_17988d804e03af::t_11f6d0d65b72c7 395-401
+  s_17988d804e03af::t_da7ddc10585c8a 10
+  s_17988d804e03af::t_bb76e2ec608e87 417,481-483,485,488,624-625,629,632,655-662
+  s_17988d804e03af::t_565d2f3910c0de 348-360,364-365,367,370,372-374,376,378-382,402-411,474,489
+  s_17988d804e03af::t_ea40a3979a639e 211-213
+  s_0f797f94ab2d33::t_40c549f9b34f8d 156
+  s_17988d804e03af::t_be3fd1cc09cc0b 654
+  s_0f797f94ab2d33::t_ccc283aeb3d1a7 2,35-64,71-72,87,90,98-102,109-119,126,128-155,157-165,167,169-196,217,226-227,229,236-242,256-257,259-260,266-282,304,306,310-334,336,341,346,465-466,469,471,503-551,563,565,572,598,754-768,771-773
+  s_dc587df93c0526::t_57aba30d72aea5 3,23-30,207,347,384-388,393-394,412-416,451-464,467-468,470,472-473,475-480,484,486-487,490-502,552-562,564,566-571,573-597,599,604,606-608,611-612,618-623,626-628,630-631,633-634,643-648,664,666-669,672-674,676-680,682-703,709,712-715,723-727,734-738,745-747,750-753,774,776,781-784
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "7aed80c434deae81e7da751f1d214ba63b20aa83",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_0f797f94ab2d33": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_faf040bf5ffecEXdycj7RqwDgq",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_17988d804e03af": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fada5c03dffefnAirTi9ybpziy",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_3b9dbeee37dc70": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fac7f9f7cffedCOEfMgX92PAtM",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_dc587df93c0526": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fb29358e4ffemR449xRnug1XcJ",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

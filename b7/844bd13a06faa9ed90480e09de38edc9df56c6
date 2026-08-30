@@ -1,0 +1,24 @@
+frontend/src/lib/data/grievance.ts
+  s_98f85dc9298168::t_4ff2a6a9fcf405 28-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "b7844bd13a06faa9ed90480e09de38edc9df56c6",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_98f85dc9298168": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fad570b89ffeeYJBxLTxox1Uaa",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

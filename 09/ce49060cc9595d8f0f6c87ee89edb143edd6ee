@@ -1,0 +1,38 @@
+backend/tests/test_generation_history.py
+  s_fd0d8b59a3986c::t_54c04b4790f45d 1-47
+backend/app/generation.py
+  s_0f797f94ab2d33::t_6b8ae9efe07f08 94,97
+  s_0f797f94ab2d33::t_8642857739bc52 32-34
+  s_0f797f94ab2d33::t_c7903d7b6d4794 56,61
+  s_fd0d8b59a3986c::t_b497d66559f95b 65-82,85-87
+  s_0f797f94ab2d33::t_3325d07a2db870 20-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "09ce49060cc9595d8f0f6c87ee89edb143edd6ee",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_0f797f94ab2d33": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_faf040bf5ffecEXdycj7RqwDgq",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_fd0d8b59a3986c": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fac86d3c6ffeIVa5gGysZqLekM",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

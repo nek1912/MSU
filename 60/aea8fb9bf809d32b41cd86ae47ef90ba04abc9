@@ -1,0 +1,33 @@
+frontend/src/lib/api.ts
+  s_0f797f94ab2d33::t_5f57dd14b3dc85 31-54
+  s_3b9dbeee37dc70::t_2128e95d8f4d1e 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "60aea8fb9bf809d32b41cd86ae47ef90ba04abc9",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_0f797f94ab2d33": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_faf040bf5ffecEXdycj7RqwDgq",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_3b9dbeee37dc70": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fac7f9f7cffedCOEfMgX92PAtM",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

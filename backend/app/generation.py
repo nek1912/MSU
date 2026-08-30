@@ -17,8 +17,9 @@ _CITE = re.compile(r"\[chunk:([0-9a-fA-F]{8,})\]")
 _CITE_RAW = re.compile(r"\[chunk:(.*?)\]")
 
 _LANG_INSTRUCTION = {
-    "en": "answer in English",
-    "hi": "answer in Hindi (Devanagari script)",
+    "en": "Answer in English.",
+    "hi": "CRITICAL: You MUST respond entirely in Hindi using Devanagari script (हिन्दी में उत्तर दें). Do NOT use English words or Latin script in your response.",
+    "gu": "CRITICAL: You MUST respond entirely in Gujarati using Gujarati script (ગુજરાતીમાં ઉત્તર આપો). Do NOT use English words or Latin script in your response.",
 }
 
 _GENERAL_DISCLAIMER = {
@@ -28,6 +29,9 @@ _GENERAL_DISCLAIMER = {
     "hi": "यह सामान्य उत्तर है जो सरकारी स्रोतों से नहीं है। सहकारिता नियमों, योजनाओं, "
           "पीएएमएफबीवाई, या वित्तीय समावेशन पर आधिकारिक मार्गदर्शन के लिए उन विषयों "
           "के बारे में एक विशिष्ट प्रश्न पूछें।",
+    "gu": "આ સામાન્ય જવાબ છે જે સરકારી સ્રોતોમાંથી નથી. સહકારિતા નિયમો, "
+          "યોજનાઓ, PMFBY, અથવા નાણાકીય સમાવેશ પર અધિકૃત માર્ગદર્શન માટે "
+          "તે વિષયો વિશે એક ચોક્કસ પ્રશ્ન પૂછો.",
 }
 
 GENERAL_SYSTEM_PROMPT = (
@@ -49,30 +53,48 @@ def build_system_prompt(language: str) -> str:
     """
     lang = language if language in _LANG_INSTRUCTION else "en"
     return (
+        f"{_LANG_INSTRUCTION[lang]} "
         "You are a careful assistant that answers ONLY from the provided "
         "numbered context chunks. Every factual sentence must end with a marker "
         "[chunk:ID] where ID is the first 8 hex characters of the chunk id it "
         "came from. Never add outside knowledge. If the chunks do not contain "
-        "the answer, reply exactly: INSUFFICIENT_EVIDENCE. Please "
-        f"{_LANG_INSTRUCTION[lang]}."
+        "the answer, reply exactly: INSUFFICIENT_EVIDENCE."
     )
 
 
-def build_user_prompt(question: str, chunks: list[RetrievedChunk]) -> str:
-    """Build the RAG user prompt from question + numbered context chunks."""
+def build_user_prompt(
+    question: str,
+    chunks: list[RetrievedChunk],
+    history: list[dict] | None = None,
+) -> str:
+    """Build the RAG user prompt from question + numbered context chunks.
+
+    When history is provided, prepend it so the LLM has conversational context
+    for resolving pronouns and follow-up references.
+    """
+    hist_text = ""
+    if history:
+        turns = "\n".join(
+            f"{'User' if h['role'] == 'user' else 'Assistant'}: {h['content']}"
+            for h in history
+        )
+        hist_text = f"Previous conversation:\n{turns}\n\n"
+
     ctx = "\n\n".join(
         f"[chunk:{c.chunk_id[:8]}] ({c.title} — §{c.section} — p.{c.page})\n{c.content}"
-        for c in chunks)
-    return f"Question: {question}\n\nContext:\n{ctx}"
+        for c in chunks
+    )
+    return f"{hist_text}Question: {question}\n\nContext:\n{ctx}"
 
 
 def build_general_prompt(question: str, language: str) -> str:
     """User prompt for an out-of-scope question answered from general knowledge."""
     lang = language if language in _LANG_INSTRUCTION else "en"
     return (
+        f"{_LANG_INSTRUCTION[lang]} "
         f"Question: {question}\n\n"
         "Answer the question helpfully and accurately from your general "
-        f"knowledge. {_LANG_INSTRUCTION[lang].capitalize()}. Do not invent "
+        "knowledge. Do not invent "
         "specific Indian government scheme amounts, deadlines, or legal clauses; "
         "if you are unsure of a concrete official detail, say so clearly rather "
         "than guessing."

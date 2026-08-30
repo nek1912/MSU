@@ -1,34 +1,67 @@
 "use client";
-import { useState, useEffect, useRef, useMemo } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { sendChat, ChatResponse } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
 import type { Locale } from "@/lib/i18n/i18n";
 import { createSpeechService } from "@/lib/speech";
 import { MessageBubble } from "./chat/MessageBubble";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Reveal } from "@/components/motion/Reveal";
 import {
   IconMic,
-  IconChevronRight,
-  IconBot,
   IconTrash,
   IconSparkles,
   IconSend,
   IconPlus,
   IconSidebar,
   IconClock,
-  IconDoc,
-  IconGrid,
-  IconScale,
-  IconHelp,
+  IconBot,
+  IconArrowLeft,
+  IconPin,
+  IconSearch,
+  IconEdit,
+  IconShare,
+  IconUser,
+  IconCompass,
+  IconX,
 } from "@/components/ui/Icons";
 
 type Msg = { role: "user" | "assistant"; text?: string; resp?: ChatResponse };
 
-const MODELS = ["Sahakarita-v2.5", "GPT-4o", "Claude 3.5 Sonnet"];
+interface Conversation {
+  id: string;
+  title: string;
+  messages: Msg[];
+  createdAt: number;
+  updatedAt?: number;
+  pinned?: boolean;
+}
+
+const STORAGE_KEY = "sahakarita_conversations";
+const MODELS = ["Sahakarita-v2.5"];
+
+function loadConversations(): Conversation[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveConversations(convs: Conversation[]) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(convs));
+  } catch {
+    // localStorage full or unavailable
+  }
+}
 
 // Re-translate a previously received answer into the current UI language via the
 // server-side /api/translate proxy (Azure Translator). Falls back to the original
@@ -53,8 +86,8 @@ function fallback(lang: Locale): ChatResponse {
     answer:
       lang === "hi"
         ? "सेवा अभी उपलब्ध नहीं है।"
-        : lang === "mr"
-        ? "सेवा सध्या उपलब्ध नाही."
+        : lang === "gu"
+        ? "સેવા હમણાં ઉપલબ્ધ નથી."
         : "Service unavailable right now.",
     language: lang,
     domain: "unknown",
@@ -69,8 +102,10 @@ function fallback(lang: Locale): ChatResponse {
 }
 
 export function ChatWindow() {
+  const router = useRouter();
   const { t, locale } = useI18n();
   const speech = useMemo(() => createSpeechService(), []);
+  const [speechReady, setSpeechReady] = useState(false);
   const sp = useSearchParams();
   // speech.supported reads `window` (browser-only), so it differs between SSR and
   // the client. Gate the mic UI on a mounted flag so SSR and the first client
@@ -83,8 +118,11 @@ export function ChatWindow() {
   const [listening, setListening] = useState(false);
   const [model, setModel] = useState(MODELS[0]);
   const [showModelPicker, setShowModelPicker] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Collapsed by default on small mobile, expanded on desktop via effect
-  const [history, setHistory] = useState<string[]>([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeConvId, setActiveConvId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearchInput, setShowSearchInput] = useState(false);
   const [sessionId] = useState(() => crypto.randomUUID());
   const cancelListen = useRef<(() => void) | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -93,14 +131,24 @@ export function ChatWindow() {
   const taRef = useRef<HTMLTextAreaElement>(null);
   const lang: Locale = locale;
 
-  // Auto-expand sidebar on large screens (>=1024px); keep it a drawer on tablet/mobile
+  // Load conversations from localStorage on mount
+  useEffect(() => {
+    setConversations(loadConversations());
+  }, []);
+
+  // Client-only speech readiness
+  useEffect(() => {
+    setSpeechReady(true);
+  }, []);
+
+  // Auto-expand sidebar on large screens
   useEffect(() => {
     if (typeof window !== "undefined" && window.innerWidth >= 1024) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSidebarOpen(true);
     }
   }, []);
 
+  // Auto-save current conversation when msgs change
   // Flag the next message as an explicit language choice when the UI language
   // changes (covers the first switch away from the default too). Consumed + cleared
   // by ask().
@@ -115,19 +163,76 @@ export function ChatWindow() {
     () => [t("chat.starter1"), t("chat.starter2"), t("chat.starter3"), t("chat.starter4")],
     [t]
   );
-
   useEffect(() => {
-    if (history.length === 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setHistory(initialHistory);
-    }
-  }, [initialHistory, history.length]);
+    if (msgs.length === 0 || !activeConvId) return;
+    setConversations((prev) => {
+      const next = prev.map((c) =>
+        c.id === activeConvId
+          ? { ...c, messages: msgs, updatedAt: Date.now() }
+          : c
+      );
+      saveConversations(next);
+      return next;
+    });
+  }, [msgs, activeConvId]);
 
-  function factoryPrompt(scheme: string) {
-    return scheme === "pmfby"
-      ? t("chat.starter1")
-      : `${t("nav.schemes")}: ${scheme.replace(/-/g, " ")}`;
-  }
+  // Create a new conversation
+  const createConversation = useCallback((firstMsg: Msg) => {
+    const conv: Conversation = {
+      id: crypto.randomUUID(),
+      title: firstMsg.text?.slice(0, 50) || "New Chat",
+      messages: [firstMsg],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      pinned: false,
+    };
+    setConversations((prev) => {
+      const next = [conv, ...prev];
+      saveConversations(next);
+      return next;
+    });
+    setActiveConvId(conv.id);
+    setMsgs([firstMsg]);
+    return conv.id;
+  }, []);
+
+  // Load a conversation from sidebar
+  const loadConversation = useCallback((conv: Conversation) => {
+    setMsgs(conv.messages);
+    setActiveConvId(conv.id);
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      setSidebarOpen(false);
+    }
+  }, []);
+
+  // Pin/Unpin a conversation
+  const togglePinConversation = useCallback((convId: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setConversations((prev) => {
+      const next = prev.map((c) =>
+        c.id === convId ? { ...c, pinned: !c.pinned } : c
+      );
+      saveConversations(next);
+      return next;
+    });
+  }, []);
+
+  // Delete a conversation
+  const deleteConversation = useCallback(
+    (convId: string, e: React.MouseEvent) => {
+      e.stopPropagation();
+      setConversations((prev) => {
+        const next = prev.filter((c) => c.id !== convId);
+        saveConversations(next);
+        return next;
+      });
+      if (activeConvId === convId) {
+        setMsgs([]);
+        setActiveConvId(null);
+      }
+    },
+    [activeConvId]
+  );
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -138,70 +243,43 @@ export function ChatWindow() {
     const el = taRef.current;
     if (!el) return;
     el.style.height = "auto";
-    el.style.height = Math.min(el.scrollHeight, 160) + "px";
+    el.style.height = Math.min(el.scrollHeight, 180) + "px";
   }, [input]);
 
   useEffect(() => {
-    const q = sp?.get("q");
-    const scheme = sp?.get("scheme");
+    const q = sp?.get("q") || (typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("q") : null);
+    const scheme = sp?.get("scheme") || (typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("scheme") : null);
+    const schemeName = sp?.get("name") || (typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("name") : null);
     if (q) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setInput(q);
       setMsgs([]);
+      setActiveConvId(null);
     } else if (scheme) {
-      setInput(factoryPrompt(scheme));
-      setMsgs([]);
-    }
-  }, [sp]);
-
-  // Re-translate chat history when UI language changes
-  useEffect(() => {
-    if (msgs.length === 0) return;
-    let isCurrent = true;
-
-    async function translateChatHistory() {
-      const updatedMsgs = await Promise.all(
-        msgs.map(async (m) => {
-          if (m.role === "assistant" && m.resp && m.resp.language !== locale && !m.resp.abstained) {
-            try {
-              const translatedAnswer = await translate(m.resp.answer, locale);
-              return {
-                ...m,
-                resp: {
-                  ...m.resp,
-                  answer: translatedAnswer,
-                  language: locale,
-                },
-              };
-            } catch {
-              return m;
-            }
-          }
-          return m;
-        })
-      );
-
-      if (isCurrent) {
-        setMsgs(updatedMsgs);
+      if (scheme === "pmfby") {
+        setInput(t("chat.starter1"));
+      } else if (schemeName) {
+        setInput(`Tell me about ${schemeName} scheme`);
+      } else {
+        setInput(`Tell me about ${scheme.replace(/-/g, " ")} scheme`);
       }
+      setMsgs([]);
+      setActiveConvId(null);
     }
-
-    translateChatHistory();
-
-    return () => {
-      isCurrent = false;
-    };
-  }, [locale]);
+  }, [sp, t]);
 
   async function ask(q?: string) {
     const question = (q ?? input).trim();
     if (!question || typing) return;
     setInput("");
-    setMsgs((m) => [...m, { role: "user", text: question }]);
 
-    setHistory((prev) => (prev.includes(question) ? prev : [question, ...prev]));
+    const userMsg: Msg = { role: "user", text: question };
 
-    // Close sidebar on mobile/tablet when query starts
+    if (!activeConvId) {
+      createConversation(userMsg);
+    } else {
+      setMsgs((m) => [...m, userMsg]);
+    }
+
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
@@ -215,18 +293,45 @@ export function ChatWindow() {
 
     setTyping(true);
     try {
+      const history = msgs
+        .map((m) => {
+          const content = m.role === "user" ? m.text : m.resp?.answer || m.text;
+          return content ? { role: m.role, content } : null;
+        })
+        .filter((m): m is { role: "user" | "assistant"; content: string } => m !== null)
+        .slice(-8);
+
       const resp = await sendChat({
         question,
         session_id: sessionId,
         language: lang,
         state: null,
+        history,
         ui_language_explicit: uiLanguageExplicit,
       });
       setMsgs((m) => [...m, { role: "assistant", resp }]);
     } catch {
-      setMsgs((m) => [...m, { role: "assistant", resp: fallback(lang) }]);
+      const assistantMsg: Msg = { role: "assistant", resp: fallback(lang) };
+      setMsgs((m) => [...m, assistantMsg]);
     } finally {
       setTyping(false);
+    }
+  }
+
+  function handleNewChat() {
+    setMsgs([]);
+    setInput("");
+    setActiveConvId(null);
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      setSidebarOpen(false);
+    }
+  }
+
+  function handleBack() {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/");
     }
   }
 
@@ -250,155 +355,352 @@ export function ChatWindow() {
     setListening(true);
   }
 
-  function handleNewChat() {
-    setMsgs([]);
-    setInput("");
-    if (typeof window !== "undefined" && window.innerWidth < 1024) {
-      setSidebarOpen(false);
-    }
-  }
-
   const suggestedActions = [
-    { icon: "📈", label: t("nav.schemes") || "Crop Insurance", prompt: t("chat.starter1") },
+    { icon: "🌾", label: t("nav.schemes") || "Crop Insurance", prompt: t("chat.starter1") },
     { icon: "⚡", label: t("nav.services") || "Services", prompt: t("chat.starter2") },
-    { icon: "🌾", label: t("nav.library") || "PACS Services", prompt: t("chat.starter3") },
+    { icon: "🏛️", label: t("nav.library") || "PACS Services", prompt: t("chat.starter3") },
     { icon: "⚖️", label: t("nav.legal") || "Legal Framework", prompt: t("chat.starter4") },
   ];
 
+  function formatTime(ts: number) {
+    const d = new Date(ts);
+    const now = new Date();
+    if (d.toDateString() === now.toDateString()) {
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+    return d.toLocaleDateString([], { month: "short", day: "numeric" });
+  }
+
+  // Filter conversations
+  const filteredConversations = useMemo(() => {
+    if (!searchQuery.trim()) return conversations;
+    return conversations.filter((c) =>
+      c.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [conversations, searchQuery]);
+
+  const pinnedConversations = useMemo(() => {
+    return filteredConversations.filter((c) => c.pinned);
+  }, [filteredConversations]);
+
+  const recentConversations = useMemo(() => {
+    return filteredConversations.filter((c) => !c.pinned);
+  }, [filteredConversations]);
+
   return (
-    <div className="relative flex h-[calc(100dvh-8rem-env(safe-area-inset-bottom))] w-full overflow-hidden bg-[var(--canvas)] text-[var(--ink)] lg:h-[calc(100dvh-3.5rem)]">
+    <div className="relative flex h-dvh w-full overflow-hidden bg-[var(--canvas)] text-[var(--ink)] font-sans">
       {/* Mobile Backdrop Overlay */}
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-30 bg-black/40 backdrop-blur-xs lg:hidden"
+          className="fixed inset-0 z-30 bg-black/50 backdrop-blur-xs lg:hidden"
           aria-hidden="true"
         />
       )}
 
-      {/* ==================== LEFT SIDEBAR (Mobile Responsive Drawer + Desktop Sidebar) ==================== */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-40 flex flex-col border-r border-[var(--border-soft)] bg-[var(--cream)] transition-all duration-300 lg:relative lg:z-0 ${
-          sidebarOpen
-            ? "w-72 min-w-[18rem] translate-x-0 shadow-2xl lg:shadow-none"
-            : "w-0 min-w-0 -translate-x-full overflow-hidden lg:translate-x-0"
-        }`}
-      >
-        {/* New Chat Button */}
-        <div className="p-3">
+      {/* ==================== LEFT SIDEBAR ==================== */}
+      {/* Collapsed Rail (desktop icon sidebar like ChatGPT) */}
+      {!sidebarOpen && (
+        <aside className="hidden lg:flex inset-y-0 left-0 z-40 w-16 flex-col items-center border-r border-[var(--border-soft)] bg-[var(--cream)] py-3">
+          {/* Toggle Sidebar */}
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            title="Open Sidebar"
+            className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+          >
+            <IconSidebar className="h-5 w-5" />
+          </button>
+
+          {/* New Chat Icon */}
           <button
             type="button"
             onClick={handleNewChat}
-            className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-cta)] bg-[var(--dark)] px-4 py-3 text-sm font-semibold text-[var(--on-dark-strong)] shadow-sm transition-all hover:bg-[var(--ink)] active:scale-[0.99]"
+            title="New Chat"
+            className="mt-2 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
           >
-            <IconPlus className="h-4 w-4" />
-            <span>{t("common.newSession") || "New Chat"}</span>
+            <IconEdit className="h-5 w-5" />
           </button>
-        </div>
 
-        {/* History & Recent Chats Section */}
-        <div className="flex-1 overflow-y-auto px-3 py-2">
-          <div className="mb-2 flex items-center justify-between px-2 text-xs font-semibold uppercase tracking-wider text-[var(--text-faint)]">
-            <span className="flex items-center gap-1.5">
-              <IconClock className="h-3.5 w-3.5 text-[var(--text-tertiary)]" />
-              Recent History
-            </span>
-            {history.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setHistory([])}
-                title="Clear History"
-                className="text-[var(--text-faint)] hover:text-[var(--state-error)]"
-              >
-                <IconTrash className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
+          <div className="my-2 h-[1px] w-8 bg-[var(--border-soft)]" />
 
-          <div className="space-y-1">
-            {history.map((item, idx) => (
+          {/* Icon List of Conversations */}
+          <div className="flex-1 w-full overflow-y-auto space-y-1.5 px-2">
+            {conversations.map((conv) => (
               <button
-                key={idx}
+                key={conv.id}
                 type="button"
-                onClick={() => ask(item)}
-                className="group flex w-full items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-left text-xs font-medium text-[var(--ink)] transition-colors hover:bg-[var(--cream-2)]"
+                onClick={() => loadConversation(conv)}
+                title={conv.title}
+                className={`group flex h-9 w-full items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] ${
+                  activeConvId === conv.id ? "bg-[var(--cream-2)] text-[var(--accent-primary)]" : "text-[var(--text-faint)]"
+                }`}
               >
-                <IconClock className="h-3.5 w-3.5 shrink-0 text-[var(--text-faint)] group-hover:text-[var(--accent-primary)]" />
-                <span className="truncate">{item}</span>
+                {conv.pinned ? (
+                  <IconPin className="h-4 w-4 shrink-0 text-[var(--accent-primary)]" />
+                ) : (
+                  <IconClock className="h-4 w-4 shrink-0 group-hover:text-[var(--ink)]" />
+                )}
               </button>
             ))}
           </div>
 
-          {/* Quick Links & Tools Section */}
-          <div className="mt-6 border-t border-[var(--border-soft)] pt-4">
-            <div className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-[var(--text-faint)]">
-              Explore & Resources
-            </div>
-            <nav className="space-y-1">
-              <Link
-                href="/schemes"
-                onClick={() => typeof window !== "undefined" && window.innerWidth < 1024 && setSidebarOpen(false)}
-                className="flex items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-xs font-medium text-[var(--ink)] transition-colors hover:bg-[var(--cream-2)]"
-              >
-                <IconGrid className="h-4 w-4 text-[var(--accent-primary)]" />
-                <span>{t("nav.schemes")}</span>
-              </Link>
-              <Link
-                href="/services"
-                onClick={() => typeof window !== "undefined" && window.innerWidth < 1024 && setSidebarOpen(false)}
-                className="flex items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-xs font-medium text-[var(--ink)] transition-colors hover:bg-[var(--cream-2)]"
-              >
-                <IconDoc className="h-4 w-4 text-[var(--accent-primary)]" />
-                <span>{t("nav.services")}</span>
-              </Link>
-              <Link
-                href="/library"
-                onClick={() => typeof window !== "undefined" && window.innerWidth < 1024 && setSidebarOpen(false)}
-                className="flex items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-xs font-medium text-[var(--ink)] transition-colors hover:bg-[var(--cream-2)]"
-              >
-                <IconDoc className="h-4 w-4 text-[var(--accent-primary)]" />
-                <span>{t("nav.library")}</span>
-              </Link>
-              <Link
-                href="/legal"
-                onClick={() => typeof window !== "undefined" && window.innerWidth < 1024 && setSidebarOpen(false)}
-                className="flex items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-xs font-medium text-[var(--ink)] transition-colors hover:bg-[var(--cream-2)]"
-              >
-                <IconScale className="h-4 w-4 text-[var(--accent-primary)]" />
-                <span>{t("nav.legal")}</span>
-              </Link>
-              <Link
-                href="/faq"
-                onClick={() => typeof window !== "undefined" && window.innerWidth < 1024 && setSidebarOpen(false)}
-                className="flex items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-xs font-medium text-[var(--ink)] transition-colors hover:bg-[var(--cream-2)]"
-              >
-                <IconHelp className="h-4 w-4 text-[var(--accent-primary)]" />
-                <span>{t("nav.faq")}</span>
-              </Link>
-            </nav>
+          {/* Footer User Profile */}
+          <div className="mt-auto pt-2">
+            <Link
+              href="/"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--dark)] text-[var(--on-dark-strong)] shadow-xs transition-transform hover:scale-105"
+              title="Sahakarita Home"
+            >
+              <IconBot className="h-5 w-5" />
+            </Link>
+          </div>
+        </aside>
+      )}
+
+      {/* Expanded Sidebar (ChatGPT Style) */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 flex flex-col border-r border-[var(--border-soft)] bg-[var(--cream)] transition-all duration-300 lg:relative lg:z-0 ${
+          sidebarOpen
+            ? "w-72 min-w-[18rem] translate-x-0 shadow-2xl lg:shadow-none"
+            : "w-0 min-w-0 -translate-x-full overflow-hidden lg:hidden"
+        }`}
+      >
+        {/* Sidebar Header with ChatGPT-like Icons */}
+        <div className="flex items-center justify-between p-3 border-b border-[var(--border-soft)]/60">
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(false)}
+              title="Close Sidebar"
+              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+            >
+              <IconSidebar className="h-4.5 w-4.5" />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-1">
+            {/* Search Toggle */}
+            <button
+              type="button"
+              onClick={() => setShowSearchInput((s) => !s)}
+              title="Search History"
+              className={`flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] ${
+                showSearchInput ? "bg-[var(--cream-2)] text-[var(--accent-primary)]" : "text-[var(--text-body)]"
+              }`}
+            >
+              <IconSearch className="h-4 w-4" />
+            </button>
+
+            {/* New Chat Button */}
+            <button
+              type="button"
+              onClick={handleNewChat}
+              title="New Chat"
+              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+            >
+              <IconEdit className="h-4 w-4" />
+            </button>
           </div>
         </div>
 
-        {/* Sidebar Footer */}
+        {/* Search Input Bar (if open) */}
+        {showSearchInput && (
+          <div className="px-3 pt-2.5 pb-1">
+            <div className="relative flex items-center rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--canvas)] px-2.5 py-1.5 shadow-2xs">
+              <IconSearch className="h-3.5 w-3.5 shrink-0 text-[var(--text-faint)]" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search history..."
+                className="w-full bg-transparent px-2 text-xs text-[var(--ink)] placeholder:text-[var(--text-faint)] focus:outline-none"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="text-[var(--text-faint)] hover:text-[var(--ink)]"
+                >
+                  <IconX className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Main Sidebar Navigation & History List */}
+        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-4">
+          {/* ChatGPT Style Top Links */}
+          <div className="space-y-0.5">
+            <button
+              type="button"
+              onClick={handleNewChat}
+              className="flex w-full items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-left text-xs font-semibold transition-colors hover:bg-[var(--cream-2)] text-[var(--ink)]"
+            >
+              <IconPlus className="h-4 w-4 text-[var(--accent-primary)] shrink-0" />
+              <span>{t("common.newSession") || "New chat"}</span>
+            </button>
+          </div>
+
+          {/* PINNED SECTION */}
+          {pinnedConversations.length > 0 && (
+            <div>
+              <div className="mb-1.5 flex items-center justify-between px-2 text-[11px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
+                <span className="flex items-center gap-1.5">
+                  <IconPin className="h-3.5 w-3.5 text-[var(--accent-primary)]" />
+                  Pinned
+                </span>
+                <span className="text-[10px] text-[var(--text-faint)] font-mono">{pinnedConversations.length}</span>
+              </div>
+              <div className="space-y-0.5">
+                {pinnedConversations.map((conv) => (
+                  <div
+                    key={conv.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => loadConversation(conv)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        loadConversation(conv);
+                      }
+                    }}
+                    className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-left text-xs font-medium transition-colors hover:bg-[var(--cream-2)] ${
+                      activeConvId === conv.id
+                        ? "bg-[var(--cream-2)] font-semibold text-[var(--ink)] border-l-2 border-[var(--accent-primary)]"
+                        : "text-[var(--ink)]"
+                    }`}
+                  >
+                    <IconPin className="h-3.5 w-3.5 shrink-0 text-[var(--accent-primary)]" />
+                    <div className="min-w-0 flex-1">
+                      <span className="block truncate">{conv.title}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => togglePinConversation(conv.id, e)}
+                      title="Unpin"
+                      className="shrink-0 p-1 text-[var(--accent-primary)] hover:opacity-75"
+                    >
+                      <IconPin className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* RECENT HISTORY SECTION */}
+          <div>
+            <div className="mb-1.5 flex items-center justify-between px-2 text-[11px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
+              <span className="flex items-center gap-1.5">
+                <IconClock className="h-3.5 w-3.5 text-[var(--text-tertiary)]" />
+                Recent history
+              </span>
+              {conversations.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConversations([]);
+                    saveConversations([]);
+                    setMsgs([]);
+                    setActiveConvId(null);
+                  }}
+                  title="Clear History"
+                  className="text-[var(--text-faint)] hover:text-[var(--state-error)] transition-colors"
+                >
+                  <IconTrash className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-0.5">
+              {recentConversations.length === 0 && pinnedConversations.length === 0 && (
+                <p className="px-2 py-6 text-center text-xs text-[var(--text-faint)] italic">
+                  No chat history yet
+                </p>
+              )}
+
+              {recentConversations.map((conv) => (
+                <div
+                  key={conv.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => loadConversation(conv)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      loadConversation(conv);
+                    }
+                  }}
+                  className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-left text-xs font-medium transition-colors hover:bg-[var(--cream-2)] ${
+                    activeConvId === conv.id
+                      ? "bg-[var(--cream-2)] font-semibold text-[var(--ink)] border-l-2 border-[var(--accent-primary)]"
+                      : "text-[var(--ink)]"
+                  }`}
+                >
+                  <IconClock className="h-3.5 w-3.5 shrink-0 text-[var(--text-faint)] group-hover:text-[var(--accent-primary)]" />
+                  <div className="min-w-0 flex-1">
+                    <span className="block truncate">{conv.title}</span>
+                    <span className="text-[10px] text-[var(--text-faint)] block truncate">
+                      {formatTime(conv.updatedAt || conv.createdAt)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      type="button"
+                      onClick={(e) => togglePinConversation(conv.id, e)}
+                      title="Pin chat"
+                      className="p-1 text-[var(--text-faint)] hover:text-[var(--accent-primary)]"
+                    >
+                      <IconPin className="h-3 w-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => deleteConversation(conv.id, e)}
+                      title="Delete"
+                      className="p-1 text-[var(--text-faint)] hover:text-[var(--state-error)]"
+                    >
+                      <IconTrash className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Sidebar Footer with User Account */}
         <div className="border-t border-[var(--border-soft)] p-3">
-          <div className="flex items-center gap-3 rounded-[var(--radius-md)] bg-[var(--canvas)] p-2.5 shadow-2xs">
-            <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent-primary)] text-white">
-              <IconBot className="h-4 w-4" />
-              <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--canvas)] bg-[var(--state-success)]" />
+          <div className="flex items-center gap-3 rounded-[var(--radius-md)] bg-[var(--canvas)] p-2 shadow-2xs">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--dark)] text-[var(--on-dark-strong)]">
+              <IconUser className="h-4 w-4" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold text-[var(--ink)]">Sahakarita Copilot</p>
-              <p className="truncate text-[11px] text-[var(--text-faint)]">Online · {locale.toUpperCase()}</p>
+              <p className="truncate text-xs font-semibold text-[var(--ink)]">Sahakarita User</p>
+              <p className="truncate text-[10px] text-[var(--text-faint)] font-mono">Free Plan</p>
             </div>
           </div>
         </div>
       </aside>
 
-      {/* ==================== MAIN CHAT WORKSPACE (Full Responsive Size) ==================== */}
-      <main className="flex flex-1 flex-col overflow-hidden bg-[var(--canvas)]">
-        {/* Workspace Top Control Bar */}
-        <div className="flex h-12 shrink-0 items-center justify-between border-b border-[var(--border-soft)] bg-[var(--canvas)] px-3 sm:px-4">
-          <div className="flex items-center gap-2 sm:gap-3">
+      {/* ==================== MAIN CENTERED CHAT AREA ==================== */}
+      <main className="flex flex-1 flex-col overflow-hidden bg-[var(--canvas)] min-w-0">
+        {/* Top Header Bar */}
+        <header className="flex h-13 shrink-0 items-center justify-between border-b border-[var(--border-soft)] bg-[var(--canvas)] px-3 sm:px-4">
+          <div className="flex items-center gap-2">
+            {/* BACK BUTTON TO LEAVE CHAT ROUTE */}
+            <button
+              type="button"
+              onClick={handleBack}
+              title="Back"
+              className="flex items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--border-soft)] px-2.5 py-1.5 text-xs font-semibold text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+            >
+              <IconArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Back</span>
+            </button>
+
+            {/* Sidebar toggle */}
             <button
               type="button"
               onClick={() => setSidebarOpen((s) => !s)}
@@ -407,63 +709,79 @@ export function ChatWindow() {
             >
               <IconSidebar className="h-4 w-4" />
             </button>
-            <div className="flex items-center gap-2">
-              <span className="text-xs sm:text-sm font-semibold tracking-tight text-[var(--ink)]">{t("nav.chat")}</span>
-              <span className="rounded-full border border-[var(--border-soft)] bg-[var(--cream)] px-2 py-0.5 text-[10px] font-medium text-[var(--text-secondary)]">
-                {locale.toUpperCase()}
+
+            {/* Model Badge */}
+            <div className="relative ml-1">
+              <span className="flex items-center gap-1.5 rounded-[var(--radius-md)] px-2.5 py-1 text-sm font-semibold text-[var(--ink)]">
+                <span>{model}</span>
+                <span className="text-[10px] text-[var(--text-faint)]">▼</span>
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={handleNewChat} className="gap-1 text-xs">
-              <IconPlus className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">{t("common.newSession")}</span>
-            </Button>
+            <LanguageSwitcher />
+            <button
+              type="button"
+              onClick={handleNewChat}
+              title="New Chat"
+              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border-soft)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+            >
+              <IconPlus className="h-4 w-4" />
+            </button>
           </div>
-        </div>
+        </header>
 
-        {/* Messages Stream Container */}
-        <div className="flex-1 space-y-6 overflow-y-auto p-3 sm:p-6 md:p-8">
-          <div className="mx-auto max-w-4xl space-y-6">
+        {/* Center Aligned Message Stream Area */}
+        <div className="flex-1 overflow-y-auto w-full">
+          <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 py-6 space-y-6">
+            {/* ChatGPT Style Empty State Hero */}
             {msgs.length === 0 && (
               <Reveal trigger="load">
-                <div className="flex items-start gap-3 sm:gap-4">
-                  <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-[var(--dark)] text-[var(--on-dark-strong)] shadow-sm">
-                    <IconBot className="h-5 w-5" />
+                <div className="py-12 sm:py-20 text-center space-y-4">
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--dark)] text-[var(--on-dark-strong)] shadow-md">
+                    <IconBot className="h-7 w-7" />
                   </div>
-                  <div className="w-full rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--canvas)] p-4 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
-                    <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-[var(--ink)]">
-                      Sahakarita AI Copilot 🚀
-                    </h2>
-                    <p className="mt-2 text-xs sm:text-sm leading-relaxed text-[var(--text-body)]">
-                      {t("chat.welcome")}
-                    </p>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--ink)]">
+                    What can I help with today?
+                  </h1>
+                  <p className="text-sm text-[var(--text-body)] max-w-md mx-auto">
+                    Ask any question about PACS cooperative schemes, crop insurance (PMFBY), services, or legal frameworks.
+                  </p>
 
-                    <div className="mt-4 sm:mt-5 flex items-center justify-between border-t border-[var(--border-soft)] pt-3 sm:pt-4">
-                      <Link href="/schemes">
-                        <button
-                          type="button"
-                          className="inline-flex items-center gap-2 rounded-[var(--radius-cta)] border border-[var(--accent-primary)]/40 bg-[var(--cream)] px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs font-semibold text-[var(--ink)] transition-colors hover:border-[var(--accent-primary)] hover:bg-[var(--cream-2)]"
-                        >
-                          {t("landing.ctaSchemes")}
-                          <IconChevronRight className="h-4 w-4 text-[var(--accent-primary)]" />
-                        </button>
-                      </Link>
-                      <span className="text-[11px] text-[var(--text-faint)]">Just now</span>
-                    </div>
+                  {/* 2x2 Suggested Actions Grid Centered */}
+                  <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 text-left max-w-2xl mx-auto">
+                    {suggestedActions.map((action) => (
+                      <button
+                        key={action.label}
+                        type="button"
+                        onClick={() => {
+                          setInput(action.prompt);
+                          taRef.current?.focus();
+                        }}
+                        className="group flex flex-col justify-between rounded-xl border border-[var(--border-soft)] bg-[var(--cream)] p-3.5 transition-all hover:border-[var(--accent-primary)]/40 hover:bg-[var(--cream-2)] hover:shadow-sm"
+                      >
+                        <div className="flex items-center gap-2 font-medium text-xs text-[var(--ink)]">
+                          <span className="text-base">{action.icon}</span>
+                          <span>{action.label}</span>
+                        </div>
+                        <p className="mt-1.5 text-xs text-[var(--text-tertiary)] line-clamp-2">
+                          {action.prompt}
+                        </p>
+                      </button>
+                    ))}
                   </div>
                 </div>
               </Reveal>
             )}
 
+            {/* Conversation Messages */}
             {msgs.map((m, i) =>
               m.role === "user" ? (
-                <div
-                  key={i}
-                  className="ml-auto w-fit max-w-[85%] sm:max-w-[78%] rounded-[var(--radius-lg)] border border-[var(--dark)] bg-[var(--dark)] px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-[var(--on-dark-strong)] shadow-sm"
-                >
-                  {m.text}
+                <div key={i} className="flex justify-end">
+                  <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl bg-[var(--dark)] px-4 py-3 text-xs sm:text-sm leading-relaxed text-[var(--on-dark-strong)] shadow-2xs">
+                    {m.text}
+                  </div>
                 </div>
               ) : (
                 <MessageBubble key={i} resp={m.resp!} />
@@ -471,125 +789,67 @@ export function ChatWindow() {
             )}
 
             {typing && (
-              <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-[var(--dark)] text-[var(--on-dark-strong)]">
-                  <IconBot className="h-5 w-5" />
-                </span>
-                <Skeleton className="h-16 w-2/3 max-w-[28rem]" />
+              <div className="flex gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--dark)] text-[var(--on-dark-strong)]">
+                  <IconBot className="h-4 w-4 animate-pulse" />
+                </div>
+                <Skeleton className="h-16 w-3/4 max-w-[28rem] rounded-xl" />
               </div>
             )}
             <div ref={bottomRef} />
           </div>
         </div>
 
-        {/* Suggested Actions Section (Horizontally scrollable on mobile) */}
-        <div className="border-t border-[var(--border-soft)] bg-[var(--cream-2)]/30 px-3 py-2.5 sm:px-6 md:px-8">
-          <div className="mx-auto max-w-4xl">
-            <div className="mb-1.5 flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[var(--text-body)]">
-              <IconSparkles className="h-3.5 w-3.5 text-[var(--accent-primary)]" />
-              <span>Suggested Actions</span>
-            </div>
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar sm:flex-wrap">
-              {suggestedActions.map((action) => (
-                <button
-                  key={action.label}
-                  type="button"
-                  onClick={() => ask(action.prompt)}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-[var(--radius-cta)] border border-[var(--border-soft)] bg-[var(--canvas)] px-3 py-1.5 text-xs font-medium text-[var(--ink)] shadow-2xs transition-all hover:border-[var(--border-hover)] hover:bg-[var(--cream)] active:translate-y-0"
-                >
-                  <span>{action.icon}</span>
-                  <span>{action.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Input Composer */}
-        <div className="border-t border-[var(--border-soft)] bg-[var(--canvas)] p-3 sm:px-6 md:px-8 md:py-4">
-          <div className="mx-auto max-w-4xl">
-            <div className="ask-input-wrap flex items-center gap-2 sm:gap-3 rounded-[var(--radius-cta)] border border-[var(--border-default)] bg-[var(--cream)] px-3 sm:px-4 py-2 sm:py-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-all focus-within:border-[var(--accent-primary)] focus-within:ring-1 focus-within:ring-[var(--accent-primary)]">
-              {/* Mic Button */}
-              {micSupported && (
-                <Button
-                  variant="icon"
-                  size="sm"
-                  aria-label={listening ? t("common.stopMic") : t("common.mic")}
-                  onClick={toggleMic}
-                  className={`shrink-0 transition-transform ${
-                    listening
-                      ? "bg-[var(--accent-primary)] text-[var(--accent-contrast)] animate-pulse"
-                      : "text-[var(--text-body)] hover:text-[var(--ink)]"
-                  }`}
-                >
-                  <IconMic className="h-4 w-4" />
-                </Button>
-              )}
-
-              {/* Textarea Input */}
+        {/* Floating Input Composer */}
+        <div className="w-full bg-[var(--canvas)] pb-3 pt-2">
+          <div className="mx-auto w-full max-w-3xl px-4 sm:px-6">
+            <div className="ask-input-wrap relative flex flex-col rounded-3xl border border-[var(--border-default)] bg-[var(--cream)] p-2.5 sm:p-3 shadow-md transition-all focus-within:border-[var(--accent-primary)] focus-within:ring-1 focus-within:ring-[var(--accent-primary)]">
               <textarea
                 ref={taRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={onKeyDown}
                 rows={1}
-                placeholder={t("chat.placeholder") || "Type your question..."}
-                aria-label={t("chat.placeholder") || "Type your question..."}
-                className="block w-full flex-1 min-w-0 resize-none bg-transparent py-1 font-answer text-xs sm:text-base leading-normal text-[var(--ink)] placeholder:text-[var(--text-faint)] focus:outline-none"
+                placeholder={t("chat.placeholder") || "Ask anything..."}
+                aria-label={t("chat.placeholder") || "Ask anything..."}
+                className="w-full resize-none bg-transparent px-2 py-1 font-answer text-xs sm:text-base leading-relaxed text-[var(--ink)] placeholder:text-[var(--text-faint)] focus:outline-none min-h-[40px]"
               />
 
-              {/* Integrated Model Selection Dropdown */}
-              <div className="relative shrink-0">
+              {/* Input Toolbar */}
+              <div className="mt-2 flex items-center justify-end pt-1 gap-2">
+                {/* Speech Mic */}
+                {speechReady && speech.supported && (
+                  <button
+                    type="button"
+                    aria-label={listening ? t("common.stopMic") : t("common.mic")}
+                    onClick={toggleMic}
+                    className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
+                      listening
+                        ? "bg-[var(--accent-primary)] text-[var(--accent-contrast)] animate-pulse"
+                        : "text-[var(--text-body)] hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+                    }`}
+                  >
+                    <IconMic className="h-4 w-4" />
+                  </button>
+                )}
+
+                {/* ChatGPT Circular Send Button */}
                 <button
                   type="button"
-                  onClick={() => setShowModelPicker((p) => !p)}
-                  className="inline-flex items-center gap-1 rounded-[var(--radius-cta)] border border-[var(--border-soft)] bg-[var(--canvas)] px-2 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold text-[var(--ink)] transition-colors hover:border-[var(--border-hover)] hover:bg-[var(--cream-2)]"
+                  aria-label={t("common.send")}
+                  disabled={!input.trim() || typing}
+                  onClick={() => ask()}
+                  className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-[var(--accent-primary)] text-[var(--accent-contrast)] shadow-sm transition-all hover:bg-[var(--accent-hover)] hover:scale-105 active:scale-95 disabled:opacity-35 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
-                  <span className="truncate max-w-[5rem] sm:max-w-none">{model}</span>
-                  <span className="text-[9px] text-[var(--text-tertiary)]">▼</span>
+                  <IconSend className="h-4 w-4" />
                 </button>
-
-                {showModelPicker && (
-                  <div className="absolute right-0 bottom-full z-30 mb-2 w-40 sm:w-44 rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--canvas)] p-1 shadow-lg">
-                    {MODELS.map((m) => (
-                      <button
-                        key={m}
-                        type="button"
-                        onClick={() => {
-                          setModel(m);
-                          setShowModelPicker(false);
-                        }}
-                        className={`flex w-full items-center justify-between rounded-[var(--radius-sm)] px-2.5 py-1.5 text-left text-xs ${
-                          model === m
-                            ? "bg-[var(--dark)] font-semibold text-[var(--on-dark-strong)]"
-                            : "text-[var(--ink)] hover:bg-[var(--cream-2)]"
-                        }`}
-                      >
-                        <span className="truncate">{m}</span>
-                        {model === m && <span>✓</span>}
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
-
-              {/* Circular Send Button */}
-              <button
-                type="button"
-                aria-label={t("common.send")}
-                disabled={!input.trim() || typing}
-                onClick={() => ask()}
-                className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-[var(--accent-primary)] text-[var(--accent-contrast)] shadow-sm transition-all hover:bg-[var(--accent-hover)] hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
-              >
-                <IconSend className="h-4 w-4" />
-              </button>
             </div>
 
-            {/* Footer Subtext */}
-            <div className="mt-1.5 flex items-center justify-between px-1 text-[10px] sm:text-[11px] text-[var(--text-faint)]">
-              <span>Press Enter to send</span>
-              <span className="hidden sm:inline">Powered by Sahakarita Intelligence</span>
-            </div>
+            {/* Sub-caption Disclaimer Centered */}
+            <p className="mt-2 text-center text-[10px] sm:text-xs text-[var(--text-faint)]">
+              Sahakarita AI can make mistakes. Verify important info.
+            </p>
           </div>
         </div>
       </main>

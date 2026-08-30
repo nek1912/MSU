@@ -25,6 +25,12 @@ const CATEGORIES: GrievanceCategory[] = [
   { id: "pacs", labelKey: "grievance.category.pacs" },
   { id: "service", labelKey: "grievance.category.service" },
   { id: "other", labelKey: "grievance.category.other" },
+  { id: "credit-denial", labelKey: "grievance.category.credit-denial" },
+  { id: "insurance-delay", labelKey: "grievance.category.insurance-delay" },
+  { id: "election-dispute", labelKey: "grievance.category.election-dispute" },
+  { id: "mismanagement", labelKey: "grievance.category.mismanagement" },
+  { id: "member-rights", labelKey: "grievance.category.member-rights" },
+  { id: "fund-misuse", labelKey: "grievance.category.fund-misuse" },
 ];
 
 const store = new Map<string, GrievanceRecord>();

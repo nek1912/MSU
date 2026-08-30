@@ -1,7 +1,4 @@
-"""PHASE 13: Voice I/O route.
-
-Architecture: One RAG core, no separate voice RAG.
-Pipeline: audio → STT → text → existing chat RAG → answer → TTS → audio
+"""Voice I/O route — Sarvam (primary) → Azure (fallback) → text-only.
 
 The voice route is a thin adapter around the same RAG pipeline used by /chat.
 It does NOT duplicate retrieval, generation, or evidence gating logic.
@@ -50,6 +47,11 @@ class VoiceChatRequest(BaseModel):
     state: str | None = None
 
 
+def _lang_short(lang: str) -> str:
+    """'hi-IN' → 'hi', 'en-IN' → 'en'."""
+    return lang.split("-")[0] if "-" in lang else lang
+
+
 @router.post("/transcribe")
 async def transcribe_audio(req: TranscribeRequest) -> dict:
     """STT: Convert uploaded audio (base64) to text.
@@ -89,7 +91,7 @@ async def speak_text(req: SpeakRequest) -> dict:
 @router.post("")
 async def voice_chat(
     audio: UploadFile = File(...),
-    language: str = Form(default="en-IN"),
+    language: str = Form(default="hi"),
     session_id: str = Form(default=""),
     state: str | None = Form(default=None),
 ) -> dict:
@@ -119,7 +121,7 @@ async def voice_chat(
 
     chat_request = ChatRequest(
         question=transcribed,
-        language=language.split("-")[0],
+        language=_lang_short(language),
         session_id=session_id,
         state=state,
     )
@@ -132,7 +134,7 @@ async def voice_chat(
     audio_b64 = None
     try:
         answer_audio = await voice_service.text_to_speech(
-            speech_text, language.split("-")[0]
+            speech_text, _lang_short(language)
         )
         if answer_audio:
             audio_b64 = base64.b64encode(answer_audio).decode("ascii")

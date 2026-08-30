@@ -2,8 +2,8 @@ import { test, expect } from "vitest";
 import { LOCALES } from "./i18n";
 import { translate } from "./dictionaries";
 
-test("exports 12 supported locales", () => {
-  expect(LOCALES).toEqual(["en", "hi", "mr", "bn", "ta", "te", "kn", "pa", "gu", "or", "ml", "ur"]);
+test("exports supported locales", () => {
+  expect(LOCALES).toEqual(["en", "hi", "gu"]);
 });
 
 test("translates known keys for en and hi", () => {

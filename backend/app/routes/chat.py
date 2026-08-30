@@ -18,8 +18,8 @@ from app.citation_verifier import verify_citations as verify_citations_v2
 from app.db import get_supabase
 from app.domains import get_anchor_store
 from app.evidence_gate import evidence_gate_v2
-from app.generation import (CitationError, build_system_prompt,
-                            build_user_prompt, verify_citations)
+from app.generation import (CitationError, GENERAL_SYSTEM_PROMPT, build_general_prompt,
+                            build_system_prompt, build_user_prompt, general_disclaimer, verify_citations)
 from app.hybrid_retrieval import retrieve_hybrid
 from app.language import detect_query_languages
 from app.llm_fallback import AllProvidersFailedError, grounded_answer
@@ -31,7 +31,7 @@ from app.providers.translator import AzureTranslator
 from app.retrieval import RetrievedChunk, retrieve
 from app.resolve_response_language import resolve_and_remember
 from app.speech_text import prepare_speech_text, segment_speech
-from app.session_store import get_state, touch_session
+from app.session_store import get_history, get_state, save_message, touch_session, trim_messages
 from app.ui import get_abstain_text
 
 router = APIRouter()
@@ -73,6 +73,7 @@ class ChatRequest(BaseModel):
     ui_language_explicit: bool = False
     state: str | None = None
     as_of_date: str | None = None  # Optional date filter (YYYY-MM-DD)
+    history: list[dict] | None = None  # [{role: "user"|"assistant", content: str}]
 
 
 def _confidence_level(score: float) -> str:
@@ -136,22 +137,65 @@ def chat(req: ChatRequest) -> dict:
         except Exception:
             retrieval_query = req.question
     try:
+        # --- Conversation history retrieval (Stage 0) ---
+        history = req.history if req.history is not None else get_history(req.session_id, limit=8)
+
         provider = get_embedding_provider()          # cached singleton (P0-1)
         embedding = provider.embed_texts([retrieval_query], task="retrieval.query")[0]
         domain, _score = get_anchor_store().classify(retrieval_query, embedding)
+
+        rules = getattr(get_anchor_store(), "rules", {})
+        has_explicit_keyword = False
+        if isinstance(rules, dict):
+            has_explicit_keyword = any(
+                any(kw in retrieval_query.lower() for kw in kws)
+                for kws in rules.values() if isinstance(kws, (list, set, tuple))
+            )
+
+        if (not has_explicit_keyword or domain == "out_of_scope") and history:
+            user_turns = [h["content"] for h in history if isinstance(h, dict) and h.get("role") == "user" and h.get("content")]
+            if user_turns:
+                anchor_q = None
+                if isinstance(rules, dict):
+                    for prev_q in reversed(user_turns):
+                        has_kw = any(
+                            any(kw in prev_q.lower() for kw in kws)
+                            for kws in rules.values() if isinstance(kws, (list, set, tuple))
+                        )
+                        if has_kw:
+                            anchor_q = prev_q
+                            break
+                if not anchor_q:
+                    anchor_q = user_turns[-1]
+
+                contextual_query = f"{anchor_q} {retrieval_query}"
+                ctx_embedding = provider.embed_texts([contextual_query], task="retrieval.query")[0]
+                ctx_domain, _ctx_score = get_anchor_store().classify(contextual_query, ctx_embedding)
+                if ctx_domain != "out_of_scope":
+                    domain = ctx_domain
+                    retrieval_query = contextual_query
+                    embedding = ctx_embedding
         resolved_state = req.state if req.state is not None else get_state(req.session_id)
         touch_session(req.session_id, resolved_state, lang)
         if domain == "out_of_scope":
-            # Controlled out-of-scope response. Invariant #9: out-of-scope
-            # queries must NOT receive an ungrounded factual LLM answer. Return
-            # the standard controlled abstain rather than generating from
-            # general knowledge.
-            return _abstain(lang, "out_of_scope")
+            general_answer = grounded_answer(
+                GroqLLMProvider(settings), GeminiLLMProvider(settings),
+                GENERAL_SYSTEM_PROMPT, build_general_prompt(req.question, lang, history=history))
+            out_of_scope_answer = f"{general_answer}\n\n{general_disclaimer(lang)}"
+
+            save_message(req.session_id, "user", req.question)
+            save_message(req.session_id, "assistant", out_of_scope_answer)
+            trim_messages(req.session_id, keep=50)
+
+            return {"answer": out_of_scope_answer, "language": lang, "domain": "out_of_scope",
+                    "intent": "general", "entities": [],
+                    "confidence": 0.0, "confidence_level": "none",
+                    "citations": [], "abstained": False,
+                    "speech_text": prepare_speech_text(general_answer),
+                    "speech_segments": segment_speech(general_answer, lang),
+                    "follow_up_question": None}
 
         # --- Hybrid retrieval (Stage 5) ---
-        # When the reranker is enabled, pull a larger candidate pool (top 25)
-        # so the reranker can re-order and the final top-5/6 reflects true
-        # relevance rather than just dense/lexical score.
         k = 25 if settings.reranker_enabled else 6
         chunks = retrieve_hybrid(
             get_supabase(), embedding, retrieval_query, domain, resolved_state, k=k,
@@ -171,24 +215,75 @@ def chat(req: ChatRequest) -> dict:
             candidates, expected_domain=domain, expected_state=resolved_state,
         )
         if abstained:
-            return _abstain(lang, reason.value if reason else None)
+            general_answer = grounded_answer(
+                GroqLLMProvider(settings), GeminiLLMProvider(settings),
+                GENERAL_SYSTEM_PROMPT, build_general_prompt(req.question, lang, history=history))
+            out_of_scope_answer = f"{general_answer}\n\n{general_disclaimer(lang)}"
 
-        prompt = build_user_prompt(req.question, chunks)
+            save_message(req.session_id, "user", req.question)
+            save_message(req.session_id, "assistant", out_of_scope_answer)
+            trim_messages(req.session_id, keep=50)
+
+            return {"answer": out_of_scope_answer, "language": lang, "domain": domain,
+                    "intent": domain, "entities": [],
+                    "confidence": 0.5, "confidence_level": "moderate",
+                    "citations": [], "abstained": False,
+                    "speech_text": prepare_speech_text(general_answer),
+                    "speech_segments": segment_speech(general_answer, lang),
+                    "follow_up_question": None}
+
+        prompt = build_user_prompt(req.question, chunks, history=history)
         answer = grounded_answer(GroqLLMProvider(settings),
                                  GeminiLLMProvider(settings),
                                  build_system_prompt(lang), prompt)
+        answer = answer.replace("【", "[").replace("】", "]")
+
+        if "INSUFFICIENT_EVIDENCE" in answer:
+            general_answer = grounded_answer(
+                GroqLLMProvider(settings), GeminiLLMProvider(settings),
+                GENERAL_SYSTEM_PROMPT, build_general_prompt(req.question, lang, history=history))
+            out_of_scope_answer = f"{general_answer}\n\n{general_disclaimer(lang)}"
+
+            save_message(req.session_id, "user", req.question)
+            save_message(req.session_id, "assistant", out_of_scope_answer)
+            trim_messages(req.session_id, keep=50)
+
+            return {"answer": out_of_scope_answer, "language": lang, "domain": domain,
+                    "intent": domain, "entities": [],
+                    "confidence": 0.5, "confidence_level": "moderate",
+                    "citations": [], "abstained": False,
+                    "speech_text": prepare_speech_text(general_answer),
+                    "speech_segments": segment_speech(general_answer, lang),
+                    "follow_up_question": None}
 
         # --- Citation verification v2 (Stage 8) ---
         chunk_ids = [c.chunk_id for c in chunks]
         verification = verify_citations_v2(answer, chunk_ids)
         if not verification.is_valid:
-            return _abstain(lang, verification.reason.value if verification.reason else "citation_failure")
+            general_answer = grounded_answer(
+                GroqLLMProvider(settings), GeminiLLMProvider(settings),
+                GENERAL_SYSTEM_PROMPT, build_general_prompt(req.question, lang, history=history))
+            out_of_scope_answer = f"{general_answer}\n\n{general_disclaimer(lang)}"
+
+            save_message(req.session_id, "user", req.question)
+            save_message(req.session_id, "assistant", out_of_scope_answer)
+            trim_messages(req.session_id, keep=50)
+
+            return {"answer": out_of_scope_answer, "language": lang, "domain": domain,
+                    "intent": "general", "entities": [],
+                    "confidence": 0.5, "confidence_level": "moderate",
+                    "citations": [], "abstained": False,
+                    "speech_text": prepare_speech_text(general_answer),
+                    "speech_segments": segment_speech(general_answer, lang),
+                    "follow_up_question": None}
+
+        save_message(req.session_id, "user", req.question)
+        save_message(req.session_id, "assistant", answer)
+        trim_messages(req.session_id, keep=50)
 
         citations = _citations_from(answer, chunks)
         _band_to_confidence = {"high": 0.9, "medium": 0.7, "low": 0.4}
         confidence = _band_to_confidence.get(band.value, 0.4)
-        # Speech-only copy: citation markers/URLs stripped AFTER verification.
-        # TTS must consume this, never the raw `answer` (which carries [chunk:ID]).
         speech_text = prepare_speech_text(answer)
         speech_segments = segment_speech(answer, lang)
         return {"answer": answer, "language": lang, "domain": domain,

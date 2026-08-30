@@ -1,35 +1,35 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import Link from "next/link";
 import type { ChatResponse } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
-import { IconSpeaker, IconChevronRight, IconDoc, IconBot } from "@/components/ui/Icons";
+import {
+  IconSpeaker,
+  IconDoc,
+  IconChevronRight,
+  IconCopy,
+  IconCheck,
+  IconThumbsUp,
+  IconThumbsDown,
+  IconBot,
+} from "@/components/ui/Icons";
 import { deco } from "@/lib/data/deco";
 import { createSpeechService, speakSegments } from "@/lib/speech";
 import { EvidenceBand } from "@/components/EvidenceBand";
 import { evidenceBand } from "@/lib/band";
 
-const CONFIDENCE_TONE: Record<string, "strong" | "moderate" | "weak"> = {
-  high: "strong",
-  moderate: "moderate",
-  low: "weak",
-  none: "weak",
-};
-
-const CONFIDENCE_LABEL: Record<string, string> = {
-  high: "evidence.strong",
-  moderate: "evidence.moderate",
-  low: "evidence.weak",
-  none: "evidence.weak",
-};
-
 export function MessageBubble({ resp }: { resp: ChatResponse }) {
   const { t } = useI18n();
   const speech = useMemo(() => createSpeechService(), []);
   const [speaking, setSpeaking] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [openCitations, setOpenCitations] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [rating, setRating] = useState<"up" | "down" | null>(null);
+
   const segments = resp.speech_segments ?? [];
   const hasSegments = segments.length > 0;
   const domainKey = `domain.${resp.domain}`;
@@ -43,16 +43,24 @@ export function MessageBubble({ resp }: { resp: ChatResponse }) {
     }
     setSpeaking(true);
     try {
-      // Hybrid read-aloud: browser voices when available, else Azure per run.
-      // Consumes verified, citation-stripped speech_segments — never the raw answer.
-      await speakSegments(segments);
+      if (hasSegments) {
+        await speakSegments(segments);
+      } else {
+        speech.speak(resp.answer.replace(/\[chunk:[a-f0-9]+\]/g, "").trim(), resp.language);
+      }
     } finally {
       setSpeaking(false);
     }
   }
 
+  function handleCopy() {
+    const cleanText = resp.answer.replace(/\[chunk:[a-f0-9]+\]/g, "").trim();
+    navigator.clipboard.writeText(cleanText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
   if (resp.abstained) {
-    // Abstention → NO read-aloud button (per design: no spoken guess).
     return (
       <Alert tone="warn">
         <span>{t("abstained.title")}</span>
@@ -60,96 +68,130 @@ export function MessageBubble({ resp }: { resp: ChatResponse }) {
     );
   }
 
-  const tone = CONFIDENCE_TONE[resp.confidence_level] ?? "weak";
-  const labelKey = CONFIDENCE_LABEL[resp.confidence_level] ?? "evidence.weak";
-
   return (
-    <div className="flex items-start gap-2.5 sm:gap-3">
-      <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-[var(--dark)] text-[var(--on-dark-strong)] shadow-sm">
-        <IconBot className="h-4 w-4 sm:h-5 sm:w-5" />
+    <div className="group flex gap-3 text-sm sm:text-base leading-relaxed text-[var(--ink)]">
+      {/* Assistant Avatar */}
+      <div className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full bg-[var(--dark)] text-[var(--on-dark-strong)] shadow-xs">
+        <IconBot className="h-4 w-4 sm:h-4 sm:w-4" />
       </div>
-      <div className="min-w-0 flex-1">
-        <div className="rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--canvas)] p-3.5 sm:p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all hover:border-[var(--border-hover)]">
-          <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge deco={deco(resp.domain)}>{domainLabel}</Badge>
-              <EvidenceBand confidence={resp.confidence} label={t(`evidence.${evidenceBand(resp.confidence)}`)} />
-            </div>
-            <span className="text-[11px] sm:text-xs text-[var(--text-faint)]">{(resp.confidence * 100).toFixed(0)}% match</span>
+
+      <div className="min-w-0 flex-1 space-y-2">
+        <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge deco={deco(resp.domain)}>{domainLabel}</Badge>
+            <EvidenceBand confidence={resp.confidence} label={t(`evidence.${evidenceBand(resp.confidence)}`)} />
           </div>
+          <span className="text-[11px] sm:text-xs text-[var(--text-faint)]">{(resp.confidence * 100).toFixed(0)}% match</span>
+        </div>
 
-          <p className="font-answer text-sm sm:text-base leading-relaxed text-[var(--ink)]">{resp.answer}</p>
+        {/* Answer Content */}
+        <div className="font-answer text-sm sm:text-base leading-relaxed text-[var(--ink)] prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-[var(--ink)] prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-strong:text-[var(--ink)] prose-table:text-xs prose-th:font-semibold prose-td:py-1 prose-th:py-1 prose-pre:bg-[var(--dark)] prose-pre:text-[var(--on-dark-strong)] prose-code:text-[var(--accent-primary)]">
+          <Markdown remarkPlugins={[remarkGfm]}>
+            {resp.answer.replace(/\[chunk:[a-f0-9]+\]/g, "").trim()}
+          </Markdown>
+        </div>
 
-          {resp.domain === "schemes" && (
-            <div className="mt-3.5 sm:mt-4">
-              <Link href="/schemes">
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1.5 sm:gap-2 rounded-[var(--radius-cta)] border border-[var(--accent-primary)]/40 bg-[var(--cream)] px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs font-semibold text-[var(--ink)] transition-colors hover:border-[var(--accent-primary)] hover:bg-[var(--cream-2)]"
-                >
-                  Explore Schemes
-                  <IconChevronRight className="h-3.5 w-3.5 text-[var(--accent-primary)]" />
-                </button>
-              </Link>
-            </div>
+        {resp.domain === "schemes" && (
+          <div className="mt-3">
+            <Link href="/schemes">
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 rounded-[var(--radius-cta)] border border-[var(--accent-primary)]/40 bg-[var(--cream)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] transition-colors hover:border-[var(--accent-primary)] hover:bg-[var(--cream-2)]"
+              >
+                Explore Schemes
+                <IconChevronRight className="h-3.5 w-3.5 text-[var(--accent-primary)]" />
+              </button>
+            </Link>
+          </div>
+        )}
+
+        {/* Actions Footer */}
+        <div className="pt-2 flex flex-wrap items-center gap-1.5 text-xs text-[var(--text-faint)]">
+          {/* Copy Button */}
+          <button
+            type="button"
+            onClick={handleCopy}
+            title={copied ? "Copied!" : "Copy response"}
+            className="flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-tertiary)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+          >
+            {copied ? <IconCheck className="h-3.5 w-3.5 text-[var(--state-success)]" /> : <IconCopy className="h-3.5 w-3.5" />}
+          </button>
+
+          {/* Read Aloud Button */}
+          {hasSegments && (
+            <button
+              type="button"
+              onClick={handleSpeak}
+              title={speaking ? t("common.stopReadAloud") : t("common.readAloud")}
+              className={`flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)] ${
+                speaking ? "text-[var(--accent-primary)] bg-[var(--accent-tint-soft)]" : "text-[var(--text-tertiary)]"
+              }`}
+            >
+              <IconSpeaker className={`h-3.5 w-3.5 ${speaking ? "animate-pulse" : ""}`} />
+            </button>
           )}
 
-          {resp.domain === "services" && (
-            <div className="mt-3.5 sm:mt-4">
-              <Link href="/services">
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1.5 sm:gap-2 rounded-[var(--radius-cta)] border border-[var(--accent-primary)]/40 bg-[var(--cream)] px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs font-semibold text-[var(--ink)] transition-colors hover:border-[var(--accent-primary)] hover:bg-[var(--cream-2)]"
-                >
-                  View Services
-                  <IconChevronRight className="h-3.5 w-3.5 text-[var(--accent-primary)]" />
-                </button>
-              </Link>
-            </div>
+          {/* Thumbs Up Button */}
+          <button
+            type="button"
+            onClick={() => setRating((r) => (r === "up" ? null : "up"))}
+            title="Good response"
+            className={`flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)] ${
+              rating === "up" ? "text-[var(--state-success)] bg-[var(--cream-2)]" : "text-[var(--text-tertiary)]"
+            }`}
+          >
+            <IconThumbsUp className="h-3.5 w-3.5" />
+          </button>
+
+          {/* Thumbs Down Button */}
+          <button
+            type="button"
+            onClick={() => setRating((r) => (r === "down" ? null : "down"))}
+            title="Bad response"
+            className={`flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)] ${
+              rating === "down" ? "text-[var(--state-error)] bg-[var(--cream-2)]" : "text-[var(--text-tertiary)]"
+            }`}
+          >
+            <IconThumbsDown className="h-3.5 w-3.5" />
+          </button>
+
+          {/* Citations Trigger Button */}
+          {resp.citations.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setOpenCitations((o) => !o)}
+              aria-expanded={openCitations}
+              className="ml-auto inline-flex items-center gap-1 rounded-[var(--radius-md)] bg-[var(--cream-2)] px-2 py-1 text-xs text-[var(--text-body)] transition-colors hover:bg-[var(--border-soft)] hover:text-[var(--ink)]"
+            >
+              <IconDoc className="h-3.5 w-3.5 text-[var(--accent-primary)]" />
+              <span>{resp.citations.length} {t("common.source")}</span>
+              <IconChevronRight className={`h-3 w-3 transition-transform ${openCitations ? "rotate-90" : ""}`} />
+            </button>
           )}
+        </div>
 
-          <div className="mt-3.5 sm:mt-4 flex flex-wrap items-center justify-between border-t border-[var(--border-soft)] pt-2.5 sm:pt-3 text-xs text-[var(--text-tertiary)]">
-              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                {hasSegments && (
-                <button
-                  type="button"
-                  onClick={handleSpeak}
-                  className="inline-flex items-center gap-1.5 font-medium transition-colors hover:text-[var(--ink)]"
-                >
-                  <IconSpeaker className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span>{speaking ? t("common.stopReadAloud") : t("common.readAloud")}</span>
-                </button>
-                )}
-                {resp.citations.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setOpen((o) => !o)}
-                    aria-expanded={open}
-                    className="inline-flex items-center gap-1.5 font-medium transition-colors hover:text-[var(--ink)]"
-                  >
-                    <IconDoc className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span>{resp.citations.length} {t("common.source")}</span>
-                    <IconChevronRight className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-90" : ""}`} />
-                  </button>
-                )}
-              </div>
-              <span className="text-[10px] sm:text-[11px] text-[var(--text-faint)]">Just now</span>
-          </div>
-
-          {open && resp.citations.length > 0 && (
-            <ul className="mt-3 space-y-1.5 border-t border-[var(--border-soft)] pt-3">
+        {/* Citations Expandable Content */}
+        {openCitations && resp.citations.length > 0 && (
+          <div className="mt-2 rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--cream)] p-3">
+            <p className="mb-1.5 text-xs font-semibold text-[var(--text-tertiary)]">Sources & References:</p>
+            <ul className="space-y-1">
               {resp.citations.map((c, j) => (
                 <li key={j}>
-                  <a href={c.url} target="_blank" rel="noopener noreferrer" className="link block truncate text-xs">
-                    {c.title}
-                    {c.page ? ` — p.${c.page}` : ""}
+                  <a
+                    href={c.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="link block truncate text-xs font-medium"
+                  >
+                    {c.title} {c.page ? `(p. ${c.page})` : ""}
                   </a>
                 </li>
               ))}
             </ul>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+

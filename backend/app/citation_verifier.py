@@ -161,7 +161,6 @@ def verify_citations(
     # decided against the retrieved evidence set below, so this does not
     # weaken the gate or accept arbitrary IDs.
     answer = normalize_citation_markers(answer)
-
     # 1. Verify citation IDs map to evidence
     valid_ids, invalid_prefixes = verify_citation_ids(answer, evidence_chunk_ids)
 

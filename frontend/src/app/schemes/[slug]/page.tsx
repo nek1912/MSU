@@ -29,7 +29,7 @@ export default function SchemeDetailPage() {
   const sc = translated[0] ?? scheme;
   if (!sc) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-[var(--space-8)] md:px-6">
+      <div className="rail-frame page-container">
         <EmptyState title={t("detail.notFound")} action={<Link href="/schemes" className="text-sm text-[var(--accent-primary)] underline">{t("nav.schemes")}</Link>} />
       </div>
     );
@@ -43,13 +43,13 @@ export default function SchemeDetailPage() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-[var(--space-8)] md:px-6">
+    <div className="rail-frame page-container">
       <Reveal trigger="load">
         <div className="rounded-[var(--radius-md)] border border-[var(--border-soft)] border-l-[3px] border-l-[var(--accent-primary)] bg-[var(--cream)] p-6 md:p-8">
           <Badge deco={deco(sc.category)}>{t(`category.${sc.category}`)}</Badge>
           <h1 className="mt-3 display text-3xl tracking-tight text-[var(--ink)]">{sc.name}</h1>
           <p className="mt-1 text-[var(--text-body)]">{sc.benefit}</p>
-          <Link href={`/chat?scheme=${sc.slug}`}>
+          <Link href={`/chat?scheme=${sc.slug}&name=${encodeURIComponent(sc.name)}`}>
             <Button className="mt-4">
               {t("common.askThisScheme")}
               <IconChevronRight className="w-4 h-4" />

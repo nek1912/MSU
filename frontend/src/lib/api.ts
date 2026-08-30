@@ -37,6 +37,7 @@ export async function sendChat(payload: {
   session_id: string;
   language: Locale;
   state: string | null;
+  history?: Array<{ role: "user" | "assistant"; content: string }>;
   ui_language_explicit?: boolean;
 }): Promise<ChatResponse> {
   const r = await fetch("/api/chat", {
@@ -46,6 +47,30 @@ export async function sendChat(payload: {
   });
   if (!r.ok) throw new Error(`API ${r.status}`);
   return r.json();
+}
+
+export interface TranslateItem {
+  original: string;
+  translated: string;
+}
+
+export async function translateTexts(
+  texts: string[],
+  sourceLanguage: string,
+  targetLanguage: string,
+): Promise<TranslateItem[]> {
+  const r = await fetch("/api/translate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      texts,
+      source_language: sourceLanguage,
+      target_language: targetLanguage,
+    }),
+  });
+  if (!r.ok) throw new Error(`Translate API ${r.status}`);
+  const data = await r.json();
+  return data.translations;
 }
 
 export async function fetchVoiceSpeak(

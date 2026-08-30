@@ -51,9 +51,9 @@ export default function HomePage() {
   }
 
   return (
-    <div>
+    <div className="rail-frame page-container">
       {/* Hero — left headline, right product chat card */}
-      <section className="flex flex-col gap-10 px-4 pt-10 pb-12 md:px-6 md:pt-16 lg:flex-row lg:items-center lg:gap-12 lg:pb-16">
+      <section className="flex flex-col gap-10 pt-0 pb-12 md:pb-16 lg:flex-row lg:items-center lg:gap-12">
         <Reveal trigger="load" className="flex max-w-2xl flex-col items-start">
           <p className="eyebrow">{t("landing.badge")}</p>
           <h1 className="display mt-6 text-5xl leading-[1.02] tracking-tight text-[var(--ink)] md:text-[60px]">

@@ -8,7 +8,7 @@ test("localize returns the requested locale", () => {
 
 test("localize falls back to en when locale missing", () => {
   const v: I18nText = { en: "Apple" };
-  expect(localize(v, "te")).toBe("Apple");
+  expect(localize(v, "gu")).toBe("Apple");
 });
 
 test("localizeList returns requested locale array", () => {
@@ -18,5 +18,5 @@ test("localizeList returns requested locale array", () => {
 
 test("localizeList falls back to en when locale missing", () => {
   const v: I18nList = { en: ["a"] };
-  expect(localizeList(v, "kn")).toEqual(["a"]);
+  expect(localizeList(v, "gu")).toEqual(["a"]);
 });

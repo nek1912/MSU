@@ -10,7 +10,9 @@ CHUNK_ID = "abc1234567890abcdef1234567890abcd"
 def _chunks():
     return [
         RetrievedChunk(
-            chunk_id=CHUNK_ID, title="T", page=1, section="S",
+            chunk_id=CHUNK_ID, stable_chunk_id=CHUNK_ID,
+            document_id="doc1", title="T", page=1,
+            page_start=1, page_end=1, section="S",
             content="C", similarity=0.9, source_url="https://x",
             domain="pacs", jurisdiction="central", state=None),
     ]

@@ -15,8 +15,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/lib/i18n/provider";
-import { TopNav } from "@/components/layout/TopNav";
-import { MobileNav } from "@/components/layout/MobileNav";
+import { ConditionalNavs } from "@/components/layout/ConditionalNavs";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 const grotesk = Space_Grotesk({ variable: "--font-display-latin", subsets: ["latin"], weight: ["500"] });
@@ -89,13 +88,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to content
         </a>
         <LanguageProvider>
-          <TopNav />
+          <ConditionalNavs />
           <main id="content" className="flex flex-1 pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
-            <div className="rail-frame mx-auto w-full max-w-[1440px]">
+            <div className="w-full">
               {children}
             </div>
           </main>
-          <MobileNav />
         </LanguageProvider>
       </body>
     </html>

@@ -9,6 +9,23 @@ export interface SpeechService {
   stopSpeaking: () => void;
 }
 
+let currentAudio: HTMLAudioElement | null = null;
+let currentObjectUrl: string | null = null;
+
+function stopAll() {
+  if (currentAudio) {
+    try { currentAudio.pause(); } catch { /* noop */ }
+    currentAudio = null;
+  }
+  if (currentObjectUrl) {
+    try { URL.revokeObjectURL(currentObjectUrl); } catch { /* noop */ }
+    currentObjectUrl = null;
+  }
+  if (typeof window !== "undefined" && window.speechSynthesis) {
+    try { window.speechSynthesis.cancel(); } catch { /* noop */ }
+  }
+}
+
 // Monotonic token for cancelling in-flight playback when a newer request starts
 // or the user stops. Incrementing this invalidates any pending utterance/audio.
 let _speakToken = 0;
@@ -16,14 +33,8 @@ let _activeAudio: HTMLAudioElement | null = null;
 let _activeAudioResolve: (() => void) | null = null;
 
 function stopAllPlayback(): void {
+  stopAll();
   _speakToken++;
-  if (typeof window !== "undefined" && window.speechSynthesis) {
-    try {
-      window.speechSynthesis.cancel();
-    } catch {
-      /* noop */
-    }
-  }
   if (_activeAudio) {
     try {
       _activeAudio.pause();
@@ -50,9 +61,6 @@ export function pickVoice(lang: string): SpeechSynthesisVoice | undefined {
   if (typeof window === "undefined" || !window.speechSynthesis) return undefined;
   const voices = window.speechSynthesis.getVoices();
   const prefix = lang === "en" ? "en" : lang;
-  // NO English fallback: if no matching voice exists, return undefined so the
-  // caller falls back to Azure for THAT language (never silently swap to English
-  // for hi/gu/mr/bn).
   return voices.find((v) => v.lang.startsWith(prefix));
 }
 
@@ -133,12 +141,6 @@ function playAzure(hex: string, token: number): Promise<void> {
   });
 }
 
-/**
- * Hybrid read-aloud: for each contiguous language run, play via the browser
- * SpeechSynthesis if a matching voice exists, otherwise fetch Azure audio for
- * that run. Runs play sequentially (no overlap). A newer call (or stopSpeaking)
- * cancels the current playback via the monotonic token.
- */
 export async function speakSegments(
   segments: SpeechSegment[],
   opts?: { onToken?: (token: number) => void },
@@ -179,7 +181,6 @@ export function createSpeechService(): SpeechService {
       ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition)
       : undefined;
-  const synthesis = isBrowser ? window.speechSynthesis : undefined;
 
   return {
     get supported() {
@@ -210,18 +211,60 @@ export function createSpeechService(): SpeechService {
       };
     },
     speak(text, locale) {
-      if (!synthesis) return;
-      const utterance = new SpeechSynthesisUtterance(text);
-      const voices = synthesis.getVoices();
-      const match =
-        voices.find((v) => v.lang.startsWith(locale === "en" ? "en" : locale)) ||
-        voices.find((v) => v.lang.startsWith("en"));
-      if (match) utterance.voice = match;
-      synthesis.cancel();
-      synthesis.speak(utterance);
+      stopAllPlayback();
+
+      const cleanText = text
+        .replace(/\[chunk:[a-f0-9]+\]/g, "")
+        .replace(/\*\*([^*]+)\*\*/g, "$1")
+        .replace(/\n+/g, ". ")
+        .trim();
+      if (!cleanText) return;
+
+      // For Indian languages, fetch backend Sarvam TTS and play the result
+      if (locale !== "en") {
+        const ttsText = cleanText.slice(0, 500);
+        const formData = new FormData();
+        formData.append("text", ttsText);
+        formData.append("language", locale);
+
+        fetch("/api/speak", { method: "POST", body: formData })
+          .then((res) => (res.ok ? res.blob() : Promise.reject()))
+          .then((blob) => {
+            if (blob.size < 500) return Promise.reject();
+            const url = URL.createObjectURL(blob);
+            const audio = new Audio(url);
+            currentAudio = audio;
+            currentObjectUrl = url;
+            audio.onended = () => stopAll();
+            audio.onerror = () => stopAll();
+            audio.play().catch(() => {
+              stopAll();
+              speakBrowser(cleanText, locale);
+            });
+          })
+          .catch(() => {
+            speakBrowser(cleanText, locale);
+          });
+        return;
+      }
+
+      speakBrowser(cleanText, locale);
     },
     stopSpeaking() {
       stopAllPlayback();
     },
   };
+}
+
+function speakBrowser(text: string, locale: string) {
+  const synthesis = window.speechSynthesis;
+  if (!synthesis) return;
+  const utterance = new SpeechSynthesisUtterance(text);
+  const voices = synthesis.getVoices();
+  const match =
+    voices.find((v) => v.lang.startsWith(locale === "en" ? "en" : locale)) ||
+    voices.find((v) => v.lang.startsWith("en"));
+  if (match) utterance.voice = match;
+  synthesis.cancel();
+  synthesis.speak(utterance);
 }

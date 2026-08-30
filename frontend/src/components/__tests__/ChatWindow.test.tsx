@@ -11,6 +11,7 @@ vi.mock("@/lib/i18n/provider", () => ({
 }));
 vi.mock("next/navigation", () => ({
   useSearchParams: () => ({ get: () => null }),
+  useRouter: () => ({ back: vi.fn(), push: vi.fn() }),
 }));
 vi.mock("next/link", () => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -71,7 +71,6 @@ def build_system_prompt(language: str) -> str:
         "any other marker style. Never add outside knowledge. If the chunks do "
         "not contain the answer, reply exactly: INSUFFICIENT_EVIDENCE. Please "
         f"{_LANG_INSTRUCTION[lang]}."
->>>>>>> origin/main
     )
 
 

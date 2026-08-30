@@ -800,59 +800,10 @@ export function ChatWindow() {
           </div>
         </div>
 
-<<<<<<< HEAD
-        {/* Center Aligned Floating Input Composer (ChatGPT Style) */}
+        {/* Floating Input Composer */}
         <div className="w-full bg-[var(--canvas)] pb-3 pt-2">
           <div className="mx-auto w-full max-w-3xl px-4 sm:px-6">
             <div className="ask-input-wrap relative flex flex-col rounded-3xl border border-[var(--border-default)] bg-[var(--cream)] p-2.5 sm:p-3 shadow-md transition-all focus-within:border-[var(--accent-primary)] focus-within:ring-1 focus-within:ring-[var(--accent-primary)]">
-              {/* Text Area */}
-=======
-        {/* Suggested Actions Section (Horizontally scrollable on mobile) */}
-        <div className="border-t border-[var(--border-soft)] bg-[var(--cream-2)]/30 px-3 py-2.5 sm:px-6 md:px-8">
-          <div className="mx-auto max-w-4xl">
-            <div className="mb-1.5 flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[var(--text-body)]">
-              <IconSparkles className="h-3.5 w-3.5 text-[var(--accent-primary)]" />
-              <span>Suggested Actions</span>
-            </div>
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar sm:flex-wrap">
-              {suggestedActions.map((action) => (
-                <button
-                  key={action.label}
-                  type="button"
-                  onClick={() => ask(action.prompt)}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-[var(--radius-cta)] border border-[var(--border-soft)] bg-[var(--canvas)] px-3 py-1.5 text-xs font-medium text-[var(--ink)] shadow-2xs transition-all hover:border-[var(--border-hover)] hover:bg-[var(--cream)] active:translate-y-0"
-                >
-                  <span>{action.icon}</span>
-                  <span>{action.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Input Composer */}
-        <div className="border-t border-[var(--border-soft)] bg-[var(--canvas)] p-3 sm:px-6 md:px-8 md:py-4">
-          <div className="mx-auto max-w-4xl">
-            <div className="ask-input-wrap flex items-center gap-2 sm:gap-3 rounded-[var(--radius-cta)] border border-[var(--border-default)] bg-[var(--cream)] px-3 sm:px-4 py-2 sm:py-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-all focus-within:border-[var(--accent-primary)] focus-within:ring-1 focus-within:ring-[var(--accent-primary)]">
-              {/* Mic Button */}
-              {micSupported && (
-                <Button
-                  variant="icon"
-                  size="sm"
-                  aria-label={listening ? t("common.stopMic") : t("common.mic")}
-                  onClick={toggleMic}
-                  className={`shrink-0 transition-transform ${
-                    listening
-                      ? "bg-[var(--accent-primary)] text-[var(--accent-contrast)] animate-pulse"
-                      : "text-[var(--text-body)] hover:text-[var(--ink)]"
-                  }`}
-                >
-                  <IconMic className="h-4 w-4" />
-                </Button>
-              )}
-
-              {/* Textarea Input */}
->>>>>>> origin/main
               <textarea
                 ref={taRef}
                 value={input}

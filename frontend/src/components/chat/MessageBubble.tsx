@@ -118,16 +118,18 @@ export function MessageBubble({ resp }: { resp: ChatResponse }) {
           </button>
 
           {/* Read Aloud Button */}
-          <button
-            type="button"
-            onClick={handleSpeak}
-            title={speaking ? t("common.stopReadAloud") : t("common.readAloud")}
-            className={`flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)] ${
-              speaking ? "text-[var(--accent-primary)] bg-[var(--accent-tint-soft)]" : "text-[var(--text-tertiary)]"
-            }`}
-          >
-            <IconSpeaker className={`h-3.5 w-3.5 ${speaking ? "animate-pulse" : ""}`} />
-          </button>
+          {hasSegments && (
+            <button
+              type="button"
+              onClick={handleSpeak}
+              title={speaking ? t("common.stopReadAloud") : t("common.readAloud")}
+              className={`flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)] ${
+                speaking ? "text-[var(--accent-primary)] bg-[var(--accent-tint-soft)]" : "text-[var(--text-tertiary)]"
+              }`}
+            >
+              <IconSpeaker className={`h-3.5 w-3.5 ${speaking ? "animate-pulse" : ""}`} />
+            </button>
+          )}
 
           {/* Thumbs Up Button */}
           <button

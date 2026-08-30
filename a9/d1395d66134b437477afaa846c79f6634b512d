@@ -1,0 +1,190 @@
+backend/tests/test_citation_fix.py
+  s_0f797f94ab2d33::t_a01b0d21fa682d 13-15
+frontend/src/app/library/page.tsx
+  s_6807d39d51d898::t_0289ab4ef9cdca 37
+frontend/src/app/grievance/page.tsx
+  s_6807d39d51d898::t_82a7e451b51ece 82
+  s_6807d39d51d898::t_bea031da66ddca 51
+frontend/src/app/page.tsx
+  s_6807d39d51d898::t_d600c812199afb 54
+  s_dc587df93c0526::t_62302b8d08b080 56
+backend/app/config.py
+  s_17988d804e03af::t_2699520d7333c2 52-54
+  s_0f797f94ab2d33::t_627f9ea4b34c98 31-32
+  s_dc587df93c0526::t_0f8052430a317e 18
+frontend/src/app/globals.css
+  s_17988d804e03af::t_b86d84de8eb9fe 2
+  s_dc587df93c0526::t_731771eeed4819 244-272
+backend/app/services/voice_service.py
+  s_0f797f94ab2d33::t_901098a12f4f37 5,13,17-22,28,30,39,41,51
+frontend/src/app/schemes/page.tsx
+  s_6807d39d51d898::t_63e6cc7ae59249 44
+frontend/src/app/services/[slug]/page.tsx
+  s_81df6051df6f51::t_f6fdcf9e20a6f9 36
+  s_dc587df93c0526::t_aa1bf4b2b43531 30
+frontend/src/app/api/speak/route.ts
+  s_0f797f94ab2d33::t_fa1a4558a70cad 1-49
+backend/app/providers/sarvam_voice.py
+  s_0f797f94ab2d33::t_5e10b9c94bde3b 1,3,5-7,11-12,14-52,55-56,59,61,63-80,83-91,93-103,105-121
+frontend/src/app/layout.tsx
+  s_17988d804e03af::t_f0a718041e246b 18
+  s_17988d804e03af::t_c2c68069988f8e 91
+  s_17988d804e03af::t_85510c5dfb5319 93
+frontend/src/components/layout/ConditionalNavs.tsx
+  s_17988d804e03af::t_f6ff33f3480b8d 1-20
+frontend/src/app/services/page.tsx
+  s_6807d39d51d898::t_bb186ef1f2e94f 41
+frontend/src/components/chat/MessageBubble.tsx
+  s_0f797f94ab2d33::t_995b07da9045d6 25-26
+  s_0f797f94ab2d33::t_ea13785242efdb 13
+  s_17988d804e03af::t_fd77f865dfc953 3-4
+  s_17988d804e03af::t_423017278eb271 7,39-40,44-50,53-55,57-58,63-66,69-70
+  s_0f797f94ab2d33::t_9f8f5e25b69507 2
+  s_0f797f94ab2d33::t_0f68322e0c4624 17
+  s_dc587df93c0526::t_debd670b6d47fe 8-12,14-16,23,27-31,71-75,77,79-109,112-122,124-155,158-164,169-170,175
+frontend/src/components/ChatWindow.tsx
+  s_ecc12343e6c1d2::t_6b86a16d439dda 506,508-509,511-517,535,573,575-576,578-584,615
+  s_dc587df93c0526::t_ffaf95746977e2 251-256
+backend/app/routes/voice.py
+  s_0f797f94ab2d33::t_f9c684ec878802 1,5,7,12,15,23-25,27-38,40-67,69,72-80,86,88-92,98,102,104,114,117,123,126-127
+frontend/src/app/grievance/status/page.tsx
+  s_6807d39d51d898::t_0fb89c0d8dc634 29
+  s_dc587df93c0526::t_9d530c5833fcdf 82
+docs/superpowers/specs/2026-08-30-data-expansion-design.md
+  s_0f797f94ab2d33::t_ae04fa0a2a9785 1-51
+frontend/src/lib/i18n/dictionaries.ts
+  s_0f797f94ab2d33::t_a7dd03e097ba86 308-313
+  s_0f797f94ab2d33::t_8e35c084a7d392 845-850
+  s_0f797f94ab2d33::t_7d8b9692febb55 1924-1929
+  s_0f797f94ab2d33::t_10298ecb8928cd 2106
+  s_0f797f94ab2d33::t_a2727734d92294 129-134
+  s_0f797f94ab2d33::t_e91c5b5110742c 1564-1569
+  s_0f797f94ab2d33::t_d77b3552936606 2104-2105,2107-2109
+  s_0f797f94ab2d33::t_65d383626674fc 1024-1029
+  s_0f797f94ab2d33::t_21a81fdfc2ff32 666-671
+  s_0f797f94ab2d33::t_f03b101102d0b7 487-492
+  s_0f797f94ab2d33::t_0692e3ac8ed3ee 1204-1209
+  s_0f797f94ab2d33::t_e830ee2e15fceb 1384-1389
+  s_0f797f94ab2d33::t_8aba995491ca43 1744-1749
+  s_dc587df93c0526::t_a368a6760c53cf 2169
+docs/superpowers/specs/2026-08-30-conversation-memory-design.md
+  s_0f797f94ab2d33::t_1391c73c98ccd5 1-223
+frontend/package.json
+  s_17988d804e03af::t_15efa6e6ef8c3e 13
+  s_17988d804e03af::t_b6468cfc5ea94d 17-19
+backend/app/providers/sarvam_translate.py
+  s_0f797f94ab2d33::t_ab2315f16ab666 1-74
+backend/app/hybrid_retrieval.py
+  s_0f797f94ab2d33::t_d50b1094b25449 231-233,235-236,238-239,241-242
+  s_0f797f94ab2d33::t_15899dbae1823c 274-275,285-286
+  s_0f797f94ab2d33::t_7e74cddd8b17f5 141-156
+  s_dc587df93c0526::t_c9ad21caaa3223 174,199-211,215-216,288,295-303,308-309,312
+docs/superpowers/plans/2026-08-30-data-expansion.md
+  s_0f797f94ab2d33::t_f15a066f422971 1-283
+frontend/src/app/api/chat/route.ts
+  s_0f797f94ab2d33::t_d7380739c1ea25 25
+frontend/src/app/legal/page.tsx
+  s_6807d39d51d898::t_835d531ade9ca9 41
+frontend/src/app/api/translate/route.ts
+  s_0f797f94ab2d33::t_9bee97efa58a9a 4-5,9,15-21,24,26,28-30,32-38,40,42-44,47,49-53
+frontend/src/lib/speech.ts
+  s_0f797f94ab2d33::t_67dc6abc34a3aa 67,69-92,94,97-98,105-116
+  s_0f797f94ab2d33::t_f6abbc403aae25 60-64
+  s_0f797f94ab2d33::t_232bf5a72382df 8,10,59,65-66,68,93,95-96
+  s_0f797f94ab2d33::t_2c4cdac630a1f9 9,11-22,58,101,117
+PROJECT_STATUS.md
+  s_ecc12343e6c1d2::t_23c1f3dacd62b1 19,52,149-153
+frontend/src/app/schemes/[slug]/page.tsx
+  s_17988d804e03af::t_49f20960ac661e 52
+  s_81df6051df6f51::t_4deded9d031e77 46
+  s_dc587df93c0526::t_e30b0e4527fb64 32
+frontend/src/app/faq/page.tsx
+  s_6807d39d51d898::t_bf9cc4ecf7e5b6 49
+frontend/src/app/legal/[slug]/page.tsx
+  s_81df6051df6f51::t_8dbd9c7d677ba5 38
+  s_dc587df93c0526::t_3ed5c60adde764 32
+backend/app/evidence_gate.py
+  s_17988d804e03af::t_97dfa9d171e14b 77-78
+  s_17988d804e03af::t_92059abb8b9bf0 52-54
+docs/superpowers/plans/2026-08-30-conversation-memory.md
+  s_0f797f94ab2d33::t_2676ba61c039ec 1-643
+backend/app/citation_verifier.py
+  s_dc587df93c0526::t_602195f48892fe 48,136
+backend/app/generation.py
+  s_dc587df93c0526::t_ee7673bce55af0 90,93-99,102
+backend/app/routes/chat.py
+  s_dc587df93c0526::t_47df385838553b 141-143,145,148-182,190,208,215,225-232,234-238,244-260,266-280
+backend/data/keyword_rules.json
+  s_dc587df93c0526::t_50f954ddccf6b8 5
+frontend/package-lock.json
+  s_17988d804e03af::t_e9b6a9fa0bce3f 11,15-17,1870-1881,1904-1912,1926-1943,1958-1972,2004-2009,2306-2311,3069-3078,3237-3246,3274-3313,3340-3349,3379-3390,3475-3487,3531-3539,3550-3562,4247-4256,4287-4292,4746-4785,4803-4812,4850-4855,4871-4894,5053-5062,5138-5147,5201-5212,5821-5830,5864-5873,5884-5903,5906-5909,5912-5915,5918-5929,5931-5933,5936-5940,5942-5948,5950-5952,5955-5958,5960-5966,5968-5969,5972-5987,5989-6785,7152-7176,7269-7281,7304-7313,7375-7401,7446-7511,7923-7932,8082-8095,8119-8136,8190-8191,8296-8315,8517-8603,8683-8716,9348-9357
+frontend/src/components/layout/MoreSheet.tsx
+  s_dc587df93c0526::t_65331bc5ebeb9d 34
+frontend/src/components/layout/TopNav.tsx
+  s_dc587df93c0526::t_9e75dc696a5e08 24
+frontend/src/components/ui/Icons.tsx
+  s_dc587df93c0526::t_36a3816f1a3b21 202-305
+frontend/src/lib/i18n/provider.tsx
+  s_dc587df93c0526::t_63b012015b299a 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "a9d1395d66134b437477afaa846c79f6634b512d",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_0f797f94ab2d33": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_faf040bf5ffecEXdycj7RqwDgq",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_17988d804e03af": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fada5c03dffefnAirTi9ybpziy",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_6807d39d51d898": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fad7e899dffeke1suYFGreE254",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_81df6051df6f51": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fad84d4d3ffe052KKthTMDg1A2",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_dc587df93c0526": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fb29358e4ffemR449xRnug1XcJ",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_ecc12343e6c1d2": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "26e03cd7-8250-4423-9aca-a9c64dc12135",
+        "model": "mai-code-1.1-flash"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

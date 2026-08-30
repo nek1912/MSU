@@ -51,9 +51,10 @@ def _valid_payload(**overrides) -> dict:
 
 def _assert_shape(body: dict):
     assert set(body) == {"answer", "language", "domain", "intent", "entities",
-                         "confidence", "confidence_level", "citations",
-                         "abstained", "follow_up_question"}
-    assert len(body) == 10
+                          "confidence", "confidence_level", "citations",
+                          "abstained", "speech_text", "speech_segments",
+                          "follow_up_question"}
+    assert len(body) == 12
     assert isinstance(body["answer"], str) and body["answer"]
     assert isinstance(body["language"], str)
     assert body["language"] in ("en", "hi")
@@ -64,7 +65,9 @@ def _assert_shape(body: dict):
     assert isinstance(body["abstained"], bool)
     assert body["follow_up_question"] is None
     for c in body["citations"]:
-        assert set(c) == {"chunk_id", "document_id", "title", "page", "url"}
+        assert set(c) == {"chunk_id", "document_id", "title", "page",
+                          "page_start", "page_end", "section", "subsection",
+                          "clause", "source_file", "url"}
 
 
 def _assert_abstained(body: dict):
@@ -79,7 +82,9 @@ def _assert_answered(body: dict):
     assert body["abstained"] is False
     assert len(body["citations"]) >= 1
     for c in body["citations"]:
-        assert set(c) == {"chunk_id", "document_id", "title", "page", "url"}
+        assert set(c) == {"chunk_id", "document_id", "title", "page",
+                          "page_start", "page_end", "section", "subsection",
+                          "clause", "source_file", "url"}
 
 
 def _mock_successful_route(respx_mock):

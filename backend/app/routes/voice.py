@@ -1,23 +1,50 @@
 """Voice I/O route — Sarvam (primary) → Azure (fallback) → text-only.
 
-Pipeline: audio → STT → text → existing chat RAG → answer → TTS → audio
+The voice route is a thin adapter around the same RAG pipeline used by /chat.
+It does NOT duplicate retrieval, generation, or evidence gating logic.
+
+STT/TTS are delegated to the voice_service layer (app.services.voice_service),
+which owns the provider fallback chain (Azure → Sarvam → unavailable). The route
+only adapts HTTP I/O and error policy.
 """
-
-import logging
 import base64
+import logging
 
-from fastapi import APIRouter, UploadFile, File, Form
-from fastapi.responses import Response
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from pydantic import BaseModel
 
-from app.providers.sarvam_voice import SarvamSTTProvider, SarvamTTSProvider
-from app.providers.azure_stt import AzureSTTProvider
-from app.providers.azure_tts import AzureTTSProvider
 from app.config import get_settings
 from app.routes.chat import chat as chat_handler
 from app.routes.chat import ChatRequest
+from app.services.voice_service import VoiceService, VoiceUnavailableError
 
 _log = logging.getLogger(__name__)
 router = APIRouter(prefix="/voice", tags=["voice"])
+
+voice_service = VoiceService()
+
+
+class TranscribeRequest(BaseModel):
+    audio: str
+    language: str = "en"
+
+
+class SpeakRequest(BaseModel):
+    text: str = ""
+    language: str = "en"
+    segments: list["SpeechSegment"] | None = None
+
+
+class SpeechSegment(BaseModel):
+    text: str
+    language: str
+
+
+class VoiceChatRequest(BaseModel):
+    audio: str
+    language: str = "en-IN"
+    session_id: str = ""
+    state: str | None = None
 
 
 def _lang_short(lang: str) -> str:
@@ -25,71 +52,40 @@ def _lang_short(lang: str) -> str:
     return lang.split("-")[0] if "-" in lang else lang
 
 
-async def _stt(audio_bytes: bytes, language: str) -> str:
-    """STT with fallback: Sarvam → Azure."""
-    # Try Sarvam first
-    sarvam = SarvamSTTProvider()
-    if sarvam.enabled:
-        try:
-            return await sarvam.transcribe(audio_bytes, language)
-        except Exception as e:
-            _log.warning("Sarvam STT failed, trying Azure: %s", e)
-
-    # Fallback to Azure
-    settings = get_settings()
-    azure = AzureSTTProvider(settings)
-    if azure.configured:
-        try:
-            return azure.transcribe(audio_bytes, language)
-        except Exception as e:
-            _log.warning("Azure STT failed: %s", e)
-
-    return ""
-
-
-async def _tts(text: str, language: str) -> bytes | None:
-    """TTS with fallback: Sarvam → Azure → None."""
-    # Try Sarvam first
-    sarvam = SarvamTTSProvider()
-    if sarvam.enabled:
-        try:
-            return await sarvam.synthesize(text, language)
-        except Exception as e:
-            _log.warning("Sarvam TTS failed, trying Azure: %s", e)
-
-    # Fallback to Azure
-    settings = get_settings()
-    azure = AzureTTSProvider(settings)
-    if azure.configured:
-        try:
-            return azure.synthesize(text, language)
-        except Exception as e:
-            _log.warning("Azure TTS failed: %s", e)
-
-    return None
-
-
 @router.post("/transcribe")
-async def transcribe_audio(
-    audio: UploadFile = File(...),
-    language: str = Form(default="hi"),
-) -> dict:
-    """STT: Convert uploaded audio to text (no RAG)."""
-    audio_bytes = await audio.read()
-    text = await _stt(audio_bytes, language)
-    return {"text": text, "language": language, "error": None if text else "no_speech"}
+async def transcribe_audio(req: TranscribeRequest) -> dict:
+    """STT: Convert uploaded audio (base64) to text.
+
+    This is a pure STT endpoint — no RAG, no generation.
+    Delegates to the voice_service provider fallback chain.
+    """
+    audio_bytes = base64.b64decode(req.audio)
+    try:
+        text = await voice_service.speech_to_text(audio_bytes, req.language)
+    except VoiceUnavailableError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+    return {"text": text, "language": req.language}
 
 
 @router.post("/speak")
-async def speak_text(
-    text: str = Form(...),
-    language: str = Form(default="hi"),
-) -> Response:
-    """TTS: Convert text to speech audio (no RAG). Returns WAV."""
-    audio = await _tts(text, language)
-    if audio:
-        return Response(content=audio, media_type="audio/wav")
-    return Response(content=b"", media_type="audio/wav", status_code=503)
+async def speak_text(req: SpeakRequest) -> dict:
+    """TTS: Convert text to speech audio (hex-encoded bytes).
+
+    This is a pure TTS endpoint — no RAG, no generation.
+    Delegates to the voice_service provider fallback chain.
+    """
+    try:
+        if req.segments:
+            audio_bytes = await voice_service.text_to_speech_segments(
+                [s.model_dump() for s in req.segments]
+            )
+            language = req.segments[0].language
+        else:
+            audio_bytes = await voice_service.text_to_speech(req.text, req.language)
+            language = req.language
+    except VoiceUnavailableError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+    return {"audio": audio_bytes.hex(), "language": language}
 
 
 @router.post("")
@@ -99,9 +95,21 @@ async def voice_chat(
     session_id: str = Form(default=""),
     state: str | None = Form(default=None),
 ) -> dict:
-    """Full voice pipeline: audio → STT → RAG → TTS → audio."""
+    """Full voice pipeline: audio → STT → RAG → TTS → audio.
+
+    One RAG core (same as /chat), no separate voice RAG.
+    Pipeline: STT (voice_service) → chat handler → TTS (voice_service)
+    """
     audio_bytes = await audio.read()
-    transcribed = await _stt(audio_bytes, language)
+    try:
+        transcribed = await voice_service.speech_to_text(audio_bytes, language)
+    except VoiceUnavailableError:
+        return {
+            "answer": "Voice input is not configured.",
+            "transcribed_text": "",
+            "audio_base64": None,
+            "error": "No voice providers available",
+        }
 
     if not transcribed:
         return {
@@ -111,7 +119,6 @@ async def voice_chat(
             "error": "no_speech",
         }
 
-    # RAG via existing chat pipeline
     chat_request = ChatRequest(
         question=transcribed,
         language=_lang_short(language),
@@ -120,13 +127,19 @@ async def voice_chat(
     )
     rag_result = chat_handler(chat_request)
 
-    # TTS
     answer_text = rag_result.get("answer", "")
+    # TTS must consume the citation-stripped speech copy, never the raw answer
+    # (which carries [chunk:ID] markers). speech_text is produced post-verification.
+    speech_text = rag_result.get("speech_text") or answer_text
     audio_b64 = None
-    if answer_text:
-        answer_audio = await _tts(answer_text, _lang_short(language))
+    try:
+        answer_audio = await voice_service.text_to_speech(
+            speech_text, _lang_short(language)
+        )
         if answer_audio:
             audio_b64 = base64.b64encode(answer_audio).decode("ascii")
+    except VoiceUnavailableError:
+        audio_b64 = None
 
     return {
         "answer": answer_text,

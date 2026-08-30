@@ -88,3 +88,78 @@ def test_speak_default_language():
         r = client.post("/voice/speak", json={"text": "Hello"})
         assert r.status_code == 200
         assert r.json()["language"] == "en"
+
+
+def test_speak_segments_endpoint():
+    """POST /voice/speak with segments uses the multi-voice TTS path."""
+    with patch("app.routes.voice.voice_service") as mock_vs:
+        mock_vs.text_to_speech_segments = AsyncMock(return_value=b"\x01audio")
+        mock_vs.text_to_speech = AsyncMock(return_value=b"\x00")
+        r = client.post(
+            "/voice/speak",
+            json={
+                "text": "",
+                "language": "en",
+                "segments": [
+                    {"text": "hello", "language": "en"},
+                    {"text": "नमस्ते", "language": "hi"},
+                ],
+            },
+        )
+        assert r.status_code == 200
+        body = r.json()
+        assert body["audio"] == b"\x01audio".hex()
+        assert body["language"] == "en"
+        mock_vs.text_to_speech_segments.assert_awaited_once()
+        mock_vs.text_to_speech.assert_not_called()
+
+
+def test_speak_plain_text_still_uses_single_voice():
+    """A plain text POST still hits the single-voice text_to_speech path."""
+    with patch("app.routes.voice.voice_service") as mock_vs:
+        mock_vs.text_to_speech = AsyncMock(return_value=b"\x00\x01")
+        mock_vs.text_to_speech_segments = AsyncMock(return_value=b"\x99")
+        r = client.post("/voice/speak", json={"text": "Hello world", "language": "en"})
+        assert r.status_code == 200
+        assert r.json()["audio"] == "0001"
+        mock_vs.text_to_speech.assert_awaited_once()
+        mock_vs.text_to_speech_segments.assert_not_called()
+
+
+def test_voice_chat_passes_speech_text_not_answer_to_tts():
+    """The full voice pipeline must hand the citation-stripped speech_text to
+    TTS, never the raw answer (which carries [chunk:ID] markers)."""
+    captured = {}
+
+    async def fake_tts(text, language):
+        captured["text"] = text
+        captured["language"] = language
+        return b"\x01\x02"
+
+    async def fake_stt(audio, language):
+        return "Who is eligible under PMFBY?"
+
+    with patch("app.routes.voice.chat_handler") as mock_chat, patch(
+        "app.routes.voice.voice_service"
+    ) as mock_vs:
+        mock_chat.return_value = {
+            "answer": "Farmers are eligible [chunk:aaaaaaaa].",
+            "language": "en",
+            "domain": "pmfby",
+            "speech_text": "Farmers are eligible.",
+            "abstained": False,
+        }
+        mock_vs.speech_to_text = AsyncMock(side_effect=fake_stt)
+        mock_vs.text_to_speech = AsyncMock(side_effect=fake_tts)
+        r = client.post(
+            "/voice",
+            files={"audio": ("a.wav", b"dummy", "audio/wav")},
+            data={"language": "en-IN"},
+        )
+    assert r.status_code == 200
+    body = r.json()
+    assert body["audio_base64"] == "AQI="
+    # TTS received the clean speech copy, NOT the marker-bearing answer.
+    assert captured["text"] == "Farmers are eligible."
+    assert "[chunk:" not in captured["text"]
+    assert body["answer"] == "Farmers are eligible [chunk:aaaaaaaa]."

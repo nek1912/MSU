@@ -63,6 +63,24 @@ function saveConversations(convs: Conversation[]) {
   }
 }
 
+// Re-translate a previously received answer into the current UI language via the
+// server-side /api/translate proxy (Azure Translator). Falls back to the original
+// text if translation is unavailable/unconfigured so the UI stays functional.
+async function translate(text: string, locale: Locale): Promise<string> {
+  try {
+    const res = await fetch("/api/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ texts: [text], to: locale }),
+    });
+    if (!res.ok) return text;
+    const data = (await res.json()) as { translations?: string[] };
+    return data.translations?.[0] ?? text;
+  } catch {
+    return text;
+  }
+}
+
 function fallback(lang: Locale): ChatResponse {
   return {
     answer:
@@ -89,6 +107,11 @@ export function ChatWindow() {
   const speech = useMemo(() => createSpeechService(), []);
   const [speechReady, setSpeechReady] = useState(false);
   const sp = useSearchParams();
+  // speech.supported reads `window` (browser-only), so it differs between SSR and
+  // the client. Gate the mic UI on a mounted flag so SSR and the first client
+  // render match, then reveal it after hydration (avoids hydration mismatch).
+  const [micSupported, setMicSupported] = useState(false);
+  useEffect(() => setMicSupported(speech.supported), [speech]);
   const [input, setInput] = useState("");
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [typing, setTyping] = useState(false);
@@ -103,6 +126,8 @@ export function ChatWindow() {
   const [sessionId] = useState(() => crypto.randomUUID());
   const cancelListen = useRef<(() => void) | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [explicitPending, setExplicitPending] = useState(false);
+  const prevLocaleRef = useRef<Locale>(locale);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const lang: Locale = locale;
 
@@ -124,6 +149,20 @@ export function ChatWindow() {
   }, []);
 
   // Auto-save current conversation when msgs change
+  // Flag the next message as an explicit language choice when the UI language
+  // changes (covers the first switch away from the default too). Consumed + cleared
+  // by ask().
+  useEffect(() => {
+    if (prevLocaleRef.current !== lang) {
+      prevLocaleRef.current = lang;
+      setExplicitPending(true);
+    }
+  }, [lang]);
+
+  const initialHistory = useMemo(
+    () => [t("chat.starter1"), t("chat.starter2"), t("chat.starter3"), t("chat.starter4")],
+    [t]
+  );
   useEffect(() => {
     if (msgs.length === 0 || !activeConvId) return;
     setConversations((prev) => {
@@ -245,6 +284,13 @@ export function ChatWindow() {
       setSidebarOpen(false);
     }
 
+    // Only flag an explicit language choice when the UI language was *changed*
+    // by the user since the last sent message. The default UI language must NOT
+    // be sent as an explicit choice (so it can never override a remembered
+    // Hindi session, per the design priority chain).
+    const uiLanguageExplicit = explicitPending;
+    setExplicitPending(false);
+
     setTyping(true);
     try {
       const history = msgs
@@ -255,9 +301,15 @@ export function ChatWindow() {
         .filter((m): m is { role: "user" | "assistant"; content: string } => m !== null)
         .slice(-8);
 
-      const resp = await sendChat({ question, session_id: sessionId, language: lang, state: null, history });
-      const assistantMsg: Msg = { role: "assistant", resp };
-      setMsgs((m) => [...m, assistantMsg]);
+      const resp = await sendChat({
+        question,
+        session_id: sessionId,
+        language: lang,
+        state: null,
+        history,
+        ui_language_explicit: uiLanguageExplicit,
+      });
+      setMsgs((m) => [...m, { role: "assistant", resp }]);
     } catch {
       const assistantMsg: Msg = { role: "assistant", resp: fallback(lang) };
       setMsgs((m) => [...m, assistantMsg]);
@@ -748,11 +800,59 @@ export function ChatWindow() {
           </div>
         </div>
 
+<<<<<<< HEAD
         {/* Center Aligned Floating Input Composer (ChatGPT Style) */}
         <div className="w-full bg-[var(--canvas)] pb-3 pt-2">
           <div className="mx-auto w-full max-w-3xl px-4 sm:px-6">
             <div className="ask-input-wrap relative flex flex-col rounded-3xl border border-[var(--border-default)] bg-[var(--cream)] p-2.5 sm:p-3 shadow-md transition-all focus-within:border-[var(--accent-primary)] focus-within:ring-1 focus-within:ring-[var(--accent-primary)]">
               {/* Text Area */}
+=======
+        {/* Suggested Actions Section (Horizontally scrollable on mobile) */}
+        <div className="border-t border-[var(--border-soft)] bg-[var(--cream-2)]/30 px-3 py-2.5 sm:px-6 md:px-8">
+          <div className="mx-auto max-w-4xl">
+            <div className="mb-1.5 flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[var(--text-body)]">
+              <IconSparkles className="h-3.5 w-3.5 text-[var(--accent-primary)]" />
+              <span>Suggested Actions</span>
+            </div>
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar sm:flex-wrap">
+              {suggestedActions.map((action) => (
+                <button
+                  key={action.label}
+                  type="button"
+                  onClick={() => ask(action.prompt)}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-[var(--radius-cta)] border border-[var(--border-soft)] bg-[var(--canvas)] px-3 py-1.5 text-xs font-medium text-[var(--ink)] shadow-2xs transition-all hover:border-[var(--border-hover)] hover:bg-[var(--cream)] active:translate-y-0"
+                >
+                  <span>{action.icon}</span>
+                  <span>{action.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Input Composer */}
+        <div className="border-t border-[var(--border-soft)] bg-[var(--canvas)] p-3 sm:px-6 md:px-8 md:py-4">
+          <div className="mx-auto max-w-4xl">
+            <div className="ask-input-wrap flex items-center gap-2 sm:gap-3 rounded-[var(--radius-cta)] border border-[var(--border-default)] bg-[var(--cream)] px-3 sm:px-4 py-2 sm:py-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-all focus-within:border-[var(--accent-primary)] focus-within:ring-1 focus-within:ring-[var(--accent-primary)]">
+              {/* Mic Button */}
+              {micSupported && (
+                <Button
+                  variant="icon"
+                  size="sm"
+                  aria-label={listening ? t("common.stopMic") : t("common.mic")}
+                  onClick={toggleMic}
+                  className={`shrink-0 transition-transform ${
+                    listening
+                      ? "bg-[var(--accent-primary)] text-[var(--accent-contrast)] animate-pulse"
+                      : "text-[var(--text-body)] hover:text-[var(--ink)]"
+                  }`}
+                >
+                  <IconMic className="h-4 w-4" />
+                </Button>
+              )}
+
+              {/* Textarea Input */}
+>>>>>>> origin/main
               <textarea
                 ref={taRef}
                 value={input}

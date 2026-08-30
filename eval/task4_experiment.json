@@ -1,0 +1,110 @@
+{
+  "modes": [
+    "dense",
+    "hybrid",
+    "hybrid_reranker"
+  ],
+  "metrics": {
+    "dense": {
+      "recall_at_1": 0.8,
+      "recall_at_3": 0.9,
+      "recall_at_5": 0.925,
+      "recall_at_10": 0.95,
+      "recall_at_20": 0.95,
+      "mrr": 0.85625,
+      "domain_accuracy": 0.925,
+      "jurisdiction_contamination": 0,
+      "n": 40,
+      "fails": [],
+      "dom_mismatch": [
+        {
+          "query": "Restrictions on cooperative society borrowing",
+          "expected": "pacs_governance",
+          "predicted": "pacs_computerization",
+          "score": 1.0
+        },
+        {
+          "query": "Managing committee powers under cooperative act",
+          "expected": "pacs_governance",
+          "predicted": "out_of_scope",
+          "score": 0.19957861554438736
+        },
+        {
+          "query": "Dividend declaration rules for cooperative",
+          "expected": "pacs_governance",
+          "predicted": "out_of_scope",
+          "score": 0.20957206987071378
+        }
+      ],
+      "contam_cases": []
+    },
+    "hybrid": {
+      "recall_at_1": 0.75,
+      "recall_at_3": 0.85,
+      "recall_at_5": 0.875,
+      "recall_at_10": 0.9,
+      "recall_at_20": 0.9,
+      "mrr": 0.80625,
+      "domain_accuracy": 0.925,
+      "jurisdiction_contamination": 0,
+      "n": 40,
+      "fails": [],
+      "dom_mismatch": [
+        {
+          "query": "Restrictions on cooperative society borrowing",
+          "expected": "pacs_governance",
+          "predicted": "pacs_computerization",
+          "score": 1.0
+        },
+        {
+          "query": "Managing committee powers under cooperative act",
+          "expected": "pacs_governance",
+          "predicted": "out_of_scope",
+          "score": 0.19957861554438736
+        },
+        {
+          "query": "Dividend declaration rules for cooperative",
+          "expected": "pacs_governance",
+          "predicted": "out_of_scope",
+          "score": 0.20957206987071378
+        }
+      ],
+      "contam_cases": []
+    },
+    "hybrid_reranker": {
+      "recall_at_1": 0.5,
+      "recall_at_3": 0.75,
+      "recall_at_5": 0.825,
+      "recall_at_10": 0.9,
+      "recall_at_20": 0.9,
+      "mrr": 0.6454166666666666,
+      "domain_accuracy": 0.925,
+      "jurisdiction_contamination": 0,
+      "n": 40,
+      "fails": [],
+      "dom_mismatch": [
+        {
+          "query": "Restrictions on cooperative society borrowing",
+          "expected": "pacs_governance",
+          "predicted": "pacs_computerization",
+          "score": 1.0
+        },
+        {
+          "query": "Managing committee powers under cooperative act",
+          "expected": "pacs_governance",
+          "predicted": "out_of_scope",
+          "score": 0.19957861554438736
+        },
+        {
+          "query": "Dividend declaration rules for cooperative",
+          "expected": "pacs_governance",
+          "predicted": "out_of_scope",
+          "score": 0.20957206987071378
+        }
+      ],
+      "contam_cases": []
+    }
+  },
+  "duration_seconds": 293.3244125843048,
+  "n_answerable": 40
+}

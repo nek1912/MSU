@@ -119,3 +119,13 @@ class SarvamTTSProvider:
                 if not audios:
                     raise RuntimeError("Sarvam TTS returned no audio")
                 return base64.b64decode(audios[0])
+
+    async def text_to_speech(self, text: str, language: str = "hi") -> bytes:
+        """Convert text to speech."""
+        return await self.synthesize(text, language)
+
+    async def text_to_speech_segments(self, segments: list[dict]) -> bytes:
+        """Convert text segments to multi-voice speech."""
+        combined_text = " ".join(s.get("text", "") for s in segments if s.get("text"))
+        lang = segments[0].get("lang", "hi") if segments else "hi"
+        return await self.synthesize(combined_text, lang)

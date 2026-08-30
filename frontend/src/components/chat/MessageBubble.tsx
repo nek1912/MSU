@@ -2,8 +2,11 @@
 import { useState, useMemo, useEffect } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import Link from "next/link";
 import type { ChatResponse } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
+import { Alert } from "@/components/ui/Alert";
+import { Badge } from "@/components/ui/Badge";
 import {
   IconSpeaker,
   IconDoc,
@@ -13,31 +16,40 @@ import {
   IconThumbsUp,
   IconThumbsDown,
   IconBot,
-  IconShare,
 } from "@/components/ui/Icons";
-import { createSpeechService } from "@/lib/speech";
+import { deco } from "@/lib/data/deco";
+import { createSpeechService, speakSegments } from "@/lib/speech";
+import { EvidenceBand } from "@/components/EvidenceBand";
+import { evidenceBand } from "@/lib/band";
 
 export function MessageBubble({ resp }: { resp: ChatResponse }) {
   const { t } = useI18n();
   const speech = useMemo(() => createSpeechService(), []);
-  const [speechReady, setSpeechReady] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [openCitations, setOpenCitations] = useState(false);
   const [copied, setCopied] = useState(false);
   const [rating, setRating] = useState<"up" | "down" | null>(null);
 
-  useEffect(() => {
-    setSpeechReady(true);
-  }, []);
+  const segments = resp.speech_segments ?? [];
+  const hasSegments = segments.length > 0;
+  const domainKey = `domain.${resp.domain}`;
+  const domainLabel = t(domainKey).startsWith("domain.") ? resp.domain : t(domainKey);
 
-  function handleSpeak() {
+  async function handleSpeak() {
     if (speaking) {
       speech.stopSpeaking();
       setSpeaking(false);
-    } else {
-      setSpeaking(true);
-      speech.speak(resp.answer.replace(/\[chunk:[a-f0-9]+\]/g, "").trim(), resp.language);
-      setTimeout(() => setSpeaking(false), 30000);
+      return;
+    }
+    setSpeaking(true);
+    try {
+      if (hasSegments) {
+        await speakSegments(segments);
+      } else {
+        speech.speak(resp.answer.replace(/\[chunk:[a-f0-9]+\]/g, "").trim(), resp.language);
+      }
+    } finally {
+      setSpeaking(false);
     }
   }
 
@@ -50,12 +62,9 @@ export function MessageBubble({ resp }: { resp: ChatResponse }) {
 
   if (resp.abstained) {
     return (
-      <div className="flex gap-3 text-sm text-[var(--text-tertiary)] italic">
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--cream-2)] text-[var(--ink)]">
-          <IconBot className="h-4 w-4" />
-        </div>
-        <p className="py-1">{t("abstained.title")}</p>
-      </div>
+      <Alert tone="warn">
+        <span>{t("abstained.title")}</span>
+      </Alert>
     );
   }
 
@@ -67,13 +76,12 @@ export function MessageBubble({ resp }: { resp: ChatResponse }) {
       </div>
 
       <div className="min-w-0 flex-1 space-y-2">
-        <div className="font-semibold text-xs text-[var(--text-tertiary)] flex items-center gap-2">
-          <span>Sahakarita Assistant</span>
-          {resp.confidence_level && resp.confidence_level !== "none" && (
-            <span className="text-[10px] rounded bg-[var(--cream-2)] px-1.5 py-0.5 text-[var(--text-faint)] font-mono uppercase">
-              {resp.confidence_level} confidence
-            </span>
-          )}
+        <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge deco={deco(resp.domain)}>{domainLabel}</Badge>
+            <EvidenceBand confidence={resp.confidence} label={t(`evidence.${evidenceBand(resp.confidence)}`)} />
+          </div>
+          <span className="text-[11px] sm:text-xs text-[var(--text-faint)]">{(resp.confidence * 100).toFixed(0)}% match</span>
         </div>
 
         {/* Answer Content */}
@@ -83,7 +91,21 @@ export function MessageBubble({ resp }: { resp: ChatResponse }) {
           </Markdown>
         </div>
 
-        {/* ChatGPT Style Actions Footer */}
+        {resp.domain === "schemes" && (
+          <div className="mt-3">
+            <Link href="/schemes">
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 rounded-[var(--radius-cta)] border border-[var(--accent-primary)]/40 bg-[var(--cream)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] transition-colors hover:border-[var(--accent-primary)] hover:bg-[var(--cream-2)]"
+              >
+                Explore Schemes
+                <IconChevronRight className="h-3.5 w-3.5 text-[var(--accent-primary)]" />
+              </button>
+            </Link>
+          </div>
+        )}
+
+        {/* Actions Footer */}
         <div className="pt-2 flex flex-wrap items-center gap-1.5 text-xs text-[var(--text-faint)]">
           {/* Copy Button */}
           <button
@@ -96,18 +118,16 @@ export function MessageBubble({ resp }: { resp: ChatResponse }) {
           </button>
 
           {/* Read Aloud Button */}
-          {speechReady && speech.supported && (
-            <button
-              type="button"
-              onClick={handleSpeak}
-              title={speaking ? t("common.stopReadAloud") : t("common.readAloud")}
-              className={`flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)] ${
-                speaking ? "text-[var(--accent-primary)] bg-[var(--accent-tint-soft)]" : "text-[var(--text-tertiary)]"
-              }`}
-            >
-              <IconSpeaker className={`h-3.5 w-3.5 ${speaking ? "animate-pulse" : ""}`} />
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={handleSpeak}
+            title={speaking ? t("common.stopReadAloud") : t("common.readAloud")}
+            className={`flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)] ${
+              speaking ? "text-[var(--accent-primary)] bg-[var(--accent-tint-soft)]" : "text-[var(--text-tertiary)]"
+            }`}
+          >
+            <IconSpeaker className={`h-3.5 w-3.5 ${speaking ? "animate-pulse" : ""}`} />
+          </button>
 
           {/* Thumbs Up Button */}
           <button

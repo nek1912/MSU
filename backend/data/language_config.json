@@ -1,17 +1,21 @@
 {
   "scripts": {
     "devanagari": [2304, 2431],
-    "gujarati": [2688, 2815]
+    "gujarati": [2688, 2815],
+    "bengali": [2432, 2559]
   },
   "stopwords": {
     "hi": ["ka", "ki", "ke", "kaise", "kya", "hai", "mein", "meri", "mera",
-           "kitna", "nahi", "aur"],
+           "kitna", "nahi", "aur", "क्या", "है", "में", "कैसे", "कितना", "नहीं", "और", "मेरा", "मेरी"],
     "gu": ["ma", "ne", "nu", "na", "che", "e", "thay", "haya", "ke",
            "su", "ketla", "nathi", "ane"],
+    "mr": ["che", "ahe", "mi", "tu", "aamhi", "tumhi", "kay", "kase", "maze",
+           "nahi", "ani", "asa", "आहे", "मी", "तू", "आम्ही", "तुम्ही", "काय", "कसे", "माझे", "नाही", "आणि", "असा"],
+    "bn": ["ki", "ke", "kemon", "hai", "ami", "tumi", "ki", "koto", "na", "ebong", "holo"],
     "en": ["the", "is", "at", "which", "on", "in", "how", "what", "do",
            "does", "of", "and", "to", "for"]
   },
-  "supported_languages": ["en", "hi", "gu"],
+  "supported_languages": ["en", "hi", "gu", "mr", "bn"],
   "script_threshold": 0.7,
   "latin_threshold": 0.05
 }

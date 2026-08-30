@@ -1,0 +1,48 @@
+backend/app/routes/chat.py
+  s_0f797f94ab2d33::t_b6054376ece278 44-46
+  s_0f797f94ab2d33::t_2be31de90314c5 228-261
+  s_0f797f94ab2d33::t_57f55b1b2102d4 124-125
+  s_5fdff816ccf305::t_205147c6cce5c1 68
+  s_0f797f94ab2d33::t_8cc2206ab54daf 86-117
+  s_5fdff816ccf305::t_0a06f44684c24e 205-210
+  s_0f797f94ab2d33::t_423a0c270c9a18 172
+  s_0f797f94ab2d33::t_f2dec8b8af7330 141
+  s_0f797f94ab2d33::t_a03a08478a3d99 13
+  s_5fdff816ccf305::t_5d286004ec64b1 32
+  s_0f797f94ab2d33::t_0afb4a360aa8f2 204,212-213
+  s_0f797f94ab2d33::t_758861b4c818e2 58
+  s_5fdff816ccf305::t_03dda53446ff93 188-191
+  s_0f797f94ab2d33::t_94464fa56276df 161-163
+  s_5fdff816ccf305::t_3ff05188040623 152-159
+backend/tests/test_chat_history.py
+  s_5fdff816ccf305::t_e0bc7fa220d432 1-145
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "0f480809e22ce856aca61435a94faa7ad8272287",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_0f797f94ab2d33": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_faf040bf5ffecEXdycj7RqwDgq",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_5fdff816ccf305": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fac838510ffe4P57yWF57S2jw3",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

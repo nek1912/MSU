@@ -1,0 +1,22 @@
+backend/app/hybrid_retrieval.py
+  h_c5a3d01edfee72 149-150
+backend/app/routes/chat.py
+  h_c5a3d01edfee72 13,21-22,34,108-109,143-145,151,171,176,190,194-195,204,208,228,231-232,252,255-256,276-277,284-285,298
+frontend/src/components/ChatWindow.tsx
+  h_c5a3d01edfee72 803
+frontend/src/components/__tests__/ChatWindow.test.tsx
+  h_c5a3d01edfee72 14
+frontend/src/components/chat/MessageBubble.tsx
+  h_c5a3d01edfee72 121-132
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "0ca5673975a6e28d7601371afab4e253a7677e90",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

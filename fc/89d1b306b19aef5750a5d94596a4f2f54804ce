@@ -1,0 +1,36 @@
+frontend/src/lib/data/schemes.ts
+  s_62f03a12a57e15::t_337fe8b3b079db 137,171
+  s_53e71b13e0d544::t_e66a8ec20f2dbb 92-136,138-170,172-190
+PROJECT_STATUS.md
+  s_53e71b13e0d544::t_836660c71d301b 19
+  s_53e71b13e0d544::t_1a14b28f199cd8 144-147
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "fc89d1b306b19aef5750a5d94596a4f2f54804ce",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_53e71b13e0d544": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fad71afe2ffe10C4nDQlJAJyVt",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_62f03a12a57e15": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fad90801bffeNSHXQ74CJ0Ne0q",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

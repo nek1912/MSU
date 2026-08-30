@@ -1,0 +1,36 @@
+backend/app/session_store.py
+  s_0f797f94ab2d33::t_359eb5e01dd3bc 9-13
+  s_33daf3b070df7e::t_b1edb772aa872c 34-81
+  s_0f797f94ab2d33::t_3998f23270c5dc 26-33
+backend/tests/test_session_store_messages.py
+  s_33daf3b070df7e::t_5f3a6b5aa1c7fd 1-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "abab219bd05cee673ef6b6b9ab5d3811b305d46d",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_0f797f94ab2d33": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_faf040bf5ffecEXdycj7RqwDgq",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_33daf3b070df7e": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fac89717effehDiVOtRi7710pz",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

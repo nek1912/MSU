@@ -1,0 +1,26 @@
+frontend/src/components/chat/MessageBubble.tsx
+  s_17988d804e03af::t_423017278eb271 46
+  s_17988d804e03af::t_e87ed0cc4b1a75 43-45
+  s_17988d804e03af::t_fd7c6bb82a08db 47-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "b4c2fe86870b4ae74d8b8830b2b2ace3e8983d1c",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_17988d804e03af": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fada5c03dffefnAirTi9ybpziy",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

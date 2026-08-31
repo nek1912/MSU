@@ -20,6 +20,7 @@ from app.domains import get_anchor_store
 from app.evidence_gate import evidence_gate_v2
 from app.generation import (CitationError, GENERAL_SYSTEM_PROMPT, build_general_prompt,
                             build_system_prompt, build_user_prompt, general_disclaimer, verify_citations)
+from app.grievance.workflow import GrievanceWorkflow
 from app.hybrid_retrieval import retrieve_hybrid
 from app.language import detect_query_languages
 from app.llm_fallback import AllProvidersFailedError, grounded_answer
@@ -28,13 +29,45 @@ from app.providers.reranker import JinaReranker
 from app.providers.gemini_llm import GeminiLLMProvider
 from app.providers.groq_llm import GroqLLMProvider
 from app.providers.translator import AzureTranslator
+from app.rag.pipeline import RAGPipeline
 from app.retrieval import RetrievedChunk, retrieve
 from app.resolve_response_language import resolve_and_remember
 from app.speech_text import prepare_speech_text, segment_speech
 from app.session_store import get_history, get_state, save_message, touch_session, trim_messages
 from app.ui import get_abstain_text
+from app.web_rag.query_classifier import QueryClassifier
 
 router = APIRouter()
+
+# Domains with curated local corpus — use static RAG for these
+_STATIC_DOMAINS = {"pacs_governance", "pacs_computerization", "pmfby", "financial_inclusion"}
+
+# Singletons for routing (lazy initialization to avoid import-time side effects)
+_query_classifier: QueryClassifier | None = None
+_web_rag_pipeline: RAGPipeline | None = None
+_grievance_workflow: GrievanceWorkflow | None = None
+
+
+def _get_query_classifier() -> QueryClassifier:
+    global _query_classifier
+    if _query_classifier is None:
+        _query_classifier = QueryClassifier()
+    return _query_classifier
+
+
+def _get_web_rag_pipeline() -> RAGPipeline:
+    global _web_rag_pipeline
+    if _web_rag_pipeline is None:
+        _web_rag_pipeline = RAGPipeline()
+    return _web_rag_pipeline
+
+
+def _get_grievance_workflow() -> GrievanceWorkflow:
+    global _grievance_workflow
+    if _grievance_workflow is None:
+        _grievance_workflow = GrievanceWorkflow()
+    return _grievance_workflow
+
 
 ABSTAIN_TEXT = {
     "en": "I could not find this in official sources, so I won't guess. "
@@ -177,6 +210,91 @@ def chat(req: ChatRequest) -> dict:
                     embedding = ctx_embedding
         resolved_state = req.state if req.state is not None else get_state(req.session_id)
         touch_session(req.session_id, resolved_state, lang)
+
+        # --- Auto-routing (Task 13) ---
+        classifier = _get_query_classifier()
+        classification = classifier.classify(req.question)
+
+        # 1. Grievance queries → dedicated grievance workflow
+        if classification.domain == "grievance":
+            workflow = _get_grievance_workflow()
+            result = workflow.process_message(
+                user_message=req.question,
+                conversation_id=req.session_id,
+                user_id=req.session_id,
+            )
+            response_text = result.response
+            save_message(req.session_id, "user", req.question)
+            save_message(req.session_id, "assistant", response_text)
+            trim_messages(req.session_id, keep=50)
+            return {
+                "answer": response_text,
+                "language": lang,
+                "domain": "grievance",
+                "intent": classification.intent,
+                "entities": [],
+                "confidence": classification.confidence,
+                "confidence_level": _confidence_level(classification.confidence),
+                "citations": [],
+                "abstained": False,
+                "speech_text": prepare_speech_text(response_text),
+                "speech_segments": segment_speech(response_text, lang),
+                "follow_up_question": None,
+                "mode": "grievance",
+                "conversation_id": req.session_id,
+            }
+
+        # 2. Cooperative/governance domains → try static RAG first
+        if domain in _STATIC_DOMAINS:
+            # Existing static RAG pipeline runs below (falls through)
+            static_rag_mode = "static"
+        else:
+            # 3. Non-static domains → web RAG
+            static_rag_mode = None  # signal to skip static RAG below
+
+        # If web RAG is needed, run it now and return
+        if static_rag_mode is None:
+            try:
+                web_pipeline = _get_web_rag_pipeline()
+                web_result = web_pipeline.ask(
+                    query=req.question,
+                    classification=classification,
+                )
+                if web_result.get("status") == "success":
+                    answer = web_result.get("answer", "")
+                    evidence = web_result.get("evidence", [])
+                    citations = [
+                        {
+                            "chunk_id": s.get("chunk_id", ""),
+                            "title": s.get("title", ""),
+                            "url": s.get("url", ""),
+                            "source": s.get("source", ""),
+                        }
+                        for s in evidence
+                    ]
+                    save_message(req.session_id, "user", req.question)
+                    save_message(req.session_id, "assistant", answer)
+                    trim_messages(req.session_id, keep=50)
+                    return {
+                        "answer": answer,
+                        "language": lang,
+                        "domain": classification.domain,
+                        "intent": classification.intent,
+                        "entities": [],
+                        "confidence": classification.confidence,
+                        "confidence_level": _confidence_level(classification.confidence),
+                        "citations": citations,
+                        "abstained": False,
+                        "speech_text": prepare_speech_text(answer),
+                        "speech_segments": segment_speech(answer, lang),
+                        "follow_up_question": None,
+                        "mode": "web",
+                        "conversation_id": req.session_id,
+                    }
+                # Web RAG abstained → fall through to static RAG as fallback
+            except Exception:
+                pass  # Web RAG failed → fall through to static RAG
+
         if domain == "out_of_scope":
             general_answer = grounded_answer(
                 GroqLLMProvider(settings), GeminiLLMProvider(settings),
@@ -193,7 +311,8 @@ def chat(req: ChatRequest) -> dict:
                     "citations": [], "abstained": False,
                     "speech_text": prepare_speech_text(general_answer),
                     "speech_segments": segment_speech(general_answer, lang),
-                    "follow_up_question": None}
+                    "follow_up_question": None,
+                    "mode": "static", "conversation_id": req.session_id}
 
         # --- Hybrid retrieval (Stage 5) ---
         k = 25 if settings.reranker_enabled else 6
@@ -230,7 +349,8 @@ def chat(req: ChatRequest) -> dict:
                     "citations": [], "abstained": False,
                     "speech_text": prepare_speech_text(general_answer),
                     "speech_segments": segment_speech(general_answer, lang),
-                    "follow_up_question": None}
+                    "follow_up_question": None,
+                    "mode": "static", "conversation_id": req.session_id}
 
         prompt = build_user_prompt(req.question, chunks, history=history)
         answer = grounded_answer(GroqLLMProvider(settings),
@@ -254,7 +374,8 @@ def chat(req: ChatRequest) -> dict:
                     "citations": [], "abstained": False,
                     "speech_text": prepare_speech_text(general_answer),
                     "speech_segments": segment_speech(general_answer, lang),
-                    "follow_up_question": None}
+                    "follow_up_question": None,
+                    "mode": "static", "conversation_id": req.session_id}
 
         # --- Citation verification v2 (Stage 8) ---
         chunk_ids = [c.chunk_id for c in chunks]
@@ -275,7 +396,8 @@ def chat(req: ChatRequest) -> dict:
                     "citations": [], "abstained": False,
                     "speech_text": prepare_speech_text(general_answer),
                     "speech_segments": segment_speech(general_answer, lang),
-                    "follow_up_question": None}
+                    "follow_up_question": None,
+                    "mode": "static", "conversation_id": req.session_id}
 
         save_message(req.session_id, "user", req.question)
         save_message(req.session_id, "assistant", answer)
@@ -293,10 +415,11 @@ def chat(req: ChatRequest) -> dict:
                 "citations": citations, "abstained": False,
                 "speech_text": speech_text,
                 "speech_segments": speech_segments,
-                "follow_up_question": None}
+                "follow_up_question": None,
+                "mode": "static", "conversation_id": req.session_id}
     except _SAFE_FAILURES:
         # Known dependency failures → contract-valid abstention
-        return _abstain(lang, "dependency_failure")
+        return _abstain(lang, "dependency_failure", session_id=req.session_id)
     except Exception:
         raise
 
@@ -366,7 +489,7 @@ def _citations_from(answer: str, chunks: list[RetrievedChunk]) -> list[dict]:
     return citations
 
 
-def _abstain(lang: str, _reason: str | None) -> dict:
+def _abstain(lang: str, _reason: str | None, session_id: str | None = None) -> dict:
     answer = get_abstain_text(lang)
     return {"answer": answer, "language": lang, "domain": "unknown",
             "intent": "unknown", "entities": [],
@@ -374,4 +497,5 @@ def _abstain(lang: str, _reason: str | None) -> dict:
             "citations": [], "abstained": True,
             "speech_text": prepare_speech_text(answer),
             "speech_segments": [],
-            "follow_up_question": None}
+            "follow_up_question": None,
+            "mode": "static", "conversation_id": session_id}

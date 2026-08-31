@@ -49,6 +49,6 @@ export async function POST(req: Request) {
 
   // Fallback: return original texts (no translation)
   return NextResponse.json({
-    translations: texts.map((t) => ({ original: t, translated: t })),
+    translations: texts,
   });
 }

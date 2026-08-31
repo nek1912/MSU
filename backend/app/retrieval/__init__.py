@@ -16,9 +16,9 @@ class RetrievedChunk(BaseModel):
     clause: str = ""
     content: str
     similarity: float
-    source_url: str
+    source_url: str = ""
     source_file: str = ""
-    domain: str
+    domain: str = ""
     jurisdiction: str
     state: str | None = None
 

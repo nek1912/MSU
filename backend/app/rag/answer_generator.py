@@ -988,11 +988,43 @@ Do not return an empty response.
                     )
 
 
-        raise RuntimeError(
-            "All configured Groq API attempts failed "
-            "during RAG answer generation. "
-            f"Last error: {last_error}"
+        # Groq exhausted — fallback to Gemini
+        print("Groq exhausted, falling back to Gemini...")
+        try:
+            answer = self._generate_with_gemini(
+                system_prompt, user_prompt
+            )
+            return answer
+        except Exception as gemini_error:
+            raise RuntimeError(
+                "All configured LLM attempts failed "
+                "during RAG answer generation. "
+                f"Groq last error: {last_error}. "
+                f"Gemini error: {gemini_error}"
+            )
+
+    def _generate_with_gemini(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+    ) -> str:
+        """Fallback to Gemini when Groq is rate-limited."""
+        settings = get_settings()
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/"
+            f"gemini-2.5-flash-lite:generateContent?key={settings.gemini_api_key}"
         )
+        r = httpx.post(
+            url,
+            json={
+                "systemInstruction": {"parts": [{"text": system_prompt}]},
+                "contents": [{"role": "user", "parts": [{"text": user_prompt}]}],
+                "generationConfig": {"temperature": DEFAULT_TEMPERATURE},
+            },
+            timeout=REQUEST_TIMEOUT_S,
+        )
+        r.raise_for_status()
+        return r.json()["candidates"][0]["content"]["parts"][0]["text"]
 
 
 _generator = None

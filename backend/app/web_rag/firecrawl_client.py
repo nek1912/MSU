@@ -8,7 +8,7 @@ It mirrors the TavilyClient interface so the WebDiscoveryService can
 treat both search engines identically behind a single, swappable
 provider abstraction. To swap or add a search engine later, implement
 a client with the same ``.search(...)`` signature and register it in
-the provider factory (see ``web_rag/providers.py``).
+the provider factory (see ``web_discovery/providers.py``).
 
 Responsibilities:
 - Send web-search requests
@@ -21,11 +21,14 @@ Responsibilities:
 
 from __future__ import annotations
 
+import os
 from typing import Any
 
-import httpx
+import requests
+from dotenv import load_dotenv
 
-from app.config import get_settings
+
+load_dotenv()
 
 
 FIRECRAWL_SEARCH_URL = (
@@ -58,11 +61,12 @@ class FirecrawlClient:
         timeout: int = DEFAULT_TIMEOUT_SECONDS,
     ):
 
-        settings = get_settings()
-
         self.api_key = (
             api_key
-            or settings.firecrawl_api_key
+            or os.getenv(
+                "FIRECRAWL_API_KEY",
+                "",
+            )
         )
 
         self.api_key = (
@@ -73,7 +77,10 @@ class FirecrawlClient:
 
         self.api_url = (
             api_url
-            or settings.firecrawl_api_url
+            or os.getenv(
+                "FIRECRAWL_API_URL",
+                "",
+            )
         )
 
         self.api_url = (
@@ -152,24 +159,21 @@ class FirecrawlClient:
 
         try:
 
-            with httpx.Client(
+            response = requests.post(
+                self.api_url,
+                json=payload,
+                headers={
+                    "Authorization": (
+                        f"Bearer {self.api_key}"
+                    ),
+                    "Content-Type": (
+                        "application/json"
+                    ),
+                },
                 timeout=self.timeout,
-            ) as client:
+            )
 
-                response = client.post(
-                    self.api_url,
-                    json=payload,
-                    headers={
-                        "Authorization": (
-                            f"Bearer {self.api_key}"
-                        ),
-                        "Content-Type": (
-                            "application/json"
-                        ),
-                    },
-                )
-
-        except httpx.RequestError as error:
+        except requests.RequestException as error:
 
             raise FirecrawlAPIError(
                 f"Firecrawl network error: {error}"
@@ -182,7 +186,7 @@ class FirecrawlClient:
                 "The free tier allows roughly 10 requests/minute."
             )
 
-        if response.status_code >= 400:
+        if not response.ok:
 
             body = response.text[
                 :1000

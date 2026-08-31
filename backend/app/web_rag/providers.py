@@ -1,5 +1,5 @@
 """
-Search-provider factory for the WebRAG layer.
+Search-provider factory for the WebDiscovery layer.
 
 The WebDiscoveryService performs web search through one or more
 providers. This module centralises HOW providers are chosen so that
@@ -18,9 +18,10 @@ and its normalizer stay engine-agnostic.
 
 from __future__ import annotations
 
+import os
 from typing import Any
 
-from app.config import get_settings
+from dotenv import load_dotenv
 
 from app.web_rag.firecrawl_client import (
     FirecrawlClient,
@@ -28,6 +29,9 @@ from app.web_rag.firecrawl_client import (
 from app.web_rag.tavily_client import (
     TavilyClient,
 )
+
+
+load_dotenv()
 
 
 DEFAULT_PROVIDERS = "tavily"
@@ -45,8 +49,10 @@ def resolve_providers(
 
     if raw is None:
 
-        settings = get_settings()
-        raw = settings.search_providers
+        raw = os.getenv(
+            "SEARCH_PROVIDERS",
+            "",
+        )
 
     raw = (raw or "").strip()
 

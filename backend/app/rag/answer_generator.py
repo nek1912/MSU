@@ -1012,7 +1012,7 @@ Do not return an empty response.
         settings = get_settings()
         url = (
             f"https://generativelanguage.googleapis.com/v1beta/models/"
-            f"gemini-2.5-flash-lite:generateContent?key={settings.gemini_api_key}"
+            f"gemini-3.5-flash:generateContent?key={settings.gemini_api_key}"
         )
         r = httpx.post(
             url,

@@ -5,10 +5,12 @@ Feature flag: USE_HYBRID_RETRIEVAL (env var) controls old vs new path.
 Default: new path (hybrid + v2 gate + verifier).
 """
 
+import json
 from typing import Literal
 
 import httpx
 from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
 from postgrest.exceptions import APIError as PostgrestAPIError
 from pydantic import BaseModel, Field
 
@@ -23,7 +25,7 @@ from app.generation import (CitationError, GENERAL_SYSTEM_PROMPT, build_general_
 from app.grievance.workflow import GrievanceWorkflow
 from app.hybrid_retrieval import retrieve_hybrid
 from app.language import detect_query_languages
-from app.llm_fallback import AllProvidersFailedError, grounded_answer
+from app.llm_fallback import AllProvidersFailedError, grounded_answer, grounded_answer_stream
 from app.providers.embeddings import get_embedding_provider
 from app.providers.reranker import JinaReranker
 from app.providers.gemini_llm import GeminiLLMProvider
@@ -423,6 +425,225 @@ def chat(req: ChatRequest) -> dict:
         return _abstain(lang, "dependency_failure", session_id=req.session_id)
     except Exception:
         raise
+
+
+# ---------------------------------------------------------------------------
+# SSE streaming endpoint — POST /chat/stream
+# ---------------------------------------------------------------------------
+
+_THINKING_MESSAGES = {
+    "en": ["Searching official documents...", "Analyzing content...", "Preparing answer..."],
+    "hi": ["आधिकारिक दस्तावेज़ खोज रहे हैं...", "सामग्री का विश्लेषण कर रहे हैं...", "उत्तर तैयार कर रहे हैं..."],
+    "gu": ["અધિકૃત દસ્તાવેજો શોધી રહ્યા છીએ...", "સામગ્રીનું વિશ્લેષણ કરી રહ્યા છીએ...", "જવાબ તૈયાર કરી રહ્યા છીએ..."],
+}
+
+
+def _sse_event(event: str, data: dict | str) -> str:
+    """Format a server-sent event."""
+    payload = json.dumps(data) if isinstance(data, dict) else data
+    return f"event: {event}\ndata: {payload}\n\n"
+
+
+@router.post("/chat/stream")
+def chat_stream(req: ChatRequest):
+    """Streaming version of /chat — returns SSE with thinking + token events."""
+
+    def generate():
+        settings = get_settings()
+        ui_code = req.language if req.ui_language_explicit else None
+        lang = resolve_and_remember(req.session_id, req.question, ui_code)
+        detected = detect_query_languages(req.question)
+        input_lang = detected.get("dominant") or "en"
+        retrieval_query = req.question
+        if input_lang != "en":
+            try:
+                retrieval_query = AzureTranslator(settings).translate(
+                    req.question, to="en", source=input_lang)
+            except Exception:
+                retrieval_query = req.question
+
+        thinking_msgs = _THINKING_MESSAGES.get(lang, _THINKING_MESSAGES["en"])
+
+        try:
+            # --- Conversation history retrieval (Stage 0) ---
+            history = req.history if req.history is not None else get_history(req.session_id, limit=8)
+
+            # Thinking: searching
+            yield _sse_event("thinking", {"text": thinking_msgs[0]})
+
+            provider = get_embedding_provider()
+            embedding = provider.embed_texts([retrieval_query], task="retrieval.query")[0]
+            domain, _score = get_anchor_store().classify(retrieval_query, embedding)
+
+            rules = getattr(get_anchor_store(), "rules", {})
+            has_explicit_keyword = False
+            if isinstance(rules, dict):
+                has_explicit_keyword = any(
+                    any(kw in retrieval_query.lower() for kw in kws)
+                    for kws in rules.values() if isinstance(kws, (list, set, tuple))
+                )
+
+            if (not has_explicit_keyword or domain == "out_of_scope") and history:
+                user_turns = [h["content"] for h in history if isinstance(h, dict) and h.get("role") == "user" and h.get("content")]
+                if user_turns:
+                    anchor_q = None
+                    if isinstance(rules, dict):
+                        for prev_q in reversed(user_turns):
+                            has_kw = any(
+                                any(kw in prev_q.lower() for kw in kws)
+                                for kws in rules.values() if isinstance(kws, (list, set, tuple))
+                            )
+                            if has_kw:
+                                anchor_q = prev_q
+                                break
+                    if not anchor_q:
+                        anchor_q = user_turns[-1]
+
+                    contextual_query = f"{anchor_q} {retrieval_query}"
+                    ctx_embedding = provider.embed_texts([contextual_query], task="retrieval.query")[0]
+                    ctx_domain, _ctx_score = get_anchor_store().classify(contextual_query, ctx_embedding)
+                    if ctx_domain != "out_of_scope":
+                        domain = ctx_domain
+                        retrieval_query = contextual_query
+                        embedding = ctx_embedding
+
+            resolved_state = req.state if req.state is not None else get_state(req.session_id)
+            touch_session(req.session_id, resolved_state, lang)
+
+            if domain == "out_of_scope":
+                yield _sse_event("thinking", {"text": thinking_msgs[1]})
+                answer_text = grounded_answer(
+                    GroqLLMProvider(settings), GeminiLLMProvider(settings),
+                    GENERAL_SYSTEM_PROMPT, build_general_prompt(req.question, lang, history=history))
+                out_of_scope_answer = f"{answer_text}\n\n{general_disclaimer(lang)}"
+                save_message(req.session_id, "user", req.question)
+                save_message(req.session_id, "assistant", out_of_scope_answer)
+                trim_messages(req.session_id, keep=50)
+                yield _sse_event("metadata", {"domain": "out_of_scope", "confidence": 0.0,
+                                               "confidence_level": "none", "citations": [],
+                                               "abstained": False, "language": lang})
+                for token in out_of_scope_answer.split(" "):
+                    yield _sse_event("token", {"text": token + " "})
+                yield _sse_event("done", {})
+                return
+
+            # --- Hybrid retrieval (Stage 5) ---
+            yield _sse_event("thinking", {"text": thinking_msgs[1]})
+            k = 25 if settings.reranker_enabled else 6
+            chunks = retrieve_hybrid(
+                get_supabase(), embedding, retrieval_query, domain, resolved_state, k=k,
+            )
+
+            if settings.reranker_enabled:
+                reranker = JinaReranker()
+                docs_for_rerank = [{"chunk_id": c.chunk_id, "content": c.content} for c in chunks]
+                reranked = reranker.rerank(req.question, docs_for_rerank, top_n=6)
+                chunks_by_id = {c.chunk_id: c for c in chunks}
+                chunks = [chunks_by_id[r["chunk_id"]] for r in reranked if r["chunk_id"] in chunks_by_id]
+
+            # --- Evidence gate v2 (Stage 7) ---
+            candidates = [_to_candidate(c, domain, resolved_state) for c in chunks]
+            abstained, reason, band = evidence_gate_v2(
+                candidates, expected_domain=domain, expected_state=resolved_state,
+            )
+            if abstained:
+                yield _sse_event("thinking", {"text": thinking_msgs[2]})
+                answer_text = grounded_answer(
+                    GroqLLMProvider(settings), GeminiLLMProvider(settings),
+                    GENERAL_SYSTEM_PROMPT, build_general_prompt(req.question, lang, history=history))
+                out_of_scope_answer = f"{answer_text}\n\n{general_disclaimer(lang)}"
+                save_message(req.session_id, "user", req.question)
+                save_message(req.session_id, "assistant", out_of_scope_answer)
+                trim_messages(req.session_id, keep=50)
+                yield _sse_event("metadata", {"domain": domain, "confidence": 0.5,
+                                               "confidence_level": "moderate", "citations": [],
+                                               "abstained": False, "language": lang})
+                for token in out_of_scope_answer.split(" "):
+                    yield _sse_event("token", {"text": token + " "})
+                yield _sse_event("done", {})
+                return
+
+            # --- LLM generation (streaming) ---
+            yield _sse_event("thinking", {"text": thinking_msgs[2]})
+            prompt = build_user_prompt(req.question, chunks, history=history)
+            answer_parts: list[str] = []
+            try:
+                for token in grounded_answer_stream(
+                    GroqLLMProvider(settings), GeminiLLMProvider(settings),
+                    build_system_prompt(lang), prompt):
+                    answer_parts.append(token)
+                    yield _sse_event("token", {"text": token})
+            except AllProvidersFailedError:
+                yield _sse_event("error", {"message": "All LLM providers failed"})
+                yield _sse_event("done", {})
+                return
+
+            answer = "".join(answer_parts).replace("【", "[").replace("】", "]")
+
+            if "INSUFFICIENT_EVIDENCE" in answer:
+                answer_text = grounded_answer(
+                    GroqLLMProvider(settings), GeminiLLMProvider(settings),
+                    GENERAL_SYSTEM_PROMPT, build_general_prompt(req.question, lang, history=history))
+                out_of_scope_answer = f"{answer_text}\n\n{general_disclaimer(lang)}"
+                save_message(req.session_id, "user", req.question)
+                save_message(req.session_id, "assistant", out_of_scope_answer)
+                trim_messages(req.session_id, keep=50)
+                yield _sse_event("metadata", {"domain": domain, "confidence": 0.5,
+                                               "confidence_level": "moderate", "citations": [],
+                                               "abstained": False, "language": lang})
+                # Re-stream the fallback answer
+                for token in out_of_scope_answer.split(" "):
+                    yield _sse_event("token", {"text": token + " "})
+                yield _sse_event("done", {})
+                return
+
+            # --- Citation verification v2 (Stage 8) ---
+            chunk_ids = [c.chunk_id for c in chunks]
+            verification = verify_citations_v2(answer, chunk_ids)
+            if not verification.is_valid:
+                answer_text = grounded_answer(
+                    GroqLLMProvider(settings), GeminiLLMProvider(settings),
+                    GENERAL_SYSTEM_PROMPT, build_general_prompt(req.question, lang, history=history))
+                out_of_scope_answer = f"{answer_text}\n\n{general_disclaimer(lang)}"
+                save_message(req.session_id, "user", req.question)
+                save_message(req.session_id, "assistant", out_of_scope_answer)
+                trim_messages(req.session_id, keep=50)
+                yield _sse_event("metadata", {"domain": domain, "confidence": 0.5,
+                                               "confidence_level": "moderate", "citations": [],
+                                               "abstained": False, "language": lang})
+                for token in out_of_scope_answer.split(" "):
+                    yield _sse_event("token", {"text": token + " "})
+                yield _sse_event("done", {})
+                return
+
+            save_message(req.session_id, "user", req.question)
+            save_message(req.session_id, "assistant", answer)
+            trim_messages(req.session_id, keep=50)
+
+            citations = _citations_from(answer, chunks)
+            _band_to_confidence = {"high": 0.9, "medium": 0.7, "low": 0.4}
+            confidence = _band_to_confidence.get(band.value, 0.4)
+            yield _sse_event("metadata", {
+                "domain": domain, "confidence": confidence,
+                "confidence_level": _confidence_level(confidence),
+                "citations": citations, "abstained": False, "language": lang,
+            })
+            yield _sse_event("done", {})
+
+        except _SAFE_FAILURES:
+            answer = get_abstain_text(lang)
+            yield _sse_event("metadata", {"domain": "unknown", "confidence": 0.0,
+                                           "confidence_level": "none", "citations": [],
+                                           "abstained": True, "language": lang})
+            for token in answer.split(" "):
+                yield _sse_event("token", {"text": token + " "})
+            yield _sse_event("done", {})
+        except Exception:
+            yield _sse_event("error", {"message": "Internal server error"})
+            yield _sse_event("done", {})
+
+    return StreamingResponse(generate(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 def _citations_from(answer: str, chunks: list[RetrievedChunk]) -> list[dict]:

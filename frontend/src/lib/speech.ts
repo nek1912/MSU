@@ -5,7 +5,7 @@ export type { SpeechSegment };
 export interface SpeechService {
   supported: boolean;
   listen: (locale: string, onTranscript: (text: string) => void) => () => void;
-  speak: (text: string, locale: string) => void;
+  speak: (text: string, locale: string) => Promise<void>;
   stopSpeaking: () => void;
 }
 
@@ -210,7 +210,7 @@ export function createSpeechService(): SpeechService {
         }
       };
     },
-    speak(text, locale) {
+    speak(text, locale): Promise<void> {
       stopAllPlayback();
 
       const cleanText = text
@@ -218,37 +218,10 @@ export function createSpeechService(): SpeechService {
         .replace(/\*\*([^*]+)\*\*/g, "$1")
         .replace(/\n+/g, ". ")
         .trim();
-      if (!cleanText) return;
+      if (!cleanText) return Promise.resolve();
 
-      // For Indian languages, fetch backend Sarvam TTS and play the result
-      if (locale !== "en") {
-        const ttsText = cleanText.slice(0, 500);
-        const formData = new FormData();
-        formData.append("text", ttsText);
-        formData.append("language", locale);
-
-        fetch("/api/speak", { method: "POST", body: formData })
-          .then((res) => (res.ok ? res.blob() : Promise.reject()))
-          .then((blob) => {
-            if (blob.size < 500) return Promise.reject();
-            const url = URL.createObjectURL(blob);
-            const audio = new Audio(url);
-            currentAudio = audio;
-            currentObjectUrl = url;
-            audio.onended = () => stopAll();
-            audio.onerror = () => stopAll();
-            audio.play().catch(() => {
-              stopAll();
-              speakBrowser(cleanText, locale);
-            });
-          })
-          .catch(() => {
-            speakBrowser(cleanText, locale);
-          });
-        return;
-      }
-
-      speakBrowser(cleanText, locale);
+      // Try backend TTS (Sarvam) first, fallback to browser TTS
+      return speakBackend(cleanText, locale).catch(() => speakBrowser(cleanText, locale));
     },
     stopSpeaking() {
       stopAllPlayback();
@@ -256,15 +229,84 @@ export function createSpeechService(): SpeechService {
   };
 }
 
-function speakBrowser(text: string, locale: string) {
-  const synthesis = window.speechSynthesis;
-  if (!synthesis) return;
-  const utterance = new SpeechSynthesisUtterance(text);
-  const voices = synthesis.getVoices();
-  const match =
-    voices.find((v) => v.lang.startsWith(locale === "en" ? "en" : locale)) ||
-    voices.find((v) => v.lang.startsWith("en"));
-  if (match) utterance.voice = match;
-  synthesis.cancel();
-  synthesis.speak(utterance);
+function speakBackend(text: string, locale: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const ttsText = text.slice(0, 500);
+    const formData = new FormData();
+    formData.append("text", ttsText);
+    formData.append("language", locale);
+
+    fetch("/api/speak", { method: "POST", body: formData })
+      .then((res) => {
+        if (!res.ok) throw new Error(`Speak API ${res.status}`);
+        return res.arrayBuffer();
+      })
+      .then((buffer) => {
+        if (buffer.byteLength < 100) throw new Error("Audio too small");
+        const blob = new Blob([buffer], { type: "audio/wav" });
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        currentAudio = audio;
+        currentObjectUrl = url;
+        audio.onended = () => { stopAll(); resolve(); };
+        audio.onerror = () => { stopAll(); reject(new Error("Audio playback failed")); };
+        audio.play().catch((e) => { stopAll(); reject(e); });
+      })
+      .catch(reject);
+  });
+}
+
+function speakBrowser(text: string, locale: string): Promise<void> {
+  return new Promise((resolve) => {
+    const synthesis = window.speechSynthesis;
+    if (!synthesis) return resolve();
+
+    // BCP-47 language tags for TTS
+    const langTags: Record<string, string> = {
+      en: "en-IN",
+      hi: "hi-IN",
+      gu: "gu-IN",
+      mr: "mr-IN",
+      bn: "bn-IN",
+    };
+
+    const targetLang = langTags[locale] || locale;
+
+    const doSpeak = () => {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = targetLang;
+      utterance.rate = 1;
+      utterance.pitch = 1;
+
+      // Find matching voice
+      const voices = synthesis.getVoices();
+      const voice = voices.find((v) => v.lang === targetLang)
+        || voices.find((v) => v.lang.startsWith(locale))
+        || voices.find((v) => v.lang.startsWith("en"));
+
+      if (voice) {
+        utterance.voice = voice;
+        utterance.lang = voice.lang;
+      }
+
+      utterance.onend = () => resolve();
+      utterance.onerror = () => resolve();
+
+      synthesis.cancel();
+      setTimeout(() => {
+        synthesis.speak(utterance);
+      }, 50);
+    };
+
+    // Wait for voices to load if needed
+    if (synthesis.getVoices().length === 0) {
+      const onLoaded = () => {
+        synthesis.removeEventListener("voiceschanged", onLoaded);
+        doSpeak();
+      };
+      synthesis.addEventListener("voiceschanged", onLoaded);
+    } else {
+      doSpeak();
+    }
+  });
 }

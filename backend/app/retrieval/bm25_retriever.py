@@ -28,7 +28,11 @@ class BM25Retriever:
         metadata_path = Path(metadata_path)
 
         if not metadata_path.exists():
-            raise FileNotFoundError(f"Metadata not found: {metadata_path}")
+            print(f"Warning: BM25 metadata not found at {metadata_path}, BM25 ranking disabled")
+            self.metadata = []
+            self.tokenized_corpus = []
+            self.bm25 = None
+            return
 
         print("Loading metadata...")
 
@@ -80,7 +84,7 @@ class BM25Retriever:
     def retrieve(self, query: str, top_k: int = 5) -> list[dict]:
         query = str(query or "").strip()
 
-        if not query:
+        if not query or not self.bm25:
             return []
 
         if top_k <= 0:
@@ -120,8 +124,8 @@ class BM25Retriever:
     ) -> list[dict]:
         query = str(query or "").strip()
 
-        if not query:
-            return []
+        if not query or not self.bm25:
+            return candidates[:top_k] if candidates else []
 
         if not candidates:
             return []

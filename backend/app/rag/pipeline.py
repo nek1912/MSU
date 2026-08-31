@@ -96,7 +96,7 @@ class RAGPipeline:
     """
 
 
-    DEFAULT_MIN_RELEVANCE_SCORE = 60.0
+    DEFAULT_MIN_RELEVANCE_SCORE = 2.5
 
     def __init__(
         self,

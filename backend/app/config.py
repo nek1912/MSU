@@ -50,7 +50,7 @@ class Settings(BaseSettings):
     search_providers: str = "tavily"
 
     # Grievance & evidence
-    grievance_gemini_model: str = "gemini-3.5-flash-lite"
+    grievance_gemini_model: str = "gemini-2.5-flash-lite"
 
     @property
     def tts_voices(self) -> dict[str, str]:

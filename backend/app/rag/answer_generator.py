@@ -994,7 +994,12 @@ Do not return an empty response.
             answer = self._generate_with_gemini(
                 system_prompt, user_prompt
             )
-            return answer
+            return {
+                "status": "success",
+                "answer": answer,
+                "provider": "gemini",
+                "model": "gemini-3.5-flash",
+            }
         except Exception as gemini_error:
             raise RuntimeError(
                 "All configured LLM attempts failed "

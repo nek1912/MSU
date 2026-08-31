@@ -245,8 +245,8 @@ def chat(req: ChatRequest) -> dict:
             }
 
         # 2. Cooperative/governance domains → try static RAG first
-        # Use QueryClassifier domain for routing, AnchorStore domain for retrieval
-        if classification.domain in _STATIC_DOMAINS or domain in _STATIC_DOMAINS:
+        # QueryClassifier is authoritative for routing; AnchorStore is for retrieval only
+        if classification.domain in _STATIC_DOMAINS:
             # Existing static RAG pipeline runs below (falls through)
             static_rag_mode = "static"
         else:

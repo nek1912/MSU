@@ -42,6 +42,16 @@ class Settings(BaseSettings):
     # Sarvam AI (STT, TTS, Translation — Indian languages)
     sarvam_api_key: str = ""
 
+    # Web search providers
+    tavily_api_key_1: str = ""
+    tavily_api_key_2: str = ""
+    firecrawl_api_key: str = ""
+    firecrawl_api_url: str = "https://api.firecrawl.dev/v1"
+    search_providers: str = "tavily"
+
+    # Grievance & evidence
+    grievance_gemini_model: str = "gemini-3.5-flash-lite"
+
     @property
     def tts_voices(self) -> dict[str, str]:
         """Parse azure_tts_voices into a dict."""

@@ -41,4 +41,6 @@ def health_providers() -> dict:
         "supabase": "configured" if s.supabase_url else "missing",
         "bhashini": "stub",
         "azure_speech": "configured" if s.azure_speech_key else "missing",
+        "tavily": "configured" if s.tavily_api_key_1 else "missing",
+        "firecrawl": "configured" if s.firecrawl_api_key else "missing",
     }

@@ -7,6 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.routes.chat import router as chat_router
 from app.routes.voice import router as voice_router
+from app.routes.conversations import router as conversations_router
+from app.routes.evidence import router as evidence_router
+from app.routes.grievance import router as grievance_router
 
 logging.basicConfig(level=logging.INFO,
                     format='{"level":"%(levelname)s","msg":"%(message)s"}')
@@ -25,6 +28,9 @@ app.add_middleware(CORSMiddleware,
 
 app.include_router(chat_router)
 app.include_router(voice_router)
+app.include_router(conversations_router)
+app.include_router(evidence_router)
+app.include_router(grievance_router)
 
 
 @app.get("/health")

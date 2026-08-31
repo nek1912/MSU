@@ -16,7 +16,7 @@ trust it. If you only have two minutes, update `Last updated` and the
 
 ## Last updated
 
-`2026-09-01 (5th session), Task 9: RAG pipeline copied from sub-project, imports fixed, answer_generator adapted to httpx`
+`2026-09-01 (6th session), Task 14: Registered conversations, evidence, grievance routers in main.py`
 
 ## Current day / plan position
 

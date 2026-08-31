@@ -16,7 +16,7 @@ trust it. If you only have two minutes, update `Last updated` and the
 
 ## Last updated
 
-`2026-08-30 (4th session), by conversation-memory implementation: messages table + history prompt flow verified`
+`2026-09-01 (5th session), Task 9: RAG pipeline copied from sub-project, imports fixed, answer_generator adapted to httpx`
 
 ## Current day / plan position
 
@@ -50,6 +50,7 @@ broken`.
 | Citation verifier (Stage 8) | M2 | working | citation_verifier.py, all responses routed through verification |
 | `/chat` wired to retrieval | M2 | working | Session store, evidence gate v2, citations, abstention wired |
 | Conversation memory / session history | M2 | working | `messages` table + last-5-turn history prepended to prompt; frontend sends history with each request |
+| Web-grounded RAG pipeline (Task 9) | M2 | stubbed | `app/rag/` copied from sub-project, imports adapted; GeminiReranker + SourceVerifier are stubs; `ask()` calls `WebDiscoveryService().discover()` which needs integration verification |
 | Citation verification | M2 | working | Set-membership based, routed through verifier |
 | Abstention logic | M2 | working | Defense-in-depth: domain + jurisdiction + thresholds |
 | Confidence calibration | M2 | working | Retrieval-signal-based scoring (not heuristic) |

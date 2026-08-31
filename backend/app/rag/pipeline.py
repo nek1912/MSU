@@ -751,62 +751,7 @@ class RAGPipeline:
 
         # scope, so this check must run before evidence is even
 
-        if (
-            classification is not None
-            and classification.domain == "general"
-        ):
-
-            print(
-                "\n[0/10] Domain scope gate: "
-                "UNSUPPORTED DOMAIN."
-            )
-
-            print(
-                "Query does not match any supported "
-                "eGovAssistant domain. Abstaining before "
-                "web discovery."
-            )
-
-            scope_classification_data = {
-
-                "domain": classification.domain,
-
-                "jurisdiction": (
-                    classification.jurisdiction
-                ),
-
-                "state": classification.state,
-
-                "confidence": (
-                    classification.confidence
-                ),
-
-            }
-
-            return self._base_result(
-
-                status="abstained",
-
-                answer=(
-                    "This question is outside the scope of "
-                    "eGovAssistant. I can help with "
-                    "government schemes, cooperative societies, "
-                    "PACS, crop insurance (PMFBY), agriculture, "
-                    "financial literacy, and grievance-redressal "
-                    "questions."
-                ),
-
-                classification=(
-                    scope_classification_data
-                ),
-
-                discovery={},
-
-                evidence_validation_status=(
-                    "out_of_domain"
-                ),
-
-            )
+        # Removed domain scope gate - allow general queries to proceed to web discovery
 
 
         print(

@@ -79,6 +79,19 @@ export function MessageBubble({ resp }: { resp: ChatResponse }) {
         <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <Badge deco={deco(resp.domain)}>{domainLabel}</Badge>
+            {resp.mode && (
+              <span
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] sm:text-xs font-medium ${
+                  resp.mode === "web"
+                    ? "bg-blue-100 text-blue-800"
+                    : resp.mode === "grievance"
+                      ? "bg-orange-100 text-orange-800"
+                      : "bg-gray-100 text-gray-600"
+                }`}
+              >
+                {resp.mode === "web" ? "Web Search" : resp.mode === "grievance" ? "Grievance" : "Static RAG"}
+              </span>
+            )}
             <EvidenceBand confidence={resp.confidence} label={t(`evidence.${evidenceBand(resp.confidence)}`)} />
           </div>
           <span className="text-[11px] sm:text-xs text-[var(--text-faint)]">{(resp.confidence * 100).toFixed(0)}% match</span>

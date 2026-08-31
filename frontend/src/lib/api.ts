@@ -27,6 +27,8 @@ export interface ChatResponse {
     url: string;
   }[];
   abstained: boolean;
+  mode?: string;
+  conversation_id?: string;
   speech_text?: string;
   speech_segments?: SpeechSegment[];
   follow_up_question: string | null;

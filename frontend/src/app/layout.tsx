@@ -83,7 +83,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${inter.variable} ${grotesk.variable} ${geistMono.variable} ${devanagari.variable} ${bengali.variable} ${tamil.variable} ${telugu.variable} ${kannada.variable} ${gurmukhi.variable} ${gujarati.variable} ${odia.variable} ${malayalam.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans">
+      <body suppressHydrationWarning className="min-h-full flex flex-col font-sans">
         <a href="#content" className="skip-link">
           Skip to content
         </a>

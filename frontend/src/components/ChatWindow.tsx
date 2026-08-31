@@ -2,11 +2,12 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { sendChat, ChatResponse } from "@/lib/api";
+import { sendChat, sendChatStream, ChatResponse, type StreamEvent } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
 import type { Locale } from "@/lib/i18n/i18n";
 import { createSpeechService } from "@/lib/speech";
 import { MessageBubble } from "./chat/MessageBubble";
+import { ThinkingBubble } from "./chat/ThinkingBubble";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -42,6 +43,7 @@ interface Conversation {
 }
 
 const STORAGE_KEY = "sahakarita_conversations";
+const ACTIVE_CONV_KEY = "sahakarita_active_conv";
 const MODELS = ["Sahakarita-v2.5"];
 
 function loadConversations(): Conversation[] {
@@ -107,20 +109,37 @@ export function ChatWindow() {
   const speech = useMemo(() => createSpeechService(), []);
   const [speechReady, setSpeechReady] = useState(false);
   const sp = useSearchParams();
-  // speech.supported reads `window` (browser-only), so it differs between SSR and
-  // the client. Gate the mic UI on a mounted flag so SSR and the first client
-  // render match, then reveal it after hydration (avoids hydration mismatch).
   const [micSupported, setMicSupported] = useState(false);
   useEffect(() => setMicSupported(speech.supported), [speech]);
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
   const [input, setInput] = useState("");
-  const [msgs, setMsgs] = useState<Msg[]>([]);
+  const [msgs, setMsgs] = useState<Msg[]>(() => {
+    if (typeof window === "undefined") return [];
+    const convs = loadConversations();
+    const savedId = localStorage.getItem(ACTIVE_CONV_KEY);
+    if (savedId) {
+      const conv = convs.find((c) => c.id === savedId);
+      if (conv) return conv.messages;
+    }
+    return [];
+  });
   const [typing, setTyping] = useState(false);
   const [listening, setListening] = useState(false);
   const [model, setModel] = useState(MODELS[0]);
   const [showModelPicker, setShowModelPicker] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [activeConvId, setActiveConvId] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<Conversation[]>(() => {
+    if (typeof window === "undefined") return [];
+    return loadConversations();
+  });
+  const [activeConvId, setActiveConvId] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    const savedId = localStorage.getItem(ACTIVE_CONV_KEY);
+    const convs = loadConversations();
+    if (savedId && convs.find((c) => c.id === savedId)) return savedId;
+    return null;
+  });
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [sessionId] = useState(() => crypto.randomUUID());
@@ -131,10 +150,13 @@ export function ChatWindow() {
   const taRef = useRef<HTMLTextAreaElement>(null);
   const lang: Locale = locale;
 
-  // Load conversations from localStorage on mount
-  useEffect(() => {
-    setConversations(loadConversations());
-  }, []);
+  // Streaming state
+  const [thinkingText, setThinkingText] = useState("");
+  const [streamingAnswer, setStreamingAnswer] = useState("");
+  const [streamingMeta, setStreamingMeta] = useState<Record<string, unknown> | null>(null);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
+  const tokenBufferRef = useRef("");
 
   // Client-only speech readiness
   useEffect(() => {
@@ -192,6 +214,7 @@ export function ChatWindow() {
       return next;
     });
     setActiveConvId(conv.id);
+    localStorage.setItem(ACTIVE_CONV_KEY, conv.id);
     setMsgs([firstMsg]);
     return conv.id;
   }, []);
@@ -200,6 +223,7 @@ export function ChatWindow() {
   const loadConversation = useCallback((conv: Conversation) => {
     setMsgs(conv.messages);
     setActiveConvId(conv.id);
+    localStorage.setItem(ACTIVE_CONV_KEY, conv.id);
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
@@ -229,14 +253,40 @@ export function ChatWindow() {
       if (activeConvId === convId) {
         setMsgs([]);
         setActiveConvId(null);
+        localStorage.removeItem(ACTIVE_CONV_KEY);
       }
     },
     [activeConvId]
   );
 
+  // Smart auto-scroll: only scroll if user is near bottom
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const isNearBottomRef = useRef(true);
+
+  const checkIfNearBottom = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    isNearBottomRef.current = scrollHeight - scrollTop - clientHeight < 150;
+  }, []);
+
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [msgs, typing]);
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    container.addEventListener("scroll", checkIfNearBottom, { passive: true });
+    checkIfNearBottom();
+    return () => container.removeEventListener("scroll", checkIfNearBottom);
+  }, [checkIfNearBottom]);
+
+  const scrollToBottom = useCallback(() => {
+    if (isNearBottomRef.current) {
+      bottomRef.current?.scrollIntoView({ behavior: "auto" });
+    }
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [msgs, typing, streamingAnswer, scrollToBottom]);
 
   // Auto-grow composer
   useEffect(() => {
@@ -284,37 +334,79 @@ export function ChatWindow() {
       setSidebarOpen(false);
     }
 
-    // Only flag an explicit language choice when the UI language was *changed*
-    // by the user since the last sent message. The default UI language must NOT
-    // be sent as an explicit choice (so it can never override a remembered
-    // Hindi session, per the design priority chain).
     const uiLanguageExplicit = explicitPending;
     setExplicitPending(false);
 
     setTyping(true);
-    try {
-      const history = msgs
-        .map((m) => {
-          const content = m.role === "user" ? m.text : m.resp?.answer || m.text;
-          return content ? { role: m.role, content } : null;
-        })
-        .filter((m): m is { role: "user" | "assistant"; content: string } => m !== null)
-        .slice(-8);
+    setThinkingText("");
+    setStreamingAnswer("");
+    setStreamingMeta(null);
+    setIsStreaming(true);
+    tokenBufferRef.current = "";
 
-      const resp = await sendChat({
-        question,
-        session_id: sessionId,
-        language: lang,
-        state: null,
-        history,
-        ui_language_explicit: uiLanguageExplicit,
-      });
-      setMsgs((m) => [...m, { role: "assistant", resp }]);
-    } catch {
+    const history = msgs
+      .map((m) => {
+        const content = m.role === "user" ? m.text : m.resp?.answer || m.text;
+        return content ? { role: m.role, content } : null;
+      })
+      .filter((m): m is { role: "user" | "assistant"; content: string } => m !== null)
+      .slice(-8);
+
+    const abortController = new AbortController();
+    abortRef.current = abortController;
+
+    let metaSnapshot: Record<string, unknown> = {};
+
+    try {
+      await sendChatStream(
+        { question, session_id: sessionId, language: lang, state: null, history, ui_language_explicit: uiLanguageExplicit },
+        (event: StreamEvent) => {
+          if (event.event === "thinking") {
+            setThinkingText(event.data.text as string);
+          } else if (event.event === "token") {
+            setThinkingText("");
+            const text = (event.data.text as string).replace(/INSUFFICIENT_EVIDENCE/g, "");
+            if (text) {
+              tokenBufferRef.current += text;
+              setStreamingAnswer(tokenBufferRef.current);
+            }
+          } else if (event.event === "metadata") {
+            metaSnapshot = event.data;
+            setStreamingMeta(event.data);
+          } else if (event.event === "error") {
+            console.error("Stream error:", event.data.message);
+          }
+        },
+        abortController.signal,
+      );
+
+      // Build final response from ref (synchronous, no stale state)
+      const finalAnswer = tokenBufferRef.current.replace(/INSUFFICIENT_EVIDENCE/g, "").trim();
+      const finalResp: ChatResponse = {
+        answer: finalAnswer,
+        language: (metaSnapshot.language as Locale) || lang,
+        domain: (metaSnapshot.domain as string) || "unknown",
+        intent: (metaSnapshot.domain as string) || "unknown",
+        entities: [],
+        confidence: (metaSnapshot.confidence as number) || 0,
+        confidence_level: (metaSnapshot.confidence_level as ChatResponse["confidence_level"]) || "none",
+        citations: (metaSnapshot.citations as ChatResponse["citations"]) || [],
+        abstained: (metaSnapshot.abstained as boolean) || false,
+        follow_up_question: null,
+      };
+      setMsgs((m) => [...m, { role: "assistant", resp: finalResp }]);
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") return;
       const assistantMsg: Msg = { role: "assistant", resp: fallback(lang) };
       setMsgs((m) => [...m, assistantMsg]);
     } finally {
       setTyping(false);
+      setIsStreaming(false);
+      setThinkingText("");
+      setStreamingAnswer("");
+      setStreamingMeta(null);
+      tokenBufferRef.current = "";
+      abortRef.current = null;
     }
   }
 
@@ -322,6 +414,7 @@ export function ChatWindow() {
     setMsgs([]);
     setInput("");
     setActiveConvId(null);
+    localStorage.removeItem(ACTIVE_CONV_KEY);
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
@@ -425,7 +518,7 @@ export function ChatWindow() {
           <div className="my-2 h-[1px] w-8 bg-[var(--border-soft)]" />
 
           {/* Icon List of Conversations */}
-          <div className="flex-1 w-full overflow-y-auto space-y-1.5 px-2">
+          <div suppressHydrationWarning className="flex-1 w-full overflow-y-auto space-y-1.5 px-2">
             {conversations.map((conv) => (
               <button
                 key={conv.id}
@@ -733,10 +826,10 @@ export function ChatWindow() {
         </header>
 
         {/* Center Aligned Message Stream Area */}
-        <div className="flex-1 overflow-y-auto w-full">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto w-full">
           <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 py-6 space-y-6">
             {/* ChatGPT Style Empty State Hero */}
-            {msgs.length === 0 && (
+            {hydrated && msgs.length === 0 && (
               <Reveal trigger="load">
                 <div className="py-12 sm:py-20 text-center space-y-4">
                   <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--dark)] text-[var(--on-dark-strong)] shadow-md">
@@ -788,13 +881,35 @@ export function ChatWindow() {
               )
             )}
 
-            {typing && (
+            {typing && !isStreaming && (
               <div className="flex gap-3">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--dark)] text-[var(--on-dark-strong)]">
                   <IconBot className="h-4 w-4 animate-pulse" />
                 </div>
                 <Skeleton className="h-16 w-3/4 max-w-[28rem] rounded-xl" />
               </div>
+            )}
+
+            {/* Streaming thinking + answer */}
+            {isStreaming && thinkingText && !streamingAnswer && (
+              <ThinkingBubble thinkingText={thinkingText} lang={lang} />
+            )}
+            {isStreaming && streamingAnswer.trim() && (
+              <MessageBubble
+                isStreaming={true}
+                resp={{
+                  answer: streamingAnswer,
+                  language: lang,
+                  domain: (streamingMeta?.domain as string) || "unknown",
+                  intent: (streamingMeta?.domain as string) || "unknown",
+                  entities: [],
+                  confidence: (streamingMeta?.confidence as number) || 0,
+                  confidence_level: (streamingMeta?.confidence_level as ChatResponse["confidence_level"]) || "none",
+                  citations: (streamingMeta?.citations as ChatResponse["citations"]) || [],
+                  abstained: false,
+                  follow_up_question: null,
+                }}
+              />
             )}
             <div ref={bottomRef} />
           </div>

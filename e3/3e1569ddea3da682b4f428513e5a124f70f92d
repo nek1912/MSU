@@ -1,0 +1,83 @@
+frontend/src/app/layout.tsx
+  s_237a5431892a2e::t_4791f4463e9680 86
+frontend/src/components/chat/ThinkingBubble.tsx
+  s_237a5431892a2e::t_4a02b43aa941ad 1-62
+frontend/src/app/api/speak/route.ts
+  s_237a5431892a2e::t_a5110294de3ae4 26-27,33-41
+frontend/src/app/api/chat/stream/route.ts
+  s_237a5431892a2e::t_8f3fd988c7cc71 1-49
+frontend/src/components/ChatWindow.tsx
+  s_237a5431892a2e::t_bbae30c45dbca3 417
+  s_237a5431892a2e::t_15af63405872c8 5,10
+  s_237a5431892a2e::t_0c52da1cae9df4 884,894,897
+  s_237a5431892a2e::t_4cbc499c57bfd8 892-893,895-896,898,900-913
+  s_237a5431892a2e::t_ea6f46e5e4a0e1 217,226
+  s_237a5431892a2e::t_6f858a034f0dd8 408
+  s_237a5431892a2e::t_9aaccd80b68227 117-126,132-142
+  s_237a5431892a2e::t_9baab5b028ac22 159
+  s_237a5431892a2e::t_4dd9150e1238bf 266,269-270,274-281,283,285-286,288-289
+  s_237a5431892a2e::t_8cdeb8c02fcffe 829
+  s_237a5431892a2e::t_0d975075af4ab4 832
+  s_237a5431892a2e::t_7b1cc5a3edd062 368-372
+  s_237a5431892a2e::t_b87d30e4285cec 114-115
+  s_237a5431892a2e::t_d9014a950bc46c 345,358-359,374,383,387-389,391-394
+  s_237a5431892a2e::t_413cd2a79d7fcb 521
+  s_237a5431892a2e::t_7fc0d1b74be8b0 46
+  s_237a5431892a2e::t_aca7e8b7548ece 899
+  s_237a5431892a2e::t_9bf256fc4c14e4 384,386
+  s_237a5431892a2e::t_626e5cf768614a 153-158
+  s_237a5431892a2e::t_b2508a993d406b 341-344,346-357,361-367,373,375-382,385,390,395-399,404-407,409
+  s_237a5431892a2e::t_a75ba850ee98bb 256
+  s_237a5431892a2e::t_71646349d31ed1 262-265,267-268,271-273,282,284
+frontend/src/lib/speech.ts
+  s_237a5431892a2e::t_a341ab6ba60390 213,221
+  s_237a5431892a2e::t_f37c3a4e224928 264-270,273
+  s_237a5431892a2e::t_831cd700157f9a 274-279,281-285,287-290,292-310
+  s_237a5431892a2e::t_12157ada82497d 280,286,291
+  s_237a5431892a2e::t_fe5d64d74673be 223-224
+  s_237a5431892a2e::t_62f3af699d32d9 8
+  s_237a5431892a2e::t_4e519652c0c757 232-258
+  s_237a5431892a2e::t_0258f238179b2b 263,271-272
+  s_237a5431892a2e::t_bd45cd120c2fbc 259-262,311
+backend/app/providers/groq_llm.py
+  s_237a5431892a2e::t_2a802ade3eff4d 1-3,25-51
+backend/app/providers/gemini_llm.py
+  s_237a5431892a2e::t_c46ca38bc97fa4 1-3,12,14-16,26-53
+frontend/src/lib/api.ts
+  s_237a5431892a2e::t_be83c5d0a1ad16 52-105
+frontend/src/components/chat/MessageBubble.tsx
+  s_237a5431892a2e::t_e1a4125a797b26 130-139
+  s_237a5431892a2e::t_81303df5251c61 83,88-101
+  s_237a5431892a2e::t_1f16ec1f826516 49
+  s_237a5431892a2e::t_134fc54a4124fc 25
+backend/app/routes/chat.py
+  s_237a5431892a2e::t_b25aae910362f1 306-524
+  s_237a5431892a2e::t_a5d5a420bcf4fe 8,13,27
+backend/app/llm_fallback.py
+  s_237a5431892a2e::t_e427c12ccc9167 1-2,26-38
+backend/app/hybrid_retrieval.py
+  s_237a5431892a2e::t_45165b04566830 154
+backend/app/retrieval.py
+  s_237a5431892a2e::t_4dc100395ed354 20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "e33e1569ddea3da682b4f428513e5a124f70f92d",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_237a5431892a2e": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fa9b5c1b8ffe8Xv2rHpILWnesO",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

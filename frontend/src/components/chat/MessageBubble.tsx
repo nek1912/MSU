@@ -22,7 +22,7 @@ import { createSpeechService, speakSegments } from "@/lib/speech";
 import { EvidenceBand } from "@/components/EvidenceBand";
 import { evidenceBand } from "@/lib/band";
 
-export function MessageBubble({ resp }: { resp: ChatResponse }) {
+export function MessageBubble({ resp, isStreaming = false }: { resp: ChatResponse; isStreaming?: boolean }) {
   const { t } = useI18n();
   const speech = useMemo(() => createSpeechService(), []);
   const [speaking, setSpeaking] = useState(false);
@@ -46,7 +46,7 @@ export function MessageBubble({ resp }: { resp: ChatResponse }) {
       if (hasSegments) {
         await speakSegments(segments);
       } else {
-        speech.speak(resp.answer.replace(/\[chunk:[a-f0-9]+\]/g, "").trim(), resp.language);
+        await speech.speak(resp.answer.replace(/\[chunk:[a-f0-9]+\]/g, "").trim(), resp.language);
       }
     } finally {
       setSpeaking(false);
@@ -70,11 +70,6 @@ export function MessageBubble({ resp }: { resp: ChatResponse }) {
 
   return (
     <div className="group flex gap-3 text-sm sm:text-base leading-relaxed text-[var(--ink)]">
-      {/* Assistant Avatar */}
-      <div className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full bg-[var(--dark)] text-[var(--on-dark-strong)] shadow-xs">
-        <IconBot className="h-4 w-4 sm:h-4 sm:w-4" />
-      </div>
-
       <div className="min-w-0 flex-1 space-y-2">
         <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
@@ -85,11 +80,25 @@ export function MessageBubble({ resp }: { resp: ChatResponse }) {
         </div>
 
         {/* Answer Content */}
-        <div className="font-answer text-sm sm:text-base leading-relaxed text-[var(--ink)] prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-[var(--ink)] prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-strong:text-[var(--ink)] prose-table:text-xs prose-th:font-semibold prose-td:py-1 prose-th:py-1 prose-pre:bg-[var(--dark)] prose-pre:text-[var(--on-dark-strong)] prose-code:text-[var(--accent-primary)]">
+        <div className={`font-answer text-sm sm:text-base leading-relaxed text-[var(--ink)] prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-[var(--ink)] prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-strong:text-[var(--ink)] prose-table:text-xs prose-th:font-semibold prose-td:py-1 prose-th:py-1 prose-pre:bg-[var(--dark)] prose-pre:text-[var(--on-dark-strong)] prose-code:text-[var(--accent-primary)] ${isStreaming ? "streaming-text" : ""}`}>
           <Markdown remarkPlugins={[remarkGfm]}>
             {resp.answer.replace(/\[chunk:[a-f0-9]+\]/g, "").trim()}
           </Markdown>
         </div>
+        {isStreaming && (
+          <style jsx>{`
+            .streaming-text :global(p:last-child)::after {
+              content: "▊";
+              animation: blink 0.8s step-end infinite;
+              color: var(--accent-primary);
+              font-weight: normal;
+            }
+            @keyframes blink {
+              0%, 100% { opacity: 1; }
+              50% { opacity: 0; }
+            }
+          `}</style>
+        )}
 
         {resp.domain === "schemes" && (
           <div className="mt-3">
@@ -118,18 +127,16 @@ export function MessageBubble({ resp }: { resp: ChatResponse }) {
           </button>
 
           {/* Read Aloud Button */}
-          {hasSegments && (
-            <button
-              type="button"
-              onClick={handleSpeak}
-              title={speaking ? t("common.stopReadAloud") : t("common.readAloud")}
-              className={`flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)] ${
-                speaking ? "text-[var(--accent-primary)] bg-[var(--accent-tint-soft)]" : "text-[var(--text-tertiary)]"
-              }`}
-            >
-              <IconSpeaker className={`h-3.5 w-3.5 ${speaking ? "animate-pulse" : ""}`} />
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={handleSpeak}
+            title={speaking ? t("common.stopReadAloud") : t("common.readAloud")}
+            className={`flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)] ${
+              speaking ? "text-[var(--accent-primary)] bg-[var(--accent-tint-soft)]" : "text-[var(--text-tertiary)]"
+            }`}
+          >
+            <IconSpeaker className={`h-3.5 w-3.5 ${speaking ? "animate-pulse" : ""}`} />
+          </button>
 
           {/* Thumbs Up Button */}
           <button

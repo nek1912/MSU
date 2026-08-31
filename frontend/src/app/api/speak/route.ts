@@ -21,21 +21,24 @@ export async function POST(req: Request) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 15000);
 
-    const backendForm = new FormData();
-    backendForm.append("text", text);
-    backendForm.append("language", language);
-
     const res = await fetch(`${backendUrl}/voice/speak`, {
       method: "POST",
-      body: backendForm,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, language }),
       signal: controller.signal,
     });
     clearTimeout(timer);
 
     if (res.ok) {
-      const audioBuffer = await res.arrayBuffer();
-      if (audioBuffer.byteLength > 100) {
-        return new Response(audioBuffer, {
+      const data = await res.json();
+      if (data.audio) {
+        // Convert hex to binary
+        const hex = data.audio;
+        const bytes = new Uint8Array(hex.length / 2);
+        for (let i = 0; i < hex.length; i += 2) {
+          bytes[i / 2] = parseInt(hex.substr(i, 2), 16);
+        }
+        return new Response(bytes, {
           headers: { "Content-Type": "audio/wav" },
         });
       }

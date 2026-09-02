@@ -7,7 +7,7 @@ import httpx
 from app.config import REQUEST_TIMEOUT_S, get_settings
 
 
-DEFAULT_MODEL = "openai/gpt-oss-20b"
+DEFAULT_MODEL = "llama-3.3-70b-versatile"
 DEFAULT_TEMPERATURE = 0
 
 DEFAULT_MAX_TOKENS = 1800
@@ -426,79 +426,6 @@ class AnswerGenerator:
             return True, []
 
         return False, reasons
-
-        def flush_block():
-            if current_block:
-                block = "\n".join(
-                    current_block
-                ).strip()
-
-                if block:
-                    blocks.append(block)
-
-                current_block.clear()
-
-        for raw_line in lines:
-
-            line = raw_line.strip()
-
-            if not line:
-                flush_block()
-                continue
-
-            if self._is_heading(line):
-                flush_block()
-                blocks.append(line)
-                continue
-
-            current_block.append(line)
-
-        flush_block()
-
-
-        factual_blocks: list[tuple[int, str]] = []
-
-        for index, block in enumerate(blocks, start=1):
-
-            if self._is_heading(block):
-                continue
-
-            if not self._has_substantive_text(block):
-                continue
-
-            factual_blocks.append(
-                (index, block)
-            )
-
-        if not factual_blocks:
-            reasons.append(
-                "No substantive factual content was found in the answer."
-            )
-
-            return False, reasons
-
-
-        uncited_blocks: list[int] = []
-
-        for block_index, block in factual_blocks:
-
-            if not CITATION_PATTERN.search(
-                block
-            ):
-                uncited_blocks.append(
-                    block_index
-                )
-
-        if uncited_blocks:
-            reasons.append(
-                "Substantive blocks without citations: "
-                f"{uncited_blocks}"
-            )
-
-
-        is_valid = not reasons
-
-        return is_valid, reasons
 
 
     def _citations_are_valid(

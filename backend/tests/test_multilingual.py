@@ -382,7 +382,7 @@ class TestMultilingualContract:
         assert set(body) == {"answer", "language", "domain", "intent", "entities",
                              "confidence", "confidence_level", "citations",
                              "abstained", "speech_text", "speech_segments",
-                             "follow_up_question"}
+                             "follow_up_question", "mode", "conversation_id"}
         assert body["language"] == "en"
 
     @respx.mock
@@ -400,7 +400,7 @@ class TestMultilingualContract:
         assert set(body) == {"answer", "language", "domain", "intent", "entities",
                              "confidence", "confidence_level", "citations",
                              "abstained", "speech_text", "speech_segments",
-                             "follow_up_question"}
+                             "follow_up_question", "mode", "conversation_id"}
         assert body["language"] == "hi"
 
     @respx.mock
@@ -418,5 +418,5 @@ class TestMultilingualContract:
         assert set(body) == {"answer", "language", "domain", "intent", "entities",
                              "confidence", "confidence_level", "citations",
                              "abstained", "speech_text", "speech_segments",
-                             "follow_up_question"}
+                             "follow_up_question", "mode", "conversation_id"}
         assert body["language"] == "gu"

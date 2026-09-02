@@ -22,6 +22,7 @@ _LANG_INSTRUCTION = {
     "gu": "CRITICAL: You MUST respond entirely in Gujarati using Gujarati script (ગુજરાતીમાં ઉત્તર આપો). Do NOT use English words or Latin script in your response.",
     "mr": "CRITICAL: You MUST respond entirely in Marathi using Devanagari script (मराठीत उत्तर द्या). Do NOT use English words or Latin script in your response.",
     "bn": "CRITICAL: You MUST respond entirely in Bengali using Bengali script (বাংলায় উত্তর দিন). Do NOT use English words or Latin script in your response.",
+    "ta": "CRITICAL: You MUST respond entirely in Tamil using Tamil script (தமிழில் பதிலளிக்கவும்). Do NOT use English words or Latin script in your response.",
 }
 
 _GENERAL_DISCLAIMER = {
@@ -38,8 +39,11 @@ _GENERAL_DISCLAIMER = {
           "पीएमएफबीवाय, किंवा वित्तीय साक्षरता यावर अधिकृत मार्गदर्शनासाठी त्या "
           "विषयांवर एक विशिष्ट प्रश्न विचारा.",
     "bn": "এটি একটি সাধারণ উত্তর যা সরকারি উৎস থেকে নয়। সহকারিতা নিয়ম, প্রকল্প, "
-          "পিএমএফবি঵াই, বা আর্থিক অন্তর্ভুক্তি সম্পর্কে আধিকারিক নির্দেশনার জন্য "
-          "এই বিষয়গুলোতে একটি নির্দিষ্ট প্রশ্ন করুন.",
+          "পিএমএফবিবাই, বা আর্থিক অন্তর্ভুক্তি সম্পর্কে আধিকারিক নির্দেশনার জন্য "
+          "এই বিষয়গুলোতে একটি নির্দিষ্ট প্রশ্ন করুন।",
+    "ta": "இது அரசு மூலங்களிலிருந்து வராத பொதுவான பதில். கூட்டுறவு விதிகள், "
+          "திட்டங்கள், பிஎம்எஃப்பிவை, அல்லது நிதி உள்ளடக்கம் பற்றிய அதிகாரப்பூர்வ "
+          "வழிகாட்டுதலுக்கு அந்த தலைப்புகள் பற்றிய குறிப்பிட்ட கேள்வியைக் கேளுங்கள்.",
 }
 
 GENERAL_SYSTEM_PROMPT = (
@@ -62,15 +66,18 @@ def build_system_prompt(language: str) -> str:
     lang = language if language in _LANG_INSTRUCTION else "en"
     return (
         f"{_LANG_INSTRUCTION[lang]} "
-        "You are a careful assistant that answers ONLY from the provided "
-        "numbered context chunks. Cite the source chunk after EVERY factual "
-        "sentence using EXACTLY this format: [chunk:ID] where ID is the "
-        "8-character hex prefix shown in the chunk's label (for example "
-        "[chunk:a1b2c3d4]). Use ONLY half-width square brackets and the literal "
-        "prefix 'chunk:'. Do NOT use full-width brackets 【】, parentheses, or "
-        "any other marker style. Never add outside knowledge. If the chunks do "
-        "not contain the answer, reply exactly: INSUFFICIENT_EVIDENCE. Please "
-        f"{_LANG_INSTRUCTION[lang]}."
+        "You are a helpful assistant that answers questions using the provided "
+        "context chunks below. The chunks contain official government documents "
+        "and authoritative sources. USE THEM to answer the question. "
+        "CRITICAL RULES:\n"
+        "1. Answer using information from the context chunks whenever possible.\n"
+        "2. After EVERY factual sentence, add a citation: [chunk:XXXXXXXX] where "
+        "XXXXXXXX is the 8-character hex ID from the chunk label (e.g., [chunk:a1b2c3d4]).\n"
+        "3. Use ONLY half-width square brackets []. Never use full-width brackets.\n"
+        "4. You MUST provide an answer if the chunks contain relevant information.\n"
+        "5. Only say INSUFFICIENT_EVIDENCE if the chunks truly contain NO relevant "
+        "information at all.\n"
+        f"{_LANG_INSTRUCTION[lang]}"
     )
 
 

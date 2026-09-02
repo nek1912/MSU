@@ -57,14 +57,33 @@ DOMAIN_KEYWORDS = {
         "pmfby",
         "fasal bima",
         "crop insurance",
-        "pradhan mantri fasal bima",
+        "pradhan mantri fasal",
         "crop insurance scheme",
+        "पीएमएफबीवाई",
+        "फसल बीमा",
+        "प्रधानमंत्री फसल",
     ],
 
     "pacs": [
         "pacs",
         "primary agricultural credit society",
         "primary agriculture credit society",
+        "प्राथमिक कृषि ऋण सहकारी समिति",
+    ],
+
+    "pacs_computerization": [
+        "computerization",
+        "digitization",
+        "digital",
+        "pacspl",
+        "ncip",
+        "ict",
+        "erp",
+        "pmu",
+        "micro-atm",
+        "core banking",
+        "pacs project",
+        "data readiness",
     ],
 
     "cooperative": [
@@ -76,6 +95,8 @@ DOMAIN_KEYWORDS = {
         "by-laws",
         "member rights",
         "society registration",
+        "सहकारी",
+        "समिति",
     ],
 
     "schemes": [
@@ -94,6 +115,8 @@ DOMAIN_KEYWORDS = {
         "government programme",
         "portal",
         "registration for",
+        "योजना",
+        "सरकारी योजना",
     ],
 
     "agriculture": [
@@ -105,6 +128,9 @@ DOMAIN_KEYWORDS = {
         "fertilizer",
         "irrigation",
         "kisan",
+        "किसान",
+        "खेती",
+        "फसल",
     ],
 
     "finlit": [
@@ -116,6 +142,14 @@ DOMAIN_KEYWORDS = {
         "savings",
         "financial",
         "account",
+        "jan dhan",
+        "pmjdy",
+        "rupay",
+        "kcc",
+        "kisan credit card",
+        "वित्तीय साक्षरता",
+        "ऋण",
+        "बैंकिंग",
     ],
 
     "grievance": [
@@ -126,6 +160,7 @@ DOMAIN_KEYWORDS = {
         "dispute",
         "redressal",
         "redress",
+        "शिकायत",
     ],
 
     "driving_licence": [

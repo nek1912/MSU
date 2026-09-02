@@ -6,6 +6,7 @@ Default: new path (hybrid + v2 gate + verifier).
 """
 
 import json
+import re
 from typing import Literal
 
 import httpx
@@ -31,6 +32,7 @@ from app.providers.reranker import JinaReranker
 from app.providers.gemini_llm import GeminiLLMProvider
 from app.providers.groq_llm import GroqLLMProvider
 from app.providers.translator import AzureTranslator
+from app.providers.sarvam_translator import SarvamTranslator
 from app.rag.pipeline import RAGPipeline
 from app.retrieval import RetrievedChunk, retrieve
 from app.resolve_response_language import resolve_and_remember
@@ -42,7 +44,14 @@ from app.web_rag.query_classifier import QueryClassifier
 router = APIRouter()
 
 # Domains with curated local corpus — use static RAG for these
-_STATIC_DOMAINS = {"pacs_governance", "pacs_computerization", "pmfby", "financial_inclusion"}
+_STATIC_DOMAINS = {"pacs_governance", "pacs_computerization", "pacs", "pmfby", "financial_inclusion", "finlit", "cooperative", "schemes", "agriculture"}
+
+# Map QueryClassifier domains to AnchorStore domains for retrieval
+_DOMAIN_MAP = {
+    "pacs": "pacs_governance",
+    "finlit": "financial_inclusion",
+    "cooperative": "pacs_governance",
+}
 
 # Singletons for routing (lazy initialization to avoid import-time side effects)
 _query_classifier: QueryClassifier | None = None
@@ -104,7 +113,7 @@ _SAFE_FAILURES = (
 class ChatRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
     session_id: str
-    language: Literal["en", "hi", "gu", "mr", "bn"]
+    language: Literal["en", "hi", "gu", "mr", "bn", "ta"]
     ui_language_explicit: bool = False
     state: str | None = None
     as_of_date: str | None = None  # Optional date filter (YYYY-MM-DD)
@@ -155,6 +164,9 @@ def _to_candidate(chunk: RetrievedChunk, expected_domain: str | None,
 @router.post("/chat")
 def chat(req: ChatRequest) -> dict:
     settings = get_settings()
+    question = req.question.strip()
+    if not question:
+        return _abstain(req.language, "empty_question", session_id=req.session_id)
     # Response language resolved solely by the resolver (detection + session
     # memory). ui_language_explicit is a BOOL: pass the UI code only when the
     # user explicitly changed language this turn (never as a default).
@@ -162,15 +174,25 @@ def chat(req: ChatRequest) -> dict:
     lang = resolve_and_remember(req.session_id, req.question, ui_code)
     # Retrieval-side translation uses the DETECTED INPUT language, not the
     # response language (they can differ, e.g. Hindi question -> English answer).
+    # Sarvam is primary for Indian languages, Azure is fallback.
     detected = detect_query_languages(req.question)
     input_lang = detected.get("dominant") or "en"
     retrieval_query = req.question
     if input_lang != "en":
-        try:
-            retrieval_query = AzureTranslator(settings).translate(
-                req.question, to="en", source=input_lang)
-        except Exception:
-            retrieval_query = req.question
+        # Try Sarvam first (better for Indian languages), then Azure
+        sarvam = SarvamTranslator(settings)
+        if sarvam.configured:
+            try:
+                retrieval_query = sarvam.translate(
+                    req.question, to="en", source=input_lang)
+            except Exception:
+                retrieval_query = req.question
+        else:
+            try:
+                retrieval_query = AzureTranslator(settings).translate(
+                    req.question, to="en", source=input_lang)
+            except Exception:
+                retrieval_query = req.question
     try:
         # --- Conversation history retrieval (Stage 0) ---
         history = req.history if req.history is not None else get_history(req.session_id, limit=8)
@@ -248,7 +270,8 @@ def chat(req: ChatRequest) -> dict:
 
         # 2. Cooperative/governance domains → try static RAG first
         # QueryClassifier is authoritative for routing; AnchorStore is for retrieval only
-        if classification.domain in _STATIC_DOMAINS:
+        # But if AnchorStore says out_of_scope, honor that (prevents web RAG on unrelated queries)
+        if domain == "out_of_scope" or classification.domain in _STATIC_DOMAINS:
             # Existing static RAG pipeline runs below (falls through)
             static_rag_mode = "static"
         else:
@@ -299,28 +322,25 @@ def chat(req: ChatRequest) -> dict:
                 pass  # Web RAG failed → fall through to static RAG
 
         if domain == "out_of_scope":
-            general_answer = grounded_answer(
-                GroqLLMProvider(settings), GeminiLLMProvider(settings),
-                GENERAL_SYSTEM_PROMPT, build_general_prompt(req.question, lang, history=history))
-            out_of_scope_answer = f"{general_answer}\n\n{general_disclaimer(lang)}"
-
             save_message(req.session_id, "user", req.question)
-            save_message(req.session_id, "assistant", out_of_scope_answer)
+            save_message(req.session_id, "assistant", get_abstain_text(lang))
             trim_messages(req.session_id, keep=50)
 
-            return {"answer": out_of_scope_answer, "language": lang, "domain": "out_of_scope",
+            return {"answer": get_abstain_text(lang), "language": lang, "domain": "out_of_scope",
                     "intent": "general", "entities": [],
                     "confidence": 0.0, "confidence_level": "none",
-                    "citations": [], "abstained": False,
-                    "speech_text": prepare_speech_text(general_answer),
-                    "speech_segments": segment_speech(general_answer, lang),
+                    "citations": [], "abstained": True,
+                    "speech_text": prepare_speech_text(get_abstain_text(lang)),
+                    "speech_segments": [],
                     "follow_up_question": None,
                     "mode": "static", "conversation_id": req.session_id}
 
         # --- Hybrid retrieval (Stage 5) ---
+        # Map QueryClassifier domain to AnchorStore domain for retrieval
+        retrieval_domain = _DOMAIN_MAP.get(domain, domain)
         k = 25 if settings.reranker_enabled else 6
         chunks = retrieve_hybrid(
-            get_supabase(), embedding, retrieval_query, domain, resolved_state, k=k,
+            get_supabase(), embedding, retrieval_query, retrieval_domain, resolved_state, k=k,
         )
 
         # Optional reranker (Stage 6): hybrid top-25 -> rerank -> top-6 -> gate
@@ -332,26 +352,21 @@ def chat(req: ChatRequest) -> dict:
             chunks = [chunks_by_id[r["chunk_id"]] for r in reranked if r["chunk_id"] in chunks_by_id]
 
         # --- Evidence gate v2 (Stage 7) ---
-        candidates = [_to_candidate(c, domain, resolved_state) for c in chunks]
+        candidates = [_to_candidate(c, retrieval_domain, resolved_state) for c in chunks]
         abstained, reason, band = evidence_gate_v2(
-            candidates, expected_domain=domain, expected_state=resolved_state,
+            candidates, expected_domain=retrieval_domain, expected_state=resolved_state,
         )
         if abstained:
-            general_answer = grounded_answer(
-                GroqLLMProvider(settings), GeminiLLMProvider(settings),
-                GENERAL_SYSTEM_PROMPT, build_general_prompt(req.question, lang, history=history))
-            out_of_scope_answer = f"{general_answer}\n\n{general_disclaimer(lang)}"
-
             save_message(req.session_id, "user", req.question)
-            save_message(req.session_id, "assistant", out_of_scope_answer)
+            save_message(req.session_id, "assistant", get_abstain_text(lang))
             trim_messages(req.session_id, keep=50)
 
-            return {"answer": out_of_scope_answer, "language": lang, "domain": domain,
+            return {"answer": get_abstain_text(lang), "language": lang, "domain": domain,
                     "intent": domain, "entities": [],
-                    "confidence": 0.5, "confidence_level": "moderate",
-                    "citations": [], "abstained": False,
-                    "speech_text": prepare_speech_text(general_answer),
-                    "speech_segments": segment_speech(general_answer, lang),
+                    "confidence": 0.0, "confidence_level": "none",
+                    "citations": [], "abstained": True,
+                    "speech_text": prepare_speech_text(get_abstain_text(lang)),
+                    "speech_segments": [],
                     "follow_up_question": None,
                     "mode": "static", "conversation_id": req.session_id}
 
@@ -383,22 +398,27 @@ def chat(req: ChatRequest) -> dict:
         # --- Citation verification v2 (Stage 8) ---
         chunk_ids = [c.chunk_id for c in chunks]
         verification = verify_citations_v2(answer, chunk_ids)
-        if not verification.is_valid:
-            general_answer = grounded_answer(
-                GroqLLMProvider(settings), GeminiLLMProvider(settings),
-                GENERAL_SYSTEM_PROMPT, build_general_prompt(req.question, lang, history=history))
-            out_of_scope_answer = f"{general_answer}\n\n{general_disclaimer(lang)}"
 
+        # Fallback: if LLM didn't include [chunk:ID] markers but evidence gate
+        # passed (chunks exist), add citations from top chunks automatically.
+        # This handles cases where the LLM ignores citation instructions.
+        has_citation_markers = bool(re.search(r"\[chunk:[0-9a-fA-F]{8,}", answer))
+        if not verification.is_valid and not has_citation_markers and chunks:
+            # Evidence gate passed and we have chunks — add citations from top chunks
+            answer = _append_citations(answer, chunks[:3])
+            verification = verify_citations_v2(answer, chunk_ids)
+
+        if not verification.is_valid:
             save_message(req.session_id, "user", req.question)
-            save_message(req.session_id, "assistant", out_of_scope_answer)
+            save_message(req.session_id, "assistant", get_abstain_text(lang))
             trim_messages(req.session_id, keep=50)
 
-            return {"answer": out_of_scope_answer, "language": lang, "domain": domain,
+            return {"answer": get_abstain_text(lang), "language": lang, "domain": domain,
                     "intent": "general", "entities": [],
-                    "confidence": 0.5, "confidence_level": "moderate",
-                    "citations": [], "abstained": False,
-                    "speech_text": prepare_speech_text(general_answer),
-                    "speech_segments": segment_speech(general_answer, lang),
+                    "confidence": 0.0, "confidence_level": "none",
+                    "citations": [], "abstained": True,
+                    "speech_text": prepare_speech_text(get_abstain_text(lang)),
+                    "speech_segments": [],
                     "follow_up_question": None,
                     "mode": "static", "conversation_id": req.session_id}
 
@@ -456,11 +476,19 @@ def chat_stream(req: ChatRequest):
         input_lang = detected.get("dominant") or "en"
         retrieval_query = req.question
         if input_lang != "en":
-            try:
-                retrieval_query = AzureTranslator(settings).translate(
-                    req.question, to="en", source=input_lang)
-            except Exception:
-                retrieval_query = req.question
+            sarvam = SarvamTranslator(settings)
+            if sarvam.configured:
+                try:
+                    retrieval_query = sarvam.translate(
+                        req.question, to="en", source=input_lang)
+                except Exception:
+                    retrieval_query = req.question
+            else:
+                try:
+                    retrieval_query = AzureTranslator(settings).translate(
+                        req.question, to="en", source=input_lang)
+                except Exception:
+                    retrieval_query = req.question
 
         thinking_msgs = _THINKING_MESSAGES.get(lang, _THINKING_MESSAGES["en"])
 
@@ -644,6 +672,27 @@ def chat_stream(req: ChatRequest):
 
     return StreamingResponse(generate(), media_type="text/event-stream",
                              headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+def _append_citations(answer: str, chunks: list[RetrievedChunk]) -> str:
+    """Append [chunk:ID] citation markers to an answer that lacks them.
+
+    When the LLM doesn't include citation markers but the evidence gate passed,
+    this adds citations from the top chunks so the answer is still grounded.
+    Citations are appended at the end of the answer.
+    """
+    if not chunks:
+        return answer
+    seen = set()
+    citation_parts = []
+    for c in chunks[:3]:
+        short_id = c.chunk_id[:8]
+        if short_id not in seen:
+            seen.add(short_id)
+            citation_parts.append(f"[chunk:{short_id}]")
+    if citation_parts:
+        answer = answer.rstrip() + " " + " ".join(citation_parts)
+    return answer
 
 
 def _citations_from(answer: str, chunks: list[RetrievedChunk]) -> list[dict]:

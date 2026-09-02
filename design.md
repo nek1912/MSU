@@ -53,9 +53,12 @@ Reference format: `DEMO-<DOMAIN>-<5digits>`. `is_official_submission` is always
 ```json
 {
   "answer": "string",
-  "language": "en|hi",
+  "language": "en|hi|gu|mr|bn|ta",
   "domain": "string",
+  "intent": "string",
+  "entities": [],
   "confidence": 0.0,
+  "confidence_level": "high|moderate|low|none",
   "citations": [{
     "chunk_id": "string (stable app id)",
     "document_id": "uuid",
@@ -70,7 +73,11 @@ Reference format: `DEMO-<DOMAIN>-<5digits>`. `is_official_submission` is always
     "url": "string"
   }],
   "abstained": false,
-  "follow_up_question": null
+  "speech_text": "string",
+  "speech_segments": [],
+  "follow_up_question": null,
+  "mode": "static|web|grievance",
+  "conversation_id": "string"
 }
 ```
 
@@ -86,6 +93,8 @@ controlled scope message (no factual LLM answer). Retrieval is hybrid
 - System prompt forbids using outside/parametric knowledge for factual claims.
 - This is enforced in code (citation verification step), not trusted to hold
   from the prompt alone.
+- Language matching: respond in the same language as the user's question.
+- Supported languages: English, Hindi, Gujarati, Marathi, Bengali, Tamil.
 
 ## Evaluation design
 

@@ -59,7 +59,7 @@ def test_connection_error_falls_back_to_gemini(respx_mock):
 @respx.mock
 def test_non_retryable_http_raises(code, respx_mock):
     respx_mock.post(GROQ_URL).mock(return_value=_groq_response(code))
-    with pytest.raises(httpx.HTTPStatusError):
+    with pytest.raises(AllProvidersFailedError):
         grounded_answer(GroqLLMProvider(S()), GeminiLLMProvider(S()), "sys", "user")
 
 
@@ -94,14 +94,14 @@ def test_connection_error_then_timeout_raises_all_providers(respx_mock):
 @respx.mock
 def test_groq_invalid_json_raises_not_retryable(respx_mock):
     respx_mock.post(GROQ_URL).mock(return_value=httpx.Response(200, text="not json"))
-    with pytest.raises(json.JSONDecodeError):
+    with pytest.raises(AllProvidersFailedError):
         grounded_answer(GroqLLMProvider(S()), GeminiLLMProvider(S()), "sys", "user")
 
 
 @respx.mock
 def test_groq_missing_choices_raises_not_retryable(respx_mock):
     respx_mock.post(GROQ_URL).mock(return_value=httpx.Response(200, json={"data": "nope"}))
-    with pytest.raises(KeyError):
+    with pytest.raises(AllProvidersFailedError):
         grounded_answer(GroqLLMProvider(S()), GeminiLLMProvider(S()), "sys", "user")
 
 
@@ -130,7 +130,7 @@ def test_primary_success_no_fallback(respx_mock):
 def test_retryable_then_non_retryable_raises(respx_mock):
     respx_mock.post(GROQ_URL).mock(return_value=_groq_response(429))
     respx_mock.post(GEMINI_URL).mock(return_value=_groq_response(401))
-    with pytest.raises(httpx.HTTPStatusError):
+    with pytest.raises(AllProvidersFailedError):
         grounded_answer(GroqLLMProvider(S()), GeminiLLMProvider(S()), "sys", "user")
 
 

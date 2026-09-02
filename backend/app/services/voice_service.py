@@ -47,7 +47,7 @@ class VoiceService:
 
     async def text_to_speech_segments(self, segments: list[dict]) -> bytes:
         """Convert text segments to multi-voice speech with fallback."""
-        for name, provider in self.providers:
+        for name, provider in self.tts_providers:
             try:
                 return await provider.text_to_speech_segments(segments)
             except Exception as e:

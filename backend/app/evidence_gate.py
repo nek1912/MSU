@@ -9,6 +9,7 @@ composable, testable gate that uses contract types.
 
 from __future__ import annotations
 
+from app.config import MIN_CHUNKS_ABOVE_SECONDARY, SECONDARY_THRESHOLD, TOP1_THRESHOLD
 from app.contracts import (
     AbstentionReason,
     ConfidenceBand,
@@ -140,7 +141,12 @@ def evidence_gate_v2(
     if reason:
         return True, reason, ConfidenceBand.LOW
 
-    reason = check_evidence_sufficient(candidates)
+    reason = check_evidence_sufficient(
+        candidates,
+        min_top1=TOP1_THRESHOLD,
+        min_secondary=SECONDARY_THRESHOLD,
+        min_supporting=MIN_CHUNKS_ABOVE_SECONDARY,
+    )
     if reason:
         return True, reason, ConfidenceBand.LOW
 

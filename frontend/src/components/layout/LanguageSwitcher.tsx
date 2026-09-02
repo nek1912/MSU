@@ -8,6 +8,9 @@ const NAMES: Record<Locale, string> = {
   en: "English",
   hi: "हिंदी",
   gu: "ગુજરાતી",
+  mr: "मराठी",
+  bn: "বাংলা",
+  ta: "தமிழ்",
 };
 
 export function LanguageSwitcher({ className = "" }: { className?: string }) {

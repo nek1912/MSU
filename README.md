@@ -1,8 +1,8 @@
-# Multilingual Cooperative Governance & Legal Assistance Chatbot
+# Sahakarita — Multilingual Cooperative Governance & Legal Assistance Chatbot
 
-Evidence-grounded, multilingual (English + Hindi) citizen-assistance PWA for
-cooperative governance, legal guidance, schemes, PMFBY, financial literacy, and
-grievance redressal.
+Evidence-grounded, multilingual (English + Hindi + Gujarati + Marathi + Bengali + Tamil)
+citizen-assistance PWA for cooperative governance, legal guidance, schemes, PMFBY,
+financial literacy, and grievance redressal.
 
 > **Core principle:** the LLM is **never** the source of truth. Every factual
 > answer must be grounded in retrieved official documents with verifiable
@@ -14,13 +14,15 @@ grievance redressal.
 ## What It Does
 
 - Answers questions from official government sources with verifiable citations
-- Supports English + Hindi text chat (Hindi voice is Tier 2 / not yet enabled)
+- **6 languages**: English, Hindi, Gujarati, Marathi, Bengali, Tamil
 - Routes queries across 7 domains: cooperative, PACS, schemes, PMFBY, agriculture,
   financial literacy, grievance
 - Applies jurisdiction filtering (central + selected state — currently Gujarat)
+- **Hybrid retrieval**: dense vector search (pgvector) + lexical search (RRF fusion)
 - Abstains when evidence is insufficient — never guesses
 - Prototype grievance workflow with follow-up questions and status lookup
   (`is_official_submission: false` — no real government integration)
+- Voice input/output via Sarvam AI (Indic language support)
 - Responsive PWA (desktop + mobile)
 
 ---
@@ -49,20 +51,15 @@ low-confidence or uncited result into an answer.
 
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js + React + Tailwind CSS, PWA |
-| Backend | FastAPI (Python 3.11+) on Render Free |
+| Frontend | Next.js 16 + React 19 + Tailwind CSS 4, PWA |
+| Backend | FastAPI (Python 3.11+) |
 | Database | Supabase Postgres + pgvector (HNSW cosine index) |
-| Embeddings | **Jina Embeddings v3** (`jina-embeddings-v3`), 768d — `retrieval.passage` / `retrieval.query` task types |
+| Embeddings | Jina Embeddings v3 (`jina-embeddings-v3`), 768d |
 | LLM | Groq (Llama 3.3 70B) primary, Gemini 2.5 Flash fallback |
-| Reranker | Jina `jina-reranker-v2-base-multilingual` (wired, disabled by default) |
-| Voice | Bhashini STT/TTS → Sarvam/Azure → Groq Whisper → text-only (Tier 2) |
-| Document parsing | **MinerU** `content_list_v2.json` (real page numbers + tables) |
-| Eval | Supabase-backed retrieval eval, pytest, vitest |
-
-> **Note on stack drift:** the frozen `CLAUDE.md` still names Docling + Gemini
-> embeddings. The working pipeline was changed during the RAG rebuild (logged in
-> `PROJECT_STATUS.md`): parsing is MinerU `content_list_v2.json` and embeddings are
-> Jina v3. Update `CLAUDE.md` if this becomes permanent.
+| Reranker | Gemini 2.5 Flash Lite (wired, disabled by default) |
+| Voice | Sarvam AI (STT + TTS) primary, Azure fallback, text-only final |
+| Document parsing | MinerU `content_list_v2.json` |
+| Eval | Supabase-backed retrieval eval, pytest |
 
 ---
 
@@ -80,14 +77,19 @@ backend/
     citation_verifier.py citation→chunk→document→page resolution
     contracts.py         frozen API response contract
     generation.py        grounded answer generation
+    llm_fallback.py      Groq → Gemini fallback chain
+    config.py            all thresholds and settings
     providers/           llm, embeddings, reranker, voice adapters (timeout + fallback)
+    rag/                 web-grounded RAG pipeline (Tavily + Gemini reranker)
+    services/            voice_service.py (Sarvam → Azure → text-only)
+    web_rag/             tavily_client.py (dual-key rotation)
     data/                keyword_rules.json, domain_anchors.json
   seed_parser.py         MinerU content_list_v2.json → canonical chunk JSONL
   ingest_seed.py         clear + Jina-v3 embed + insert into Supabase
   migrations/            0001_init.sql, 0005_rag_contracts.sql, combined_migration.sql
-  tests/                 pytest (domain routing, retrieval, evidence gate, citations)
+  tests/                 pytest (417 tests — domain routing, retrieval, evidence gate, citations)
 
-frontend/                Next.js PWA (chat, grievance, citations UI)
+frontend/                Next.js PWA (chat, grievance, citations UI, 6 languages)
 
 corpus/
   seeds/
@@ -102,12 +104,8 @@ eval/
   run_retrieval_eval.py  Recall@1/3/5/10/20 + MRR vs live Supabase
   validate_retrieval.py  page/citation/metadata/taxonomy checks
   populate_gold_chunk_ids.py  localizes relevant chunk per query (retriever-anchored)
-  reranker_smoke.py      reranker path smoke test
-  run_gate2.py           aggregated Gate-2 report
-  gate2_config.yaml      frozen targets
 
 docs/                    foundation / repair / e2e reports
-tests/                   cross-cutting tests (domain taxonomy, etc.)
 ```
 
 ---
@@ -119,7 +117,7 @@ tests/                   cross-cutting tests (domain taxonomy, etc.)
 - Python 3.11+
 - Node.js 18+
 - Supabase project (free tier) with pgvector
-- API keys: Supabase, Jina (embeddings + reranker), Groq, Gemini
+- API keys: Supabase, Jina (embeddings), Groq, Gemini, Sarvam AI
 
 ### Backend
 
@@ -145,10 +143,12 @@ See `.env.example`. Key variables:
 ```
 SUPABASE_URL=             # Supabase project URL
 SUPABASE_SERVICE_KEY=     # Supabase service role key
-JINA_API_KEY=            # Jina embeddings + reranker
-GROQ_API_KEY=            # Groq LLM
-GEMINI_API_KEY=          # Gemini fallback LLM
-RERANKER_ENABLED=false   # reranker is wired but OFF (see PROJECT_STATUS)
+JINA_API_KEY=             # Jina embeddings
+GROQ_API_KEY=             # Groq LLM
+GEMINI_API_KEY=           # Gemini fallback LLM
+SARVAM_API_KEY=           # Sarvam AI voice (STT + TTS)
+TAVILY_API_KEY=           # Tavily web search (dynamic RAG)
+RERANKER_ENABLED=false    # reranker is wired but OFF (see PROJECT_STATUS)
 ```
 
 ### Database Setup
@@ -173,72 +173,38 @@ python backend/ingest_seed.py     # embed (Jina v3) + insert into Supabase
 ```
 
 Current frozen corpus: **5 documents, 2,188 embedded chunks (768d Jina v3)**.
-Do not modify chunks mid-evaluation — re-run `populate_gold_chunk_ids.py` after any re-ingest.
 
 ---
 
-## Evaluation
+## Supported Languages
 
-All eval scripts read `backend/.env` for the live Supabase + Jina connection.
-
-```bash
-# Rebuild gold chunk mapping (localizes relevant chunk per query)
-python populate_gold_chunk_ids.py
-
-# Retrieval quality (Recall@1/3/5/10/20 + MRR, domain acc, contamination)
-python eval/run_retrieval_eval.py --output eval/retrieval_report.json
-
-# Page / citation / metadata / taxonomy checks
-python eval/validate_retrieval.py
-
-# Reranker path smoke test (requires RERANKER_ENABLED=true)
-python eval/reranker_smoke.py
-
-# Aggregated Gate-2 report
-python eval/run_gate2.py
-```
-
-### Latest retrieval baseline (frozen 2,188-chunk corpus, 2026-08-29)
-
-Measured over 245 gold cases (40 answerable: 18 pacs_governance + 22 pmfby).
-Queries embedded with `retrieval.query` (mirrors `/chat`). Gold is
-**retriever-anchored** (weak supervision) — treat as a regression baseline, not a
-final target.
-
-| Metric | Value | Frozen target |
+| Language | Code | Status |
 |---|---|---|
-| Recall@1 | **0.850** | 0.40 |
-| Recall@3 | **0.950** | 0.60 |
-| Recall@5 | **0.975** | 0.80 |
-| Recall@10 | 0.975 | — |
-| MRR | **0.904** | 0.50 |
-| Domain accuracy | 0.950 | 0.85 |
-| Jurisdiction contamination | 0 | 0 |
+| English | `en` | Full support |
+| Hindi | `hi` | Full support |
+| Gujarati | `gu` | Full support |
+| Marathi | `mr` | Full support |
+| Bengali | `bn` | Full support |
+| Tamil | `ta` | Full support |
 
-Versus the old 226-chunk baseline (Recall@5 = 0.625): a large improvement from the
-MinerU + Jina-v3 strategy. The reranker is **left OFF** because on this gold it
-lowers final top-6 Recall@1 (0.85 → 0.50); revisit after curating real gold.
-
-> See `PROJECT_STATUS.md` for the full, current status, known caveats, and the
-> next-action list (manual gold curation, confidence calibration, multilingual, voice).
+All UI strings translated. Backend responds in the same language as the question.
 
 ---
 
-## API
+## RAG Pipelines
 
-| Endpoint | Method | Description |
-|---|---|---|
-| `/chat` | POST | Text chat with RAG, citations, abstention |
-| `/voice/transcribe` | POST | Audio → text (Tier 2) |
-| `/voice/speak` | POST | Text → audio (Tier 2) |
-| `/grievances` | POST | Create grievance |
-| `/grievances/{reference}` | GET | Lookup grievance status |
-| `/sources/{id}` | GET | Source metadata |
-| `/health` | GET | Health check |
-| `/health/providers` | GET | Provider status |
+### Static RAG (Retrieval-Augmented Generation)
+- Hybrid retrieval: dense vector search (pgvector) + lexical search (RRF fusion)
+- Domain + jurisdiction filtering before candidate ranking
+- Evidence gate with configurable thresholds
+- Citation verification against retrieved chunks
+- Abstains when evidence insufficient
 
-Chat response fields: `answer, language, domain, confidence, citations[], abstained,
-follow_up_question`.
+### Dynamic RAG (Web-Grounded)
+- Tavily web search for current information
+- Gemini reranker for semantic scoring
+- Answer generation with `llama-3.3-70b-versatile`
+- Language-matching: responds in same language as question
 
 ---
 

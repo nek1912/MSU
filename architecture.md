@@ -113,9 +113,9 @@ integration, language-provider integration, grievance workflow, error handling,
 fallbacks.
 
 ### 6.3 Language layer
-Primary: Bhashini (Hindi STT, Hindi↔English translation, Hindi TTS). Fallback:
-Groq Whisper for STT. Final fallback: text-only mode. This is a Tier 2 (post-MVP)
-component — the MVP ships text-only.
+Primary: Sarvam AI (Hindi STT, Hindi TTS, multilingual Indic support). Fallback:
+Azure Cognitive Services (disabled until API key). Final fallback: text-only mode.
+Voice is now enabled with Sarvam API key configured.
 
 ### 6.4 Retrieval layer
 Supabase Postgres + pgvector, HNSW index (cosine). Retrieval is **hybrid**:
@@ -164,11 +164,11 @@ resolution → domain+state filter → top-k retrieval → evidence threshold
 → LLM → citation verification → answer / abstention
 ```
 
-## 8. Data flow: voice (Tier 2)
+## 8. Data flow: voice
 ```
-audio → Bhashini STT → text → normal chat pipeline → answer → Bhashini TTS → audio
+audio → Sarvam STT → text → normal chat pipeline → answer → Sarvam TTS → audio
 ```
-Fallback: `Bhashini STT (failure) → Groq Whisper (failure) → text input`
+Fallback: `Sarvam STT (failure) → Azure STT (failure) → text input`
 
 ## 9. Data flow: grievance
 ```
@@ -191,7 +191,8 @@ probability.
 ## 11. Fallback chains
 
 ```
-STT:  Bhashini → Groq Whisper → text-only
+STT:  Sarvam → Azure → text-only
+TTS:  Sarvam → Azure → text-only
 LLM:  Groq → Gemini → safe "unavailable" response
 ```
 

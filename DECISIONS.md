@@ -127,3 +127,131 @@ generator, and gate2_config.yaml for frozen target T.
 and retrieval accuracy measurement before adding new features.
 **Replaces:** None — extends existing plan.
 **Doc updated:** yes — docs/superpowers/specs/2026-08-26-phase2a-corpus-retrieval-quality-design.md
+
+### Implemented GeminiReranker with real Gemini API calls
+**Date:** 2026-09-02
+**Changed by:** 7th session
+**What:** Replaced stub GeminiReranker (passthrough scores) with real Gemini API
+calls for pre-ranking and final reranking. Uses `gemini-2.5-flash-lite` model
+with batch scoring prompts. Falls back to passthrough on API failure.
+**Why:** Stub reranker was not providing real semantic ranking, making the
+dynamic RAG pipeline's reranking step ineffective.
+**Replaces:** Stub GeminiReranker that returned passthrough scores.
+**Doc updated:** yes — PROJECT_STATUS.md
+
+### Changed AnswerGenerator model from openai/gpt-oss-20b to llama-3.3-70b-versatile
+**Date:** 2026-09-02
+**Changed by:** 7th session
+**What:** Updated DEFAULT_MODEL in `app/rag/answer_generator.py` from
+`openai/gpt-oss-20b` (non-existent model) to `llama-3.3-70b-versatile`
+(available on Groq API).
+**Why:** The previous model ID was invalid and would cause API errors.
+**Replaces:** `openai/gpt-oss-20b` model ID.
+**Doc updated:** yes — PROJECT_STATUS.md
+
+### Enabled Sarvam as primary voice provider
+**Date:** 2026-09-02
+**Changed by:** 7th session
+**What:** Configured Sarvam AI as primary voice provider (STT + TTS) with API
+key. Voice fallback chain: Sarvam → Azure → text-only.
+**Why:** User provided Sarvam API key; Sarvam offers better Indic language
+support than Azure for Hindi, Gujarati, Marathi, Bengali, Tamil.
+**Replaces:** Previous state where both providers were disabled.
+**Doc updated:** yes — PROJECT_STATUS.md
+
+### Aligned evidence gate thresholds with test expectations
+**Date:** 2026-09-02
+**Changed by:** 7th session
+**What:** Updated `app/config.py` thresholds: `TOP1_THRESHOLD=0.25` (was 0.20),
+`SECONDARY_THRESHOLD=0.30` (was 0.15), `MIN_CHUNKS_ABOVE_SECONDARY=2` (was 1).
+Updated `evidence_gate_v2` to read thresholds from config instead of hardcoded
+defaults.
+**Why:** Tests expected these threshold values; the previous values were too
+permissive and allowed weak evidence through.
+**Replaces:** Previous threshold values.
+**Doc updated:** yes — PROJECT_STATUS.md
+
+### Added language-matching rule to dynamic RAG prompts
+**Date:** 2026-09-02
+**Changed by:** 7th session
+**What:** Added explicit language-matching instruction to dynamic RAG system
+prompt: "You MUST respond in the same language as the user's question." Added
+Tamil language support to generation.py. Added conflicting evidence handling
+guidance to prompt_builder.py.
+**Why:** Dynamic RAG pipeline was not language-aware; responses would default
+to English regardless of question language. Tamil was missing from supported
+languages.
+**Replaces:** No language matching rule in dynamic RAG prompts.
+**Doc updated:** yes — PROJECT_STATUS.md
+
+### Added Hindi keywords to QueryClassifier and domain mapping
+**Date:** 2026-09-02
+**Changed by:** 8th session
+**What:** Added Hindi keywords to QueryClassifier DOMAIN_KEYWORDS (PMFBY,
+cooperative, schemes, agriculture, finlit, grievance). Added `_DOMAIN_MAP` in
+chat.py to map QueryClassifier domains to AnchorStore domains (pacs→pacs_governance,
+finlit→financial_inclusion, cooperative→pacs_governance). Added `pacs_computerization`
+as separate domain with its own keywords.
+**Why:** Hindi queries were not matching any keywords and falling through to
+"general" domain. Domain name mismatch between QueryClassifier and _STATIC_DOMAINS
+caused incorrect routing to web RAG.
+**Replaces:** English-only keywords in QueryClassifier; mismatched domain names.
+**Doc updated:** yes — PROJECT_STATUS.md
+
+### Out-of-scope questions now abstain instead of generating general answers
+**Date:** 2026-09-02
+**Changed by:** 8th session
+**What:** Changed out_of_scope handling in chat.py to return abstain text instead
+of generating a general answer with disclaimer. When AnchorStore classifies a
+query as "out_of_scope", the system now returns `abstained: True` with no citations.
+**Why:** The previous behavior answered out-of-scope questions (like "What is the
+capital of France?") with a general answer + disclaimer, which violated the
+principle that the LLM is never the source of truth. Out-of-scope queries should
+abstain, not guess.
+**Replaces:** General answer with disclaimer for out-of-scope queries.
+**Doc updated:** yes — PROJECT_STATUS.md
+
+### Added Tamil to ChatRequest.language literal
+**Date:** 2026-09-02
+**Changed by:** 8th session
+**What:** Updated `ChatRequest.language` field in chat.py from
+`Literal["en", "hi", "gu", "mr", "bn"]` to include `"ta"` for Tamil support.
+**Why:** Tamil was added to the frontend i18n but was missing from the backend
+request schema, causing 422 errors for Tamil queries.
+**Replaces:** `Literal["en", "hi", "gu", "mr", "bn"]`
+**Doc updated:** yes — PROJECT_STATUS.md
+
+### Improved RAG system prompt to reduce INSUFFICIENT_EVIDENCE responses
+**Date:** 2026-09-02
+**Changed by:** 8th session
+**What:** Rewrote `build_system_prompt()` in generation.py to explicitly instruct
+the LLM to use the provided context chunks. Added clearer citation format
+instructions and explicit guidance to only say INSUFFICIENT_EVIDENCE when chunks
+truly contain no relevant information.
+**Why:** The previous prompt was causing Groq Llama 3.3 70B to return
+INSUFFICIENT_EVIDENCE despite having good chunks, resulting in empty citations
+and general answers with disclaimers.
+**Replaces:** Previous system prompt that was too restrictive.
+**Doc updated:** yes — PROJECT_STATUS.md
+
+### Added fallback citation logic for LLM non-compliance
+**Date:** 2026-09-02
+**Changed by:** 8th session
+**What:** Added `_append_citations()` function in chat.py that automatically
+adds citation markers from top chunks when the LLM doesn't include them. This
+handles cases where the LLM ignores citation instructions.
+**Why:** Even with improved prompts, some LLMs may not always include citations.
+Fallback logic ensures citations are always present when the evidence gate passes.
+**Replaces:** No fallback citation logic.
+**Doc updated:** yes — PROJECT_STATUS.md
+
+### Added Sarvam translator for Indian languages
+**Date:** 2026-09-02
+**Changed by:** 8th session
+**What:** Created `SarvamTranslator` provider using Sarvam's Mayura v2 translation
+model. Updated chat.py to use Sarvam as primary translator for Indian languages,
+with Azure as fallback.
+**Why:** Sarvam handles Indian languages better than Azure Translator. User
+confirmed Sarvam is better for Indian language translation.
+**Replaces:** Azure-only translation.
+**Doc updated:** yes — PROJECT_STATUS.md

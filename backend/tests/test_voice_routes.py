@@ -18,18 +18,22 @@ def test_voice_routes_import():
 
 def test_transcribe_returns_503_when_no_providers():
     """Test that /voice/transcribe returns 503 when no voice providers are configured."""
-    r = client.post("/voice/transcribe", json={"audio": "dGVzdA==", "language": "en"})
-    assert r.status_code == 503
-    body = r.json()
-    assert "No voice providers available" in body["detail"]
+    with patch("app.routes.voice.voice_service") as mock_vs:
+        mock_vs.speech_to_text = AsyncMock(side_effect=VoiceUnavailableError("No voice providers available"))
+        r = client.post("/voice/transcribe", json={"audio": "dGVzdA==", "language": "en"})
+        assert r.status_code == 503
+        body = r.json()
+        assert "No voice providers available" in body["detail"]
 
 
 def test_speak_returns_503_when_no_providers():
     """Test that /voice/speak returns 503 when no voice providers are configured."""
-    r = client.post("/voice/speak", json={"text": "Hello world", "language": "en"})
-    assert r.status_code == 503
-    body = r.json()
-    assert "No voice providers available" in body["detail"]
+    with patch("app.routes.voice.voice_service") as mock_vs:
+        mock_vs.text_to_speech = AsyncMock(side_effect=VoiceUnavailableError("No voice providers available"))
+        r = client.post("/voice/speak", json={"text": "Hello world", "language": "en"})
+        assert r.status_code == 503
+        body = r.json()
+        assert "No voice providers available" in body["detail"]
 
 
 def test_transcribe_returns_503_when_all_providers_fail():

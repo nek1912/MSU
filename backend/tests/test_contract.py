@@ -53,8 +53,8 @@ def _assert_shape(body: dict):
     assert set(body) == {"answer", "language", "domain", "intent", "entities",
                           "confidence", "confidence_level", "citations",
                           "abstained", "speech_text", "speech_segments",
-                          "follow_up_question"}
-    assert len(body) == 12
+                          "follow_up_question", "mode", "conversation_id"}
+    assert len(body) == 14
     assert isinstance(body["answer"], str) and body["answer"]
     assert isinstance(body["language"], str)
     assert body["language"] in ("en", "hi")
@@ -130,16 +130,10 @@ def test_empty_question_returns_422():
 
 
 def test_whitespace_only_question_returns_200_abstains():
-    respx_mock = respx.mock()
-    with respx_mock:
-        respx_mock.post(EMBED_URL).mock(
-            return_value=httpx.Response(200, json={"embedding": {"values": [0.5] * 768}}))
-        respx_mock.post(httpx.URL("http://testsupa" + RPC_PATH)).mock(
-            return_value=httpx.Response(200, json=[]))
-        r = client.post("/chat", json={"question": "   ", "session_id": "s", "language": "en"})
-        assert r.status_code == 200
-        body = r.json()
-        _assert_abstained(body)
+    r = client.post("/chat", json={"question": "   ", "session_id": "s", "language": "en"})
+    assert r.status_code == 200
+    body = r.json()
+    _assert_abstained(body)
 
 
 def test_over_2000_chars_returns_422():

@@ -90,6 +90,12 @@ function fallback(lang: Locale): ChatResponse {
         ? "सेवा अभी उपलब्ध नहीं है।"
         : lang === "gu"
         ? "સેવા હમણાં ઉપલબ્ધ નથી."
+        : lang === "mr"
+        ? "सेवा सध्या उपलब्ध नाही."
+        : lang === "bn"
+        ? "সেবা এখন পর্যন্ত পাওয়া যাচ্ছে না।"
+        : lang === "ta"
+        ? "சேவை தற்போது கிடைக்கவில்லை."
         : "Service unavailable right now.",
     language: lang,
     domain: "unknown",
@@ -499,7 +505,7 @@ export function ChatWindow() {
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            title="Open Sidebar"
+            title={t("chat.openSidebar")}
             className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
           >
             <IconSidebar className="h-5 w-5" />
@@ -509,7 +515,7 @@ export function ChatWindow() {
           <button
             type="button"
             onClick={handleNewChat}
-            title="New Chat"
+            title={t("chat.newChat")}
             className="mt-2 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
           >
             <IconEdit className="h-5 w-5" />
@@ -543,7 +549,7 @@ export function ChatWindow() {
             <Link
               href="/"
               className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--dark)] text-[var(--on-dark-strong)] shadow-xs transition-transform hover:scale-105"
-              title="Sahakarita Home"
+              title={t("chat.home")}
             >
               <IconBot className="h-5 w-5" />
             </Link>
@@ -565,7 +571,7 @@ export function ChatWindow() {
             <button
               type="button"
               onClick={() => setSidebarOpen(false)}
-              title="Close Sidebar"
+              title={t("chat.closeSidebar")}
               className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
             >
               <IconSidebar className="h-4.5 w-4.5" />
@@ -577,7 +583,7 @@ export function ChatWindow() {
             <button
               type="button"
               onClick={() => setShowSearchInput((s) => !s)}
-              title="Search History"
+              title={t("chat.searchHistory")}
               className={`flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] ${
                 showSearchInput ? "bg-[var(--cream-2)] text-[var(--accent-primary)]" : "text-[var(--text-body)]"
               }`}
@@ -589,7 +595,7 @@ export function ChatWindow() {
             <button
               type="button"
               onClick={handleNewChat}
-              title="New Chat"
+              title={t("chat.newChat")}
               className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
             >
               <IconEdit className="h-4 w-4" />
@@ -606,7 +612,7 @@ export function ChatWindow() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search history..."
+                placeholder={t("chat.searchPlaceholder")}
                 className="w-full bg-transparent px-2 text-xs text-[var(--ink)] placeholder:text-[var(--text-faint)] focus:outline-none"
               />
               {searchQuery && (
@@ -632,7 +638,7 @@ export function ChatWindow() {
               className="flex w-full items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-left text-xs font-semibold transition-colors hover:bg-[var(--cream-2)] text-[var(--ink)]"
             >
               <IconPlus className="h-4 w-4 text-[var(--accent-primary)] shrink-0" />
-              <span>{t("common.newSession") || "New chat"}</span>
+              <span>{t("common.newSession")}</span>
             </button>
           </div>
 
@@ -642,7 +648,7 @@ export function ChatWindow() {
               <div className="mb-1.5 flex items-center justify-between px-2 text-[11px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
                 <span className="flex items-center gap-1.5">
                   <IconPin className="h-3.5 w-3.5 text-[var(--accent-primary)]" />
-                  Pinned
+                  {t("chat.pinned")}
                 </span>
                 <span className="text-[10px] text-[var(--text-faint)] font-mono">{pinnedConversations.length}</span>
               </div>
@@ -672,7 +678,7 @@ export function ChatWindow() {
                     <button
                       type="button"
                       onClick={(e) => togglePinConversation(conv.id, e)}
-                      title="Unpin"
+                      title={t("chat.unpin")}
                       className="shrink-0 p-1 text-[var(--accent-primary)] hover:opacity-75"
                     >
                       <IconPin className="h-3 w-3" />
@@ -688,7 +694,7 @@ export function ChatWindow() {
             <div className="mb-1.5 flex items-center justify-between px-2 text-[11px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
               <span className="flex items-center gap-1.5">
                 <IconClock className="h-3.5 w-3.5 text-[var(--text-tertiary)]" />
-                Recent history
+                {t("chat.recentHistory")}
               </span>
               {conversations.length > 0 && (
                 <button
@@ -699,7 +705,7 @@ export function ChatWindow() {
                     setMsgs([]);
                     setActiveConvId(null);
                   }}
-                  title="Clear History"
+                  title={t("chat.clearHistory")}
                   className="text-[var(--text-faint)] hover:text-[var(--state-error)] transition-colors"
                 >
                   <IconTrash className="h-3.5 w-3.5" />
@@ -710,7 +716,7 @@ export function ChatWindow() {
             <div className="space-y-0.5">
               {recentConversations.length === 0 && pinnedConversations.length === 0 && (
                 <p className="px-2 py-6 text-center text-xs text-[var(--text-faint)] italic">
-                  No chat history yet
+                  {t("chat.noHistory")}
                 </p>
               )}
 
@@ -743,7 +749,7 @@ export function ChatWindow() {
                     <button
                       type="button"
                       onClick={(e) => togglePinConversation(conv.id, e)}
-                      title="Pin chat"
+                      title={t("chat.pinChat")}
                       className="p-1 text-[var(--text-faint)] hover:text-[var(--accent-primary)]"
                     >
                       <IconPin className="h-3 w-3" />
@@ -751,7 +757,7 @@ export function ChatWindow() {
                     <button
                       type="button"
                       onClick={(e) => deleteConversation(conv.id, e)}
-                      title="Delete"
+                      title={t("chat.delete")}
                       className="p-1 text-[var(--text-faint)] hover:text-[var(--state-error)]"
                     >
                       <IconTrash className="h-3 w-3" />
@@ -770,8 +776,8 @@ export function ChatWindow() {
               <IconUser className="h-4 w-4" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold text-[var(--ink)]">Sahakarita User</p>
-              <p className="truncate text-[10px] text-[var(--text-faint)] font-mono">Free Plan</p>
+              <p className="truncate text-xs font-semibold text-[var(--ink)]">{t("chat.user")}</p>
+              <p className="truncate text-[10px] text-[var(--text-faint)] font-mono">{t("chat.freePlan")}</p>
             </div>
           </div>
         </div>
@@ -786,7 +792,7 @@ export function ChatWindow() {
             <button
               type="button"
               onClick={handleBack}
-              title="Back"
+              title={t("chat.back")}
               className="flex items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--border-soft)] px-2.5 py-1.5 text-xs font-semibold text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
             >
               <IconArrowLeft className="h-4 w-4" />
@@ -797,7 +803,7 @@ export function ChatWindow() {
             <button
               type="button"
               onClick={() => setSidebarOpen((s) => !s)}
-              title="Toggle Sidebar"
+              title={t("chat.toggleSidebar")}
               className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border-soft)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
             >
               <IconSidebar className="h-4 w-4" />
@@ -817,7 +823,7 @@ export function ChatWindow() {
             <button
               type="button"
               onClick={handleNewChat}
-              title="New Chat"
+              title={t("chat.newChat")}
               className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border-soft)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
             >
               <IconPlus className="h-4 w-4" />
@@ -836,10 +842,10 @@ export function ChatWindow() {
                     <IconBot className="h-7 w-7" />
                   </div>
                   <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--ink)]">
-                    What can I help with today?
+                    {t("chat.emptyTitle")}
                   </h1>
                   <p className="text-sm text-[var(--text-body)] max-w-md mx-auto">
-                    Ask any question about PACS cooperative schemes, crop insurance (PMFBY), services, or legal frameworks.
+                    {t("chat.emptySubtitle")}
                   </p>
 
                   {/* 2x2 Suggested Actions Grid Centered */}
@@ -925,8 +931,8 @@ export function ChatWindow() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={onKeyDown}
                 rows={1}
-                placeholder={t("chat.placeholder") || "Ask anything..."}
-                aria-label={t("chat.placeholder") || "Ask anything..."}
+                placeholder={t("chat.placeholder")}
+                aria-label={t("chat.placeholder")}
                 className="w-full resize-none bg-transparent px-2 py-1 font-answer text-xs sm:text-base leading-relaxed text-[var(--ink)] placeholder:text-[var(--text-faint)] focus:outline-none min-h-[40px]"
               />
 
@@ -963,7 +969,7 @@ export function ChatWindow() {
 
             {/* Sub-caption Disclaimer Centered */}
             <p className="mt-2 text-center text-[10px] sm:text-xs text-[var(--text-faint)]">
-              Sahakarita AI can make mistakes. Verify important info.
+              {t("chat.disclaimer")}
             </p>
           </div>
         </div>

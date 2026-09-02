@@ -84,7 +84,7 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
                       : "bg-gray-100 text-gray-600"
                 }`}
               >
-                {resp.mode === "web" ? "Web Search" : resp.mode === "grievance" ? "Grievance" : "Static RAG"}
+                {resp.mode === "web" ? t("chat.mode.webSearch") : resp.mode === "grievance" ? t("chat.mode.grievance") : t("chat.mode.staticRag")}
               </span>
             )}
             <EvidenceBand confidence={resp.confidence} label={t(`evidence.${evidenceBand(resp.confidence)}`)} />
@@ -120,7 +120,7 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
                 type="button"
                 className="inline-flex items-center gap-1.5 rounded-[var(--radius-cta)] border border-[var(--accent-primary)]/40 bg-[var(--cream)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] transition-colors hover:border-[var(--accent-primary)] hover:bg-[var(--cream-2)]"
               >
-                Explore Schemes
+                {t("chat.exploreSchemes")}
                 <IconChevronRight className="h-3.5 w-3.5 text-[var(--accent-primary)]" />
               </button>
             </Link>
@@ -133,7 +133,7 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
           <button
             type="button"
             onClick={handleCopy}
-            title={copied ? "Copied!" : "Copy response"}
+            title={copied ? t("chat.copied") : t("chat.copyResponse")}
             className="flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-tertiary)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
           >
             {copied ? <IconCheck className="h-3.5 w-3.5 text-[var(--state-success)]" /> : <IconCopy className="h-3.5 w-3.5" />}
@@ -155,7 +155,7 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
           <button
             type="button"
             onClick={() => setRating((r) => (r === "up" ? null : "up"))}
-            title="Good response"
+            title={t("chat.goodResponse")}
             className={`flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)] ${
               rating === "up" ? "text-[var(--state-success)] bg-[var(--cream-2)]" : "text-[var(--text-tertiary)]"
             }`}
@@ -167,7 +167,7 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
           <button
             type="button"
             onClick={() => setRating((r) => (r === "down" ? null : "down"))}
-            title="Bad response"
+            title={t("chat.badResponse")}
             className={`flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)] ${
               rating === "down" ? "text-[var(--state-error)] bg-[var(--cream-2)]" : "text-[var(--text-tertiary)]"
             }`}
@@ -193,7 +193,7 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
         {/* Citations Expandable Content */}
         {openCitations && resp.citations.length > 0 && (
           <div className="mt-2 rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--cream)] p-3">
-            <p className="mb-1.5 text-xs font-semibold text-[var(--text-tertiary)]">Sources & References:</p>
+            <p className="mb-1.5 text-xs font-semibold text-[var(--text-tertiary)]">{t("chat.sourcesReferences")}</p>
             <ul className="space-y-1">
               {resp.citations.map((c, j) => (
                 <li key={j}>

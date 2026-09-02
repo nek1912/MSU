@@ -48,7 +48,7 @@ class VoiceService:
         # Fallback to Azure STT
         try:
             result = await asyncio.wait_for(
-                self._azure_stt.transcribe(audio_bytes, language),
+                self._azure_stt.speech_to_text(audio_bytes, language),
                 timeout=_STT_TIMEOUT,
             )
             return result

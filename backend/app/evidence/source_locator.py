@@ -13,7 +13,7 @@ from app.db import get_supabase
 
 
 DEFAULT_MODEL = (
-    "gemini-2.5-flash-lite"
+    "gemini-3.5-flash-lite"
 )
 
 MAX_CHUNK_TEXT = 5000

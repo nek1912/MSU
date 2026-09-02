@@ -3,12 +3,16 @@
 Two-stage reranking:
 1. Pre-ranking: Quick semantic scoring to filter candidates
 2. Final reranking: Detailed relevance scoring for top candidates
+
+Structured JSON output via response_schema for reliable parsing.
+Jurisdiction-aware scoring prevents cross-country evidence contamination.
 """
 
 from __future__ import annotations
 
 import json
 import logging
+import re
 
 import httpx
 
@@ -18,8 +22,12 @@ logger = logging.getLogger(__name__)
 
 _GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
-PRE_RANK_MODEL = "gemini-2.5-flash-lite"
-FINAL_RANK_MODEL = "gemini-2.5-flash-lite"
+DEFAULT_MODEL = "gemini-3.5-flash-lite"
+
+PRE_RANK_MAX_CANDIDATES = 50
+PRE_RANK_TOP_K = 15
+FINAL_TOP_K = 8
+MAX_TEXT_CHARS = 1800
 
 
 class GeminiReranker:
@@ -32,97 +40,519 @@ class GeminiReranker:
             self._enabled = False
         else:
             self._enabled = True
+            self.model = DEFAULT_MODEL
             logger.info("Gemini reranker initialized")
 
-    def _call_gemini(self, model: str, contents: list[dict]) -> dict | None:
-        """Make a single Gemini API call."""
+    def _call_gemini(
+        self,
+        query: str,
+        candidates: list[dict],
+        classification: dict,
+    ) -> dict | None:
+        """Make a structured Gemini API call with response_schema."""
         if not self._enabled:
             return None
 
-        url = _GEMINI_URL.format(model=model) + f"?key={self._api_key}"
+        domain = classification.get("domain")
+        jurisdiction = classification.get("jurisdiction")
+        state = classification.get("state")
+
+        candidate_payload = self._build_candidate_payload(candidates)
+        system_prompt = self._build_system_prompt(domain, jurisdiction, state)
+
+        user_prompt = f"""
+USER QUERY:
+{query}
+
+QUERY CLASSIFICATION:
+{json.dumps({"domain": domain, "jurisdiction": jurisdiction, "state": state}, ensure_ascii=False, indent=2)}
+
+DOCUMENT CANDIDATES:
+
+{json.dumps(candidate_payload, ensure_ascii=False, indent=2)}
+"""
+
+        url = _GEMINI_URL.format(model=self.model) + f"?key={self._api_key}"
         payload = {
-            "contents": contents,
+            "systemInstruction": {"parts": [{"text": system_prompt}]},
+            "contents": [{"role": "user", "parts": [{"text": user_prompt}]}],
             "generationConfig": {
                 "temperature": 0,
-                "maxTokens": 1024,
+                "maxOutputTokens": 4096,
+                "responseMimeType": "application/json",
+                "responseSchema": {
+                    "type": "object",
+                    "properties": {
+                        "ranked_chunks": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "chunk_id": {"type": "string"},
+                                    "relevance_score": {"type": "number"},
+                                    "applicable": {"type": "boolean"},
+                                    "applicability_reason": {"type": "string"},
+                                },
+                                "required": ["chunk_id", "relevance_score", "applicable", "applicability_reason"],
+                            },
+                        },
+                        "merge_groups": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "chunk_ids": {"type": "array", "items": {"type": "string"}},
+                                    "reason": {"type": "string"},
+                                },
+                                "required": ["chunk_ids"],
+                            },
+                        },
+                    },
+                    "required": ["ranked_chunks", "merge_groups"],
+                },
             },
         }
 
         try:
             r = httpx.post(url, json=payload, timeout=REQUEST_TIMEOUT_S)
             r.raise_for_status()
-            return r.json()
+            data = r.json()
+            text = data["candidates"][0]["content"]["parts"][0]["text"]
+            return json.loads(text)
         except Exception as e:
             logger.warning(f"Gemini reranking call failed: {e}")
             return None
 
-    def _extract_score(self, response: dict) -> float | None:
-        """Extract numeric score from Gemini response."""
-        try:
-            text = response["candidates"][0]["content"]["parts"][0]["text"]
-            # Try to parse as JSON first
+    @staticmethod
+    def _build_candidate_payload(candidates: list[dict]) -> list[dict]:
+        payload = []
+        for index, candidate in enumerate(candidates, start=1):
+            text = str(candidate.get("text", ""))
+            if len(text) > MAX_TEXT_CHARS:
+                text = text[:MAX_TEXT_CHARS] + "..."
+            payload.append({
+                "candidate_number": index,
+                "chunk_id": candidate.get("chunk_id"),
+                "document_id": candidate.get("document_id"),
+                "source_url": candidate.get("source_url"),
+                "source_title": candidate.get("title", candidate.get("source_title")),
+                "section_id": candidate.get("section_id"),
+                "section_title": candidate.get("section_title"),
+                "section_type": candidate.get("section_type"),
+                "page": candidate.get("page"),
+                "text_preview": text,
+            })
+        return payload
+
+    @staticmethod
+    def _build_system_prompt(domain, jurisdiction, state) -> str:
+        system_prompt = """
+You are the evidence-ranking layer of eGovAssist.
+
+You are NOT answering the user's question.
+
+You must inspect ALL provided document candidates.
+
+Your task is to determine which candidates are actually
+applicable evidence for the user's exact question.
+
+============================================================
+IMPORTANT: SEMANTIC MATCH IS NOT ENOUGH
+============================================================
+
+Do NOT reward a candidate merely because it contains words
+such as:
+
+- grievance
+- committee
+- complaint
+- redressal
+- procedure
+- disposal
+
+A document is useful only when its actual meaning and legal,
+governmental, institutional, or procedural context apply to
+the question.
+
+A question about Indian central-government grievance
+redressal must NOT be supported by an unrelated foreign
+regulation merely because it contains similar terminology.
+
+Likewise, attorney disciplinary grievance procedures, private
+organization complaint processes, and unrelated foreign
+regulations must not be treated as evidence for a government
+grievance question.
+
+============================================================
+JURISDICTION
+============================================================
+
+Expected jurisdiction:
+__JURISDICTION__
+
+Expected state:
+__STATE__
+
+Expected domain:
+__DOMAIN__
+
+When jurisdiction information is available:
+
+- Prefer candidates that clearly belong to that jurisdiction.
+- Penalize candidates from a different country or legal system.
+- A foreign regulation is NOT relevant merely because its
+  terminology resembles the question.
+- If a candidate is clearly from the wrong jurisdiction and
+  cannot directly answer the user's question, mark it
+  applicable=false.
+
+Do not invent jurisdiction information.
+
+============================================================
+DOMAIN AND INSTITUTIONAL CONTEXT
+============================================================
+
+The expected domain is:
+
+__DOMAIN__
+
+Determine whether the candidate actually belongs to the
+same substantive domain.
+
+For government grievance questions, distinguish between:
+
+- government public grievance redressal
+- CPGRAMS / DARPG
+- government departments
+- statutory grievance mechanisms
+
+AND unrelated concepts such as:
+
+- attorney grievance committees
+- legal-assistance grievance procedures
+- private-company complaints
+- foreign grievance systems
+- disciplinary grievance systems
+
+Similar vocabulary does not establish applicability.
+
+============================================================
+QUESTION INTENT
+============================================================
+
+Determine what the user is actually asking for.
+
+Examples:
+
+"How long does X have to dispose of a complaint?"
+    -> Need an applicable deadline/time limit.
+
+"Who can file X?"
+    -> Need applicable eligibility rules.
+
+"How do I appeal X?"
+    -> Need applicable appeal procedure.
+
+"What documents are required?"
+    -> Need applicable document requirements.
+
+A candidate that merely discusses the general topic but
+does not help answer the actual requested fact should receive
+a low score.
+
+============================================================
+EVIDENCE QUALITY
+============================================================
+
+Prefer:
+
+- official government sources
+- statutes and regulations
+- official orders
+- official department pages
+- official scheme documents
+- authoritative institutional sources
+
+But authority alone is NOT sufficient.
+
+A highly authoritative document from the wrong jurisdiction
+is still irrelevant evidence for the user's question.
+
+============================================================
+APPLICABILITY DECISION
+============================================================
+
+For EVERY candidate determine:
+
+applicable = true
+or
+applicable = false
+
+Set applicable=false when:
+
+- it belongs to a clearly different jurisdiction and is not
+  applicable to the user's question;
+- it concerns a materially different institution or legal
+  system;
+- it discusses the same words but a different substantive
+  process;
+- it cannot reasonably support the answer to the exact query.
+
+Set applicable=true only when the candidate can legitimately
+be used as evidence for the user's question.
+
+============================================================
+RANKING
+============================================================
+
+Rank ALL supplied candidates according to actual usefulness.
+
+Prefer:
+
+100 = directly answers the question in the correct context
+90-99 = extremely strong directly applicable evidence
+80-89 = highly relevant supporting evidence
+60-79 = useful supporting evidence
+40-59 = somewhat relevant but limited
+20-39 = weak evidence
+1-19 = effectively irrelevant
+0 = clearly inapplicable
+
+IMPORTANT:
+
+If applicable=false, relevance_score MUST be 0-10.
+
+Do not give a high score to an inapplicable document.
+
+============================================================
+NO OUTSIDE KNOWLEDGE
+============================================================
+
+Do NOT use outside knowledge to answer the question.
+
+Do NOT invent:
+
+- laws
+- deadlines
+- authorities
+- jurisdictions
+- procedures
+- exceptions
+
+Judge only the supplied candidates and the supplied query
+context.
+
+============================================================
+MERGING
+============================================================
+
+Some retrieved chunks may be fragments of the same underlying
+piece of evidence.
+
+Suggest merging chunks when:
+
+- they clearly continue the same passage;
+- they belong to the same document;
+- they belong to the same section or closely related section;
+- they are on the same or adjacent pages;
+- presenting them separately would create a fragmented or
+  half-cut evidence passage.
+
+Do NOT suggest merging unrelated chunks merely because they
+discuss the same general topic.
+
+Do NOT rewrite, summarize, or modify source text.
+
+Every chunk may belong to at most one merge group.
+
+A merge group containing only one chunk is unnecessary and
+should not be returned.
+
+============================================================
+OUTPUT
+============================================================
+
+Return JSON only.
+
+ranked_chunks must contain ALL candidates exactly once.
+
+Each ranked chunk MUST contain:
+
+- chunk_id
+- relevance_score
+- applicable
+- applicability_reason
+
+merge_groups contains only groups of two or more chunk IDs
+that should be presented together.
+
+Example structure:
+
+{
+  "ranked_chunks": [
+    {
+      "chunk_id": "chunk_a",
+      "relevance_score": 96,
+      "applicable": true,
+      "applicability_reason": "Directly applicable evidence."
+    }
+  ],
+  "merge_groups": []
+}
+
+Every supplied candidate must appear exactly once.
+"""
+
+        system_prompt = system_prompt.replace("__DOMAIN__", str(domain or "unknown"))
+        system_prompt = system_prompt.replace("__JURISDICTION__", str(jurisdiction or "unknown"))
+        system_prompt = system_prompt.replace("__STATE__", str(state or "none"))
+
+        return system_prompt
+
+    def _build_ranked_results(
+        self,
+        candidates: list[dict],
+        data: dict,
+    ) -> tuple[list[dict], list[dict]]:
+        """Build ranked results from structured Gemini response."""
+        candidate_map = {
+            candidate.get("chunk_id"): candidate
+            for candidate in candidates
+            if candidate.get("chunk_id")
+        }
+
+        ranked_results = []
+        seen = set()
+
+        for item in data.get("ranked_chunks", []):
+            if not isinstance(item, dict):
+                continue
+
+            chunk_id = item.get("chunk_id")
+            if not chunk_id or chunk_id in seen or chunk_id not in candidate_map:
+                continue
+
             try:
-                data = json.loads(text)
-                if isinstance(data, dict):
-                    return float(data.get("score", 0))
-                elif isinstance(data, list) and data:
-                    return float(data[0].get("score", 0))
-            except json.JSONDecodeError:
-                # Try to extract number from text
-                import re
-                match = re.search(r'"?score"?\s*[:=]\s*(\d+\.?\d*)', text, re.IGNORECASE)
-                if match:
-                    return float(match.group(1))
-        except (KeyError, IndexError, TypeError):
-            pass
-        return None
+                score = float(item.get("relevance_score", 0.0))
+            except (TypeError, ValueError):
+                score = 0.0
+
+            score = max(0.0, min(100.0, score))
+
+            applicable = item.get("applicable", False)
+            if not isinstance(applicable, bool):
+                applicable = str(applicable).lower() == "true"
+
+            reason = str(item.get("applicability_reason", "")).strip()
+
+            if not applicable:
+                score = min(score, 10.0)
+
+            result = dict(candidate_map[chunk_id])
+            result["gemini_score"] = score
+            result["rerank_score"] = score
+            result["reranker"] = "gemini"
+            result["rerank_applicable"] = applicable
+            result["applicability_reason"] = reason
+
+            ranked_results.append(result)
+            seen.add(chunk_id)
+
+        for candidate in candidates:
+            chunk_id = candidate.get("chunk_id")
+            if not chunk_id or chunk_id in seen:
+                continue
+
+            result = dict(candidate)
+            result["gemini_score"] = 0.0
+            result["rerank_score"] = 0.0
+            result["reranker"] = "gemini_completion_fallback"
+            result["rerank_applicable"] = False
+            result["applicability_reason"] = "Gemini did not return a ranking decision for this candidate."
+            ranked_results.append(result)
+            seen.add(chunk_id)
+
+        ranked_results.sort(
+            key=lambda item: float(item.get("rerank_score", 0.0)),
+            reverse=True,
+        )
+
+        valid_merge_groups = []
+        used_merge_chunks = set()
+
+        for group in data.get("merge_groups", []):
+            if not isinstance(group, dict):
+                continue
+            chunk_ids = group.get("chunk_ids", [])
+            if not isinstance(chunk_ids, list):
+                continue
+
+            clean_ids = []
+            for chunk_id in chunk_ids:
+                if chunk_id not in candidate_map:
+                    continue
+                if chunk_id in clean_ids or chunk_id in used_merge_chunks:
+                    continue
+                clean_ids.append(chunk_id)
+
+            if len(clean_ids) < 2:
+                continue
+
+            valid_merge_groups.append({
+                "chunk_ids": clean_ids,
+                "reason": group.get("reason", ""),
+            })
+            used_merge_chunks.update(clean_ids)
+
+        merge_map: dict[str, list[int]] = {}
+        for group_index, group in enumerate(valid_merge_groups, start=1):
+            for chunk_id in group["chunk_ids"]:
+                merge_map.setdefault(chunk_id, []).append(group_index)
+
+        for result in ranked_results:
+            chunk_id = result.get("chunk_id")
+            result["gemini_merge_groups"] = merge_map.get(chunk_id, [])
+
+        return ranked_results, valid_merge_groups
 
     def pre_rank(
         self,
         query: str,
         candidates: list[dict],
-        top_k: int = 15,
+        top_k: int = PRE_RANK_TOP_K,
         classification: dict | None = None,
     ) -> list[dict]:
-        """Pre-rank candidates using Gemini to filter for relevance."""
+        """Stage 1 Gemini ranking on discovery candidate pool."""
         if not self._enabled or not candidates:
             return self._passthrough_pre_rank(query, candidates, top_k)
 
-        # Build batch prompt for efficiency
-        candidate_texts = []
-        for i, c in enumerate(candidates[:top_k * 2]):  # Process more than needed
-            content = c.get("content", "")[:500]  # Truncate for token efficiency
-            candidate_texts.append(f"[{i}] {content}")
+        query = str(query or "").strip()
+        if not query or top_k <= 0:
+            return []
 
-        prompt = f"""Rate each text chunk's relevance to the query on a scale of 0-10.
-Query: {query}
+        if classification is None:
+            classification = {}
 
-Chunks:
-{chr(10).join(candidate_texts)}
+        candidates = candidates[:PRE_RANK_MAX_CANDIDATES]
+        logger.info(f"Gemini pre-ranking {len(candidates)} candidates...")
 
-Return JSON array: [{{"index": 0, "score": 7, "relevant": true}}, ...]
-Only include chunks with score >= 5 as relevant."""
+        data = self._call_gemini(query=query, candidates=candidates, classification=classification)
 
-        contents = [{"role": "user", "parts": [{"text": prompt}]}]
-        response = self._call_gemini(PRE_RANK_MODEL, contents)
-
-        if not response:
+        if not data:
             return self._passthrough_pre_rank(query, candidates, top_k)
 
-        # Parse scores
-        scores = self._extract_scores_batch(response)
+        ranked_results, merge_groups = self._build_ranked_results(candidates, data)
 
-        # Apply scores to candidates
-        scored = []
-        for i, c in enumerate(candidates):
-            result = dict(c)
-            score_data = scores.get(i, {})
-            result["gemini_score"] = score_data.get("score", 0.0)
-            result["rerank_applicable"] = score_data.get("relevant", True)
-            scored.append(result)
+        final_results = []
+        for rank, result in enumerate(ranked_results[:top_k], start=1):
+            result = dict(result)
+            result["gemini_pre_rank"] = rank
+            final_results.append(result)
 
-        scored.sort(key=lambda x: x["gemini_score"], reverse=True)
-        return scored[:top_k]
+        applicable_count = sum(1 for r in final_results if r.get("rerank_applicable", False))
+        logger.info(f"Gemini pre-ranking complete: {len(final_results)} returned, {applicable_count} applicable")
+
+        return final_results
 
     def _passthrough_pre_rank(self, query: str, candidates: list[dict], top_k: int) -> list[dict]:
         """Fallback passthrough scoring when Gemini is unavailable."""
@@ -131,85 +561,51 @@ Only include chunks with score >= 5 as relevant."""
             result = dict(c)
             result["gemini_score"] = float(c.get("bm25_score", 100.0 - i))
             result["rerank_applicable"] = True
+            result["reranker"] = "passthrough"
             scored.append(result)
         scored.sort(key=lambda x: x["gemini_score"], reverse=True)
         return scored[:top_k]
-
-    def _extract_scores_batch(self, response: dict) -> dict[int, dict]:
-        """Extract batch scores from Gemini response."""
-        scores = {}
-        try:
-            text = response["candidates"][0]["content"]["parts"][0]["text"]
-            # Find JSON array in response
-            import re
-            json_match = re.search(r'\[.*?\]', text, re.DOTALL)
-            if json_match:
-                data = json.loads(json_match.group())
-                for item in data:
-                    idx = item.get("index", -1)
-                    if 0 <= idx:
-                        scores[idx] = {
-                            "score": float(item.get("score", 0)),
-                            "relevant": item.get("relevant", True),
-                        }
-        except (KeyError, IndexError, TypeError, json.JSONDecodeError) as e:
-            logger.debug(f"Failed to parse Gemini batch scores: {e}")
-        return scores
 
     def final_rerank(
         self,
         query: str,
         candidates: list[dict],
-        top_k: int = 8,
+        top_k: int = FINAL_TOP_K,
         classification: dict | None = None,
     ) -> list[dict]:
-        """Final rerank using Gemini for detailed relevance scoring."""
+        """Stage 2 Gemini ranking on RRF fused pool."""
         if not self._enabled or not candidates:
             return self._passthrough_final_rerank(query, candidates, top_k)
 
-        # Build detailed prompt for final ranking
-        candidate_texts = []
-        for i, c in enumerate(candidates):
-            content = c.get("content", "")[:600]
-            source = c.get("source", c.get("url", "unknown"))
-            candidate_texts.append(f"[{i}] Source: {source}\nContent: {content}")
+        query = str(query or "").strip()
+        if not query or top_k <= 0:
+            return []
 
-        domain_hint = ""
-        if classification:
-            domain = classification.get("domain", "")
-            if domain:
-                domain_hint = f"\nDomain context: {domain}"
+        if classification is None:
+            classification = {}
 
-        prompt = f"""Score each evidence chunk for relevance to the query.
-Rate 0-10 based on: direct answer support, source credibility, specificity.
+        logger.info(f"Gemini final reranking {len(candidates)} fused candidates...")
 
-Query: {query}{domain_hint}
+        data = self._call_gemini(query=query, candidates=candidates, classification=classification)
 
-Evidence chunks:
-{chr(10).join(candidate_texts)}
-
-Return JSON array: [{{"index": 0, "score": 8.5, "applicable": true, "reason": "directly answers"}}, ...]"""
-
-        contents = [{"role": "user", "parts": [{"text": prompt}]}]
-        response = self._call_gemini(FINAL_RANK_MODEL, contents)
-
-        if not response:
+        if not data:
             return self._passthrough_final_rerank(query, candidates, top_k)
 
-        scores = self._extract_final_scores(response)
+        ranked_results, merge_groups = self._build_ranked_results(candidates, data)
 
-        scored = []
-        for i, c in enumerate(candidates):
-            result = dict(c)
-            score_data = scores.get(i, {})
-            result["rerank_score"] = score_data.get("score", 0.0)
-            result["rerank_applicable"] = score_data.get("applicable", True)
-            if "reason" in score_data:
-                result["rerank_reason"] = score_data["reason"]
-            scored.append(result)
+        final_results = []
+        for rank, result in enumerate(ranked_results, start=1):
+            if len(final_results) >= top_k:
+                break
+            if not result.get("rerank_applicable", False):
+                continue
+            result = dict(result)
+            result["gemini_final_rank"] = rank
+            result["reranker"] = "gemini_final"
+            final_results.append(result)
 
-        scored.sort(key=lambda x: x.get("rerank_score", 0), reverse=True)
-        return scored[:top_k]
+        logger.info(f"Gemini final reranking complete: {len(final_results)} final chunks")
+        return final_results
 
     def _passthrough_final_rerank(self, query: str, candidates: list[dict], top_k: int) -> list[dict]:
         """Fallback passthrough scoring when Gemini is unavailable."""
@@ -218,27 +614,41 @@ Return JSON array: [{{"index": 0, "score": 8.5, "applicable": true, "reason": "d
             result = dict(c)
             result["rerank_score"] = float(c.get("rrf_score", 100.0 - i) * 100)
             result["rerank_applicable"] = True
+            result["reranker"] = "passthrough"
             scored.append(result)
         scored.sort(key=lambda x: x["rerank_score"], reverse=True)
         return scored[:top_k]
 
-    def _extract_final_scores(self, response: dict) -> dict[int, dict]:
-        """Extract final scores from Gemini response."""
-        scores = {}
-        try:
-            text = response["candidates"][0]["content"]["parts"][0]["text"]
-            import re
-            json_match = re.search(r'\[.*?\]', text, re.DOTALL)
-            if json_match:
-                data = json.loads(json_match.group())
-                for item in data:
-                    idx = item.get("index", -1)
-                    if 0 <= idx:
-                        scores[idx] = {
-                            "score": float(item.get("score", 0)),
-                            "applicable": item.get("applicable", True),
-                            "reason": item.get("reason", ""),
-                        }
-        except (KeyError, IndexError, TypeError, json.JSONDecodeError) as e:
-            logger.debug(f"Failed to parse Gemini final scores: {e}")
-        return scores
+    def rerank(
+        self,
+        query: str,
+        candidates: list[dict],
+        top_k: int = 5,
+        classification: dict | None = None,
+    ) -> list[dict]:
+        """Backward-compatible method."""
+        return self.final_rerank(query=query, candidates=candidates, top_k=top_k, classification=classification)
+
+
+_reranker = None
+
+
+def pre_rank(query: str, candidates: list[dict], top_k: int = 15, classification: dict | None = None) -> list[dict]:
+    global _reranker
+    if _reranker is None:
+        _reranker = GeminiReranker()
+    return _reranker.pre_rank(query=query, candidates=candidates, top_k=top_k, classification=classification)
+
+
+def final_rerank(query: str, candidates: list[dict], top_k: int = 8, classification: dict | None = None) -> list[dict]:
+    global _reranker
+    if _reranker is None:
+        _reranker = GeminiReranker()
+    return _reranker.final_rerank(query=query, candidates=candidates, top_k=top_k, classification=classification)
+
+
+def rerank(query: str, candidates: list[dict], top_k: int = 5, classification: dict | None = None) -> list[dict]:
+    global _reranker
+    if _reranker is None:
+        _reranker = GeminiReranker()
+    return _reranker.rerank(query=query, candidates=candidates, top_k=top_k, classification=classification)

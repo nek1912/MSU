@@ -207,7 +207,7 @@ class TestOffTopicQuestion:
             body = r.json()
 
             assert body["abstained"] is True
-            assert body["domain"] == "unknown"
+            assert body["domain"] == "out_of_scope"
             assert body["citations"] == []
         finally:
             chat_route.get_anchor_store = original_get_anchor

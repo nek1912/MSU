@@ -15,7 +15,7 @@ S = lambda: Settings(
     supabase_url="u", supabase_service_key="s")
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
-GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent"
 
 
 def _groq_response(code, body=None):

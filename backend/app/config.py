@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     # current IDs against live docs and they are set via .env; defaults here
     # are best-known values only.
     groq_model: str = "groq/compound"
-    gemini_model: str = "gemini-2.5-flash"
+    gemini_model: str = "gemini-3.5-flash"
     embed_model: str = "gemini-embedding-2"
     jina_embed_model: str = "jina-embeddings-v3"
     # Reranker config (Phase 4/5) — disabled until curated eval proves value
@@ -50,7 +50,7 @@ class Settings(BaseSettings):
     search_providers: str = "tavily"
 
     # Grievance & evidence
-    grievance_gemini_model: str = "gemini-2.5-flash-lite"
+    grievance_gemini_model: str = "gemini-3.5-flash-lite"
 
     @property
     def tts_voices(self) -> dict[str, str]:

@@ -163,7 +163,7 @@ def test_abstains_when_both_llms_fail(respx_mock):
     # Both LLMs return 429
     respx_mock.post("https://api.groq.com/openai/v1/chat/completions").mock(
         return_value=httpx.Response(429, json={"error": "rate limited"}))
-    respx_mock.post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent").mock(
+    respx_mock.post("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent").mock(
         return_value=httpx.Response(429, json={"error": "rate limited"}))
     r = client.post("/chat", json=PAYLOAD)
     assert r.status_code == 200

@@ -6,7 +6,14 @@ import datetime
 import logging
 import re
 
-from app.contracts import QueryRequirements
+from app.contracts import (
+    EvidenceBundle,
+    DynamicEvidence,
+    EvidenceChunk,
+    QueryRequirements,
+    RAGResult,
+    StaticEvidence,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -161,3 +168,144 @@ class QueryRequirementClassifier:
             # Explicit year → needs dynamic
             return True
         return False
+
+
+# ---------------------------------------------------------------------------
+# Source Priority Prompt
+# ---------------------------------------------------------------------------
+
+_SOURCE_PRIORITY_PROMPT = """You are a government information assistant. You must answer based on
+the evidence provided, following these SOURCE PRIORITY RULES:
+
+1. STATIC EVIDENCE (official documents, guidelines, policies) may establish:
+   - Policy definitions and legal framework
+   - Eligibility rules and general procedures
+   - Historical or general scheme structure
+   - How processes work (notification, application, etc.)
+
+2. DYNAMIC EVIDENCE (web sources, current data) must establish:
+   - Current values, amounts, figures
+   - Current notifications and active schemes
+   - District/state-specific information
+   - Current portal/service availability
+   - Current insurer assignments
+   - Current premium/coverage figures
+
+3. RULES FOR COMBINED EVIDENCE:
+   - Never use static evidence to state a current/local fact unless
+     dynamic evidence explicitly confirms it
+   - If dynamic evidence is absent or insufficient for a current/local
+     claim, say so clearly — do NOT infer from static evidence
+   - Static evidence can explain the rule/framework surrounding an
+     unanswered dynamic claim
+
+4. EVIDENCE SEPARATION:
+   - Evidence marked [STATIC] comes from official documents (may be outdated)
+   - Evidence marked [DYNAMIC] comes from web sources (current but may vary)
+   - Treat them as having different epistemic roles
+
+5. CITATIONS:
+   - After EVERY factual sentence, add the citation: [chunk:ID]
+   - Use the EXACT citation marker shown in the evidence
+   - Use ONLY half-width square brackets []
+
+6. LANGUAGE:
+   - Respond in the SAME language as the question
+   - Do NOT switch languages mid-response"""
+
+
+# ---------------------------------------------------------------------------
+# EvidenceController
+# ---------------------------------------------------------------------------
+
+
+class EvidenceController:
+    """Wraps static + web evidence with metadata and requirements."""
+
+    def build_bundle(
+        self,
+        static_result: RAGResult,
+        web_result: RAGResult,
+        query_requirements: QueryRequirements,
+        query: str,
+    ) -> EvidenceBundle:
+        static = StaticEvidence(
+            available=not static_result.abstained and len(static_result.chunks) > 0,
+            chunks=static_result.chunks,
+            summary=f"{len(static_result.chunks)} chunks from official documents",
+        )
+
+        web_available = not web_result.abstained and len(web_result.chunks) > 0
+        web = DynamicEvidence(
+            available=web_available,
+            chunks=web_result.chunks,
+            reason=None if web_available else (
+                web_result.reason.value if web_result.reason else "No applicable web evidence found"
+            ),
+        )
+
+        return EvidenceBundle(
+            static=static,
+            dynamic=web,
+            query_requirements=query_requirements,
+            query=query,
+        )
+
+    def build_curated_prompt(
+        self,
+        bundle: EvidenceBundle,
+        english_query: str,
+        history: list[dict] | None,
+        lang: str,
+    ) -> tuple[str, str]:
+        system_prompt = _SOURCE_PRIORITY_PROMPT
+
+        # Build history text
+        hist_text = ""
+        if history:
+            turns = "\n".join(
+                f"{'User' if h.get('role') == 'user' else 'Assistant'}: {h.get('content', '')}"
+                for h in history if isinstance(h, dict)
+            )
+            if turns:
+                hist_text = f"Previous conversation:\n{turns}\n\n"
+
+        # Build static evidence section
+        static_parts: list[str] = []
+        for chunk in bundle.static.chunks:
+            short_id = chunk.chunk_id[:8]
+            static_parts.append(
+                f"[STATIC] [chunk:{short_id}] ({chunk.title} — {chunk.section} — p.{chunk.page})\n{chunk.content}"
+            )
+        static_section = "\n\n---\n\n".join(static_parts) if static_parts else "No static evidence available."
+
+        # Build dynamic evidence section
+        if bundle.dynamic.available:
+            dynamic_parts: list[str] = []
+            for chunk in bundle.dynamic.chunks:
+                short_id = chunk.chunk_id[:8]
+                dynamic_parts.append(
+                    f"[DYNAMIC] [chunk:{short_id}] ({chunk.title} — web — {chunk.url})\n{chunk.content}"
+                )
+            dynamic_section = "\n\n---\n\n".join(dynamic_parts)
+            dynamic_status = f"available — {len(bundle.dynamic.chunks)} chunks"
+        else:
+            dynamic_section = "No dynamic evidence available."
+            dynamic_status = f"ABSENT — {bundle.dynamic.reason or 'No applicable web evidence found'}"
+
+        user_prompt = (
+            f"{hist_text}"
+            f"Question: {english_query}\n\n"
+            f"== STATIC EVIDENCE (official documents — may not reflect current status) ==\n"
+            f"{static_section}\n\n"
+            f"== DYNAMIC EVIDENCE (web sources — current information) ==\n"
+            f"{dynamic_section}\n\n"
+            f"== EVIDENCE AVAILABILITY ==\n"
+            f"Static: {len(bundle.static.chunks)} chunks available\n"
+            f"Dynamic: {dynamic_status}\n\n"
+            f"Synthesize an answer following the SOURCE PRIORITY RULES.\n"
+            f"If dynamic evidence is absent for a current/local claim, state that clearly.\n"
+            f"Do NOT infer current values from static guidelines."
+        )
+
+        return system_prompt, user_prompt

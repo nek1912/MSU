@@ -293,6 +293,22 @@ def test_claim_verification_creation():
     assert cv.evidence_ids == ["chunk1"]
 
 
+def test_flagged_claim_creation():
+    from app.contracts import FlaggedClaim
+    fc = FlaggedClaim(
+        claim_id="fc-001",
+        claim_text="PMFBY premium is 2%",
+        claim_type="static",
+        flag_reason="unverified amount",
+        requires_evidence="static",
+    )
+    assert fc.claim_id == "fc-001"
+    assert fc.claim_text == "PMFBY premium is 2%"
+    assert fc.claim_type == "static"
+    assert fc.flag_reason == "unverified amount"
+    assert fc.requires_evidence == "static"
+
+
 def test_filter_outcome_constants():
     from app.contracts import FilterOutcome
     assert FilterOutcome.KEEP == "keep"

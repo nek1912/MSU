@@ -394,7 +394,7 @@ class ClaimVerification(BaseModel):
     verification_confidence: float | None = None
 
 
-class FilterOutcome:
+class FilterOutcome(str, Enum):
     """Constants for the evidence filter decision."""
     KEEP = "keep"
     FILTER = "filter"

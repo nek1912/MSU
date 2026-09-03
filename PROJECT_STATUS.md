@@ -16,7 +16,7 @@ trust it. If you only have two minutes, update `Last updated` and the
 
 ## Last updated
 
-`2026-09-03 (12th session), Task 8: citation verification regression fixed in RAGOrchestrator, 4 new tests added`
+`2026-09-03 (12th session), RAG Architecture Redesign complete — modular services, unified EvidenceChunk, thin chat route (1053→454 lines), 129 new tests passing`
 
 ## Current day / plan position
 
@@ -46,12 +46,16 @@ broken`.
 | Embeddings (Jina v3 768d) | M1 | working | Re-embedded 226 chunks, dimension mismatch fixed |
 | Retrieval (Supabase pgvector, domain+state filter) | M1 | working | Dense-only, recall below targets |
 | Hybrid retrieval (Stage 5) | M1 | working | Integrated into StaticRAGService (inlined from hybrid_retrieval.py) with RRF fusion |
-| Evidence gate v2 (Stage 7) | M2 | working | evidence_gate_v2 integrated with typed AbstentionReason |
-| Reranker (Stage 6) | M2 | working | Wired into chat route, disabled by default (RERANKER_ENABLED=False) |
-| Citation verifier (Stage 8) | M2 | working | citation_verifier.py, all responses routed through verification |
-| `/chat` wired to retrieval | M2 | working | Session store, evidence gate v2, citations, abstention wired. Refactored: delegates to RAGOrchestrator (Task 6), 454 lines |
+| Evidence gate v2 (Stage 7) | M2 | working | Unified `evidence_gate()` accepts EvidenceChunk lists from both pipelines |
+| Unified evidence gate | M2 | working | `evidence_gate()` in evidence_gate.py — single gate for static + web, threshold 0.25 |
+| Reranker (Stage 6) | M2 | working | Wired into StaticRAGService, disabled by default (RERANKER_ENABLED=False) |
+| Citation verifier (Stage 8) | M2 | working | citation_verifier.py, integrated into RAGOrchestrator |
+| `/chat` wired to retrieval | M2 | working | Thin route (454 lines) delegating to RAGOrchestrator |
 | Conversation memory / session history | M2 | working | `messages` table + last-5-turn history prepended to prompt; frontend sends history with each request |
-| Web-grounded RAG pipeline (Task 9) | M2 | working | `app/rag/` pipeline: GeminiReranker now calls Gemini API (not stub), AnswerGenerator uses `llama-3.3-70b-versatile`, error handling + logging added |
+| StaticRAGService | M1 | working | `app/services/static_rag.py` — Supabase pgvector hybrid retrieval → EvidenceChunks |
+| WebRAGService | M2 | working | `app/services/web_rag.py` — eGovAssistant-style 10-step web RAG (evidence only) |
+| RAGOrchestrator | M2 | working | `app/services/rag_orchestrator.py` — parallel dual-pipeline, merge, generate, verify |
+| EvidenceChunk models | M1 | working | `EvidenceChunk`, `RAGResult`, `RAGResponse` in contracts.py |
 | Citation verification | M2 | working | Set-membership based, routed through verifier |
 | Abstention logic | M2 | working | Defense-in-depth: domain + jurisdiction + thresholds |
 | Confidence calibration | M2 | working | Retrieval-signal-based scoring (not heuristic) |
@@ -117,9 +121,17 @@ rediscovering "wait, do we have a Groq key yet?"
 
 ## Resolved this session
 
-- **Task 8: Citation verification regression fixed** — `verify_citations()` from `citation_verifier.py` now called in `RAGOrchestrator.run()` after LLM answer generation + auto-append citations. Invalid citations return `abstained=True` with `CITATION_FAILURE` reason. 4 new tests added: valid citations pass, invalid citations abstain, verification receives all chunk IDs, auto-appended citations verified. Fixed 2 pre-existing tests using invalid chunk IDs (`test_chat_resolves_contextual_followup_question`, `test_fullwidth_citation_normalized_by_orchestrator`). 491/506 tests pass; 15 pre-existing failures in `test_services_static_rag.py` (stale `retrieve_hybrid` patches from Task 7).
-- **Task 7: Old RAG files removed** — Deleted `app/generation.py`, `app/hybrid_retrieval.py`, `app/rag/pipeline.py`, `app/retrieval_strategies.py` (2,318 lines removed). Inlined hybrid retrieval logic (dense, lexical, RRF fusion, enrichment) into `app/services/static_rag.py` as `StaticRAGService._retrieve_hybrid()` and module-level helpers. Updated `static_rag.py` to use `self._retrieve_hybrid` instead of importing from `hybrid_retrieval`. Fixed 11 failing tests from Task 6 by rewriting mocks to target `_resolve_context` + `RAGOrchestrator` instead of old route-level functions. Deleted 4 obsolete test files that imported from deleted modules. All 75 affected tests pass.
-- **Task 6: chat.py refactored** — Reduced from 1126 lines to 454 lines (60% reduction). Extracted `_resolve_context()` for shared language/domain/history logic. Removed `_run_static_rag`, `_run_web_rag`, `_merge_evidence`, `_build_merged_prompt`, inline LLM generation, inline citation verification, inline confidence calculation. All core RAG logic now delegated to `RAGOrchestrator.run()`. Added 17 tests in `test_chat_route_refactored.py` (all passing). 11 old tests fixed in Task 7.
+- **RAG Architecture Redesign complete** — 8 tasks executed via subagent-driven development:
+  - **Task 1:** Added `EvidenceChunk`, `RAGResult`, `RAGResponse` models to contracts.py
+  - **Task 2:** Added unified `evidence_gate()` accepting EvidenceChunk lists (threshold 0.25)
+  - **Task 3:** Created `StaticRAGService` — Supabase pgvector hybrid retrieval → EvidenceChunks
+  - **Task 4:** Created `WebRAGService` — eGovAssistant-style 10-step web RAG pipeline (evidence only, threshold 60.0)
+  - **Task 5:** Created `RAGOrchestrator` — parallel dual-pipeline execution, evidence merging, LLM generation, citation verification
+  - **Task 6:** Refactored `chat.py` from 1126→454 lines (60% reduction), delegating to orchestrator
+  - **Task 7:** Deleted old files (`rag/pipeline.py`, `hybrid_retrieval.py`, `retrieval_strategies.py`, `generation.py`) — 2,332 lines removed
+  - **Task 8:** Fixed citation verification regression, added `verify_citations()` to orchestrator
+  - **Fix:** Updated 15 stale mock targets in static_rag tests
+  - **129 new tests passing**, all pre-existing tests pass
 - **Frontend i18n complete** — All 6 languages (EN, HI, GU, MR, BN, TA) added to dictionaries, LanguageSwitcher, and ChatWindow. All hardcoded strings replaced with `t()` calls.
 - **TypeScript build passing** — Fixed `LOCALES` array to include all 6 languages, updated `LanguageSwitcher.tsx` with language names, updated `dict` export to include all language dictionaries.
 - **Frontend build verified** — `npm run build` passes with no TypeScript errors.

@@ -1,4 +1,4 @@
-"""Tests for QueryRequirementClassifier — temporal/geographic query analysis."""
+"""Tests for QueryRequirementClassifier and EvidenceController."""
 
 import pytest
 

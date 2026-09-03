@@ -274,9 +274,13 @@ class EvidenceController:
         static_parts: list[str] = []
         for chunk in bundle.static.chunks:
             short_id = chunk.chunk_id[:8]
-            static_parts.append(
-                f"[STATIC] [chunk:{short_id}] ({chunk.title} — {chunk.section} — p.{chunk.page})\n{chunk.content}"
-            )
+            meta_parts = [chunk.title]
+            if chunk.section:
+                meta_parts.append(chunk.section)
+            if chunk.page is not None:
+                meta_parts.append(f"p.{chunk.page}")
+            meta_str = " — ".join(meta_parts)
+            static_parts.append(f"[STATIC] [chunk:{short_id}] ({meta_str})\n{chunk.content}")
         static_section = "\n\n---\n\n".join(static_parts) if static_parts else "No static evidence available."
 
         # Build dynamic evidence section

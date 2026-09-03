@@ -76,7 +76,7 @@ class TestDomainMapping:
     def test_pacs_maps_to_pacs_governance(self):
         service = StaticRAGService(_make_settings())
         with patch("app.services.static_rag.get_supabase"), \
-             patch("app.services.static_rag.retrieve_hybrid", return_value=[]):
+             patch("app.services.static_rag.StaticRAGService._retrieve_hybrid", return_value=[]):
             result = service.retrieve(
                 embedding=[0.1] * 768,
                 query="test",
@@ -88,7 +88,7 @@ class TestDomainMapping:
     def test_finlit_maps_to_financial_inclusion(self):
         service = StaticRAGService(_make_settings())
         with patch("app.services.static_rag.get_supabase"), \
-             patch("app.services.static_rag.retrieve_hybrid", return_value=[]):
+             patch("app.services.static_rag.StaticRAGService._retrieve_hybrid", return_value=[]):
             result = service.retrieve(
                 embedding=[0.1] * 768,
                 query="test",
@@ -100,7 +100,7 @@ class TestDomainMapping:
     def test_pmfby_passes_through(self):
         service = StaticRAGService(_make_settings())
         with patch("app.services.static_rag.get_supabase"), \
-             patch("app.services.static_rag.retrieve_hybrid", return_value=[]):
+             patch("app.services.static_rag.StaticRAGService._retrieve_hybrid", return_value=[]):
             result = service.retrieve(
                 embedding=[0.1] * 768,
                 query="test",
@@ -122,7 +122,7 @@ class TestRetrieval:
         embedding = [0.1] * 768
 
         with patch("app.services.static_rag.get_supabase") as mock_db, \
-             patch("app.services.static_rag.retrieve_hybrid", return_value=[]) as mock_retrieve:
+             patch("app.services.static_rag.StaticRAGService._retrieve_hybrid", return_value=[]) as mock_retrieve:
             service.retrieve(
                 embedding=embedding,
                 query="What is PMFBY?",
@@ -137,7 +137,7 @@ class TestRetrieval:
     def test_default_k_without_reranker(self):
         service = StaticRAGService(_make_settings(reranker_enabled=False))
         with patch("app.services.static_rag.get_supabase"), \
-             patch("app.services.static_rag.retrieve_hybrid", return_value=[]) as mock_retrieve:
+             patch("app.services.static_rag.StaticRAGService._retrieve_hybrid", return_value=[]) as mock_retrieve:
             service.retrieve(
                 embedding=[0.1] * 768,
                 query="test",
@@ -150,7 +150,7 @@ class TestRetrieval:
     def test_default_k_with_reranker(self):
         service = StaticRAGService(_make_settings(reranker_enabled=True))
         with patch("app.services.static_rag.get_supabase"), \
-             patch("app.services.static_rag.retrieve_hybrid", return_value=[]) as mock_retrieve:
+             patch("app.services.static_rag.StaticRAGService._retrieve_hybrid", return_value=[]) as mock_retrieve:
             service.retrieve(
                 embedding=[0.1] * 768,
                 query="test",
@@ -163,7 +163,7 @@ class TestRetrieval:
     def test_retrieval_failure_returns_abstained(self):
         service = StaticRAGService(_make_settings())
         with patch("app.services.static_rag.get_supabase"), \
-             patch("app.services.static_rag.retrieve_hybrid", side_effect=Exception("DB error")):
+             patch("app.services.static_rag.StaticRAGService._retrieve_hybrid", side_effect=Exception("DB error")):
             result = service.retrieve(
                 embedding=[0.1] * 768,
                 query="test",
@@ -261,7 +261,7 @@ class TestRerankerIntegration:
         ]
 
         with patch("app.services.static_rag.get_supabase"), \
-             patch("app.services.static_rag.retrieve_hybrid", return_value=chunks), \
+             patch("app.services.static_rag.StaticRAGService._retrieve_hybrid", return_value=chunks), \
              patch("app.services.static_rag.JinaReranker") as MockReranker:
             MockReranker.return_value.rerank.return_value = reranked
             result = service.retrieve(
@@ -279,7 +279,7 @@ class TestRerankerIntegration:
     def test_reranker_skipped_when_disabled(self):
         service = StaticRAGService(_make_settings(reranker_enabled=False))
         with patch("app.services.static_rag.get_supabase"), \
-             patch("app.services.static_rag.retrieve_hybrid", return_value=[
+             patch("app.services.static_rag.StaticRAGService._retrieve_hybrid", return_value=[
                  _make_retrieved_chunk(chunk_id="c1"),
              ]), \
              patch("app.services.static_rag.JinaReranker") as MockReranker:
@@ -299,7 +299,7 @@ class TestRerankerIntegration:
         ]
 
         with patch("app.services.static_rag.get_supabase"), \
-             patch("app.services.static_rag.retrieve_hybrid", return_value=chunks), \
+             patch("app.services.static_rag.StaticRAGService._retrieve_hybrid", return_value=chunks), \
              patch("app.services.static_rag.JinaReranker") as MockReranker:
             MockReranker.return_value.rerank.side_effect = Exception("API error")
             result = service.retrieve(
@@ -328,7 +328,7 @@ class TestEvidenceGateIntegration:
         ]
 
         with patch("app.services.static_rag.get_supabase"), \
-             patch("app.services.static_rag.retrieve_hybrid", return_value=chunks), \
+             patch("app.services.static_rag.StaticRAGService._retrieve_hybrid", return_value=chunks), \
              patch("app.services.static_rag.evidence_gate", return_value=(False, None, ConfidenceBand.HIGH)) as mock_gate:
             result = service.retrieve(
                 embedding=[0.1] * 768,
@@ -346,7 +346,7 @@ class TestEvidenceGateIntegration:
         chunks = [_make_retrieved_chunk(domain="wrong_domain")]
 
         with patch("app.services.static_rag.get_supabase"), \
-             patch("app.services.static_rag.retrieve_hybrid", return_value=chunks), \
+             patch("app.services.static_rag.StaticRAGService._retrieve_hybrid", return_value=chunks), \
              patch("app.services.static_rag.evidence_gate",
                     return_value=(True, AbstentionReason.DOMAIN_MISMATCH, ConfidenceBand.LOW)):
             result = service.retrieve(
@@ -363,7 +363,7 @@ class TestEvidenceGateIntegration:
         chunks = [_make_retrieved_chunk()]
 
         with patch("app.services.static_rag.get_supabase"), \
-             patch("app.services.static_rag.retrieve_hybrid", return_value=chunks), \
+             patch("app.services.static_rag.StaticRAGService._retrieve_hybrid", return_value=chunks), \
              patch("app.services.static_rag.evidence_gate", side_effect=Exception("gate error")):
             result = service.retrieve(
                 embedding=[0.1] * 768,
@@ -385,7 +385,7 @@ class TestRAGResultStructure:
     def test_empty_retrieval_returns_empty_result(self):
         service = StaticRAGService(_make_settings())
         with patch("app.services.static_rag.get_supabase"), \
-             patch("app.services.static_rag.retrieve_hybrid", return_value=[]), \
+             patch("app.services.static_rag.StaticRAGService._retrieve_hybrid", return_value=[]), \
              patch("app.services.static_rag.evidence_gate",
                     return_value=(True, AbstentionReason.NO_ELIGIBLE_SOURCE, ConfidenceBand.LOW)):
             result = service.retrieve(
@@ -414,7 +414,7 @@ class TestRAGResultStructure:
         )
 
         with patch("app.services.static_rag.get_supabase"), \
-             patch("app.services.static_rag.retrieve_hybrid", return_value=[chunk]), \
+             patch("app.services.static_rag.StaticRAGService._retrieve_hybrid", return_value=[chunk]), \
              patch("app.services.static_rag.evidence_gate",
                     return_value=(False, None, ConfidenceBand.MEDIUM)):
             result = service.retrieve(

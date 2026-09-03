@@ -111,8 +111,8 @@ def retrieve_chunks(query: str, embed_fn, domain: str, state: str = None, k: int
     query_embedding = embed_fn([query], task="retrieval.query")[0]
 
     if mode in ("hybrid", "hybrid_reranker"):
-        from app.hybrid_retrieval import retrieve_hybrid
-        chunks = retrieve_hybrid(supabase, query_embedding, query, domain, state, k=k)
+        from app.services.static_rag import StaticRAGService
+        chunks = StaticRAGService._retrieve_hybrid(supabase, query_embedding, query, domain, state, k=k)
         docs = [{
             "chunk_id": c.chunk_id,
             "stable_chunk_id": c.stable_chunk_id,

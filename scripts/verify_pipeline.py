@@ -6,7 +6,7 @@ from supabase import create_client
 from app.config import get_settings
 from app.providers.embeddings import get_embedding_provider
 from app.domains import get_anchor_store
-from app.hybrid_retrieval import retrieve_hybrid
+from app.services.static_rag import StaticRAGService
 from app.evidence_gate import evidence_gate_v2
 from app.contracts import RetrievalCandidate
 
@@ -22,7 +22,7 @@ def run(q):
     print("  domain=%s score=%.3f" % (domain, score))
     if domain == "out_of_scope":
         print("  -> out_of_scope (general answer)\n"); return
-    chunks = retrieve_hybrid(sb, v, q, domain, None)
+    chunks = StaticRAGService._retrieve_hybrid(sb, v, q, domain, None)
     cands = [RetrievalCandidate(chunk_id=c.chunk_id, document_id="", source_id="",
                                 dense_score=c.similarity,
                                 filter_decisions={"domain": True, "active": True,

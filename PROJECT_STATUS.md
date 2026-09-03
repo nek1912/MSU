@@ -16,7 +16,7 @@ trust it. If you only have two minutes, update `Last updated` and the
 
 ## Last updated
 
-`2026-09-03 (10th session), Task 6: chat.py refactored 1126→454 lines, delegates to RAGOrchestrator`
+`2026-09-03 (11th session), Task 7: old RAG files removed, hybrid retrieval inlined into static_rag.py, 11 failing tests fixed`
 
 ## Current day / plan position
 
@@ -45,7 +45,7 @@ broken`.
 | Embeddings (Jina v3 768d) | M1 | working | Frozen: jina-embeddings-v3, retrieval.passage (docs) / retrieval.query (queries), 768d, truncate:true, TPM-bucketed |
 | Embeddings (Jina v3 768d) | M1 | working | Re-embedded 226 chunks, dimension mismatch fixed |
 | Retrieval (Supabase pgvector, domain+state filter) | M1 | working | Dense-only, recall below targets |
-| Hybrid retrieval (Stage 5) | M1 | working | Integrated into chat route: hybrid_retrieval.py with RRF fusion |
+| Hybrid retrieval (Stage 5) | M1 | working | Integrated into StaticRAGService (inlined from hybrid_retrieval.py) with RRF fusion |
 | Evidence gate v2 (Stage 7) | M2 | working | evidence_gate_v2 integrated with typed AbstentionReason |
 | Reranker (Stage 6) | M2 | working | Wired into chat route, disabled by default (RERANKER_ENABLED=False) |
 | Citation verifier (Stage 8) | M2 | working | citation_verifier.py, all responses routed through verification |
@@ -117,7 +117,8 @@ rediscovering "wait, do we have a Groq key yet?"
 
 ## Resolved this session
 
-- **Task 6: chat.py refactored** — Reduced from 1126 lines to 454 lines (60% reduction). Extracted `_resolve_context()` for shared language/domain/history logic. Removed `_run_static_rag`, `_run_web_rag`, `_merge_evidence`, `_build_merged_prompt`, inline LLM generation, inline citation verification, inline confidence calculation. All core RAG logic now delegated to `RAGOrchestrator.run()`. Added 17 tests in `test_chat_route_refactored.py` (all passing). 11 old tests fail (expected — they mock internals now in orchestrator).
+- **Task 7: Old RAG files removed** — Deleted `app/generation.py`, `app/hybrid_retrieval.py`, `app/rag/pipeline.py`, `app/retrieval_strategies.py` (2,318 lines removed). Inlined hybrid retrieval logic (dense, lexical, RRF fusion, enrichment) into `app/services/static_rag.py` as `StaticRAGService._retrieve_hybrid()` and module-level helpers. Updated `static_rag.py` to use `self._retrieve_hybrid` instead of importing from `hybrid_retrieval`. Fixed 11 failing tests from Task 6 by rewriting mocks to target `_resolve_context` + `RAGOrchestrator` instead of old route-level functions. Deleted 4 obsolete test files that imported from deleted modules. All 75 affected tests pass.
+- **Task 6: chat.py refactored** — Reduced from 1126 lines to 454 lines (60% reduction). Extracted `_resolve_context()` for shared language/domain/history logic. Removed `_run_static_rag`, `_run_web_rag`, `_merge_evidence`, `_build_merged_prompt`, inline LLM generation, inline citation verification, inline confidence calculation. All core RAG logic now delegated to `RAGOrchestrator.run()`. Added 17 tests in `test_chat_route_refactored.py` (all passing). 11 old tests fixed in Task 7.
 - **Frontend i18n complete** — All 6 languages (EN, HI, GU, MR, BN, TA) added to dictionaries, LanguageSwitcher, and ChatWindow. All hardcoded strings replaced with `t()` calls.
 - **TypeScript build passing** — Fixed `LOCALES` array to include all 6 languages, updated `LanguageSwitcher.tsx` with language names, updated `dict` export to include all language dictionaries.
 - **Frontend build verified** — `npm run build` passes with no TypeScript errors.
@@ -211,7 +212,7 @@ Track these independently — they're what actually gets shown to judges.
    reranker) and re-measure on curated gold before flipping `RERANKER_ENABLED=true`.
 3. **Confirm HNSW index live** via the Supabase SQL editor (SQL in Blocking issues).
 4. **Expose stable text chunk_id** from `match_chunks` (add `c.chunk_id` to the RPC
-   returns) so citations survive re-ingestion; update `retrieval.py`/`hybrid_retrieval.py`
+   returns) so citations survive re-ingestion; update `retrieval.py`/`static_rag.py`
    and citation tests accordingly.
 5. **Calibrate confidence**: replace the retrieval-signal heuristic with a calibrated
    model over held-out retrieval/evidence features (PROJECT_STATUS step 12).

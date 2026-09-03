@@ -69,19 +69,17 @@ low-confidence or uncited result into an answer.
 backend/
   app/
     main.py              FastAPI entrypoint
-    routes/chat.py       /chat pipeline (retrieve → rerank → evidence gate → LLM)
+    routes/chat.py       /chat pipeline (delegates to RAGOrchestrator)
     domains.py           domain classifier (keyword rules + anchor store + LLM fallback)
-    hybrid_retrieval.py  dense (match_chunks) + lexical fusion
     retrieval.py         legacy dense retrieval wrapper
     evidence_gate.py     abstention / confidence scoring
     citation_verifier.py citation→chunk→document→page resolution
     contracts.py         frozen API response contract
-    generation.py        grounded answer generation
     llm_fallback.py      Groq → Gemini fallback chain
     config.py            all thresholds and settings
     providers/           llm, embeddings, reranker, voice adapters (timeout + fallback)
     rag/                 web-grounded RAG pipeline (Tavily + Gemini reranker)
-    services/            voice_service.py (Sarvam → Azure → text-only)
+    services/            static_rag.py (hybrid retrieval), web_rag.py, rag_orchestrator.py, voice_service.py
     web_rag/             tavily_client.py (dual-key rotation)
     data/                keyword_rules.json, domain_anchors.json
   seed_parser.py         MinerU content_list_v2.json → canonical chunk JSONL

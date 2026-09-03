@@ -1,4 +1,4 @@
-"""Tests for refactored RAG components: hybrid retrieval, evidence gate, citation verifier."""
+"""Tests for refactored RAG components: evidence gate, citation verifier."""
 
 import pytest
 
@@ -8,12 +8,9 @@ from app.contracts import (
     HardFilter,
     RetrievalCandidate,
 )
-from app.hybrid_retrieval import (
-    apply_hard_filters,
-    deduplicate_candidates,
-    reciprocal_rank_fusion,
-)
+from app.services.static_rag import _reciprocal_rank_fusion as reciprocal_rank_fusion
 from app.evidence_gate import (
+    apply_hard_filters,
     check_domain_match,
     check_evidence_sufficient,
     check_jurisdiction,
@@ -57,7 +54,7 @@ def _make_candidate(
 
 
 # ---------------------------------------------------------------------------
-# Hybrid Retrieval
+# Hybrid Retrieval (RRF fusion)
 # ---------------------------------------------------------------------------
 
 class TestHybridRetrieval:
@@ -74,11 +71,9 @@ class TestHybridRetrieval:
         lexical = [_make_candidate("a", lexical_score=0.9), _make_candidate("b", lexical_score=0.8)]
 
         result = reciprocal_rank_fusion(dense, lexical)
-        # "a" appears in both top ranks, should be first
         assert result[0].chunk_id == "a"
 
     def test_rrf_tie_breaking_deterministic(self):
-        # Same scores, should break by document_id then chunk_id
         c1 = _make_candidate("aaa", document_id="doc-001", dense_score=0.5)
         c2 = _make_candidate("bbb", document_id="doc-001", dense_score=0.5)
         c3 = _make_candidate("ccc", document_id="doc-002", dense_score=0.5)
@@ -88,16 +83,7 @@ class TestHybridRetrieval:
 
         result = reciprocal_rank_fusion(dense, lexical)
         ids = [r.chunk_id for r in result]
-        assert ids == sorted(ids)  # deterministic order
-
-    def test_deduplication(self):
-        candidates = [
-            _make_candidate("a"), _make_candidate("a"), _make_candidate("b"),
-        ]
-        result = deduplicate_candidates(candidates)
-        assert len(result) == 2
-        assert result[0].chunk_id == "a"
-        assert result[1].chunk_id == "b"
+        assert ids == sorted(ids)
 
     def test_hard_filters_domain(self):
         c1 = RetrievalCandidate(

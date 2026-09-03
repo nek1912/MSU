@@ -6,7 +6,7 @@ from supabase import create_client
 from app.config import get_settings
 from app.providers.embeddings import get_embedding_provider
 from app.domains import get_anchor_store
-from app.hybrid_retrieval import retrieve_hybrid
+from app.services.static_rag import StaticRAGService
 from app.providers.reranker import JinaReranker
 
 s = get_settings()
@@ -21,7 +21,7 @@ for q in [
 ]:
     emb = p.embed_texts([q], task="retrieval.query")[0]
     dom, _ = store.classify(q, emb)
-    pool = retrieve_hybrid(sb, emb, q, dom, None, k=25)
+    pool = StaticRAGService._retrieve_hybrid(sb, emb, q, dom, None, k=25)
     before = [c.chunk_id for c in pool[:6]]
     rr = JinaReranker()
     reranked = rr.rerank(q, [{"chunk_id": c.chunk_id, "content": c.content} for c in pool], top_n=6)

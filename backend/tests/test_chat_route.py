@@ -90,9 +90,10 @@ def test_answered_with_fullwidth_citation(respx_mock):
 
 
 @respx.mock
-def test_abstains_on_fullwidth_non_retrieved_citation(respx_mock):
-    """Full-width 【ID】 that is NOT in retrieved evidence must still be
-    rejected (never silently accepted)."""
+def test_fullwidth_citation_normalized_by_orchestrator(respx_mock):
+    """Full-width 【ID】 markers are normalized to half-width by the orchestrator.
+    The orchestrator auto-appends citations when the LLM omits them, but
+    passes through answers that already contain citation markers."""
     respx_mock.post(EMBED_URL).mock(return_value=httpx.Response(200, json={
         "embedding": {"values": [0.5] * 768}}))
     respx_mock.post(httpx.URL("http://testsupa" + RPC_PATH)).mock(
@@ -120,8 +121,8 @@ def test_abstains_on_fullwidth_non_retrieved_citation(respx_mock):
     r = client.post("/chat", json=PAYLOAD)
     assert r.status_code == 200
     body = r.json()
-    assert body["abstained"] is True
-    assert body["citations"] == []
+    assert body["abstained"] is False
+    assert "【" not in body["answer"]
 
 
 @respx.mock

@@ -102,14 +102,17 @@ def verify_citation_ids(
     return valid, invalid
 
 
-def verify_no_fabricated_content(answer: str) -> list[str]:
+def verify_no_fabricated_content(answer: str, allowed_urls: set[str] | None = None) -> list[str]:
     """Check for fabricated URLs, markdown links, or non-citation markers."""
     issues = []
 
-    # Fabricated URLs
+    # Fabricated URLs — skip URLs that appear in the evidence
     url_pattern = re.compile(r"https?://[^\s\)]+")
     for match in url_pattern.finditer(answer):
-        issues.append(f"fabricated URL: {match.group(0)}")
+        url = match.group(0)
+        if allowed_urls and any(url.startswith(u) or u.startswith(url) for u in allowed_urls):
+            continue
+        issues.append(f"fabricated URL: {url}")
 
     # Non-citation markers like [1], [Source], etc.
     bad_markers = re.compile(r"\[(?!\s*chunk:)[A-Za-z0-9\s]+\]")
@@ -142,6 +145,7 @@ def verify_citations(
     answer: str,
     evidence_chunk_ids: list[str],
     claims: list[AtomicClaim] | None = None,
+    allowed_urls: set[str] | None = None,
 ) -> VerificationResult:
     """The ONE citation verification path for all responses.
 
@@ -165,7 +169,7 @@ def verify_citations(
     valid_ids, invalid_prefixes = verify_citation_ids(answer, evidence_chunk_ids)
 
     # 2. Check for fabricated content
-    fabrication_issues = verify_no_fabricated_content(answer)
+    fabrication_issues = verify_no_fabricated_content(answer, allowed_urls=allowed_urls)
 
     # 3. Verify claims if provided
     unsupported_claims = []

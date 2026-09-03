@@ -15,16 +15,18 @@ export interface ChatResponse {
   confidence_level: "high" | "moderate" | "low" | "none";
   citations: {
     chunk_id: string | null;
-    document_id: string | null;
-    source_file: string;
+    document_id?: string | null;
+    source_file?: string;
     title: string;
-    page: number;
-    page_start: number | null;
-    page_end: number | null;
-    section: string;
-    subsection: string;
-    clause: string;
+    page?: number;
+    page_start?: number | null;
+    page_end?: number | null;
+    section?: string;
+    subsection?: string;
+    clause?: string;
     url: string;
+    source?: "static" | "web";
+    source_label?: string;
   }[];
   abstained: boolean;
   mode?: string;

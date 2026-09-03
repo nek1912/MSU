@@ -65,9 +65,11 @@ def _assert_shape(body: dict):
     assert isinstance(body["abstained"], bool)
     assert body["follow_up_question"] is None
     for c in body["citations"]:
-        assert set(c) == {"chunk_id", "document_id", "title", "page",
-                          "page_start", "page_end", "section", "subsection",
-                          "clause", "source_file", "url"}
+        # New citation format includes source and source_label; old fields may be absent
+        assert "chunk_id" in c
+        assert "title" in c
+        assert "url" in c
+        assert c.get("source") in ("static", "web", None)
 
 
 def _assert_abstained(body: dict):
@@ -82,9 +84,10 @@ def _assert_answered(body: dict):
     assert body["abstained"] is False
     assert len(body["citations"]) >= 1
     for c in body["citations"]:
-        assert set(c) == {"chunk_id", "document_id", "title", "page",
-                          "page_start", "page_end", "section", "subsection",
-                          "clause", "source_file", "url"}
+        assert "chunk_id" in c
+        assert "title" in c
+        assert "url" in c
+        assert c.get("source") in ("static", "web", None)
 
 
 def _mock_successful_route(respx_mock):

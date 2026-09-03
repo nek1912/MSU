@@ -11,6 +11,7 @@ Test cases:
 - Ambiguous question → handled appropriately
 """
 import uuid
+from unittest.mock import patch, MagicMock
 
 import httpx
 import respx
@@ -20,7 +21,17 @@ from app.main import app
 from app.retrieval import RetrievedChunk, evidence_gate
 
 client = TestClient(app)
-EMBED_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent"
+EMBED_URL = "https://api.jina.ai/v1/embeddings"
+EMBED_URL_GEMINI = "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent"
+EMBED_MOCK_RESPONSE = {"data": [{"embedding": [0.5] * 768, "index": 0}]}
+
+
+def _mock_embeddings(respx_mock):
+    """Mock both Jina and Gemini embedding endpoints."""
+    respx_mock.post(EMBED_URL).mock(return_value=httpx.Response(200, json=EMBED_MOCK_RESPONSE))
+    respx_mock.post(EMBED_URL_GEMINI).mock(return_value=httpx.Response(200, json={
+        "embedding": {"values": [0.5] * 768}
+    }))
 RPC_PATH = "/rest/v1/rpc/match_chunks"
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
@@ -78,8 +89,7 @@ class TestPipelineOrder:
     @respx.mock
     def test_evidence_gate_blocks_llm_call(self, respx_mock):
         """When evidence gate fails, LLM is never called."""
-        respx_mock.post(EMBED_URL).mock(
-            return_value=httpx.Response(200, json={"embedding": {"values": [0.5] * 768}}))
+        _mock_embeddings(respx_mock)
         # Return low similarity chunks that will fail evidence gate
         respx_mock.post(httpx.URL("http://testsupa" + RPC_PATH)).mock(
             return_value=httpx.Response(200, json=_mock_chunks(similarities=[0.20, 0.15, 0.10])))
@@ -100,8 +110,7 @@ class TestPipelineOrder:
     @respx.mock
     def test_evidence_gate_passes_to_llm(self, respx_mock):
         """When evidence gate passes, LLM is called."""
-        respx_mock.post(EMBED_URL).mock(
-            return_value=httpx.Response(200, json={"embedding": {"values": [0.5] * 768}}))
+        _mock_embeddings(respx_mock)
         respx_mock.post(httpx.URL("http://testsupa" + RPC_PATH)).mock(
             return_value=httpx.Response(200, json=_mock_chunks(similarities=[0.72, 0.51, 0.35])))
         groq_mock = respx_mock.post(GROQ_URL).mock(
@@ -125,8 +134,7 @@ class TestAnswerableQuestion:
 
     @respx.mock
     def test_answerable_returns_grounded_answer(self, respx_mock):
-        respx_mock.post(EMBED_URL).mock(
-            return_value=httpx.Response(200, json={"embedding": {"values": [0.5] * 768}}))
+        _mock_embeddings(respx_mock)
         respx_mock.post(httpx.URL("http://testsupa" + RPC_PATH)).mock(
             return_value=httpx.Response(200, json=_mock_chunks(similarities=[0.82, 0.65, 0.48])))
         respx_mock.post(GROQ_URL).mock(
@@ -152,8 +160,7 @@ class TestUnanswerableQuestion:
 
     @respx.mock
     def test_no_chunks_abstains(self, respx_mock):
-        respx_mock.post(EMBED_URL).mock(
-            return_value=httpx.Response(200, json={"embedding": {"values": [0.5] * 768}}))
+        _mock_embeddings(respx_mock)
         respx_mock.post(httpx.URL("http://testsupa" + RPC_PATH)).mock(
             return_value=httpx.Response(200, json=[]))
 
@@ -167,8 +174,7 @@ class TestUnanswerableQuestion:
 
     @respx.mock
     def test_low_similarity_abstains(self, respx_mock):
-        respx_mock.post(EMBED_URL).mock(
-            return_value=httpx.Response(200, json={"embedding": {"values": [0.5] * 768}}))
+        _mock_embeddings(respx_mock)
         respx_mock.post(httpx.URL("http://testsupa" + RPC_PATH)).mock(
             return_value=httpx.Response(200, json=_mock_chunks(similarities=[0.25, 0.20, 0.15])))
 
@@ -188,29 +194,23 @@ class TestOffTopicQuestion:
 
     @respx.mock
     def test_out_of_scope_returns_immediately(self, respx_mock):
-        respx_mock.post(EMBED_URL).mock(
-            return_value=httpx.Response(200, json={"embedding": {"values": [0.5] * 768}}))
+        _mock_embeddings(respx_mock)
 
-        # Override the anchor store to return out_of_scope
-        import app.routes.chat as chat_route
+        with patch("app.routes.chat.get_anchor_store") as mock_get_anchor, \
+             patch("app.routes.chat.resolve_and_remember", return_value="en"), \
+             patch("app.routes.chat.touch_session"), \
+             patch("app.routes.chat.save_message"), \
+             patch("app.routes.chat.trim_messages"):
+            fake_store = MagicMock()
+            fake_store.classify.return_value = ("out_of_scope", 0.1)
+            mock_get_anchor.return_value = fake_store
 
-        class _FakeStore:
-            @staticmethod
-            def classify(_text, _embedding):
-                return "out_of_scope", 0.1
-
-        original_get_anchor = chat_route.get_anchor_store
-        chat_route.get_anchor_store = lambda: _FakeStore()
-
-        try:
             r = client.post("/chat", json=_payload(question="What is quantum physics?"))
             body = r.json()
 
             assert body["abstained"] is True
             assert body["domain"] == "out_of_scope"
             assert body["citations"] == []
-        finally:
-            chat_route.get_anchor_store = original_get_anchor
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -222,8 +222,7 @@ class TestWrongDomainQuestion:
 
     @respx.mock
     def test_wrong_domain_chunks_abstain(self, respx_mock):
-        respx_mock.post(EMBED_URL).mock(
-            return_value=httpx.Response(200, json={"embedding": {"values": [0.5] * 768}}))
+        _mock_embeddings(respx_mock)
         # Return chunks from wrong domain
         respx_mock.post(httpx.URL("http://testsupa" + RPC_PATH)).mock(
             return_value=httpx.Response(200, json=_mock_chunks(
@@ -248,8 +247,7 @@ class TestAmbiguousQuestion:
     @respx.mock
     def test_ambiguous_with_evidence_answers(self, respx_mock):
         """Ambiguous question that matches some evidence → answer with confidence."""
-        respx_mock.post(EMBED_URL).mock(
-            return_value=httpx.Response(200, json={"embedding": {"values": [0.5] * 768}}))
+        _mock_embeddings(respx_mock)
         respx_mock.post(httpx.URL("http://testsupa" + RPC_PATH)).mock(
             return_value=httpx.Response(200, json=_mock_chunks(similarities=[0.62, 0.45, 0.38])))
         respx_mock.post(GROQ_URL).mock(
@@ -267,8 +265,7 @@ class TestAmbiguousQuestion:
     @respx.mock
     def test_ambiguous_without_evidence_abstains(self, respx_mock):
         """Ambiguous question with no evidence → abstention."""
-        respx_mock.post(EMBED_URL).mock(
-            return_value=httpx.Response(200, json={"embedding": {"values": [0.5] * 768}}))
+        _mock_embeddings(respx_mock)
         respx_mock.post(httpx.URL("http://testsupa" + RPC_PATH)).mock(
             return_value=httpx.Response(200, json=_mock_chunks(similarities=[0.28, 0.22, 0.18])))
 

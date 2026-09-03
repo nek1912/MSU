@@ -351,6 +351,11 @@ def chat_stream(req: ChatRequest):
 
     def generate():
         try:
+            # Fire first thinking event IMMEDIATELY so user sees feedback
+            initial_lang = req.language or "en"
+            initial_msgs = _THINKING_MESSAGES.get(initial_lang, _THINKING_MESSAGES["en"])
+            yield _sse_event("thinking", {"text": initial_msgs[0]})
+
             ctx = _resolve_context(req)
             thinking_msgs = _THINKING_MESSAGES.get(ctx.lang, _THINKING_MESSAGES["en"])
 
@@ -397,7 +402,7 @@ def chat_stream(req: ChatRequest):
                 return
 
             # ── Core RAG via orchestrator ────────────────────────────────
-            yield _sse_event("thinking", {"text": thinking_msgs[0]})
+            yield _sse_event("thinking", {"text": thinking_msgs[1]})
 
             orchestrator = _get_rag_orchestrator(ctx.settings)
             rag_response = orchestrator.run(

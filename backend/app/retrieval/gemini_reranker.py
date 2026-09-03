@@ -14,13 +14,12 @@ import json
 import logging
 import re
 
-import httpx
+from google import genai
+from google.genai import types
 
-from app.config import REQUEST_TIMEOUT_S, get_settings
+from app.config import get_settings
 
 logger = logging.getLogger(__name__)
-
-_GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
 DEFAULT_MODEL = "gemini-3.5-flash-lite"
 
@@ -38,9 +37,11 @@ class GeminiReranker:
         if not self._api_key:
             logger.warning("Gemini API key not set, reranker will use passthrough scores")
             self._enabled = False
+            self.client = None
         else:
             self._enabled = True
             self.model = DEFAULT_MODEL
+            self.client = genai.Client(api_key=self._api_key)
             logger.info("Gemini reranker initialized")
 
     def _call_gemini(
@@ -50,7 +51,7 @@ class GeminiReranker:
         classification: dict,
     ) -> dict | None:
         """Make a structured Gemini API call with response_schema."""
-        if not self._enabled:
+        if not self._enabled or not self.client:
             return None
 
         domain = classification.get("domain")
@@ -72,52 +73,46 @@ DOCUMENT CANDIDATES:
 {json.dumps(candidate_payload, ensure_ascii=False, indent=2)}
 """
 
-        url = _GEMINI_URL.format(model=self.model) + f"?key={self._api_key}"
-        payload = {
-            "systemInstruction": {"parts": [{"text": system_prompt}]},
-            "contents": [{"role": "user", "parts": [{"text": user_prompt}]}],
-            "generationConfig": {
-                "temperature": 0,
-                "maxOutputTokens": 4096,
-                "responseMimeType": "application/json",
-                "responseSchema": {
-                    "type": "object",
-                    "properties": {
-                        "ranked_chunks": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "chunk_id": {"type": "string"},
-                                    "relevance_score": {"type": "number"},
-                                    "applicable": {"type": "boolean"},
-                                    "applicability_reason": {"type": "string"},
-                                },
-                                "required": ["chunk_id", "relevance_score", "applicable", "applicability_reason"],
-                            },
-                        },
-                        "merge_groups": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "chunk_ids": {"type": "array", "items": {"type": "string"}},
-                                    "reason": {"type": "string"},
-                                },
-                                "required": ["chunk_ids"],
-                            },
-                        },
-                    },
-                    "required": ["ranked_chunks", "merge_groups"],
-                },
-            },
-        }
-
         try:
-            r = httpx.post(url, json=payload, timeout=REQUEST_TIMEOUT_S)
-            r.raise_for_status()
-            data = r.json()
-            text = data["candidates"][0]["content"]["parts"][0]["text"]
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=[system_prompt, user_prompt],
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema={
+                        "type": "object",
+                        "properties": {
+                            "ranked_chunks": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "chunk_id": {"type": "string"},
+                                        "relevance_score": {"type": "number"},
+                                        "applicable": {"type": "boolean"},
+                                        "applicability_reason": {"type": "string"},
+                                    },
+                                    "required": ["chunk_id", "relevance_score", "applicable", "applicability_reason"],
+                                },
+                            },
+                            "merge_groups": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "chunk_ids": {"type": "array", "items": {"type": "string"}},
+                                        "reason": {"type": "string"},
+                                    },
+                                    "required": ["chunk_ids"],
+                                },
+                            },
+                        },
+                        "required": ["ranked_chunks", "merge_groups"],
+                    },
+                ),
+            )
+            text = response.text
+            logger.info("Gemini reranker raw response (first 500 chars): %s", str(text)[:500])
             return json.loads(text)
         except Exception as e:
             logger.warning(f"Gemini reranking call failed: {e}")

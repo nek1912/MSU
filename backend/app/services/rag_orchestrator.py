@@ -56,7 +56,13 @@ _SYSTEM_PROMPT = (
     "After EVERY factual sentence, add the citation: [chunk:ID]. "
     "Use ONLY half-width square brackets []. "
     "If evidence is insufficient, say so clearly. "
-    "Do NOT mention source types or priorities in your answer — just cite the evidence."
+    "Do NOT mention source types or priorities in your answer — just cite the evidence. "
+    "CRITICAL: The question is written in the user's language. "
+    "You MUST respond in the SAME language as the question. "
+    "If the question is in Hindi, respond in Hindi. "
+    "If the question is in Gujarati, respond in Gujarati. "
+    "If the question is in English, respond in English. "
+    "Never switch languages mid-response."
 )
 
 
@@ -111,6 +117,7 @@ class RAGOrchestrator:
         Returns:
             RAGResponse with answer, citations, confidence, and speech data.
         """
+        self._user_lang = lang  # store for prompt building
         logger.info(
             "RAGOrchestrator.run: domain=%s state=%s lang=%s session=%s",
             domain, state, lang, session_id,
@@ -249,7 +256,7 @@ class RAGOrchestrator:
             )
             web_future = executor.submit(
                 self._web_rag.retrieve,
-                query=query,
+                query=english_query,
                 domain=domain,
                 state=state,
                 classification=classification,
@@ -328,6 +335,14 @@ class RAGOrchestrator:
             source_hint.append(f"{web_count} chunks from web sources")
         source_str = " and ".join(source_hint) if source_hint else "no evidence sources"
 
+        lang_instruction = ""
+        if hasattr(self, '_user_lang') and self._user_lang and self._user_lang != "en":
+            lang_instruction = (
+                f"\n\nIMPORTANT: The user's language is '{self._user_lang}'. "
+                f"You MUST respond in this language. "
+                f"Do NOT respond in English."
+            )
+
         return (
             f"{hist_text}"
             f"Question: {english_query}\n\n"
@@ -335,6 +350,7 @@ class RAGOrchestrator:
             f"Available sources: {source_str}\n"
             f"Synthesize an answer using whichever evidence best answers the question. "
             f"Combine evidence from multiple sources when it strengthens the answer."
+            f"{lang_instruction}"
         )
 
     def _auto_append_citations(

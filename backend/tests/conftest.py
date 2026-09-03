@@ -17,9 +17,12 @@ def env_and_route_stubs(monkeypatch):
     monkeypatch.setenv("SUPABASE_SERVICE_KEY", "test")
     monkeypatch.setenv("JINA_API_KEY", "")  # force Gemini provider in tests
     get_settings.cache_clear()
+    from app.providers.embeddings import get_embedding_provider
+    get_embedding_provider.cache_clear()
     import app.routes.chat as chat_route
     monkeypatch.setattr(chat_route, "get_anchor_store", lambda: _FakeStore())
     monkeypatch.setattr(chat_route, "get_state", lambda _sid: None)
     monkeypatch.setattr(chat_route, "touch_session", lambda *_a, **_k: None)
     yield
     get_settings.cache_clear()
+    get_embedding_provider.cache_clear()

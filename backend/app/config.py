@@ -41,6 +41,11 @@ class Settings(BaseSettings):
     azure_speech_locales: str = "en:en-IN,hi:hi-IN,gu:gu-IN,mr:mr-IN,bn:bn-IN"
     # Sarvam AI (STT, TTS, Translation — Indian languages)
     sarvam_api_key: str = ""
+    sarvam_api_key_2: str = ""
+
+    # Groq LLM (primary) — multiple keys for rotation
+    groq_api_key_1: str = ""
+    groq_api_key_2: str = ""
 
     # Web search providers
     tavily_api_key_1: str = ""
@@ -75,6 +80,18 @@ class Settings(BaseSettings):
     @property
     def origins(self) -> list[str]:
         return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]
+
+    @property
+    def sarvam_keys(self) -> list[str]:
+        """Return all non-empty Sarvam API keys for rotation."""
+        keys = [k for k in [self.sarvam_api_key, self.sarvam_api_key_2] if k]
+        return keys
+
+    @property
+    def groq_keys(self) -> list[str]:
+        """Return all non-empty Groq API keys for rotation."""
+        keys = [k for k in [self.groq_api_key, self.groq_api_key_1, self.groq_api_key_2] if k]
+        return keys
 
 EMBED_DIMS = 768
 REQUEST_TIMEOUT_S = 30.0

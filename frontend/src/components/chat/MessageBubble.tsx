@@ -196,7 +196,16 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
             <p className="mb-1.5 text-xs font-semibold text-[var(--text-tertiary)]">{t("chat.sourcesReferences")}</p>
             <ul className="space-y-1">
               {resp.citations.map((c, j) => (
-                <li key={j}>
+                <li key={j} className="flex items-start gap-2">
+                  <span
+                    className={`mt-0.5 inline-flex shrink-0 items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${
+                      c.source === "web"
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-green-100 text-green-700"
+                    }`}
+                  >
+                    {c.source_label || (c.source === "web" ? "Web" : "Doc")}
+                  </span>
                   <a
                     href={c.url}
                     target="_blank"

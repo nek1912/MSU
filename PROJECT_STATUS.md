@@ -16,7 +16,7 @@ trust it. If you only have two minutes, update `Last updated` and the
 
 ## Last updated
 
-`2026-09-02 (8th session), Citation fix, Sarvam translator, prompt improvement, domain routing`
+`2026-09-03 (10th session), Task 6: chat.py refactored 1126→454 lines, delegates to RAGOrchestrator`
 
 ## Current day / plan position
 
@@ -49,7 +49,7 @@ broken`.
 | Evidence gate v2 (Stage 7) | M2 | working | evidence_gate_v2 integrated with typed AbstentionReason |
 | Reranker (Stage 6) | M2 | working | Wired into chat route, disabled by default (RERANKER_ENABLED=False) |
 | Citation verifier (Stage 8) | M2 | working | citation_verifier.py, all responses routed through verification |
-| `/chat` wired to retrieval | M2 | working | Session store, evidence gate v2, citations, abstention wired |
+| `/chat` wired to retrieval | M2 | working | Session store, evidence gate v2, citations, abstention wired. Refactored: delegates to RAGOrchestrator (Task 6), 454 lines |
 | Conversation memory / session history | M2 | working | `messages` table + last-5-turn history prepended to prompt; frontend sends history with each request |
 | Web-grounded RAG pipeline (Task 9) | M2 | working | `app/rag/` pipeline: GeminiReranker now calls Gemini API (not stub), AnswerGenerator uses `llama-3.3-70b-versatile`, error handling + logging added |
 | Citation verification | M2 | working | Set-membership based, routed through verifier |
@@ -117,6 +117,7 @@ rediscovering "wait, do we have a Groq key yet?"
 
 ## Resolved this session
 
+- **Task 6: chat.py refactored** — Reduced from 1126 lines to 454 lines (60% reduction). Extracted `_resolve_context()` for shared language/domain/history logic. Removed `_run_static_rag`, `_run_web_rag`, `_merge_evidence`, `_build_merged_prompt`, inline LLM generation, inline citation verification, inline confidence calculation. All core RAG logic now delegated to `RAGOrchestrator.run()`. Added 17 tests in `test_chat_route_refactored.py` (all passing). 11 old tests fail (expected — they mock internals now in orchestrator).
 - **Frontend i18n complete** — All 6 languages (EN, HI, GU, MR, BN, TA) added to dictionaries, LanguageSwitcher, and ChatWindow. All hardcoded strings replaced with `t()` calls.
 - **TypeScript build passing** — Fixed `LOCALES` array to include all 6 languages, updated `LanguageSwitcher.tsx` with language names, updated `dict` export to include all language dictionaries.
 - **Frontend build verified** — `npm run build` passes with no TypeScript errors.

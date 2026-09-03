@@ -335,3 +335,68 @@ class EvaluationRunProvenance(BaseModel):
     timestamp: str = ""
     raw_metrics: dict[str, float] = Field(default_factory=dict)
     failed_case_rankings: list[dict] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Evidence Controller Data Models
+# ---------------------------------------------------------------------------
+
+class QueryRequirements(BaseModel):
+    """Describes what kind of evidence a query needs."""
+    temporal_scope: str        # "general" | "current" | "historical" | "2025" | "unspecified"
+    geographic_scope: str      # "none" | "state" | "district"
+    required_specificity: str  # "general" | "state" | "district" | "crop+district+year"
+    requires_dynamic: bool
+
+
+class StaticEvidence(BaseModel):
+    """Evidence from the pre-embedded corpus."""
+    available: bool
+    chunks: list[EvidenceChunk] = Field(default_factory=list)
+    summary: str = ""
+
+
+class DynamicEvidence(BaseModel):
+    """Evidence from live web retrieval."""
+    available: bool
+    chunks: list[EvidenceChunk] = Field(default_factory=list)
+    reason: str | None = None
+
+
+class EvidenceBundle(BaseModel):
+    """Combined static + dynamic evidence for a single query."""
+    static: StaticEvidence
+    dynamic: DynamicEvidence
+    query_requirements: QueryRequirements
+    query: str
+    query_id: str | None = None
+
+
+class FlaggedClaim(BaseModel):
+    """A claim extracted from an LLM answer that needs verification."""
+    claim_id: str
+    claim_text: str
+    claim_type: str       # "static" | "dynamic" | "mixed"
+    flag_reason: str
+    requires_evidence: str  # "static" | "dynamic" | "any"
+
+
+class ClaimVerification(BaseModel):
+    """Result of verifying a single claim against evidence."""
+    claim_id: str
+    claim_text: str
+    is_supported: bool
+    claim_type: str
+    source_type_needed: str
+    evidence_found: bool
+    evidence_ids: list[str] = Field(default_factory=list)
+    rejection_reason: str | None = None
+    verification_confidence: float | None = None
+
+
+class FilterOutcome:
+    """Constants for the evidence filter decision."""
+    KEEP = "keep"
+    FILTER = "filter"
+    REGENERATE = "regenerate"
+    ABSTAIN = "abstain"

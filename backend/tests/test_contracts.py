@@ -242,3 +242,60 @@ class TestEvaluationRunProvenance:
         assert p.run_id == "run-001"
         assert p.raw_metrics["recall@5"] == 0.6
         assert p.failed_case_rankings == []
+
+
+# ---------------------------------------------------------------------------
+# Evidence Controller Data Models
+# ---------------------------------------------------------------------------
+
+def test_query_requirements_creation():
+    from app.contracts import QueryRequirements
+    qr = QueryRequirements(
+        temporal_scope="current",
+        geographic_scope="district",
+        required_specificity="crop+district+year",
+        requires_dynamic=True,
+    )
+    assert qr.temporal_scope == "current"
+    assert qr.requires_dynamic is True
+
+
+def test_evidence_bundle_creation():
+    from app.contracts import EvidenceBundle, StaticEvidence, DynamicEvidence, QueryRequirements
+    bundle = EvidenceBundle(
+        static=StaticEvidence(available=True, chunks=[], summary="test"),
+        dynamic=DynamicEvidence(available=False, chunks=[], reason="no web results"),
+        query_requirements=QueryRequirements(
+            temporal_scope="current", geographic_scope="district",
+            required_specificity="district", requires_dynamic=True,
+        ),
+        query="test query",
+    )
+    assert bundle.static.available is True
+    assert bundle.dynamic.available is False
+    assert bundle.query == "test query"
+
+
+def test_claim_verification_creation():
+    from app.contracts import ClaimVerification
+    cv = ClaimVerification(
+        claim_id="abc123",
+        claim_text="PMFBY premium is 2%",
+        is_supported=True,
+        claim_type="static",
+        source_type_needed="static",
+        evidence_found=True,
+        evidence_ids=["chunk1"],
+        rejection_reason=None,
+        verification_confidence=0.9,
+    )
+    assert cv.is_supported is True
+    assert cv.evidence_ids == ["chunk1"]
+
+
+def test_filter_outcome_constants():
+    from app.contracts import FilterOutcome
+    assert FilterOutcome.KEEP == "keep"
+    assert FilterOutcome.FILTER == "filter"
+    assert FilterOutcome.REGENERATE == "regenerate"
+    assert FilterOutcome.ABSTAIN == "abstain"

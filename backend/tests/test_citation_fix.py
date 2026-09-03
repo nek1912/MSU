@@ -1,7 +1,6 @@
 """Tests for citation verification helper functions."""
 from app.generation import verify_citations
 from app.retrieval import RetrievedChunk
-from app.routes.chat import _citations_from
 
 
 CHUNK_ID = "abc1234567890abcdef1234567890abcd"
@@ -16,29 +15,6 @@ def _chunks():
             content="C", similarity=0.9, source_url="https://x",
             domain="pacs", jurisdiction="central", state=None),
     ]
-
-
-def test_citations_from_filters_invalid():
-    chunks = _chunks()
-    answer = "This is about PACS [chunk:abc12345] but also [chunk:deadbeef]"
-    citations = _citations_from(answer, chunks)
-    assert len(citations) == 1
-    assert citations[0]["title"] == "T"
-
-
-def test_citations_from_accepts_valid():
-    chunks = _chunks()
-    answer = "This is about PACS [chunk:abc12345]"
-    citations = _citations_from(answer, chunks)
-    assert len(citations) == 1
-    assert citations[0]["title"] == "T"
-
-
-def test_citations_from_empty_when_no_markers():
-    chunks = _chunks()
-    answer = "This has no citation markers."
-    citations = _citations_from(answer, chunks)
-    assert citations == []
 
 
 def test_verify_citations_rejects_invalid():

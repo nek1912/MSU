@@ -16,7 +16,7 @@ trust it. If you only have two minutes, update `Last updated` and the
 
 ## Last updated
 
-`2026-09-03 (11th session), Task 7: old RAG files removed, hybrid retrieval inlined into static_rag.py, 11 failing tests fixed`
+`2026-09-03 (12th session), Task 8: citation verification regression fixed in RAGOrchestrator, 4 new tests added`
 
 ## Current day / plan position
 
@@ -117,6 +117,7 @@ rediscovering "wait, do we have a Groq key yet?"
 
 ## Resolved this session
 
+- **Task 8: Citation verification regression fixed** — `verify_citations()` from `citation_verifier.py` now called in `RAGOrchestrator.run()` after LLM answer generation + auto-append citations. Invalid citations return `abstained=True` with `CITATION_FAILURE` reason. 4 new tests added: valid citations pass, invalid citations abstain, verification receives all chunk IDs, auto-appended citations verified. Fixed 2 pre-existing tests using invalid chunk IDs (`test_chat_resolves_contextual_followup_question`, `test_fullwidth_citation_normalized_by_orchestrator`). 491/506 tests pass; 15 pre-existing failures in `test_services_static_rag.py` (stale `retrieve_hybrid` patches from Task 7).
 - **Task 7: Old RAG files removed** — Deleted `app/generation.py`, `app/hybrid_retrieval.py`, `app/rag/pipeline.py`, `app/retrieval_strategies.py` (2,318 lines removed). Inlined hybrid retrieval logic (dense, lexical, RRF fusion, enrichment) into `app/services/static_rag.py` as `StaticRAGService._retrieve_hybrid()` and module-level helpers. Updated `static_rag.py` to use `self._retrieve_hybrid` instead of importing from `hybrid_retrieval`. Fixed 11 failing tests from Task 6 by rewriting mocks to target `_resolve_context` + `RAGOrchestrator` instead of old route-level functions. Deleted 4 obsolete test files that imported from deleted modules. All 75 affected tests pass.
 - **Task 6: chat.py refactored** — Reduced from 1126 lines to 454 lines (60% reduction). Extracted `_resolve_context()` for shared language/domain/history logic. Removed `_run_static_rag`, `_run_web_rag`, `_merge_evidence`, `_build_merged_prompt`, inline LLM generation, inline citation verification, inline confidence calculation. All core RAG logic now delegated to `RAGOrchestrator.run()`. Added 17 tests in `test_chat_route_refactored.py` (all passing). 11 old tests fixed in Task 7.
 - **Frontend i18n complete** — All 6 languages (EN, HI, GU, MR, BN, TA) added to dictionaries, LanguageSwitcher, and ChatWindow. All hardcoded strings replaced with `t()` calls.

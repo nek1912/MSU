@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from app.citation_verifier import VerificationResult
 from app.config import Settings
 from app.contracts import (
     AbstentionReason,
@@ -216,7 +217,8 @@ class TestAbstention:
 
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
-             patch("app.services.rag_orchestrator.grounded_answer", return_value="Web answer [chunk:chunk-abc12345]"):
+             patch("app.services.rag_orchestrator.grounded_answer", return_value="Web answer [chunk:chunk-abc12345]"), \
+             patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)):
 
             response = orch.run(
                 query="Tell me about PMFBY",
@@ -251,7 +253,8 @@ class TestAbstention:
 
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
-             patch("app.services.rag_orchestrator.grounded_answer", return_value="Static answer [chunk:chunk-abc12345]"):
+             patch("app.services.rag_orchestrator.grounded_answer", return_value="Static answer [chunk:chunk-abc12345]"), \
+             patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)):
 
             response = orch.run(
                 query="PMFBY details",
@@ -644,7 +647,8 @@ class TestFullPipeline:
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
              patch("app.services.rag_orchestrator.grounded_answer",
-                   return_value="PMFBY provides crop insurance with 2% premium [chunk:static-abc12345] and covers all food crops [chunk:web-abc12345]"):
+                   return_value="PMFBY provides crop insurance with 2% premium [chunk:static-abc12345] and covers all food crops [chunk:web-abc12345]"), \
+             patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)):
 
             response = orch.run(
                 query="What is PMFBY?",
@@ -682,7 +686,8 @@ class TestFullPipeline:
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
              patch("app.services.rag_orchestrator.grounded_answer",
-                   return_value="PMFBY is a crop insurance scheme [chunk:chunk-abc12345]"):
+                   return_value="PMFBY is a crop insurance scheme [chunk:chunk-abc12345]"), \
+             patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)):
 
             response = orch.run(
                 query="PMFBY क्या है?",
@@ -697,4 +702,170 @@ class TestFullPipeline:
             )
 
             assert response.language == "hi"
+            assert response.abstained is False
+
+
+# ---------------------------------------------------------------------------
+# Citation verification integration
+# ---------------------------------------------------------------------------
+
+class TestCitationVerification:
+    def test_valid_citations_pass_verification(self):
+        """Valid citations from evidence pass verification and return normal response."""
+        settings = _make_settings()
+        orch = RAGOrchestrator(settings)
+        classification = _make_classification()
+
+        static_chunks = [
+            _make_evidence_chunk(
+                chunk_id="chunk-abc12345",
+                content="PMFBY premium is 2%.",
+                source_type="static",
+            ),
+        ]
+        static_result = _make_rag_result(chunks=static_chunks, band=ConfidenceBand.HIGH)
+        web_result = _make_rag_result(abstained=True)
+
+        with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
+             patch.object(orch._web_rag, "retrieve", return_value=web_result), \
+             patch("app.services.rag_orchestrator.grounded_answer",
+                   return_value="PMFBY premium is 2% [chunk:chunk-abc12345]"), \
+             patch("app.services.rag_orchestrator.verify_citations") as mock_verify:
+            mock_verify.return_value = VerificationResult(
+                is_valid=True,
+                valid_citations=[],
+            )
+
+            response = orch.run(
+                query="PMFBY premium",
+                english_query="PMFBY premium",
+                embedding=[0.1] * 768,
+                domain="pmfby",
+                state=None,
+                classification=classification,
+                history=None,
+                lang="en",
+                session_id="sess-cite-1",
+            )
+
+            assert response.abstained is False
+            mock_verify.assert_called_once()
+
+    def test_invalid_citations_return_abstained(self):
+        """Invalid citations cause verification failure and return abstained response."""
+        settings = _make_settings()
+        orch = RAGOrchestrator(settings)
+        classification = _make_classification()
+
+        static_chunks = [
+            _make_evidence_chunk(chunk_id="chunk-abc12345"),
+        ]
+        static_result = _make_rag_result(chunks=static_chunks, band=ConfidenceBand.HIGH)
+        web_result = _make_rag_result(abstained=True)
+
+        with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
+             patch.object(orch._web_rag, "retrieve", return_value=web_result), \
+             patch("app.services.rag_orchestrator.grounded_answer",
+                   return_value="Some answer [chunk:fffffffffff]"), \
+             patch("app.services.rag_orchestrator.verify_citations") as mock_verify:
+            mock_verify.return_value = VerificationResult(
+                is_valid=False,
+                invalid_prefixes=["ffffffff"],
+                reason=AbstentionReason.CITATION_FAILURE,
+            )
+
+            response = orch.run(
+                query="test query",
+                english_query="test query",
+                embedding=[0.1] * 768,
+                domain="pmfby",
+                state=None,
+                classification=classification,
+                history=None,
+                lang="en",
+                session_id="sess-cite-2",
+            )
+
+            assert response.abstained is True
+            assert response.confidence == 0.0
+            assert response.citations == []
+
+    def test_verification_receives_all_chunk_ids(self):
+        """Verification receives chunk IDs from all evidence chunks."""
+        settings = _make_settings()
+        orch = RAGOrchestrator(settings)
+        classification = _make_classification()
+
+        static_chunks = [
+            _make_evidence_chunk(chunk_id="static-aaa11111"),
+            _make_evidence_chunk(chunk_id="static-bbb22222"),
+        ]
+        web_chunks = [
+            _make_evidence_chunk(chunk_id="web-ccc33333", source_type="web"),
+        ]
+        static_result = _make_rag_result(chunks=static_chunks, band=ConfidenceBand.HIGH)
+        web_result = _make_rag_result(chunks=web_chunks, band=ConfidenceBand.MEDIUM)
+
+        with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
+             patch.object(orch._web_rag, "retrieve", return_value=web_result), \
+             patch("app.services.rag_orchestrator.grounded_answer",
+                   return_value="Answer [chunk:static-aaa11111] [chunk:web-ccc33333]"), \
+             patch("app.services.rag_orchestrator.verify_citations") as mock_verify:
+            mock_verify.return_value = VerificationResult(is_valid=True)
+
+            orch.run(
+                query="test",
+                english_query="test",
+                embedding=[0.1] * 768,
+                domain="pmfby",
+                state=None,
+                classification=classification,
+                history=None,
+                lang="en",
+                session_id="sess-cite-3",
+            )
+
+            call_args = mock_verify.call_args
+            chunk_ids = call_args[0][1]
+            assert "static-aaa11111" in chunk_ids
+            assert "static-bbb22222" in chunk_ids
+            assert "web-ccc33333" in chunk_ids
+
+    def test_auto_appended_citations_verified(self):
+        """Auto-appended citations also go through verification."""
+        settings = _make_settings()
+        orch = RAGOrchestrator(settings)
+        classification = _make_classification()
+
+        static_chunks = [
+            _make_evidence_chunk(chunk_id="chunk-abc12345"),
+        ]
+        static_result = _make_rag_result(chunks=static_chunks, band=ConfidenceBand.HIGH)
+        web_result = _make_rag_result(abstained=True)
+
+        # LLM returns no citations, auto-append adds them, then verify
+        with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
+             patch.object(orch._web_rag, "retrieve", return_value=web_result), \
+             patch("app.services.rag_orchestrator.grounded_answer",
+                   return_value="PMFBY is crop insurance."), \
+             patch("app.services.rag_orchestrator.verify_citations") as mock_verify:
+            mock_verify.return_value = VerificationResult(is_valid=True)
+
+            response = orch.run(
+                query="PMFBY",
+                english_query="PMFBY",
+                embedding=[0.1] * 768,
+                domain="pmfby",
+                state=None,
+                classification=classification,
+                history=None,
+                lang="en",
+                session_id="sess-cite-4",
+            )
+
+            # Verify was called with the auto-appended citation in the answer
+            call_args = mock_verify.call_args
+            answer_arg = call_args[0][0]
+            # Auto-append truncates chunk_id to 8 chars: chunk-abc12345 -> chunk-ab
+            assert "[chunk:chunk-ab]" in answer_arg
             assert response.abstained is False

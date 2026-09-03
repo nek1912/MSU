@@ -201,7 +201,7 @@ def test_chat_resolves_contextual_followup_question(respx_mock):
             "domain": "pmfby", "jurisdiction": "central", "state": None}]))
     respx_mock.post("https://api.groq.com/openai/v1/chat/completions").mock(
         return_value=httpx.Response(200, json={"choices": [{"message": {
-            "content": "PMFBY eligibility: All farmers... [chunk:aaaabbbb]."}}]}))
+            "content": "PMFBY eligibility: All farmers... [chunk:aaaaaaaa]."}}]}))
 
     payload = {
         "question": "What are the eligibility criteria?",

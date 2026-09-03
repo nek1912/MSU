@@ -22,6 +22,7 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
+from app.citation_verifier import verify_citations
 from app.config import Settings, get_settings
 from app.contracts import (
     AbstentionReason,
@@ -172,6 +173,21 @@ class RAGOrchestrator:
 
         # Step 6: Auto-append citations if missing
         answer = self._auto_append_citations(answer, all_chunks)
+
+        # Step 6b: Verify citations against evidence
+        all_chunk_ids = [chunk.chunk_id for chunk in all_chunks]
+        verification = verify_citations(answer, all_chunk_ids)
+        if not verification.is_valid:
+            logger.warning(
+                "Citation verification failed: reason=%s invalid_prefixes=%s",
+                verification.reason, verification.invalid_prefixes,
+            )
+            return self._abstain_response(
+                lang=lang,
+                reason=verification.reason or AbstentionReason.CITATION_FAILURE,
+                domain=domain,
+                session_id=session_id,
+            )
 
         # Step 7: Calculate confidence
         confidence, confidence_band = self._calculate_confidence(

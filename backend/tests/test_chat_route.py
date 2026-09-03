@@ -117,7 +117,7 @@ def test_fullwidth_citation_normalized_by_orchestrator(respx_mock):
             "domain": "pmfby", "jurisdiction": "central", "state": None}]))
     respx_mock.post("https://api.groq.com/openai/v1/chat/completions").mock(
         return_value=httpx.Response(200, json={"choices": [{"message": {
-            "content": "Something about farmers 【ffffffff】."}}]}))
+            "content": "Something about farmers 【aaaaaaaa】."}}]}))
     r = client.post("/chat", json=PAYLOAD)
     assert r.status_code == 200
     body = r.json()

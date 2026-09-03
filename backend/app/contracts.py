@@ -233,6 +233,59 @@ class ConfidenceBand(str, Enum):
 # Citation & Answer
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Unified RAG Evidence & Results
+# ---------------------------------------------------------------------------
+
+class EvidenceChunk(BaseModel):
+    """A single evidence chunk used by both static and web RAG pipelines."""
+    chunk_id: str
+    content: str
+    source_type: Literal["static", "web"]
+    title: str = ""
+    url: str = ""
+    page: int | None = None
+    section: str = ""
+    domain: str = ""
+    jurisdiction: str = ""
+    state: str | None = None
+    dense_score: float | None = None
+    bm25_score: float | None = None
+    rerank_score: float | None = None
+    trust_score: float | None = None
+    metadata: dict = Field(default_factory=dict)
+
+
+class RAGResult(BaseModel):
+    """Aggregated result from a RAG retrieval pipeline."""
+    chunks: list[EvidenceChunk] = Field(default_factory=list)
+    abstained: bool = False
+    reason: AbstentionReason | None = None
+    band: ConfidenceBand | None = None
+    domain: str = ""
+    metadata: dict = Field(default_factory=dict)
+
+
+class RAGResponse(BaseModel):
+    """Unified API response for the /chat endpoint."""
+    answer: str
+    language: str = "en"
+    domain: str = ""
+    confidence: float = 0.0
+    confidence_level: ConfidenceBand = ConfidenceBand.LOW
+    citations: list[dict] = Field(default_factory=list)
+    abstained: bool = False
+    speech_text: str = ""
+    speech_segments: list[dict] = Field(default_factory=list)
+    follow_up_question: str | None = None
+    mode: str = "rag"
+    conversation_id: str = ""
+
+
+# ---------------------------------------------------------------------------
+# Citation & Answer
+# ---------------------------------------------------------------------------
+
 class AtomicClaim(BaseModel):
     """A single factual claim in the answer."""
     claim_text: str

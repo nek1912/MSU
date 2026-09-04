@@ -32,6 +32,9 @@ function cleanAnswerText(text: string): string {
   cleaned = cleaned.replace(/\[chunk:[^\]]*\]/gi, '');
   cleaned = cleaned.replace(/\(chunk:[^\)]*\)/gi, '');
 
+  // Fix escaped asterisks from LLM (e.g., \*\*text\*\* -> **text**)
+  cleaned = cleaned.replace(/\\\*/g, '*');
+
   cleaned = cleaned.replace(/\s+/g, ' ').trim();
   return cleaned;
 }

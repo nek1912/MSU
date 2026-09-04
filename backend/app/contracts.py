@@ -349,6 +349,30 @@ class QueryRequirements(BaseModel):
     requires_dynamic: bool
 
 
+class SourceRole(Enum):
+    """Which evidence source should be primary for this query."""
+    STATIC_PRIMARY = "static_primary"    # General policy/rules/definitions
+    WEB_PRIMARY = "web_primary"          # Current/local/notification/value
+    BALANCED = "balanced"                # Both relevant
+
+
+class EvidenceSufficiency(Enum):
+    """How much evidence is available to answer the query."""
+    SUFFICIENT = "sufficient"      # Enough quality evidence to answer
+    PARTIAL = "partial"            # Some evidence, gaps remain
+    INSUFFICIENT = "insufficient"  # Not enough to answer properly
+    EMPTY = "empty"                # No evidence found
+
+
+class EvidenceAssessment(BaseModel):
+    """Assessment of evidence quality and sufficiency for a query."""
+    source_role: SourceRole
+    sufficiency: EvidenceSufficiency
+    static_quality: Literal["high", "medium", "low"]
+    web_quality: Literal["high", "medium", "low"]
+    assessment_text: str  # Human-readable, injected into prompt
+
+
 class StaticEvidence(BaseModel):
     """Evidence from the pre-embedded corpus."""
     available: bool

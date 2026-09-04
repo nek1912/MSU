@@ -31,7 +31,6 @@ from app.contracts import (
     ConfidenceBand,
     EvidenceBundle,
     EvidenceChunk,
-    QueryRequirements,
     RAGResponse,
     RAGResult,
 )

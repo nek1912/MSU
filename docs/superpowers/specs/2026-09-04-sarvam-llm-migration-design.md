@@ -73,9 +73,10 @@ User query (any language / code-mixed)
 | Property | Value |
 |---|---|
 | API endpoint | `POST https://api.sarvam.ai/v1/chat/completions` |
-| Auth headers | `Authorization: Bearer {token}`, `api-subscription-key: {key}` |
+| Auth headers | `api-subscription-key: {key}` (preferred, per official docs) |
 | Model | `sarvam-105b` (128K context) |
-| Streaming | Server-Sent Events (SSE) |
+| Streaming | Server-Sent Events (SSE) — optional, NOT part of MVP correctness path |
+| Reasoning | `reasoning_effort=None` (disabled for latency-sensitive RAG) |
 | Timeout | 30s connect, 120s read |
 | Fallback chain | Sarvam key 1 → Sarvam key 2 → Groq → abstain |
 

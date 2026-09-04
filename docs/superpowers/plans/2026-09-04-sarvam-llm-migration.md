@@ -80,6 +80,13 @@ git commit -m "feat(config): add sarvam_chat_model and sarvam_chat_url settings"
 - Create: `backend/app/providers/sarvam_chat.py`
 - Test: `tests/providers/test_sarvam_chat.py`
 
+**Key design decisions (from official Sarvam docs):**
+- Auth: `api-subscription-key` header only (no `Authorization: Bearer` needed)
+- Model: `sarvam-105b` (128K context, NOT `sarvam-105b-conversations` which is 32K for voice)
+- Reasoning: `reasoning_effort=None` for latency-sensitive RAG path (reasoning is on by default)
+- Streaming: optional, NOT part of MVP correctness path (can't guarantee no chunk ID leakage during streaming)
+- Error handling: 403 = credential failure, 429 = rate limit, 5xx/timeout = provider failure, 422 = bad request (do NOT rotate keys on 422)
+
 **Interfaces:**
 - Consumes: `Settings` (for `sarvam_keys`, `sarvam_chat_model`, `sarvam_chat_url`)
 - Produces: `SarvamChatProvider.generate(system, user, temperature) -> str`, `.generate_stream(...) -> Generator[str, None, None]`
@@ -157,7 +164,7 @@ class TestSarvamChatProvider:
             with pytest.raises(Exception):
                 provider.generate("System", "User")
 
-    def test_generate_sends_correct_headers(self):
+    def test_generate_sends_correct_headers_and_body(self):
         settings = _make_settings()
         provider = SarvamChatProvider(settings)
         mock_response = MagicMock()
@@ -169,12 +176,31 @@ class TestSarvamChatProvider:
             provider.generate("System prompt", "User msg", temperature=0.5)
             call_kwargs = mock_post.call_args
             headers = call_kwargs[1].get("headers", call_kwargs.kwargs.get("headers", {}))
+            # Auth: api-subscription-key only, NO Authorization header
             assert "api-subscription-key" in headers
             assert headers["api-subscription-key"] == "sk_test_sarvam_1"
+            assert "Authorization" not in headers
             body = call_kwargs[1].get("json", call_kwargs.kwargs.get("json", {}))
             assert body["model"] == "sarvam-105b"
             assert body["messages"][0]["content"] == "System prompt"
             assert body["temperature"] == 0.5
+            # Reasoning disabled for latency-sensitive RAG path
+            assert body["reasoning_effort"] is None
+            assert body["stream"] is False
+
+    def test_422_does_not_rotate_keys(self):
+        """422 = bad request, not bad key. Rotating won't help."""
+        settings = _make_settings()
+        provider = SarvamChatProvider(settings)
+        mock_response = MagicMock()
+        mock_response.status_code = 422
+        mock_response.text = "invalid parameters"
+        mock_response.raise_for_status.side_effect = httpx.HTTPStatusError(
+            "422", request=MagicMock(), response=mock_response
+        )
+        with patch("httpx.post", return_value=mock_response):
+            with pytest.raises(httpx.HTTPStatusError):
+                provider.generate("System", "User")
 ```
 
 - [ ] **Step 2: Run tests to verify they fail**
@@ -201,8 +227,8 @@ class SarvamChatProvider:
     """Sarvam-105B chat completions adapter.
 
     Uses the OpenAI-compatible endpoint at api.sarvam.ai.
-    Auth requires both ``Authorization: Bearer <token>`` and
-    ``api-subscription-key: <key>`` headers.
+    Auth: ``api-subscription-key: <key>`` header only.
+    Reasoning is disabled (reasoning_effort=None) for latency-sensitive RAG.
     """
 
     def __init__(self, settings: Settings) -> None:
@@ -224,6 +250,7 @@ class SarvamChatProvider:
     def generate_stream(
         self, system: str, user: str, temperature: float = 0.1
     ) -> Generator[str, None, None]:
+        """Optional streaming. NOT used in MVP correctness path."""
         keys = self._rotator._keys  # noqa: SLF001 — intentional access for fallback loop
         last_exc: Exception | None = None
         for key in keys:
@@ -247,7 +274,6 @@ class SarvamChatProvider:
     ) -> str:
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer placeholder",
             "api-subscription-key": key,
         }
         body = {
@@ -257,6 +283,8 @@ class SarvamChatProvider:
                 {"role": "user", "content": user},
             ],
             "temperature": temperature,
+            "reasoning_effort": None,  # Disable reasoning for latency
+            "max_tokens": 2048,
             "stream": stream,
         }
         with httpx.Client(timeout=(30.0, 120.0)) as client:
@@ -276,7 +304,6 @@ class SarvamChatProvider:
 
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer placeholder",
             "api-subscription-key": key,
         }
         body = {
@@ -286,6 +313,8 @@ class SarvamChatProvider:
                 {"role": "user", "content": user},
             ],
             "temperature": temperature,
+            "reasoning_effort": None,
+            "max_tokens": 2048,
             "stream": True,
         }
         with httpx.Client(timeout=(30.0, 120.0)) as client:
@@ -298,7 +327,11 @@ class SarvamChatProvider:
                     if payload.strip() == "[DONE]":
                         break
                     chunk = json.loads(payload)
-                    delta = chunk.get("choices", [{}])[0].get("delta", {})
+                    # Final chunk may have usage with empty choices — skip
+                    choices = chunk.get("choices", [])
+                    if not choices:
+                        continue
+                    delta = choices[0].get("delta", {})
                     content = delta.get("content")
                     if content:
                         yield content
@@ -307,7 +340,7 @@ class SarvamChatProvider:
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `cd backend && python -m pytest tests/providers/test_sarvam_chat.py -v`
-Expected: All 4 tests PASS
+Expected: All 5 tests PASS
 
 - [ ] **Step 5: Commit**
 
@@ -1030,29 +1063,62 @@ async def run(
 ) -> RAGResponse:
 ```
 
-- [ ] **Step 2: Replace Groq+Gemini with SarvamChatProvider**
+- [ ] **Step 2: Initialize SarvamChatProvider once in __init__**
+
+In `__init__` (line 74-80), add SarvamChatProvider initialization. Do NOT create a new provider per `run()` call:
+
+```python
+def __init__(self, settings: Settings | None = None) -> None:
+    self._settings = settings or get_settings()
+    self._static_rag = StaticRAGService(self._settings)
+    self._web_rag = WebRAGService()
+    self._evidence_controller = EvidenceController()
+    self._query_classifier = QueryRequirementClassifier()
+    self._claim_verifier = ClaimVerifier()
+    # Initialize Sarvam provider once, reuse across requests
+    try:
+        from app.providers.sarvam_chat import SarvamChatProvider
+        self._sarvam = SarvamChatProvider(self._settings)
+    except (ValueError, ImportError):
+        self._sarvam = None  # Will fall back to Groq+Gemini
+```
+
+- [ ] **Step 3: Replace grounded_answer() with Sarvam + fallback**
 
 In the `run()` method, replace the `grounded_answer()` call (lines 157-172) with:
 
 ```python
-from app.providers.sarvam_chat import SarvamChatProvider
 from app.providers.groq_llm import GroqLLMProvider
 from app.providers.gemini_llm import GeminiLLMProvider
 from app.llm_fallback import grounded_answer
 
-# Try Sarvam first, fall back to Groq+Gemini
-try:
-    sarvam = SarvamChatProvider(self._settings)
-    answer = sarvam.generate(system_prompt, user_prompt)
-except Exception:
-    # Fallback to Groq+Gemini with output translation needed
+# Sarvam is primary. Fallback to Groq+Gemini only on provider failure.
+# Do NOT fall back because citation check fails — that's semantic verification
+# which is out of scope for MVP.
+if self._sarvam is not None:
+    try:
+        answer = self._sarvam.generate(system_prompt, user_prompt)
+    except Exception as exc:
+        # Provider failure (403, 429, 5xx, timeout) — fall back to Groq+Gemini
+        import logging
+        logging.warning("Sarvam provider failed, falling back to Groq: %s", exc)
+        answer = grounded_answer(
+            GroqLLMProvider(self._settings),
+            GeminiLLMProvider(self._settings),
+            system_prompt,
+            user_prompt,
+        )
+        # Mark mode so chat.py can apply output translation for Groq fallback
+        mode = "groq_fallback"
+else:
+    # Sarvam not configured — use Groq+Gemini directly
     answer = grounded_answer(
         GroqLLMProvider(self._settings),
         GeminiLLMProvider(self._settings),
         system_prompt,
         user_prompt,
     )
-    # Note: fallback path needs output translation (handled in chat.py)
+    mode = "groq_fallback"
 ```
 
 - [ ] **Step 3: Add evidence assessment before prompt construction**
@@ -1092,15 +1158,19 @@ The existing `verify_citations()` call (line 179-191) should still work because 
 **Correct order:**
 ```python
 # 1. LLM generates answer with [chunk:ID] markers
-answer = sarvam.generate(system_prompt, user_prompt)
+answer = self._sarvam.generate(system_prompt, user_prompt)
 
 # 2. Verify citations (needs original answer with markers)
+# This only checks set-membership (do cited IDs exist in evidence?)
+# It does NOT verify semantic claim support — that's out of scope for MVP
 verify_citations(answer, all_chunk_ids)
 
 # 3. Strip markers for client delivery
 clean_answer, _ = strip_citations(answer)
 answer = clean_answer
 ```
+
+**Important:** Citation verification failure does NOT trigger Groq fallback. The verifier only checks set-membership. A citation pointing to a valid but irrelevant chunk is not grounds for provider fallback — that would require semantic verification which is out of scope.
 
 - [ ] **Step 6: Run orchestrator tests**
 

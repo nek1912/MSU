@@ -12,6 +12,8 @@ import { Stagger } from "@/components/motion/Stagger";
 import { IconChevronRight } from "@/components/ui/Icons";
 import { deco } from "@/lib/data/deco";
 
+import { formatLegalQuestion } from "@/lib/i18n/formatQuery";
+
 const SECTIONS = ["keyProvisions", "applicability", "byLaws"] as const;
 
 export default function LegalDetailPage() {
@@ -41,7 +43,7 @@ export default function LegalDetailPage() {
           <Badge deco={deco(sc.category)}>{t(`legalCategory.${sc.category}`)}</Badge>
           <h1 className="mt-3 display text-3xl tracking-tight text-[var(--ink)]">{sc.title}</h1>
           <p className="mt-1 text-[var(--text-body)]">{sc.overview}</p>
-          <Link href={`/chat?q=${encodeURIComponent("Tell me about " + sc.title)}`}>
+          <Link href={`/chat?q=${encodeURIComponent(formatLegalQuestion(sc.title, locale))}`}>
             <Button className="mt-4">
               {t("legal.askThisLaw")}
               <IconChevronRight className="w-4 h-4" />

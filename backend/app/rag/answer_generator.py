@@ -7,7 +7,6 @@ import httpx
 from app.config import REQUEST_TIMEOUT_S, get_settings
 
 
-DEFAULT_MODEL = "qwen/qwen3.8-27b"
 DEFAULT_TEMPERATURE = 0
 
 DEFAULT_MAX_TOKENS = 1800
@@ -29,13 +28,14 @@ class AnswerGenerator:
 
     def __init__(
         self,
-        model: str = DEFAULT_MODEL,
+        model: str | None = None,
         temperature: float = DEFAULT_TEMPERATURE,
         max_tokens: int = DEFAULT_MAX_TOKENS,
     ):
         print("Initializing RAG answer generator...")
 
-        self.model = model
+        settings = get_settings()
+        self.model = model or settings.groq_model
         self.temperature = temperature
         self.max_tokens = max_tokens
 

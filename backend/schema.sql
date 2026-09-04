@@ -44,6 +44,7 @@ create table if not exists chunks (
 -- 4. Indexes
 create index if not exists idx_chunks_domain on chunks(domain);
 create index if not exists idx_chunks_state on chunks(state);
+create index if not exists idx_chunks_domain_state on chunks (domain, state) where state is not null;
 create index if not exists idx_documents_domain on documents(domain);
 
 -- HNSW index for vector search (only create once)
@@ -86,6 +87,7 @@ returns table (
   state          text
 )
 language sql stable
+set hnsw.ef_search = 40
 as $$
   select c.id,
          coalesce(c.stable_chunk_id, c.id::text),

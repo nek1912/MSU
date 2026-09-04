@@ -6,23 +6,46 @@ import httpx
 from app.config import REQUEST_TIMEOUT_S, Settings
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 class GeminiLLMProvider:
     def __init__(self, settings: Settings):
         self._key = settings.gemini_api_key
         self._model = settings.gemini_model
-        self._url = ("https://generativelanguage.googleapis.com/v1beta/models/"
-                     f"{self._model}:generateContent")
-        self._stream_url = ("https://generativelanguage.googleapis.com/v1beta/models/"
-                            f"{self._model}:streamGenerateContent")
+        self._fallback_models = settings.gemini_model_list
 
     def generate(self, system: str, user: str, temperature: float = 0.1) -> str:
-        r = httpx.post(f"{self._url}?key={self._key}", json={
-            "systemInstruction": {"parts": [{"text": system}]},
-            "contents": [{"role": "user", "parts": [{"text": user}]}],
-            "generationConfig": {"temperature": temperature}},
-            timeout=REQUEST_TIMEOUT_S)
-        r.raise_for_status()
-        return r.json()["candidates"][0]["content"]["parts"][0]["text"]
+        if not self._key:
+            raise RuntimeError("Gemini API key not configured")
+
+        models_to_try = list(dict.fromkeys([self._model] + self._fallback_models))
+        last_exc: Exception | None = None
+
+        for model in models_to_try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+            try:
+                r = httpx.post(
+                    f"{url}?key={self._key}",
+                    json={
+                        "systemInstruction": {"parts": [{"text": system}]},
+                        "contents": [{"role": "user", "parts": [{"text": user}]}],
+                        "generationConfig": {"temperature": temperature},
+                    },
+                    timeout=REQUEST_TIMEOUT_S,
+                )
+                r.raise_for_status()
+                return r.json()["candidates"][0]["content"]["parts"][0]["text"]
+            except Exception as exc:
+                last_exc = exc
+                logger.warning(
+                    "Gemini model %s failed: %s — trying next fallback model",
+                    model, str(exc)[:200],
+                )
+
+        raise last_exc or RuntimeError("All Gemini models failed")
 
     def generate_stream(self, system: str, user: str,
                         temperature: float = 0.1) -> Generator[str, None, None]:

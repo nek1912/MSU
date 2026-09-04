@@ -22,7 +22,7 @@ class JinaEmbeddingProvider:
     def __init__(self, settings: Settings):
         self._key = settings.jina_api_key
         self._endpoint = "https://api.jina.ai/v1/embeddings"
-        self._model = settings.jina_embed_model
+        self._model = settings.jina_embed_model or getattr(settings, "embedding_model", "jina-embeddings-v3") or "jina-embeddings-v3"
         self._max_attempts = 5
         self._base_delay = 2.0
         self._token_log: deque[tuple[float, int]] = deque()

@@ -68,42 +68,74 @@ low-confidence or uncited result into an answer.
 ```
 backend/
   app/
-    main.py              FastAPI entrypoint
-    routes/chat.py       /chat pipeline (delegates to RAGOrchestrator)
-    domains.py           domain classifier (keyword rules + anchor store + LLM fallback)
-    retrieval.py         legacy dense retrieval wrapper
-    evidence_gate.py     abstention / confidence scoring
-    citation_verifier.py citation→chunk→document→page resolution
-    contracts.py         frozen API response contract
-    llm_fallback.py      Groq → Gemini fallback chain
-    config.py            all thresholds and settings
-    providers/           llm, embeddings, reranker, voice adapters (timeout + fallback)
-    rag/                 web-grounded RAG pipeline (Tavily + Gemini reranker)
-    services/            static_rag.py (hybrid retrieval), web_rag.py, rag_orchestrator.py, voice_service.py
-    web_rag/             tavily_client.py (dual-key rotation)
-    data/                keyword_rules.json, domain_anchors.json
-  seed_parser.py         MinerU content_list_v2.json → canonical chunk JSONL
-  ingest_seed.py         clear + Jina-v3 embed + insert into Supabase
-  migrations/            0001_init.sql, 0005_rag_contracts.sql, combined_migration.sql
-  tests/                 pytest (417 tests — domain routing, retrieval, evidence gate, citations)
+    main.py                FastAPI entrypoint (5 routers: chat, voice, conversations, evidence, grievance)
+    routes/
+      chat.py              /chat + /chat/stream — language detect → domain classify → RAGOrchestrator or GrievanceWorkflow
+      voice.py             /voice, /voice/transcribe, /voice/speak
+      conversations.py     /conversations/{session_id}
+      evidence.py          /evidence/...
+      grievance.py         /grievance REST endpoint
+    domains.py             AnchorStore domain classifier (keyword rules + cosine similarity)
+    evidence_gate.py       abstention thresholds (TOP1=0.25, SECONDARY=0.30, MIN_CHUNKS=2)
+    citation_verifier.py   set-membership citation validation
+    evidence_controller.py EvidenceBundle builder + curated prompt
+    contracts.py           Pydantic models: EvidenceChunk, RAGResult, RAGResponse, etc.
+    llm_fallback.py        grounded_answer() with Groq → Gemini fallback
+    config.py              all settings and thresholds (pydantic-settings)
+    providers/             groq_llm.py, gemini_llm.py, embeddings.py, reranker.py,
+                           sarvam_voice.py, azure_voice.py, sarvam_translator.py, translator.py
+    services/
+      rag_orchestrator.py  async dual-pipeline (static + web), asyncio.gather, merge, generate, verify
+      static_rag.py        Supabase pgvector hybrid retrieval (dense + lexical RRF)
+      web_rag.py           10-step web RAG: Tavily/Firecrawl → BM25 → Gemini rerank → source verify
+      voice_service.py     STT/TTS with provider fallback (Sarvam → Azure)
+      lang_memory.py       language preference memory
+    grievance/             9-stage state machine
+      workflow.py          GrievanceWorkflow (main orchestrator + Supabase persistence)
+      classifier.py        complaint category classifier
+      draft_builder.py     draft construction and update
+      entity_extractor.py  entity extraction from user messages
+      field_detector.py    missing field detection
+      semantic_extractor.py semantic field extraction
+      submission_guide.py  portal + submission route lookup
+      status_lookup.py     status check guidance
+      models.py            GrievanceState, GrievanceDraft, GrievanceTurn, etc.
+    retrieval/             bm25_retriever.py, gemini_reranker.py, rrf.py
+    web_rag/               service.py (WebDiscoveryService), query_classifier.py,
+                           tavily_client.py, firecrawl_client.py
+    security/              source_verifier.py (trust-score filtering)
+    data/                  keyword_rules.json, domain_anchors.json
+  seed_parser.py           MinerU content_list_v2.json → canonical chunk JSONL
+  ingest_seed.py           Jina-v3 embed + insert into Supabase
+  schema.sql               Full Supabase schema (documents, chunks, sessions, grievance_states)
+  tests/                   pytest test suite
 
-frontend/                Next.js PWA (chat, grievance, citations UI, 6 languages)
+frontend/
+  src/app/
+    page.tsx               Landing page (hero, stats, coverage, how it works)
+    chat/                  Chat page
+    grievance/             Grievance intake page
+    schemes/               Schemes browser
+    services/              Services browser
+    library/               Document library
+    faq/                   FAQ page
+    legal/                 Legal info page
+  src/components/
+    ChatWindow.tsx          Main chat UI (SSE streaming, voice, citations)
+    chat/                   Sub-components
+    layout/                 Header, nav
+    ui/                     Button, Badge, Icons, etc.
+  src/lib/
+    api.ts                  Backend API client
+    i18n/                   6-language i18n provider + dictionaries
+    data/                   schemes, services, library data
+    speech.ts               Browser speech recording
 
 corpus/
-  seeds/
-    json_files/          MinerU content_list_v2.json per source (input)
-    chunks_jsonl/        canonical parsed chunks (page, heading_path, clause, tables)
-    *.pdf                source documents
-    *.md                 human-readable derived artifacts (NOT authoritative)
-  manifests/mvp_sources.yaml
+  seeds/json_files/        MinerU content_list_v2.json per source (ingestion input)
 
-eval/
-  gold_cases.yaml        golden evaluation cases (245; 40 answerable)
-  run_retrieval_eval.py  Recall@1/3/5/10/20 + MRR vs live Supabase
-  validate_retrieval.py  page/citation/metadata/taxonomy checks
-  populate_gold_chunk_ids.py  localizes relevant chunk per query (retriever-anchored)
-
-docs/                    foundation / repair / e2e reports
+eval/                       Retrieval eval scripts + gold cases
+workflows/                  Agent workflow loop docs (ingestion, retrieval, database, etc.)
 ```
 
 ---
@@ -151,14 +183,15 @@ RERANKER_ENABLED=false    # reranker is wired but OFF (see PROJECT_STATUS)
 
 ### Database Setup
 
-Apply the migrations in `backend/migrations/` to your Supabase project
-(e.g. via Supabase SQL editor, or `supabase db push`):
+Apply `backend/schema.sql` to your Supabase project via the SQL editor.
 
-1. `0001_init.sql` — tables (`documents`, `chunks`, `sessions`, `grievances`,
-   `feedback`) + **HNSW cosine index** on `chunks.embedding` + `match_chunks` RPC
-   (domain + jurisdiction filtered, cosine distance).
-2. `0005_rag_contracts.sql` / `combined_migration.sql` — response-contract and
-   citation-supporting objects.
+Tables created:
+- `documents` — source documents with jurisdiction/state/domain metadata
+- `chunks` — content chunks with `embedding vector(768)` + HNSW cosine index
+- `sessions` — session state (jsonb)
+- `grievance_states` — multi-turn grievance state (full GrievanceState as JSON)
+
+RPC created: `match_chunks(query_embedding, match_domain, match_state, match_count)`
 
 ### Ingestion (corpus build)
 

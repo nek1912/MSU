@@ -1,7 +1,11 @@
 """Groq LLM provider with API key rotation."""
 
 import json
+import time
+import logging
 from collections.abc import Generator
+
+logger = logging.getLogger(__name__)
 
 import httpx
 
@@ -17,6 +21,7 @@ class GroqLLMProvider:
         self._rotator = KeyRotator(keys, name="groq") if keys else None
         self._key = settings.groq_api_key  # fallback for single-key compat
         self._model = settings.groq_model
+        self._models = settings.groq_model_list
 
     def _get_key(self) -> str:
         return self._rotator.current_key if self._rotator else self._key
@@ -27,14 +32,34 @@ class GroqLLMProvider:
         return self._do_generate(self._key, system, user, temperature)
 
     def _do_generate(self, key: str, system: str, user: str, temperature: float) -> str:
-        r = httpx.post(_URL,
-            headers={"Authorization": f"Bearer {key}"},
-            json={"model": self._model, "temperature": temperature,
-                  "messages": [{"role": "system", "content": system},
-                               {"role": "user", "content": user}]},
-            timeout=REQUEST_TIMEOUT_S)
-        r.raise_for_status()
-        return r.json()["choices"][0]["message"]["content"]
+        models_to_try = list(dict.fromkeys([self._model] + self._models))
+        last_exc: Exception | None = None
+        for model in models_to_try:
+            logger.info(f"Calling Groq LLM with model: {model}")
+            start_time = time.time()
+            try:
+                r = httpx.post(
+                    _URL,
+                    headers={"Authorization": f"Bearer {key}"},
+                    json={
+                        "model": model,
+                        "temperature": temperature,
+                        "messages": [
+                            {"role": "system", "content": system},
+                            {"role": "user", "content": user},
+                        ],
+                    },
+                    timeout=REQUEST_TIMEOUT_S,
+                )
+                logger.info(f"Groq LLM ({model}) response time: {time.time() - start_time:.2f}s, status: {r.status_code}")
+                if r.status_code == 200:
+                    return r.json()["choices"][0]["message"]["content"]
+                logger.error(f"Groq API Error Body ({model}): {r.text}")
+                r.raise_for_status()
+            except Exception as e:
+                last_exc = e
+                logger.warning(f"Groq model {model} failed: {e} — trying next fallback model")
+        raise last_exc or RuntimeError("All Groq models failed")
 
     def generate_stream(self, system: str, user: str,
                         temperature: float = 0.1) -> Generator[str, None, None]:

@@ -226,9 +226,11 @@ class GrievanceSemanticExtractor:
     """
 
     def __init__(self, use_gemini: bool | None = None):
+        from app.config import get_settings
+        settings = get_settings()
         self.model = os.getenv(
             "GRIEVANCE_GEMINI_MODEL",
-            "gemini-3.5-flash",
+            settings.grievance_gemini_model,
         )
 
         api_key = os.getenv("GEMINI_API_KEY")

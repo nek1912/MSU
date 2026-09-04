@@ -22,31 +22,58 @@ import { createSpeechService, speakSegments } from "@/lib/speech";
 import { EvidenceBand } from "@/components/EvidenceBand";
 import { evidenceBand } from "@/lib/band";
 
-function cleanAnswerText(text: string): string {
-  if (!text) return text;
+export function cleanMarkdownForDisplay(text: string): string {
+  if (!text) return "";
   let cleaned = text;
 
-  // Remove ALL chunk citation patterns (any format, case-insensitive)
-  cleaned = cleaned.replace(/\[chunk:[^\]]*\]/gi, '');
-  cleaned = cleaned.replace(/\(chunk:[^\)]*\)/gi, '');
+  // Remove internal chunk citation tags (e.g. [chunk:123], (chunk:123))
+  cleaned = cleaned.replace(/\[chunk:[^\]]*\]/gi, "");
+  cleaned = cleaned.replace(/\(chunk:[^\)]*\)/gi, "");
 
-  // Fix escaped asterisks from LLM (e.g., \*\*text\*\* -> **text**)
-  cleaned = cleaned.replace(/\\\*/g, '*');
+  // Fix escaped asterisks (\*\* -> **)
+  cleaned = cleaned.replace(/\\\*/g, "*");
 
-  // Strip all markdown formatting — render as plain text for rural users
-  // **bold** -> bold, *italic* -> italic, remove stray asterisks
-  cleaned = cleaned.replace(/\*\*([^*]+)\*\*/g, '$1');
-  cleaned = cleaned.replace(/\*([^*]+)\*/g, '$1');
-  // Remove any remaining stray asterisks
-  cleaned = cleaned.replace(/\*/g, '');
+  // Format bullet points: replace inline bullets (•) with newlines and markdown dash (- )
+  cleaned = cleaned.replace(/([^\n])\s*•\s*/g, "$1\n- ");
+  cleaned = cleaned.replace(/^\s*•\s*/gm, "- ");
 
-  // Convert markdown bullet lists to plain text with bullet characters
-  cleaned = cleaned.replace(/^[\s]*[-*+]\s+/gm, '• ');
+  // Ensure numbered list items on inline text get proper linebreaks
+  cleaned = cleaned.replace(/([^\n])\s*(\d+\.)\s+/g, "$1\n$2 ");
 
-  // Convert markdown numbered lists to plain text
-  cleaned = cleaned.replace(/^[\s]*\d+\.\s+/gm, (match) => match.replace(/\d+\./, '•'));
+  // Preserve double newlines for paragraph breaks, remove excess newlines
+  cleaned = cleaned.replace(/\n{3,}/g, "\n\n");
 
-  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+  return cleaned.trim();
+}
+
+export function cleanTextForSpeech(text: string): string {
+  if (!text) return "";
+  let cleaned = text;
+
+  // Remove chunk citations
+  cleaned = cleaned.replace(/\[chunk:[^\]]*\]/gi, "");
+  cleaned = cleaned.replace(/\(chunk:[^\)]*\)/gi, "");
+
+  // Remove markdown headers
+  cleaned = cleaned.replace(/^#+\s+/gm, "");
+
+  // Convert bullet points to sentence endings
+  cleaned = cleaned.replace(/^[\s]*[-*+•]\s+/gm, ". ");
+  cleaned = cleaned.replace(/([^\n])\s*•\s*/g, "$1. ");
+
+  // Strip markdown formatting symbols
+  cleaned = cleaned.replace(/\*\*([^*]+)\*\*/g, "$1");
+  cleaned = cleaned.replace(/\*([^*]+)\*/g, "$1");
+  cleaned = cleaned.replace(/`([^`]+)`/g, "$1");
+  cleaned = cleaned.replace(/\\\*/g, "");
+
+  // Replace newlines with sentence breaks
+  cleaned = cleaned.replace(/\n+/g, ". ");
+
+  // Normalize duplicate spaces and periods
+  cleaned = cleaned.replace(/\.\s*\./g, ".");
+  cleaned = cleaned.replace(/\s+/g, " ").trim();
+
   return cleaned;
 }
 
@@ -74,7 +101,7 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
       if (hasSegments) {
         await speakSegments(segments);
       } else {
-        const cleanText = cleanAnswerText(resp.answer);
+        const cleanText = cleanTextForSpeech(resp.answer);
         await speech.speak(cleanText, resp.language);
       }
     } finally {
@@ -83,7 +110,7 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
   }
 
   function handleCopy() {
-    const cleanText = cleanAnswerText(resp.answer);
+    const cleanText = cleanMarkdownForDisplay(resp.answer);
     navigator.clipboard.writeText(cleanText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -122,9 +149,21 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
         </div>
 
         {/* Answer Content */}
-        <div className={`font-answer text-sm sm:text-base leading-relaxed text-[var(--ink)] prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-[var(--ink)] prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-strong:text-[var(--ink)] prose-table:text-xs prose-th:font-semibold prose-td:py-1 prose-th:py-1 prose-pre:bg-[var(--dark)] prose-pre:text-[var(--on-dark-strong)] prose-code:text-[var(--accent-primary)] ${isStreaming ? "streaming-text" : ""}`}>
-          <Markdown remarkPlugins={[remarkGfm]}>
-            {cleanAnswerText(resp.answer)}
+        <div className={`font-answer text-sm sm:text-base leading-relaxed text-[var(--ink)] prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-[var(--ink)] prose-p:my-2 prose-p:leading-relaxed prose-ul:my-2.5 prose-ul:list-disc prose-ul:pl-5 prose-ol:my-2.5 prose-ol:list-decimal prose-ol:pl-5 prose-li:my-1 prose-strong:font-semibold prose-strong:text-[var(--ink)] prose-table:text-xs prose-th:font-semibold prose-td:py-1 prose-th:py-1 prose-pre:bg-[var(--dark)] prose-pre:text-[var(--on-dark-strong)] prose-code:text-[var(--accent-primary)] ${isStreaming ? "streaming-text" : ""}`}>
+          <Markdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              p: ({ children }) => <p className="mb-2.5 leading-relaxed text-[var(--ink)]">{children}</p>,
+              ul: ({ children }) => <ul className="my-2.5 list-disc pl-5 space-y-1 text-[var(--ink)]">{children}</ul>,
+              ol: ({ children }) => <ol className="my-2.5 list-decimal pl-5 space-y-1 text-[var(--ink)]">{children}</ol>,
+              li: ({ children }) => <li className="pl-1 leading-relaxed">{children}</li>,
+              strong: ({ children }) => <strong className="font-semibold text-[var(--ink)]">{children}</strong>,
+              h1: ({ children }) => <h1 className="text-lg font-bold my-2 text-[var(--ink)]">{children}</h1>,
+              h2: ({ children }) => <h2 className="text-base font-bold my-2 text-[var(--ink)]">{children}</h2>,
+              h3: ({ children }) => <h3 className="text-sm font-semibold my-1.5 text-[var(--ink)]">{children}</h3>,
+            }}
+          >
+            {cleanMarkdownForDisplay(resp.answer)}
           </Markdown>
         </div>
         {isStreaming && (

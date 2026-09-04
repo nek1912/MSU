@@ -10,9 +10,11 @@ LLM generation, citation handling, confidence calculation.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import Literal
 
 from fastapi import APIRouter
@@ -171,7 +173,15 @@ class _ChatContext:
     language_mix: dict[str, float] | None = None
 
 
-def _resolve_context(req: ChatRequest) -> _ChatContext:
+@lru_cache(maxsize=1000)
+def _cached_embedding(query_hash: str, query: str):
+    return get_embedding_provider().embed_texts([query], task="retrieval.query")[0]
+
+@lru_cache(maxsize=500)
+def _cached_classification(query_lower: str):
+    return _get_query_classifier().classify(query_lower)
+
+async def _resolve_context(req: ChatRequest) -> _ChatContext:
     """Detect language, translate, classify domain, disambiguate context."""
     settings = get_settings()
     ui_code = req.language if req.ui_language_explicit else None
@@ -180,15 +190,26 @@ def _resolve_context(req: ChatRequest) -> _ChatContext:
     input_lang = detected.get("dominant") or "en"
     language_mix = detected.get("language_mix")
 
-    english_query = _translate_to_english(req.question, input_lang, settings)
+    async def get_embedding():
+        return await asyncio.to_thread(_cached_embedding, req.question, req.question)
+
+    async def get_translation():
+        if input_lang != "en":
+            return await asyncio.to_thread(_translate_to_english, req.question, input_lang, settings)
+        return req.question
+
+    # Run embedding and translation in parallel
+    embedding, english_query = await asyncio.gather(
+        get_embedding(), get_translation()
+    )
+
+    # Classify on the translated English query for robust keyword matching
+    classification = await asyncio.to_thread(_cached_classification, english_query.lower())
 
     history = req.history if req.history is not None else get_history(req.session_id, limit=8)
-    provider = get_embedding_provider()
-    embedding = provider.embed_texts([english_query], task="retrieval.query")[0]
-    domain, _score = get_anchor_store().classify(english_query, embedding)
-
-    classifier = _get_query_classifier()
-    classification = classifier.classify(req.question)
+    
+    # We use english_query for domain classification fallback inside anchor store
+    domain, _score = await asyncio.to_thread(get_anchor_store().classify, english_query, embedding)
 
     # AnchorStore context disambiguation
     rules = getattr(get_anchor_store(), "rules", {})
@@ -216,7 +237,7 @@ def _resolve_context(req: ChatRequest) -> _ChatContext:
                 anchor_q = user_turns[-1]
 
             contextual_query = f"{anchor_q} {english_query}"
-            ctx_embedding = provider.embed_texts([contextual_query], task="retrieval.query")[0]
+            ctx_embedding = get_embedding_provider().embed_texts([contextual_query], task="retrieval.query")[0]
             ctx_domain, _ctx_score = get_anchor_store().classify(contextual_query, ctx_embedding)
             if ctx_domain != "out_of_scope":
                 domain = ctx_domain
@@ -249,7 +270,7 @@ async def chat(req: ChatRequest) -> dict:
         return _abstain(req.language, session_id=req.session_id)
 
     try:
-        ctx = _resolve_context(req)
+        ctx = await _resolve_context(req)
 
         # Grievance queries → dedicated workflow
         if ctx.classification.domain == "grievance":
@@ -314,7 +335,9 @@ async def chat(req: ChatRequest) -> dict:
             language_mix=ctx.language_mix,
         )
 
-        # Groq generates in English; translate to user's language if needed
+        # The LLM is instructed to respond in the user's language directly.
+        # This translation call is a secondary safety net for any edge case
+        # where the LLM does not fully comply with the language instruction.
         if ctx.lang != "en":
             rag_response.answer = _translate_from_english(rag_response.answer, ctx.lang, ctx.settings)
             rag_response.speech_text = prepare_speech_text(rag_response.answer)
@@ -360,7 +383,7 @@ async def chat_stream(req: ChatRequest):
             initial_msgs = _THINKING_MESSAGES.get(initial_lang, _THINKING_MESSAGES["en"])
             yield _sse_event("thinking", {"text": initial_msgs[0]})
 
-            ctx = _resolve_context(req)
+            ctx = await _resolve_context(req)
             thinking_msgs = _THINKING_MESSAGES.get(ctx.lang, _THINKING_MESSAGES["en"])
 
             # Grievance → dedicated workflow

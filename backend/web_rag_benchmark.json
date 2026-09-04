@@ -1,0 +1,110 @@
+[
+  {
+    "query": "Rajkot APMC groundnut market price today",
+    "original_gu": "રાજકોટ APMC માં મૂંગફળીનો આજનો બજાર ભાવ કેટલો છે?",
+    "domain": "agriculture",
+    "tavily": {
+      "provider": "Tavily",
+      "latency_seconds": 2.54,
+      "result_count": 10,
+      "total_content_chars": 13416,
+      "results_with_raw_content": 6,
+      "avg_content_per_result": 1342,
+      "top_results": [
+        {
+          "title": "Groundnut mandi price today in Rajkot APMC",
+          "url": "https://www.commodityonline.com/mandiprices/groundnut/gujarat/rajkot-apmc",
+          "content_len": 149,
+          "raw_content_len": 0
+        },
+        {
+          "title": "Groundnut Mandi Market prices today in Rajkot Market as of 04-Sep-2026",
+          "url": "https://www.napanta.com/commodity-agri-market/gujarat/groundnut/rajkot",
+          "content_len": 2208,
+          "raw_content_len": 33064
+        },
+        {
+          "title": "Groundnut (Moongfali) Price at Rajkot: ₹6300/Quintal Today",
+          "url": "https://www.kisandeals.com/mandiprices/GROUNDNUT/GUJARAT/RAJKOT",
+          "content_len": 140,
+          "raw_content_len": 0
+        },
+        {
+          "title": "Groundnut Price Today in Rajkot - 1 KG Rate - Hourly Updates & Insights",
+          "url": "https://www.commoditymarketlive.com/mandi-price-district/gujarat/rajkot/groundnut",
+          "content_len": 158,
+          "raw_content_len": 0
+        },
+        {
+          "title": "Groundnut mandi price today in Rajkot",
+          "url": "https://www.commodityonline.com/mandiprices/groundnut/gujarat/rajkot",
+          "content_len": 156,
+          "raw_content_len": 0
+        }
+      ]
+    },
+    "firecrawl": {
+      "provider": "Firecrawl",
+      "latency_seconds": 1.36,
+      "result_count": 0,
+      "total_content_chars": 0,
+      "results_with_markdown": 0,
+      "avg_content_per_result": 0,
+      "top_results": []
+    }
+  },
+  {
+    "query": "cotton crop failure Gujarat what to do PMFBY claim",
+    "original_gu": "ગઈકાલે ભારે વરસાદથી મારો કપાસનો પાક બગડ્યો છે. હવે હું શું કરું?",
+    "domain": "pmfby",
+    "tavily": {
+      "provider": "Tavily",
+      "latency_seconds": 9.03,
+      "result_count": 10,
+      "total_content_chars": 16276,
+      "results_with_raw_content": 7,
+      "avg_content_per_result": 1628,
+      "top_results": [
+        {
+          "title": "Pradhan Mantri Fasal Bima Yojana - Crop Insurance | PMFBY",
+          "url": "https://www.iffcotokio.co.in/pradhan-mantri-fasal-bima-yojana",
+          "content_len": 2193,
+          "raw_content_len": 21214
+        },
+        {
+          "title": "PMFBY Crop Claim Not Paid? First Actions, Grievance and RTI",
+          "url": "https://righttoinformation.wiki/practical-guides/crop-insurance-claim-not-paid-pmfby",
+          "content_len": 2316,
+          "raw_content_len": 7724
+        },
+        {
+          "title": "PMFBY Crop Insurance: Benefits, Premium & Claim Process",
+          "url": "https://khetavya.com/blogs/pmfby-crop-insurance-india",
+          "content_len": 2345,
+          "raw_content_len": 10548
+        },
+        {
+          "title": "Pradhan Mantri Fasal Bima Yojana - Agriculture",
+          "url": "https://en.vikaspedia.in/viewcontent/agriculture/agri-insurance/pradhan-mantri-fasal-bima-yojana?lgn",
+          "content_len": 159,
+          "raw_content_len": 0
+        },
+        {
+          "title": "Pradhan Mantri Fasal Bima Yojana - Crop Insurance | PMFBY ...",
+          "url": "https://pmfby.gov.in",
+          "content_len": 156,
+          "raw_content_len": 0
+        }
+      ]
+    },
+    "firecrawl": {
+      "provider": "Firecrawl",
+      "latency_seconds": 1.38,
+      "result_count": 0,
+      "total_content_chars": 0,
+      "results_with_markdown": 0,
+      "avg_content_per_result": 0,
+      "top_results": []
+    }
+  }
+]

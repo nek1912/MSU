@@ -1,17 +1,12 @@
 # Project: Multilingual Cooperative Governance & Legal Assistance Chatbot
 
-You are assisting a 4-person team building an evidence-grounded, multilingual
-(English + Hindi) citizen-assistance PWA over 10 days, at zero cost, cloud-only,
-with no personal GPU.
+You are assisting on an evidence-grounded, multilingual citizen-assistance PWA.
 
 **Before doing anything else in a new session: read `PROJECT_STATUS.md`.** It
-tells you what's actually built, what's stubbed, what's broken, and what the
-next action is. This file (CLAUDE.md) tells you the rules that don't change.
-PROJECT_STATUS.md tells you where things stand right now. Don't confuse the two.
+tells you what's actually built and what the current state is. This file
+(CLAUDE.md) tells you the rules and stack that don't change.
 
-If you're working in Cursor instead of Claude Code, `.cursorrules` in this repo
-root is a duplicate of this file's rules section — keep them in sync if you edit
-either.
+---
 
 ## Non-negotiable principles
 
@@ -20,92 +15,92 @@ either.
 - If retrieval confidence is low or no supporting chunk exists, set `abstained: true`.
   Do not guess. Do not let the LLM override this in code.
 - Never fabricate eligibility, amounts, dates, deadlines, legal clauses, or contacts.
-- Grievances are PROTOTYPE references only. Always return `is_official_submission: false`.
-  Never claim real government registration or a real CPGRAMS integration — there is
-  no public CPGRAMS API to integrate with.
+- Grievances are PROTOTYPE references only. Always `is_official_submission: false`.
+  Never claim real government registration or a real CPGRAMS integration.
 - Central and state law can differ. Always attach jurisdiction + effective-date
   metadata. Never present a national/model rule as universally applicable across states.
 - Every citation must map to a chunk ID that was actually retrieved in that request.
+  Invalid citation → ABSTAIN.
 
-## Scope discipline
-
-Read `PRD.md` for full scope. Summary:
-
-**MVP (Tier 1):** English + Hindi text chat, central cooperative info + ONE
-selected state's rules, 8-15 curated schemes, PMFBY, 5-10 agriculture workflows,
-RBI/PMJDY financial literacy, grievance workflow (text), citations, confidence,
-abstention, responsive PWA, cloud deployment.
-
-**Tier 2 (only after MVP is stable):** Hindi voice (Bhashini), remaining domains,
-richer grievance follow-up.
-
-**Do NOT add before the core is stable and demo-ready:** native Android/iOS,
-WhatsApp integration, blockchain, custom model training, self-hosted GPU inference,
-multi-agent frameworks, complex authentication, analytics dashboard, real government
-grievance submission, nationwide legal coverage.
-
-If you're asked to build something on this "do not add" list, push back and point
-to this file rather than silently doing it.
+---
 
 ## Stack (do not change without a logged decision — see DECISIONS.md)
 
-- Frontend: Next.js + React + Tailwind, PWA, hosted on Vercel Hobby (Render Static
-  Site is the fallback if Vercel eligibility becomes an issue)
-- Backend: FastAPI (Python) on Render Free
-- DB + vectors: Supabase Postgres + pgvector (HNSW index)
-- Embeddings: Gemini API, model `gemini-embedding-2`, 768 dimensions
-  (`output_dimensionality: 768`; truncated dims are auto-renormalized).
-  `gemini-embedding-001` is the approved fallback (shutdown 2028-05-14; requires
-  manual normalization at non-default dims). Phase 0 must empirically verify
-  one-embedding-per-input-string before corpus ingestion — see DECISIONS.md
-  (2026-08-26 reversal entry; the earlier rejection targeted
-  `embedding-2-preview`, whose aggregation behavior does not carry to GA).
-- LLM: provider abstraction, Groq primary (Llama 3.3 70B or similar), Gemini
-  2.5 Flash fallback
-- Voice: Bhashini primary → Groq Whisper STT fallback → text-only fallback
-- Document parsing: Docling
-- Local retrieval testing: FAISS
+| Layer | Technology | Notes |
+|---|---|---|
+| Frontend | Next.js 16 + React 19 + Tailwind CSS 4 | PWA, hosted on Vercel |
+| Backend | FastAPI (Python ≥3.11) on Render Free | `uvicorn app.main:app` |
+| DB + vectors | Supabase Postgres + pgvector (HNSW cosine) | 768d embeddings |
+| Embeddings | Jina Embeddings v3 (primary) | 768d, task-typed |
+| Embeddings fallback | Gemini embedding | 768d fallback |
+| LLM primary | Groq (key rotation supported) | `groq_model` in config |
+| LLM fallback | Gemini | `gemini_model` in config |
+| Voice STT | Sarvam AI (primary) → Azure Speech (fallback) | |
+| Voice TTS | Sarvam AI only | Azure excluded (bad Indic output) |
+| Translation | Sarvam Mayura v2 (primary) → Azure Translator (fallback) | |
+| Web search | Tavily (primary) / Firecrawl | for WebRAGService |
+| Document parsing | MinerU `content_list_v2.json` | seed_parser.py |
+| Reranker | Jina reranker (wired, disabled) | `RERANKER_ENABLED=false` |
 
-## API contracts (frozen Day 1 — do not break without updating PROJECT_STATUS.md
-## and telling the whole team)
+---
+
+## API contracts (current — match `backend/app/routes/`)
 
 ```
 POST /chat
-POST /voice/transcribe
-POST /voice/speak
-POST /grievances
-GET  /grievances/{reference}
-GET  /sources/{id}
+POST /chat/stream                 ← SSE streaming version
+POST /voice                       ← full audio→STT→RAG→TTS pipeline
+POST /voice/transcribe            ← STT only
+POST /voice/speak                 ← TTS only
+POST /grievance                   ← grievance REST endpoint
+GET  /conversations/{session_id}
+GET  /evidence/{...}
 GET  /health
 GET  /health/providers
 ```
 
-Chat response fields: `answer, language, domain, confidence, citations[], abstained,
-follow_up_question`.
+Chat request: `{ question, session_id, language, ui_language_explicit?, state?, as_of_date?, history? }`  
+Language values: `"en" | "hi" | "gu" | "mr" | "bn" | "ta"`
+
+Chat response: `{ answer, language, domain, intent, entities, confidence, confidence_level, citations, abstained, speech_text, speech_segments, follow_up_question, mode, conversation_id }`
+
+SSE events: `thinking | token | metadata | done`
+
+---
 
 ## Coding conventions
 
 - Python: type hints everywhere, Pydantic models for all request/response bodies,
   no bare `except`.
-- Every external provider call (Bhashini, Groq, Gemini, Supabase) goes through an
-  adapter with explicit timeout and fallback handling — never call a provider SDK
-  directly from route handlers.
-- Never put API keys in frontend code, commit them, or expose them via
-  `NEXT_PUBLIC_*`. Backend environment variables only.
+- Every external provider call goes through an adapter with explicit timeout and
+  fallback handling — never call a provider SDK directly from route handlers.
+- Never put API keys in frontend code, commit them, or expose via `NEXT_PUBLIC_*`.
+  Backend environment variables only.
 - Structured logs. Never log API keys, auth tokens, or full grievance PII.
 - Write tests for: domain routing, jurisdiction filtering, retrieval, citation
-  validity, abstention, grievance workflow, provider fallback, API failure handling.
+  validity, abstention, grievance workflow, provider fallback.
+
+---
+
+## What's implemented (summary — see PROJECT_STATUS.md for full detail)
+
+- ✅ `/chat` and `/chat/stream` — full dual-pipeline RAG (static + web in parallel)
+- ✅ `/voice` — Sarvam STT → chat handler → Sarvam TTS
+- ✅ `/voice/transcribe` and `/voice/speak` — standalone STT/TTS endpoints
+- ✅ GrievanceWorkflow — 9-stage state machine, Supabase-persisted
+- ✅ Domain classification — AnchorStore (keyword + cosine, floor 0.30)
+- ✅ StaticRAGService — Supabase pgvector hybrid retrieval (dense + lexical RRF)
+- ✅ WebRAGService — 10-step pipeline (Tavily/Firecrawl → BM25 → Gemini rerank → verify)
+- ✅ Evidence gate, citation verifier, abstention
+- ✅ 6-language frontend (EN, HI, GU, MR, BN, TA) with chat, grievance, schemes, library pages
+- ✅ Document ingestion: 5 docs, 2188 chunks (pacs_governance, pacs_computerization, pmfby, financial_inclusion)
+
+---
 
 ## When unsure
 
-- Prefer reusing referenced open-source patterns (see SOURCES.md) over building
-  from scratch — but read the actual repo before depending on it. Don't assume a
-  cited repo does what a summary claims; verify against the real code/docs.
-- Push back on scope creep, out loud, citing this file.
+- Prefer code over comments — read the actual file before assuming what it does.
+- Push back on scope creep, citing this file.
 - State assumptions explicitly rather than silently picking one.
-- Never invent facts, APIs, repositories, capabilities, or free-tier limits you
-  haven't verified. If you're not sure whether a claim in these docs is still
-  accurate (free-tier quotas change), say so and suggest checking the live source.
-- At the end of every working session, update `PROJECT_STATUS.md` before you stop.
-  This is not optional — it's the only thing that makes the next session (yours or
-  a teammate's) start from reality instead of from the original plan.
+- Never invent APIs, repositories, or free-tier limits you haven't verified.
+- At the end of every working session, update `PROJECT_STATUS.md` before stopping.

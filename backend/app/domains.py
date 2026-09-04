@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 
 DATA_DIR = Path(__file__).parent.parent / "data"
-DOMAIN_FLOOR = 0.30  # lowered to be more lenient with domain classification
+DOMAIN_FLOOR = 0.20  # lowered to be lenient with domain classification for general queries
 
 
 def load_rules(path: Path = DATA_DIR / "keyword_rules.json") -> dict[str, list[str]]:

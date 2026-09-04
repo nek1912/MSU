@@ -21,7 +21,6 @@ from app.config import get_settings
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_MODEL = "gemini-3.5-flash-lite"
 
 PRE_RANK_MAX_CANDIDATES = 50
 PRE_RANK_TOP_K = 15
@@ -34,15 +33,19 @@ class GeminiReranker:
     def __init__(self):
         settings = get_settings()
         self._api_key = settings.gemini_api_key
-        if not self._api_key:
+        if not settings.reranker_enabled:
+            logger.info("Reranker is disabled in config, using passthrough scoring")
+            self._enabled = False
+            self.client = None
+        elif not self._api_key:
             logger.warning("Gemini API key not set, reranker will use passthrough scores")
             self._enabled = False
             self.client = None
         else:
             self._enabled = True
-            self.model = DEFAULT_MODEL
+            self.model = getattr(settings, "grievance_gemini_model", settings.gemini_model)
             self.client = genai.Client(api_key=self._api_key)
-            logger.info("Gemini reranker initialized")
+            logger.info("Gemini reranker initialized with model=%s", self.model)
 
     def _call_gemini(
         self,
@@ -664,9 +667,16 @@ Every supplied candidate must appear exactly once.
     def _passthrough_final_rerank(self, query: str, candidates: list[dict], top_k: int) -> list[dict]:
         """Fallback passthrough scoring when Gemini is unavailable."""
         scored = []
+        max_rrf = 2.0 / 61.0  # Max possible RRF score for 2 lists (k=60)
         for i, c in enumerate(candidates):
             result = dict(c)
-            result["rerank_score"] = float(c.get("rrf_score", 100.0 - i) * 100)
+            if "rrf_score" in c:
+                rrf_score = float(c.get("rrf_score", 0.0))
+                normalized = min(100.0, (rrf_score / max_rrf) * 100.0)
+                result["rerank_score"] = round(normalized, 2)
+                result["gemini_score"] = round(normalized, 2)
+            else:
+                result["rerank_score"] = float(c.get("gemini_score", c.get("bm25_score", 100.0 - i)))
             result["rerank_applicable"] = True
             result["reranker"] = "passthrough"
             scored.append(result)

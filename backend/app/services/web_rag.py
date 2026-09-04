@@ -142,11 +142,16 @@ class WebRAGService:
 
         effective_domain = domain or ""
 
+        if classification is None:
+            classification = self.web_discovery.classifier.classify(query, default_state=state)
+        elif state and not classification.state:
+            classification.state = state
+
         # ── Step 1: Domain scope gate ───────────────────────────────
         logger.info("[Step 1] Domain scope gate")
 
-        # Use AnchorStore domain (embedding-based) if available, fall back to classification domain
-        effective_domain_for_gate = effective_domain
+        # Use AnchorStore domain or classification domain if available
+        effective_domain_for_gate = domain
         if classification is not None and classification.domain != "general":
             effective_domain_for_gate = classification.domain
 
@@ -231,21 +236,14 @@ class WebRAGService:
                 metadata={"step": "bm25_ranking", "bm25_count": 0},
             )
 
-        # ── Step 4: Gemini pre-ranking ─────────────────────────────
-        logger.info("[Step 4] Gemini pre-ranking")
+        # ── Step 4: Fast candidate pre-ranking ─────────────────────────────
+        logger.info("[Step 4] Fast candidate pre-ranking")
 
-        try:
-            gemini_pre_results = self.reranker.pre_rank(
-                query=query,
-                candidates=discovered_results,
-                top_k=self.gemini_pre_top_k,
-                classification=classification_data,
-            )
-        except Exception:
-            logger.exception("Gemini pre-ranking failed")
-            gemini_pre_results = bm25_results[: self.gemini_pre_top_k]
-
-        logger.info("Gemini pre-rank candidates: %d", len(gemini_pre_results))
+        gemini_pre_results = self.reranker._passthrough_pre_rank(
+            query=query,
+            candidates=discovered_results,
+            top_k=self.gemini_pre_top_k,
+        )
 
         if not gemini_pre_results:
             logger.info("Gemini pre-ranking produced no results. Abstaining.")

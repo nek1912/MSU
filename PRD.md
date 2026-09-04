@@ -3,72 +3,91 @@
 ## Product
 
 Multilingual, voice-capable, evidence-grounded citizen-assistance PWA for
-cooperative governance, legal guidance, schemes, PMFBY, financial literacy, and
-grievance redressal.
+cooperative governance, PMFBY crop insurance, financial inclusion, and grievance
+redressal in India.
 
-The system answers questions from official sources with citations, abstains when
-evidence is insufficient, supports Hindi voice interaction, and supports a
-prototype grievance workflow.
+The system answers questions strictly from official sources with citations,
+abstains when evidence is insufficient, supports voice interaction (Sarvam AI),
+and provides a prototype grievance intake workflow.
+
+---
 
 ## Goals
 
 1. Provide trustworthy, cited information about: cooperative law/by-laws, PACS,
-   Ministry of Cooperation schemes, PMFBY, agriculture, financial literacy.
-2. Support English text, Hindi text, and Hindi voice.
-3. Provide grievance intake → follow-up → prototype reference → status lookup.
-4. Deploy entirely in the cloud, no personal GPU, zero monetary cost for the
-   hackathon demo.
+   Ministry of Cooperation schemes, PMFBY, financial literacy.
+2. Support 6 languages: English, Hindi, Gujarati, Marathi, Bengali, Tamil (text + voice I/O).
+3. Provide 9-stage grievance intake → entity extraction → follow-up → prototype reference → status lookup.
+4. Deploy entirely in the cloud, no personal GPU, zero monetary cost for the demo.
+
+---
 
 ## Non-goals (MVP)
 
 Native Android, native iOS, WhatsApp integration, blockchain, custom model
 training, self-hosted GPU inference, autonomous multi-agent systems, complex
 authentication, analytics dashboard, real government grievance submission
-(no public CPGRAMS API exists to integrate with), nationwide legal coverage.
+(no public CPGRAMS API exists), nationwide legal coverage.
+
+---
 
 ## Target users
 
 Cooperative members, farmers, and rural stakeholders seeking official guidance
-in English or Hindi.
+in English, Hindi, Gujarati, Marathi, Bengali, or Tamil.
 
-## Core requirements
+---
 
-1. English + Hindi text chat.
-2. Central cooperative info + PACS info + ONE selected state's cooperative
-   rules/by-laws. Mandatory metadata on every legal/cooperative answer:
-   `jurisdiction, state, effective_date, verified_date`.
-3. 8-15 curated official schemes/services (useful user journeys, not maximum
-   document count).
-4. PMFBY: FAQ, eligibility guidance, process guidance, grievance guidance.
-5. 5-10 high-value agricultural workflows.
-6. Curated RBI/PMJDY financial-literacy material.
-7. Grievance: classify → extract entities → detect missing info → follow-up →
-   create prototype reference → status lookup.
-8. Voice: Hindi STT + TTS (Bhashini primary → Groq Whisper STT fallback →
-   text-only fallback).
-9. Domain routing + domain/jurisdiction-filtered RAG + grounded generation.
-10. Citations, confidence, explicit abstention on every factual answer.
-11. Responsive PWA (desktop + mobile browsers).
-12. Demonstrably deployed in the cloud.
+## Core requirements (all implemented)
 
-## API contracts (frozen Day 1)
+1. Multilingual text chat (EN, HI, GU, MR, BN, TA).
+2. Central cooperative info + PACS info + Gujarat state rules. Mandatory metadata
+   on every legal/cooperative answer: `jurisdiction, state, effective_date, verified_date`.
+3. PMFBY: FAQ, eligibility guidance, process guidance.
+4. Financial literacy: NSFI 2025-30 content.
+5. Grievance: 9-stage workflow (classify → extract entities → detect missing info
+   → follow-up → create prototype reference → status lookup).
+6. Voice: Sarvam AI STT + TTS (primary) → Azure Speech STT (fallback) → text-only.
+7. Domain routing + parallel static & web RAG orchestration + grounded generation.
+8. Citations, confidence, explicit abstention on every factual answer.
+9. Responsive Next.js PWA (desktop + mobile browsers).
+10. Demonstrably deployed in the cloud.
+
+---
+
+## API contracts
 
 ```
 POST /chat
+  Body: { question, session_id, language, ui_language_explicit?, state?, as_of_date?, history? }
+  language: "en" | "hi" | "gu" | "mr" | "bn" | "ta"
+
+POST /chat/stream
+  Same body; returns SSE events: thinking | token | metadata | done
+
+POST /voice
+  Multipart: audio (file), language (form), session_id (form), state? (form)
+
 POST /voice/transcribe
+  Body: { audio: base64_string, language }
+
 POST /voice/speak
-POST /grievances
-GET  /grievances/{reference}
-GET  /sources/{id}
+  Body: { text, language, segments? }
+
+POST /grievance
+GET  /conversations/{session_id}
+GET  /evidence/{...}
 GET  /health
 GET  /health/providers
 ```
 
-**Chat response:** `answer, language, domain, confidence, citations[{title,page,url}],
-abstained, follow_up_question`
+**Chat response:** `answer, language, domain, intent, entities, confidence,
+confidence_level, citations[{chunk_id, title, source, source_label, url, page?, section?}],
+abstained, speech_text, speech_segments, follow_up_question, mode, conversation_id`
 
-**Grievance response:** `reference, status, missing_information[], is_official_submission`
-(always `false`)
+Response modes: `dual_rag | static | web | grievance | groq_fallback`
+
+---
 
 ## Safety & trust requirements
 
@@ -76,39 +95,42 @@ abstained, follow_up_question`
 2. Every citation must map to a chunk retrieved in that request.
 3. Low retrieval confidence forces abstention — not an LLM judgment call.
 4. Never present national/model rules as universally applicable across states.
-5. Grievances are prototypes, never official submissions.
+5. Grievances are prototypes, never official submissions (`is_official_submission: false`).
 6. Never expose provider API credentials.
-7. Avoid sending real personal grievance data to free-tier LLM providers — use
-   synthetic data for demo/testing.
+7. Avoid sending real personal grievance data to free-tier LLM providers.
+
+---
 
 ## Success metrics (internal)
 
 Groundedness, factual correctness, citation accuracy, latency, abstention
 correctness, domain classification accuracy, jurisdiction accuracy, provider
-fallback success. Demo reliability: three flagship stories run end-to-end
-without failure (see PROJECT_STATUS.md for current status against these).
+fallback success. Three flagship demos run end-to-end without failure:
+
+1. Hindi PMFBY voice query
+2. Cooperative/PACS state-filtered question
+3. Grievance intake + status lookup
+
+---
 
 ## Constraints
 
-4 members, 10 days, zero budget, cloud-only, free tiers only, no personal GPU.
-Free tiers have quotas, cold starts, and inactivity pauses — the architecture
-must tolerate all three, not assume they won't happen.
+Cloud-only, free tiers only, no personal GPU. Free tiers have quotas, cold starts,
+and inactivity pauses — the architecture tolerates all three.
 
 ## Risks
 
-- "Completely free" holds for hackathon-scale demo traffic, not production —
-  say this explicitly in the pitch, don't imply production-readiness.
-- Free-tier limits: Bhashini is suitable for PoC/hackathon use (production/
-  commercial use may need separate arrangements), Groq/Gemini have rate limits,
-  Render sleeps on inactivity with cold starts, Supabase free projects may pause
-  after inactivity, Vercel Hobby has personal/non-commercial eligibility terms.
-- Legal coverage realism: central + one state only. Say this on screen in the demo.
-- Scope creep: enforce the non-goals list. If someone proposes adding something
-  from it before Tier 1 is stable, that's a decision for DECISIONS.md, not a
-  silent addition.
+- Free-tier limits: Groq/Gemini have rate limits, Render sleeps on inactivity,
+  Supabase free projects may pause after inactivity.
+- Legal coverage: central + Gujarat only. Must be stated clearly in demo.
+- Agriculture corpus: not yet ingested. Queries route to `out_of_scope`.
 
-## Definition of done (MVP / Tier 1)
+---
 
-Deployed PWA where a text question in English or Hindi flows through routing →
-filtered RAG → grounded, cited answer, with correct abstention on unsupported
-questions, and a grievance can be created and looked up. Voice is Tier 2.
+## Definition of done
+
+✅ **Achieved.** Deployed PWA where text questions in 6 languages flow through
+domain routing → hybrid RAG (static pgvector + web) → grounded, cited answers,
+with correct abstention on unsupported questions, and grievances can be created
+with multi-turn intake + status lookup guidance. Voice (STT/TTS) working via
+Sarvam AI.

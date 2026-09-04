@@ -1,5 +1,5 @@
 """
-Deterministic query classification for the MVP.
+Deterministic query classification for the Web RAG pipeline.
 
 This module does NOT generate answers.
 
@@ -15,7 +15,7 @@ Supported domains:
 - schemes
 - pmfby
 - agriculture
-- finlit
+- finlit / financial_inclusion
 - grievance
 - driving_licence
 
@@ -39,45 +39,79 @@ Supported intents:
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
 class QueryClassification:
-
     domain: str
     jurisdiction: str
-    state: str | None
+    state: Optional[str]
     intent: str
     confidence: float
 
 
 DOMAIN_KEYWORDS = {
-
     "pmfby": [
         "pmfby",
         "fasal bima",
         "crop insurance",
         "pradhan mantri fasal",
         "crop insurance scheme",
+        "crop damage",
+        "crop loss",
+        "insurance claim",
+        "premium subsidy",
+        "wbcis",
         "पीएमएफबीवाई",
         "फसल बीमा",
         "प्रधानमंत्री फसल",
+        "फसल नुकसान",
+        "बीमा दावा",
         "વીમા",
         "ફસલ બીમા",
         "પીએમએફબીવાઈ",
+        "પાક વીમો",
+        "પાક નુકસાન",
+        "વીમા દાવો",
+        "પ્રધાનમંત્રી ફસલ બીમા યોજના",
+        "पीक विमा",
+        "पंतप्रधान पीक विमा योजना",
+        "ফসল বীমা",
+        "প্রধানমন্ত্রী ফসল বীমা",
+        "பயிர் காப்பீடு",
     ],
-
     "pacs": [
         "pacs",
         "primary agricultural credit society",
         "primary agriculture credit society",
+        "credit cooperative",
+        "cooperative credit",
+        "cooperative training",
+        "sahakari talim",
+        "sahakari bank",
+        "pacs project",
+        "pacspl",
         "प्राथमिक कृषि ऋण सहकारी समिति",
+        "प्राथमिक कृषि साख समिति",
+        "सहकारी प्रशिक्षण",
+        "सहकारी बैंक",
+        "सहकारी ऋण",
+        "સહકારી તાલીમ",
+        "સહકારી મંડળી",
+        "સહકારી બેંક",
+        "પ્રાથમિક કૃષિ ધિરાણ મંડળી",
+        "સહકારી સંસ્થા",
+        "सहकारी संस्था",
+        "प्राथमिक कृषी पतसंस्था",
+        "সমবায় সমিতি",
+        "কৃষি ঋণ সমিতি",
+        "கூட்டுறவு சங்கம்",
     ],
-
     "pacs_computerization": [
         "computerization",
         "digitization",
-        "digital",
+        "digital pacs",
         "pacspl",
         "ncip",
         "ict",
@@ -88,7 +122,6 @@ DOMAIN_KEYWORDS = {
         "pacs project",
         "data readiness",
     ],
-
     "cooperative": [
         "cooperative",
         "co-operative",
@@ -98,10 +131,15 @@ DOMAIN_KEYWORDS = {
         "by-laws",
         "member rights",
         "society registration",
+        "cooperative training",
+        "sahakari",
         "सहकारी",
         "समिति",
+        "સહકારી",
+        "સમવાય",
+        "கூட்டுறவு",
+        "সমবায়",
     ],
-
     "schemes": [
         "scheme",
         "yojana",
@@ -120,20 +158,44 @@ DOMAIN_KEYWORDS = {
         "registration for",
         "योजना",
         "सरकारी योजना",
+        "યોજના",
+        "સરકારી યોજના",
+        "સબસિડી",
+        "લાભ",
+        "પાત્રતા",
+        "शासकीय योजना",
+        "প্রকল্প",
+        "সরকারি প্রকল্প",
+        "திட்டம்",
+        "அரசு திட்டம்",
     ],
-
     "agriculture": [
         "farmer",
+        "farmers",
+        "farm",
+        "farming",
         "agriculture",
         "agricultural",
         "crop",
+        "crops",
         "cultivation",
+        "harvest",
         "fertilizer",
+        "pesticide",
         "irrigation",
+        "seed",
+        "tractor",
+        "mandi",
+        "apmc",
+        "msp",
         "kisan",
+        "khedut",
         "किसान",
         "खेती",
         "फसल",
+        "सिंचाई",
+        "उर्वरक",
+        "बीज",
         "ખેતી",
         "ખેડૂત",
         "પાક",
@@ -141,8 +203,15 @@ DOMAIN_KEYWORDS = {
         "ફસલ",
         "ખાતર",
         "સિંચાઈ",
+        "બીજ",
+        "શેતી",
+        "શતકરી",
+        "কৃষি",
+        "কৃষক",
+        "চাষ",
+        "விவசாயம்",
+        "விவசாயி",
     ],
-
     "finlit": [
         "financial literacy",
         "loan",
@@ -154,14 +223,37 @@ DOMAIN_KEYWORDS = {
         "account",
         "jan dhan",
         "pmjdy",
+        "mudra",
+        "microfinance",
+        "self help group",
+        "shg",
         "rupay",
         "kcc",
         "kisan credit card",
         "वित्तीय साक्षरता",
+        "बैंक खाता",
+        "जन धन",
+        "मुद्रा ऋण",
         "ऋण",
         "बैंकिंग",
+        "નાણાકીય સમાવેશ",
+        "બેંક ખાતું",
+        "જન ધન",
+        "મુદ્રા લોન",
+        "ஆર્થિક સમાવેશ",
+        "ব্যাংক অ্যাকাউন্ট",
+        "நிதி உள்ளடக்கம்",
     ],
-
+    "financial_inclusion": [
+        "financial inclusion",
+        "jan dhan",
+        "pmjdy",
+        "mudra loan",
+        "microfinance",
+        "self help group",
+        "shg",
+        "bank account",
+    ],
     "grievance": [
         "grievance",
         "complaint",
@@ -170,9 +262,25 @@ DOMAIN_KEYWORDS = {
         "dispute",
         "redressal",
         "redress",
+        "cpgrams",
+        "rti",
+        "right to information",
+        "ombudsman",
         "शिकायत",
+        "आरटीआई",
+        "सूचना का अधिकार",
+        "लोक शिकायत",
+        "ફરિયાદ",
+        "આરટીઆઈ",
+        "માહિતી અધિકાર",
+        "જાહેર ફરિયાદ",
+        "તક્રાર",
+        "माहिती अधिकार",
+        "অভিযোগ",
+        "তথ্য অধিকার",
+        "புகார்",
+        "தகவல் உரிமை",
     ],
-
     "driving_licence": [
         "driving licence",
         "driving license",
@@ -184,6 +292,19 @@ DOMAIN_KEYWORDS = {
         "rto",
         "motor vehicle",
         "driving test",
+        "parivahan",
+        "sarathi",
+        "ड्राइविंग लाइसेंस",
+        "लर्नर परमिट",
+        "आरटीओ",
+        "वाहन पंजीकरण",
+        "ડ્રાઇવિંગ લાઇસન્સ",
+        "લર્નર પરમિટ",
+        "આરટીઓ",
+        "વાહન નોંધણી",
+        "वाहन चालक परवाना",
+        "ড্রাইভিং লাইসেন্স",
+        "ஓட்டுநர் உரிமம்",
     ],
 }
 
@@ -209,6 +330,8 @@ INTENT_KEYWORDS = {
         "who can",
         "requirements for",
         "criteria",
+        "પાત્રતા",
+        "पात्रता",
     ],
     "APPLICATION": [
         "apply",
@@ -217,6 +340,8 @@ INTENT_KEYWORDS = {
         "application process",
         "fill out",
         "submit application",
+        "અરજી",
+        "आवेदन",
     ],
     "REGISTRATION": [
         "register",
@@ -225,6 +350,8 @@ INTENT_KEYWORDS = {
         "sign up",
         "enroll",
         "enrollment",
+        "નોંધણી",
+        "पंजीकरण",
     ],
     "DOCUMENT_REQUIREMENTS": [
         "documents required",
@@ -232,6 +359,8 @@ INTENT_KEYWORDS = {
         "paperwork",
         "forms needed",
         "required documents",
+        "દસ્તાવેજ",
+        "दस्तावेज",
     ],
     "BENEFIT": [
         "benefit",
@@ -240,6 +369,8 @@ INTENT_KEYWORDS = {
         "advantages",
         "help",
         "assistance",
+        "લાભ",
+        "लाभ",
     ],
     "SUBSIDY_AMOUNT": [
         "subsidy amount",
@@ -249,6 +380,8 @@ INTENT_KEYWORDS = {
         "sum",
         "financial aid",
         "money",
+        "સબસિડી",
+        "सब्सिडी",
     ],
     "DEADLINE": [
         "deadline",
@@ -264,6 +397,8 @@ INTENT_KEYWORDS = {
         "check status",
         "application status",
         "progress",
+        "સ્થિતિ",
+        "स्थिति",
     ],
     "GRIEVANCE": [
         "grievance",
@@ -273,6 +408,8 @@ INTENT_KEYWORDS = {
         "dispute",
         "redressal",
         "redress",
+        "ફરિયાદ",
+        "शिकायत",
     ],
     "CONTACT": [
         "contact",
@@ -281,6 +418,8 @@ INTENT_KEYWORDS = {
         "address",
         "helpline",
         "customer care",
+        "સંપર્ક",
+        "संपर्क",
     ],
     "SERVICE_ACCESS": [
         "access",
@@ -310,58 +449,131 @@ INTENT_KEYWORDS = {
 
 
 STATE_KEYWORDS = {
+    # Gujarat
+    "gujarat": "Gujarat",
+    "ગુજરાત": "Gujarat",
+    "गुजरात": "Gujarat",
+    "ahmedabad": "Gujarat",
+    "અમદાવાદ": "Gujarat",
+    "surat": "Gujarat",
+    "સુરત": "Gujarat",
+    "vadodara": "Gujarat",
+    "વડોદરા": "Gujarat",
+    "rajkot": "Gujarat",
+    "રાજકોટ": "Gujarat",
+    "ikhedut": "Gujarat",
+    "digitalgujarat": "Gujarat",
 
+    # Maharashtra
+    "maharashtra": "Maharashtra",
+    "महाराष्ट्र": "Maharashtra",
+    "mumbai": "Maharashtra",
+    "मुंबई": "Maharashtra",
+    "pune": "Maharashtra",
+    "पुणे": "Maharashtra",
+    "nagpur": "Maharashtra",
+    "नागपुर": "Maharashtra",
+    "mahaonline": "Maharashtra",
+
+    # Madhya Pradesh
+    "madhya pradesh": "Madhya Pradesh",
+    "मध्य प्रदेश": "Madhya Pradesh",
+    "bhopal": "Madhya Pradesh",
+    "भोपाल": "Madhya Pradesh",
+    "indore": "Madhya Pradesh",
+    "इंदौर": "Madhya Pradesh",
+    "mpedistrict": "Madhya Pradesh",
+
+    # Rajasthan
+    "rajasthan": "Rajasthan",
+    "राजस्थान": "Rajasthan",
+    "jaipur": "Rajasthan",
+    "जयपुर": "Rajasthan",
+    "jodhpur": "Rajasthan",
+    "emitra": "Rajasthan",
+
+    # Tamil Nadu
+    "tamil nadu": "Tamil Nadu",
+    "தமிழ்நாடு": "Tamil Nadu",
+    "chennai": "Tamil Nadu",
+    "சென்னை": "Tamil Nadu",
+    "tnega": "Tamil Nadu",
+
+    # West Bengal
+    "west bengal": "West Bengal",
+    "পশ্চিমবঙ্গ": "West Bengal",
+    "kolkata": "West Bengal",
+    "কলকাতা": "West Bengal",
+
+    # Karnataka
+    "karnataka": "Karnataka",
+    "ಕರ್ನಾಟಕ": "Karnataka",
+    "bangalore": "Karnataka",
+    "bengaluru": "Karnataka",
+
+    # Andhra Pradesh
     "andhra pradesh": "Andhra Pradesh",
+    "ఆంధ్ర ప్రదేశ్": "Andhra Pradesh",
+
+    # Uttar Pradesh
+    "uttar pradesh": "Uttar Pradesh",
+    "उत्तर प्रदेश": "Uttar Pradesh",
+    "lucknow": "Uttar Pradesh",
+    "लखनऊ": "Uttar Pradesh",
+
+    # Bihar
+    "bihar": "Bihar",
+    "बिहार": "Bihar",
+    "patna": "Bihar",
+    "पटना": "Bihar",
+
+    # Odisha
+    "odisha": "Odisha",
+    "ଓଡ଼ିଶା": "Odisha",
+
+    # Punjab
+    "punjab": "Punjab",
+    "ਪੰਜਾਬ": "Punjab",
+    "पंजाब": "Punjab",
+
+    # Other States
     "arunachal pradesh": "Arunachal Pradesh",
     "assam": "Assam",
-    "bihar": "Bihar",
     "chhattisgarh": "Chhattisgarh",
     "goa": "Goa",
-    "gujarat": "Gujarat",
     "haryana": "Haryana",
     "himachal pradesh": "Himachal Pradesh",
     "jharkhand": "Jharkhand",
-    "karnataka": "Karnataka",
     "kerala": "Kerala",
-    "madhya pradesh": "Madhya Pradesh",
-    "maharashtra": "Maharashtra",
     "manipur": "Manipur",
     "meghalaya": "Meghalaya",
     "mizoram": "Mizoram",
     "nagaland": "Nagaland",
-    "odisha": "Odisha",
-    "punjab": "Punjab",
-    "rajasthan": "Rajasthan",
     "sikkim": "Sikkim",
-    "tamil nadu": "Tamil Nadu",
     "telangana": "Telangana",
     "tripura": "Tripura",
-    "uttar pradesh": "Uttar Pradesh",
     "uttarakhand": "Uttarakhand",
-    "west bengal": "West Bengal",
 }
 
 
 class QueryClassifier:
 
     def classify(
-        self, query: str,
+        self, query: str, default_state: Optional[str] = None
     ) -> QueryClassification:
 
         text = query.lower().strip()
 
         if not text:
-
-            raise ValueError(
-                "Query cannot be empty."
-            )
+            raise ValueError("Query cannot be empty.")
 
         domain_scores = {}
         for domain, keywords in DOMAIN_KEYWORDS.items():
             score = 0
             for keyword in keywords:
                 if keyword in text:
-                    score += 1
+                    # Multi-word or specific keywords add proportional weight
+                    score += len(keyword.split())
             if score:
                 domain_scores[domain] = score
 
@@ -373,9 +585,7 @@ class QueryClassifier:
             highest_score = domain_scores[domain]
             confidence = min(
                 1.0,
-                0.55 + (
-                    highest_score * 0.1
-                ),
+                0.55 + (highest_score * 0.1),
             )
         else:
             domain = "general"
@@ -396,15 +606,16 @@ class QueryClassifier:
                 key=intent_scores.get,
             )
         else:
-            intent = "INFORMATIONAL"  # default intent
+            intent = "INFORMATIONAL"
 
         state = None
-        for keyword, state_name in (
-            STATE_KEYWORDS.items()
-        ):
+        for keyword, state_name in STATE_KEYWORDS.items():
             if keyword in text:
                 state = state_name
                 break
+
+        if not state and default_state:
+            state = default_state
 
         if state:
             jurisdiction = "state"
@@ -416,8 +627,5 @@ class QueryClassifier:
             jurisdiction=jurisdiction,
             state=state,
             intent=intent,
-            confidence=round(
-                confidence,
-                2,
-            ),
+            confidence=round(confidence, 2),
         )

@@ -1,14 +1,14 @@
 # System Architecture
 
+> Source of truth: the actual code. This document reflects what is currently implemented.
+
 ## 1. Overview
 
-Evidence-grounded, multilingual citizen-assistance platform. Official documents
-→ extraction → chunking + metadata → embeddings → Supabase pgvector →
-domain/jurisdiction-filtered retrieval → evidence validation → grounded LLM
-generation → citation verification → answer or abstention.
+Evidence-grounded, multilingual citizen-assistance platform for cooperative governance, PMFBY crop insurance, financial inclusion, and grievance filing in India.
 
-**The LLM is not the source of truth.** It only rephrases retrieved chunks into
-an answer and is not trusted to supply facts on its own.
+**Core principle:** The LLM is NOT the source of truth. It only synthesizes retrieved evidence into an answer. Every citation must map to a chunk actually retrieved in that request. Invalid citation → abstain.
+
+---
 
 ## 2. High-level diagram
 
@@ -16,189 +16,296 @@ an answer and is not trusted to supply facts on its own.
                         USER
                           |
                           v
-             +------------------------+
-             |     Next.js PWA        |
-             |  chat / voice /        |
-             |  grievance / status    |
-             +-----------+------------+
+             +---------------------------+
+             |      Next.js 16 PWA       |
+             |  / /chat /voice           |
+             |  /grievance /schemes      |
+             |  /services /library       |
+             |  /faq /legal              |
+             +------------+--------------+
                           |
                         HTTPS
                           |
                           v
-             +------------------------+
-             |      FastAPI API       |
-             +-----------+------------+
+             +---------------------------+
+             |  FastAPI (app/main.py)    |
+             |  /chat  /chat/stream      |
+             |  /voice /voice/transcribe |
+             |  /voice/speak             |
+             |  /conversations           |
+             |  /evidence  /grievance    |
+             |  /health /health/providers|
+             +------+------+------+------+
+                    |      |      |
+          +---------+      |      +----------+
+          v                v                 v
+ +-----------------+ +----------+  +------------------+
+ | Language Layer  | | Domain   |  | Grievance        |
+ | detect_query_   | | AnchorSt.|  | Workflow         |
+ | languages()     | | keyword  |  | 9-stage state    |
+ | Sarvam transl.  | | + cosine |  | machine          |
+ | Azure fallback  | | classify |  | (Supabase-backed)|
+ +-----------------+ +----------+  +------------------+
                           |
-          +---------------+----------------+
-          |                |                |
-          v                v                v
-  +----------------+ +---------------+ +----------------+
-  | Language Layer  | | Domain Router | | Grievance      |
-  | Bhashini STT/MT | | cooperative   | | Workflow       |
-  | /TTS            | | pacs/schemes  | | classify+slot- |
-  | Groq Whisper     | | pmfby/agri    | | fill+ticket    |
-  | fallback         | | finlit/       | |                |
-  +--------+---------+ | grievance     | +-------+--------+
-           |            +-------+-------+         |
-           |                    |                 |
-           |                    v                 |
-           |         +--------------------+        |
-           |         | Retrieval Service  |        |
-           |         +---------+----------+        |
-           |                   |                    |
-           |                   v                    |
-           |        +----------------------+        |
-           +------->| Supabase Postgres    |<-------+
-                     | + pgvector (HNSW)    |
-                     | documents / chunks   |
-                     | grievances / feedback|
-                     +----------+-----------+
-                                |
-                                v
-                     +--------------------+
-                     | LLM Provider       |
-                     | Groq (primary)     |
-                     | Gemini (fallback)  |
-                     +---------+----------+
-                                |
-                                v
-                     Answer + citation
-                     + confidence + abstention
+                          v
+             +---------------------------+
+             |      RAGOrchestrator      |
+             |  asyncio.gather both      |
+             |  pipelines in parallel    |
+             +--------+--------+---------+
+                      |        |
+          +-----------+        +-----------+
+          v                               v
+ +------------------+          +--------------------+
+ | StaticRAGService |          | WebRAGService      |
+ | Supabase pgvec.  |          | 10-step pipeline   |
+ | hybrid retrieval |          | Tavily/Firecrawl   |
+ | (dense + lexical |          | BM25 → Gemini pre- |
+ |  RRF fusion)     |          | rank → RRF →       |
+ | EvidenceChunks   |          | Gemini final-rank  |
+ +------------------+          | → source verify    |
+          |                    | EvidenceChunks     |
+          |                    +--------------------+
+          +----------+---------+
+                     v
+          +---------------------+
+          | EvidenceController  |
+          | build_bundle()      |
+          | assess_evidence()   |
+          | build_curated_      |
+          |   prompt()          |
+          +----------+----------+
+                     |
+                     v
+          +---------------------+
+          | LLM (grounded_ans.) |
+          | Groq (primary)      |
+          | Gemini (fallback)   |
+          +----------+----------+
+                     |
+                     v
+          +---------------------+
+          | citation_verifier   |
+          | verify_citations()  |
+          | invalid → ABSTAIN   |
+          +----------+----------+
+                     |
+                     v
+             RAGResponse (answer, citations,
+             confidence, mode, speech_text)
 ```
 
-## 3. Request flow (text)
+---
+
+## 3. Request flow: `/chat` and `/chat/stream`
 
 ```
-question → language detection → domain classification → jurisdiction
-resolution → hybrid retrieval (dense vector + lexical, RRF fusion,
-domain + state filter applied before candidate ranking) → [reranker if
-enabled, currently OFF] → evidence gate v2 (abstain if insufficient) →
-grounded LLM generation → citation verification (every [chunk:id] must map
-to a retrieved chunk) → structured response
+POST /chat (or /chat/stream for SSE)
+  │
+  ├── resolve_and_remember()      → detect/remember response language (en/hi/gu/mr/bn/ta)
+  ├── detect_query_languages()    → dominant language + language_mix
+  ├── _translate_to_english()     → Sarvam (primary) → Azure (fallback)
+  ├── get_embedding_provider().embed_texts()  → 768d Jina v3 embedding
+  ├── AnchorStore.classify()      → domain (keyword rules + cosine similarity, floor 0.30)
+  ├── QueryClassifier.classify()  → web RAG classification (domain, jurisdiction, state)
+  │
+  ├─[if domain == "grievance"]────────────────────────────────────────────────┐
+  │   GrievanceWorkflow.process_message()                                     │
+  │   State machine: INTAKE→CLASSIFICATION→ENTITY_EXTRACTION→                │
+  │   MISSING_FIELDS→FOLLOWUP→DRAFT_READY→SUBMISSION_GUIDE→                  │
+  │   STATUS_LOOKUP→COMPLETE                                                  │
+  │   Persists to Supabase `grievance_states` table                           │
+  │   Returns WorkflowResult.response                                         │
+  │                                                                           │
+  ├─[if domain == "out_of_scope"]──────────────────────────────────────────── │
+  │   Return scope message, abstained=True                                    │
+  │                                                                           │
+  └─[else RAG path]─────────────────────────────────────────────────────────►│
+      RAGOrchestrator.run()                                                   │
+        ├── asyncio.gather:                                                   │
+        │     StaticRAGService.retrieve()  → Supabase pgvector hybrid         │
+        │     WebRAGService.retrieve()     → Tavily/Firecrawl 10-step         │
+        ├── EvidenceController.build_bundle()                                 │
+        ├── EvidenceController.build_curated_prompt()                         │
+        ├── grounded_answer(GroqLLMProvider, GeminiLLMProvider, ...)          │
+        ├── _auto_append_citations()   (if LLM forgot to cite)                │
+        ├── verify_citations()         → invalid chunk ref → ABSTAIN          │
+        ├── strip_citations()          → clean visible answer                 │
+        ├── _calculate_confidence()    → band-based, dual-source +0.10        │
+        └── RAGResponse                                                       │
+      │                                                                       │
+      _translate_from_english()  Sarvam → Azure (if lang != "en")            │
+      save_message() / trim_messages()                                        │
+      return dict                                                        ◄────┘
 ```
 
-Out-of-scope queries return a controlled scope response (no factual LLM
-answer). The frontend `/api/chat` proxy has NO static fallback — a backend
-failure returns 502/503, never an ungrounded answer.
+---
 
-## 4. Domain taxonomy
+## 4. Request flow: `/voice`
+
+```
+POST /voice (multipart: audio file + language + session_id)
+  │
+  ├── VoiceService.speech_to_text()
+  │     Sarvam STT (primary, 15s timeout)
+  │     → Azure STT (fallback, 15s timeout)
+  │     → VoiceUnavailableError
+  │
+  ├── chat() handler (same pipeline as /chat)
+  │
+  └── VoiceService.text_to_speech(speech_text, language)
+        Sarvam TTS only (Azure excluded — poor Indic output)
+        → VoiceUnavailableError (returns null audio, text answer still returned)
+
+Response: { answer, transcribed_text, audio_base64, language, domain,
+            confidence, citations, abstained }
+```
+
+---
+
+## 5. Streaming SSE events (`/chat/stream`)
+
+Events emitted in order:
+1. `thinking` — `{ text: "Searching official documents & web..." }`
+2. `thinking` — `{ text: "Analyzing evidence from both sources..." }`
+3. `thinking` — `{ text: "Preparing answer..." }`
+4. `token` — `{ text: "word " }` (one per word)
+5. `metadata` — `{ domain, confidence, confidence_level, citations, abstained, language, mode }`
+6. `done` — `{}`
+
+---
+
+## 6. Domain taxonomy
 
 `pacs_governance | pacs_computerization | pmfby | financial_inclusion | schemes | agriculture | grievance | out_of_scope`
 
-## 5. Jurisdiction
+Classification: keyword rules first (instant, case-insensitive); fallback to cosine similarity of 768d anchor embeddings (floor 0.30 → `out_of_scope`).
 
-Legal and cooperative answers must carry `jurisdiction, state, effective_date,
-verified_date`. Hierarchy where applicable:
+Domain alias mapping in StaticRAGService:
+- `pacs` → `pacs_governance`
+- `finlit` → `financial_inclusion`
+- `cooperative` → `pacs_governance`
 
-```
-Central policy/law → State Act → State Rules → State notification
-→ PACS-specific by-law
-```
+---
 
-Do not treat the Model PACS Byelaws as universal law — the Ministry itself says
-they must be adapted per state Cooperative Societies Act/Rules.
+## 7. Database schema (Supabase)
 
-## 6. Components
-
-### 6.1 Frontend
-Next.js + React + Tailwind, responsive PWA, hosted on Vercel Hobby (Render
-Static Site as fallback). Features: text chat, EN/HI selector, voice recording +
-playback, citation display, confidence display, abstention UI, grievance form,
-grievance status lookup.
-
-### 6.2 Backend
-FastAPI (Python) on Render Free. Routes per the frozen API contract in PRD.md.
-Responsibilities: routing, orchestration, retrieval, citation validation, LLM
-integration, language-provider integration, grievance workflow, error handling,
-fallbacks.
-
-### 6.3 Language layer
-Primary: Sarvam AI (Hindi STT, Hindi TTS, multilingual Indic support). Fallback:
-Azure Cognitive Services (disabled until API key). Final fallback: text-only mode.
-Voice is now enabled with Sarvam API key configured.
-
-### 6.4 Retrieval layer
-Supabase Postgres + pgvector, HNSW index (cosine). Retrieval is **hybrid**:
-dense vector search (`match_chunks` RPC, 768-d Jina embeddings) fused with
-Postgres lexical search via weighted Reciprocal Rank Fusion (RRF). Domain and
-jurisdiction/state filters are applied *inside* both candidate queries before
-ranking to prevent cross-domain matches (contamination = 0). A Jina reranker
-is wired but **disabled** (`RERANKER_ENABLED=false`) until a curated eval shows
-it helps.
-
-### 6.5 LLM layer
-Provider abstraction — application logic must not depend directly on one
-provider:
-```
-LLMProvider
-  ├── GroqProvider   (primary)
-  └── GeminiProvider (fallback)
-```
-
-### 6.6 Database schema
-
-```
+```sql
 documents
 ---------
-id, title, organization, jurisdiction, state, domain, document_type,
-url, effective_date, verified_date, document_hash
+id (uuid PK), source_id (unique), title, organization, domain, jurisdiction,
+state, document_type, source_url, effective_date, verified_date, created_at
 
 chunks
 ------
-id, document_id, page, section, content, embedding vector(768), metadata
+id (uuid PK), document_id (FK → documents), stable_chunk_id,
+page, page_start, page_end, section, subsection, clause,
+content, embedding vector(768),   ← HNSW cosine index
+domain, jurisdiction, state, source_url, source_file, created_at
 
-grievances
-----------
-id, reference, status, category, location, language, payload,
-created_at, updated_at
-
-feedback
+sessions
 --------
-id, session_id, message_id, rating, note, created_at
+session_id (PK), state (jsonb), expires_at, created_at
+
+grievance_states
+----------------
+conversation_id (PK), user_id, state_json (full GrievanceState as JSON),
+created_at, updated_at
 ```
 
-## 7. Data flow: chat
+`match_chunks` RPC: dense vector search with domain + state filter, returns top-k by cosine similarity.
+
+---
+
+## 8. Hybrid retrieval (StaticRAGService)
+
 ```
-question → language detection → domain classification → jurisdiction
-resolution → domain+state filter → top-k retrieval → evidence threshold
-→ LLM → citation verification → answer / abstention
+query_embedding
+    │
+    ├── _dense_retrieve()     → match_chunks RPC (pgvector cosine, domain+state filter)
+    └── _lexical_retrieve()   → term-overlap on chunks.content (Python BM25-style)
+                                 filtered to eligible doc IDs first
+    │
+    └── _reciprocal_rank_fusion()
+          dense_weight=0.6, lexical_weight=0.4, k=60
+          → top-k fused candidates
+    │
+    └── _enrich_chunks()      → attach stable_chunk_id + provenance metadata
+    │
+    └── evidence_gate()       → TOP1_THRESHOLD=0.25, SECONDARY_THRESHOLD=0.30,
+                                 MIN_CHUNKS_ABOVE_SECONDARY=2
+                                 → abstained? + ConfidenceBand
 ```
 
-## 8. Data flow: voice
-```
-audio → Sarvam STT → text → normal chat pipeline → answer → Sarvam TTS → audio
-```
-Fallback: `Sarvam STT (failure) → Azure STT (failure) → text input`
+Optional Jina reranker wired after step 2, **currently disabled** (`RERANKER_ENABLED=false`).
 
-## 9. Data flow: grievance
-```
-user description → classification → entity extraction → missing-field
-detection → follow-up questions → prototype reference creation → status lookup
-```
-Grievance submission always contains `is_official_submission: false`.
+---
 
-## 10. Citation flow
+## 9. Web RAG pipeline (WebRAGService) — 10 steps
 
-Retrieved chunks carry a stable application `chunk_id` (e.g.
-`operational_guidelines_pmfby_00012`) plus the internal DB `id`, `document_id`,
-`source_file`, `page_start`, `page_end`, `section`, `subsection`, `clause`, and
-`text`. The LLM returns `[chunk:<id>]` markers. Backend validates: `citation
-chunk exists AND was retrieved this turn` (stable `chunk_id` resolves
-deterministically to the row → document → source page). Invalid/fabricated
-citation → `ABSTAIN`. Confidence is an internal diagnostic, not a stated
-probability.
+1. **Domain scope gate** — abstain if domain unsupported or "general"
+2. **Web discovery** — `WebDiscoveryService` via Tavily / Firecrawl
+3. **BM25 ranking** — `BM25Retriever`, top 15
+4. **Gemini pre-ranking** — `GeminiReranker.pre_rank()`, top 15
+5. **RRF fusion** — fuse BM25 + Gemini pre-rank lists
+6. **Gemini final reranking** — `GeminiReranker.final_rerank()`, top 8
+7. **Relevance gate** — minimum score threshold 40.0
+8. **Source verification** — `SourceVerifier`, trust score ≥ 35.0
+9. **Evidence threshold** — abstain if no accepted sources
+10. **Convert to EvidenceChunks** → unified `evidence_gate()`
+
+---
+
+## 10. Confidence scoring
+
+```
+static_band → static_conf (high=0.9, medium=0.7, low=0.4)
+web_band    → web_conf    (same mapping)
+
+if dual source:  confidence = min((static_conf + web_conf)/2 + 0.10, 1.0)
+if static only:  confidence = static_conf
+if web only:     confidence = web_conf
+
+Bands:  ≥0.7 → HIGH,  ≥0.5 → MEDIUM,  else → LOW
+```
+
+---
 
 ## 11. Fallback chains
 
 ```
-STT:  Sarvam → Azure → text-only
-TTS:  Sarvam → Azure → text-only
-LLM:  Groq → Gemini → safe "unavailable" response
+STT:  Sarvam (primary) → Azure (fallback) → VoiceUnavailableError
+TTS:  Sarvam only → VoiceUnavailableError (Azure excluded)
+LLM:  Groq (primary) → Gemini (fallback) → AllProvidersFailedError → ABSTAIN
+Embed: Jina (primary) → Gemini (fallback)
+Translation: Sarvam → Azure → return original
 ```
 
-## 12. Non-functional requirements
+---
 
-No personal GPU. Free-tier/cloud-only. External providers require explicit
-timeout handling. Render cold starts expected. Free-tier 429/rate limits
-expected. Supabase may pause after inactivity — check and reactivate before
-demos. Minimal PII. No secrets in frontend or source control.
+## 12. Grievance workflow stages
+
+| Stage | What happens |
+|---|---|
+| INTAKE | Classify complaint; if too vague, ask for more detail |
+| CLASSIFICATION | Present category/subcategory/department; ask to confirm |
+| ENTITY_EXTRACTION | Extract entities from description; update draft |
+| MISSING_FIELDS | (routes to ENTITY_EXTRACTION) |
+| FOLLOWUP | Ask for missing required fields one at a time |
+| DRAFT_READY | Present complete draft + submission route |
+| SUBMISSION_GUIDE | Offer status tracking guidance |
+| STATUS_LOOKUP | Provide reference number + status check URL |
+| COMPLETE | Workflow done; can restart or ask sub-questions |
+
+State persisted to Supabase `grievance_states` (upsert on `conversation_id`).
+
+---
+
+## 13. Non-functional constraints
+
+- No personal GPU; free-tier / cloud-only
+- Every external provider call has a strict timeout
+- Render cold starts expected; Supabase may pause after inactivity
+- Free-tier rate limits expected (Groq key rotation supported)
+- Minimal PII — no secrets in frontend or source control
+- Reranker: wired but disabled (`RERANKER_ENABLED=false`)

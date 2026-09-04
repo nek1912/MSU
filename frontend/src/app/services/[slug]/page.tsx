@@ -12,6 +12,8 @@ import { Stagger } from "@/components/motion/Stagger";
 import { IconChevronRight } from "@/components/ui/Icons";
 import { deco } from "@/lib/data/deco";
 
+import { formatServiceQuestion } from "@/lib/i18n/formatQuery";
+
 export default function ServiceDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { t, locale } = useI18n();
@@ -39,7 +41,7 @@ export default function ServiceDetailPage() {
           <Badge deco={deco(sc.category)}>{t(`serviceCategory.${sc.category}`)}</Badge>
           <h1 className="mt-3 display text-3xl tracking-tight text-[var(--ink)]">{sc.name}</h1>
           <p className="mt-1 text-[var(--text-body)]">{sc.summary}</p>
-          <Link href={`/chat?q=${encodeURIComponent("How do I use the " + sc.name + " service?")}`}>
+          <Link href={`/chat?q=${encodeURIComponent(formatServiceQuestion(sc.name, locale))}`}>
             <Button className="mt-4">
               {t("services.askThisService")}
               <IconChevronRight className="w-4 h-4" />

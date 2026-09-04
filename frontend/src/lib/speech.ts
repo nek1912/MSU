@@ -231,9 +231,8 @@ export function createSpeechService(): SpeechService {
 
 function speakBackend(text: string, locale: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    const ttsText = text.slice(0, 500);
     const formData = new FormData();
-    formData.append("text", ttsText);
+    formData.append("text", text);
     formData.append("language", locale);
 
     fetch("/api/speak", { method: "POST", body: formData })
@@ -243,7 +242,7 @@ function speakBackend(text: string, locale: string): Promise<void> {
       })
       .then((buffer) => {
         if (buffer.byteLength < 100) throw new Error("Audio too small");
-        const blob = new Blob([buffer], { type: "audio/wav" });
+        const blob = new Blob([buffer], { type: "audio/mpeg" });
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
         currentAudio = audio;

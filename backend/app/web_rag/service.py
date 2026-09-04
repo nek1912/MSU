@@ -63,41 +63,52 @@ from app.web_rag.web_cleaner import (
 
 
 OFFICIAL_DOMAINS = [
-
     "gov.in",
     "nic.in",
-
+    "india.gov.in",
+    "digitalindia.gov.in",
+    "meity.gov.in",
     "pmfby.gov.in",
-
     "cooperation.gov.in",
-
+    "cooperatives.gov.in",
     "agricoop.gov.in",
-
+    "agricoop.nic.in",
+    "farmer.gov.in",
+    "agmarknet.gov.in",
+    "enam.gov.in",
+    "nafscob.org",
+    "ncui.coop",
+    "iffco.in",
+    "kribhco.net",
+    "guj.nic.in",
+    "gujaratcooperative.gov.in",
+    "cooperation.gujarat.gov.in",
+    "maharashtra.gov.in",
+    "cooperation.mp.gov.in",
     "nabard.org",
-
-    "irdai.gov.in",
-
     "rbi.org.in",
-
+    "sidbi.in",
+    "mudra.org.in",
+    "pmjdy.gov.in",
+    "pgportal.gov.in",
+    "cpgrams.gov.in",
+    "serviceonline.gov.in",
+    "irdai.gov.in",
     "mca.gov.in",
-
     "pib.gov.in",
-
     "mygov.in",
-
-    "nsdcindia.org",        # NSDC -- PMKVY implementing agency
-    "pmkvyofficial.org",    # official PMKVY site
-    "pmkvyproject.org",     # PMKVY project portal
-    "mudra.org.in",         # MUDRA -- official small-business loan body
-    "aicte-india.org",      # AICTE -- technical education regulator
-    "npscra.nsdl.co.in",    # NPS CRA (Atal Pension Yojana)
-    "nsdl.co.in",           # NSDL (PAN, NPS)
-    "onlineservices.nsdl.com",  # NSDL PAN e-services
-    "pfrda.org.in",         # PFRDA -- pension regulator
-    "nsiindia.gov.in",      # National Savings Institute
-    "jansuraksha.gov.in",   # PMSBY portal
-    "pahal-diksha.gov.in",  # PAHAL/DBTL portal
-
+    "nsdcindia.org",
+    "pmkvyofficial.org",
+    "pmkvyproject.org",
+    "aicte-india.org",
+    "npscra.nsdl.co.in",
+    "nsdl.co.in",
+    "onlineservices.nsdl.com",
+    "pfrda.org.in",
+    "nsiindia.gov.in",
+    "jansuraksha.gov.in",
+    "pahal-diksha.gov.in",
+    "parivahan.gov.in",
 ]
 
 
@@ -921,6 +932,8 @@ class WebDiscoveryService:
         self,
         query: str,
         *,
+        domain: str | None = None,
+        state: str | None = None,
         max_results: int = 20,
         chunks_per_source: int = 3,
         include_domains: list[str] | None = None,
@@ -931,15 +944,6 @@ class WebDiscoveryService:
         """
         Query every active search provider for ``query`` and merge their
         raw results, de-duplicating by source URL.
-
-        ``only_official=True`` keeps only results whose URL is a known
-        official domain. This is used for the Stage-1 official search so
-        that a second provider cannot inject non-official pages and lower
-        the Official Source Rate -- the same guarantee the single-provider
-        flow had.
-
-        Returns unified raw items (``url``/``title``/``content``),
-        preserving provider order but with duplicates removed.
         """
         seen_urls: set[str] = set()
         merged: list[dict] = []
@@ -950,6 +954,8 @@ class WebDiscoveryService:
 
                 response = provider.search(
                     query,
+                    domain=domain,
+                    state=state,
                     max_results=max_results,
                     chunks_per_source=chunks_per_source,
                     include_domains=include_domains,
@@ -1038,6 +1044,8 @@ class WebDiscoveryService:
         official_search_items = (
             self._search_all(
                 enriched_query,
+                domain=classification.domain,
+                state=classification.state,
                 max_results=20,
                 chunks_per_source=3,
                 include_domains=OFFICIAL_DOMAINS,
@@ -1114,6 +1122,8 @@ class WebDiscoveryService:
                 broad_search_items = (
                     self._search_all(
                         enriched_query,
+                        domain=classification.domain,
+                        state=classification.state,
                         max_results=20,
                         chunks_per_source=3,
                         search_depth="advanced",

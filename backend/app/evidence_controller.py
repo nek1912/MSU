@@ -173,14 +173,18 @@ class QueryRequirementClassifier:
 # Source Priority Prompt
 # ---------------------------------------------------------------------------
 
+# Language rule removed from system prompt — injected per-request in user
+# prompt so the LLM always responds directly in the user's language.
 _SOURCE_PRIORITY_PROMPT = """You are a helpful government information assistant for Indian citizens,
 especially those in rural areas.
 
 CRITICAL RULES:
 
-1. Language: ALWAYS respond in English. The translation layer will convert
-   your response to the user's language. Write clear, simple English that
-   translates well to Indian languages.
+1. Language: Respond in the language specified in the USER LANGUAGE field
+   in the user prompt. Use that language throughout your entire response.
+   If the language is Hindi (hi), Gujarati (gu), Marathi (mr), Bengali (bn),
+   or Tamil (ta), write in that script. Do not mix languages unless the
+   technical term has no translation (e.g., scheme names like PMFBY, PACS).
 
 2. Evidence: Use the evidence provided to answer.
    - STATIC EVIDENCE (official documents): Rules, definitions, policy,
@@ -194,7 +198,9 @@ CRITICAL RULES:
 
 3. Citations: After each factual statement, add [chunk:ID] markers.
    These are for internal tracking and will be extracted by the system.
-   You must include them for every factual claim.
+   CRITICAL: You MUST include [chunk:ID] citations inline as you write.
+   Every factual claim requires a citation. Do NOT write answers that need repair.
+   Self-check: Before finishing, verify every fact has a [chunk:ID] marker.
 
 4. When evidence is limited:
    - Answer only what is directly supported by the available evidence
@@ -225,7 +231,6 @@ CRITICAL RULES:
 9. NEVER include these phrases in your response:
    - "Current/local information for this claim could not be verified"
    - "This information could not be verified"
-   - Any English disclaimers when responding in a non-English language
 """
 
 
@@ -311,9 +316,10 @@ class EvidenceController:
             if turns:
                 hist_text = f"Previous conversation:\n{turns}\n\n"
 
-        # Build static evidence section
+        # Build static evidence section (cap to top 3 highest-quality chunks)
         static_parts: list[str] = []
-        for chunk in bundle.static.chunks:
+        static_chunks = bundle.static.chunks[:3]
+        for chunk in static_chunks:
             short_id = chunk.chunk_id[:8]
             meta_parts = [chunk.title]
             if chunk.section:
@@ -324,16 +330,17 @@ class EvidenceController:
             static_parts.append(f"[STATIC] [chunk:{short_id}] ({meta_str})\n{chunk.content}")
         static_section = "\n\n---\n\n".join(static_parts) if static_parts else "No static evidence available."
 
-        # Build dynamic evidence section
+        # Build dynamic evidence section (cap to top 3 highest-quality chunks)
         if bundle.dynamic.available:
             dynamic_parts: list[str] = []
-            for chunk in bundle.dynamic.chunks:
+            dynamic_chunks = bundle.dynamic.chunks[:3]
+            for chunk in dynamic_chunks:
                 short_id = chunk.chunk_id[:8]
                 dynamic_parts.append(
                     f"[DYNAMIC] [chunk:{short_id}] ({chunk.title} — web — {chunk.url})\n{chunk.content}"
                 )
             dynamic_section = "\n\n---\n\n".join(dynamic_parts)
-            dynamic_status = f"available — {len(bundle.dynamic.chunks)} chunks"
+            dynamic_status = f"available — {len(dynamic_chunks)} chunks"
         else:
             dynamic_section = "No dynamic evidence available."
             dynamic_status = f"ABSENT — {bundle.dynamic.reason or 'No applicable web evidence found'}"
@@ -343,27 +350,35 @@ class EvidenceController:
         if assessment:
             assessment_text = f"\n== EVIDENCE ASSESSMENT ==\n{assessment.assessment_text}\n"
 
-        # Build language context
-        lang_context = f"User language: {lang}"
-        if language_mix:
-            lang_context += f" (code-mixed: {language_mix})"
+        # Language instruction injected per-request so the LLM writes in the
+        # correct language directly. Translation in chat.py is a secondary
+        # safety net; the LLM is the primary language enforcement mechanism.
+        _LANG_NAMES = {
+            "en": "English",
+            "hi": "Hindi (Devanagari script)",
+            "gu": "Gujarati (Gujarati script)",
+            "mr": "Marathi (Devanagari script)",
+            "bn": "Bengali (Bengali script)",
+            "ta": "Tamil (Tamil script)",
+        }
+        lang_name = _LANG_NAMES.get(lang, lang)
 
         user_prompt = (
             f"{hist_text}"
+            f"USER LANGUAGE: {lang_name}\n"
             f"Question: {english_query}\n\n"
-            f"{lang_context}\n\n"
             f"== STATIC EVIDENCE (official documents — may not reflect current status) ==\n"
             f"{static_section}\n\n"
             f"== DYNAMIC EVIDENCE (web sources — current information) ==\n"
             f"{dynamic_section}\n\n"
             f"{assessment_text}"
             f"INSTRUCTIONS:\n"
-            f"1. Answer in English. The translation layer will convert to the user's language.\n"
+            f"1. Write your ENTIRE response in {lang_name}. This is mandatory.\n"
             f"2. Answer using the evidence provided. Prioritize based on relevance and authority.\n"
             f"3. Include [chunk:ID] citations for every factual claim.\n"
             f"4. If evidence is limited, answer only what is directly supported.\n"
             f"5. Use simple, clear language suitable for ordinary citizens.\n"
-            f"6. Do NOT use markdown formatting (no bold, italic, asterisks, or bullet symbols). Write plain text only.\n"
+            f"6. Use markdown formatting (bullet points for lists, bold for key terms) to structure your answer cleanly.\n"
         )
 
         return system_prompt, user_prompt

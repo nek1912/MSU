@@ -6,23 +6,42 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
     groq_api_key: str
-    gemini_api_key: str
+    gemini_api_key: str = ""
     jina_api_key: str = ""
     supabase_url: str
     supabase_service_key: str
     allowed_origins: str = "http://localhost:3000"
     selected_state: str | None = "gujarat"
-    # Model IDs are deployment config, not code truth — Task 2 verifies the
-    # current IDs against live docs and they are set via .env; defaults here
-    # are best-known values only.
-    groq_model: str = "groq/compound"
-    gemini_model: str = "gemini-3.5-flash"
-    embed_model: str = "gemini-embedding-2"
-    jina_embed_model: str = "jina-embeddings-v3"
-    # Reranker config (Phase 4/5) — disabled until curated eval proves value
-    reranker_model: str = "jina-reranker-v2-base-multilingual"
+    # Model IDs loaded directly from environment (.env)
+    groq_model: str = ""
+    groq_fallback_model: str = ""
+    gemini_model: str = ""
+    gemini_fallback_model: str = ""
+    embed_model: str = ""
+    embedding_model: str = "jina-embeddings-v3"
+    jina_embed_model: str = ""
+    reranker_model: str = ""
     reranker_enabled: bool = False
     retrieval_strategy: str = "dense"  # dense | hybrid | hybrid_reranked
+    grievance_gemini_model: str = ""
+
+    @property
+    def groq_model_list(self) -> list[str]:
+        models = []
+        if self.groq_model:
+            models.append(self.groq_model)
+        if self.groq_fallback_model:
+            models.extend([m.strip() for m in self.groq_fallback_model.split(",") if m.strip()])
+        return list(dict.fromkeys(models))
+
+    @property
+    def gemini_model_list(self) -> list[str]:
+        models = []
+        if self.gemini_model:
+            models.append(self.gemini_model)
+        if self.gemini_fallback_model:
+            models.extend([m.strip() for m in self.gemini_fallback_model.split(",") if m.strip()])
+        return list(dict.fromkeys(models))
     # Azure Speech Services (PHASE 13 — voice I/O)
     azure_speech_key: str = ""
     azure_speech_region: str = ""

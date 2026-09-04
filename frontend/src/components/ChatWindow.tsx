@@ -5,6 +5,7 @@ import Link from "next/link";
 import { sendChat, sendChatStream, ChatResponse, type StreamEvent } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
 import type { Locale } from "@/lib/i18n/i18n";
+import { formatSchemeQuestion, formatServiceQuestion, formatLegalQuestion } from "@/lib/i18n/formatQuery";
 import { createSpeechService } from "@/lib/speech";
 import { MessageBubble } from "./chat/MessageBubble";
 import { ThinkingBubble } from "./chat/ThinkingBubble";
@@ -307,21 +308,28 @@ export function ChatWindow() {
     const scheme = sp?.get("scheme") || (typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("scheme") : null);
     const schemeName = sp?.get("name") || (typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("name") : null);
     if (q) {
-      setInput(q);
+      let formattedQ = q;
+      const tellMeMatch = q.match(/^Tell me about (.+?)(?: scheme)?$/i);
+      const useServiceMatch = q.match(/^How do I use the (.+?) service\?$/i);
+      if (tellMeMatch) {
+        formattedQ = formatSchemeQuestion(tellMeMatch[1], lang);
+      } else if (useServiceMatch) {
+        formattedQ = formatServiceQuestion(useServiceMatch[1], lang);
+      }
+      setInput(formattedQ);
       setMsgs([]);
       setActiveConvId(null);
     } else if (scheme) {
       if (scheme === "pmfby") {
         setInput(t("chat.starter1"));
-      } else if (schemeName) {
-        setInput(`Tell me about ${schemeName} scheme`);
       } else {
-        setInput(`Tell me about ${scheme.replace(/-/g, " ")} scheme`);
+        const nameToUse = schemeName || scheme.replace(/-/g, " ");
+        setInput(formatSchemeQuestion(nameToUse, lang));
       }
       setMsgs([]);
       setActiveConvId(null);
     }
-  }, [sp, t]);
+  }, [sp, t, lang]);
 
   async function ask(q?: string) {
     const question = (q ?? input).trim();
@@ -875,7 +883,7 @@ export function ChatWindow() {
             )}
 
             {/* Conversation Messages */}
-            {msgs.map((m, i) =>
+            {hydrated && msgs.map((m, i) =>
               m.role === "user" ? (
                 <div key={i} className="flex justify-end">
                   <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl bg-[var(--dark)] px-4 py-3 text-xs sm:text-sm leading-relaxed text-[var(--on-dark-strong)] shadow-2xs">

@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   // Try backend first
   try {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 15000);
+    const timer = setTimeout(() => controller.abort(), 30000);
 
     const res = await fetch(`${backendUrl}/voice/speak`, {
       method: "POST",
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
           bytes[i / 2] = parseInt(hex.substr(i, 2), 16);
         }
         return new Response(bytes, {
-          headers: { "Content-Type": "audio/wav" },
+          headers: { "Content-Type": "audio/mpeg" },
         });
       }
     }
@@ -48,5 +48,5 @@ export async function POST(req: Request) {
   }
 
   // Fallback: return empty (client falls back to browser TTS)
-  return new Response("", { status: 503, headers: { "Content-Type": "audio/wav" } });
+  return new Response("", { status: 503, headers: { "Content-Type": "audio/mpeg" } });
 }

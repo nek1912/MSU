@@ -36,6 +36,7 @@ from app.evidence_controller import EvidenceController, QueryRequirementClassifi
 from app.llm_fallback import AllProvidersFailedError, grounded_answer
 from app.providers.gemini_llm import GeminiLLMProvider
 from app.providers.groq_llm import GroqLLMProvider
+from app.providers.sarvam_chat import SarvamChatProvider
 from app.services.static_rag import StaticRAGService
 from app.services.web_rag import WebRAGService
 from app.speech_text import prepare_speech_text, segment_speech
@@ -43,6 +44,11 @@ from app.ui import get_abstain_text
 from app.web_rag.query_classifier import QueryClassification
 
 logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# RAGOrchestrator implementation
+# ---------------------------------------------------------------------------
 
 _BAND_TO_CONFIDENCE: dict[str, float] = {
     "high": 0.9,
@@ -111,6 +117,12 @@ class RAGOrchestrator:
             domain, state, lang, session_id,
         )
 
+        if classification is None:
+            classification = self._web_rag.web_discovery.classifier.classify(english_query, default_state=state)
+
+        if (not domain or domain == "general") and classification and classification.domain != "general":
+            domain = classification.domain
+
         # Step 1: Classify query requirements
         query_requirements = self._query_classifier.classify(query, lang)
 
@@ -159,13 +171,29 @@ class RAGOrchestrator:
         )
 
         # Step 7: Generate answer via LLM (Groq primary, Gemini fallback)
+        # Tiered Model Selection
+        model_name = self._settings.groq_model
+        if classification and classification.domain in ("out_of_scope", "general"):
+            model_name = getattr(self._settings, "groq_fallback_model", self._settings.groq_model)
+            
         mode = "groq"
         try:
+            primary_provider = GroqLLMProvider(self._settings)
+            primary_provider._model = model_name  # Override with tiered model
+
+            tertiary_provider = None
+            try:
+                if self._settings.sarvam_keys:
+                    tertiary_provider = SarvamChatProvider(self._settings)
+            except Exception as e:
+                logger.warning("Could not initialize SarvamChatProvider for fallback: %s", e)
+
             answer = grounded_answer(
-                GroqLLMProvider(self._settings),
+                primary_provider,
                 GeminiLLMProvider(self._settings),
                 system_prompt,
                 user_prompt,
+                tertiary=tertiary_provider,
             )
             answer = answer.replace("\u3010", "[").replace("\u3011", "]")
         except AllProvidersFailedError:
@@ -177,24 +205,33 @@ class RAGOrchestrator:
                 session_id=session_id,
             )
 
-        # Step 8: Auto-append citations if missing
+        # Step 8: Auto-append citations if missing and clean non-citation markers
         all_chunks = self._merge_evidence(static_result.chunks, web_result.chunks)
         answer = self._auto_append_citations(answer, all_chunks)
 
-        # Step 9: Verify citations against evidence
+        # Step 9: Verify citations against evidence, with auto-repair
         all_chunk_ids = [chunk.chunk_id for chunk in all_chunks]
         citation_verification = verify_citations(answer, all_chunk_ids)
         if not citation_verification.is_valid:
             logger.warning(
-                "Citation verification failed: reason=%s invalid_prefixes=%s",
+                "Citation verification failed: reason=%s invalid_prefixes=%s — performing auto-repair",
                 citation_verification.reason, citation_verification.invalid_prefixes,
             )
-            return self._abstain_response(
-                lang=lang,
-                reason=citation_verification.reason or AbstentionReason.CITATION_FAILURE,
-                domain=domain,
-                session_id=session_id,
-            )
+            # Repair invalid prefixes if present
+            for prefix in citation_verification.invalid_prefixes:
+                answer = re.sub(rf"\[chunk:\s*{prefix}[0-9a-fA-F]*\]", "", answer)
+            
+            # Re-ensure valid citations from retrieved chunks
+            answer = self._auto_append_citations(answer, all_chunks, force=True)
+            citation_verification = verify_citations(answer, all_chunk_ids)
+
+            if not citation_verification.is_valid and not all_chunks:
+                return self._abstain_response(
+                    lang=lang,
+                    reason=citation_verification.reason or AbstentionReason.CITATION_FAILURE,
+                    domain=domain,
+                    session_id=session_id,
+                )
 
         # Step 10: Strip internal citation markers from visible answer
         clean_answer, extracted_ids = strip_citations(answer)
@@ -265,7 +302,21 @@ class RAGOrchestrator:
             classification=classification,
         )
 
-        results = await asyncio.gather(static_coro, web_coro, return_exceptions=True)
+        # Wrap web RAG with a hard timeout so slow search/embeddings
+        # cannot stall the whole request. 90s allows full web discovery to finish safely.
+        async def _web_with_timeout() -> RAGResult:
+            try:
+                return await asyncio.wait_for(web_coro, timeout=90.0)
+            except asyncio.TimeoutError:
+                logger.warning("Web RAG timed out after 90s — using static only")
+                return RAGResult(
+                    chunks=[],
+                    abstained=True,
+                    reason=AbstentionReason.PROVIDER_UNAVAILABLE,
+                    domain=domain,
+                )
+
+        results = await asyncio.gather(static_coro, _web_with_timeout(), return_exceptions=True)
 
         static_result: RAGResult
         web_result: RAGResult
@@ -314,10 +365,14 @@ class RAGOrchestrator:
         self,
         answer: str,
         chunks: list[EvidenceChunk],
+        force: bool = False,
     ) -> str:
-        """Auto-append citation markers if the LLM omitted them entirely."""
+        """Auto-append citation markers if omitted, and clean non-citation bracket markers."""
+        # Clean loose non-citation brackets like [1], [Note], [Source]
+        answer = re.sub(r"\[(?!\s*chunk:)[A-Za-z0-9\s]+\]", "", answer)
+
         has_citation = bool(re.search(r"\[chunk:", answer))
-        if has_citation or not chunks:
+        if (has_citation and not force) or not chunks:
             return answer
 
         seen: set[str] = set()

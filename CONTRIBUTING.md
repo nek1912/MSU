@@ -96,9 +96,9 @@ Significant architectural or design decisions must be:
 
 Read `PRD.md` for full scope. Summary:
 
-**MVP (Tier 1):** English + Hindi text chat, central cooperative info + Gujarat
+**MVP (Tier 1 & Tier 2):** 6-language (EN, HI, GU, MR, BN, TA) text + Sarvam voice chat, central cooperative info + Gujarat
 rules, 8-15 curated schemes, PMFBY, agriculture workflows, RBI/PMJDY financial
-literacy, grievance workflow (text), citations, confidence, abstention, responsive PWA.
+literacy, 9-stage grievance workflow (text + status lookup), citations, confidence, abstention, responsive Next.js PWA.
 
 **Do NOT add before core is stable:** native apps, WhatsApp, blockchain, custom
 model training, self-hosted GPU, multi-agent frameworks, complex auth, analytics

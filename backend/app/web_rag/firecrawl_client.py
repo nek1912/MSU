@@ -113,12 +113,15 @@ class FirecrawlClient:
         self,
         query: str,
         *,
+        domain: str | None = None,
+        state: str | None = None,
         max_results: int = DEFAULT_MAX_RESULTS,
         chunks_per_source: int = 3,
         include_domains: list[str] | None = None,
         exclude_domains: list[str] | None = None,
         search_depth: str = "advanced",
         include_raw_content: bool = True,
+        **kwargs: Any,
     ) -> dict[str, Any]:
 
         query = query.strip()

@@ -525,7 +525,7 @@ export function ChatWindow() {
 
           {/* Icon List of Conversations */}
           <div suppressHydrationWarning className="flex-1 w-full overflow-y-auto space-y-1.5 px-2">
-            {conversations.map((conv) => (
+            {hydrated && conversations.map((conv) => (
               <button
                 key={conv.id}
                 type="button"
@@ -643,7 +643,7 @@ export function ChatWindow() {
           </div>
 
           {/* PINNED SECTION */}
-          {pinnedConversations.length > 0 && (
+          {hydrated && pinnedConversations.length > 0 && (
             <div>
               <div className="mb-1.5 flex items-center justify-between px-2 text-[11px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
                 <span className="flex items-center gap-1.5">
@@ -696,7 +696,7 @@ export function ChatWindow() {
                 <IconClock className="h-3.5 w-3.5 text-[var(--text-tertiary)]" />
                 {t("chat.recentHistory")}
               </span>
-              {conversations.length > 0 && (
+              {hydrated && conversations.length > 0 && (
                 <button
                   type="button"
                   onClick={() => {
@@ -714,13 +714,13 @@ export function ChatWindow() {
             </div>
 
             <div className="space-y-0.5">
-              {recentConversations.length === 0 && pinnedConversations.length === 0 && (
+              {hydrated && recentConversations.length === 0 && pinnedConversations.length === 0 && (
                 <p className="px-2 py-6 text-center text-xs text-[var(--text-faint)] italic">
                   {t("chat.noHistory")}
                 </p>
               )}
 
-              {recentConversations.map((conv) => (
+              {hydrated && recentConversations.map((conv) => (
                 <div
                   key={conv.id}
                   role="button"

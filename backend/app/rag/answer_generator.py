@@ -182,8 +182,8 @@ class AnswerGenerator:
         answer: str,
     ) -> str:
         """
-        Remove accidental model wrappers without changing
-        the actual answer content.
+        Remove accidental model wrappers, chunk IDs, and repeated disclaimers
+        without changing the actual answer content.
         """
 
         if not answer:
@@ -191,6 +191,25 @@ class AnswerGenerator:
 
         answer = answer.strip()
 
+        import re
+
+        # Remove ALL chunk citation patterns (case-insensitive, various formats)
+        # Matches: [chunk:xxx], [Chunk:xxx], [CHUNK:xxx], [chunk:xxx], etc.
+        answer = re.sub(r'\[chunk:[a-f0-9]+\]', '', answer, flags=re.IGNORECASE)
+
+        # Remove repeated disclaimer patterns
+        disclaimer_patterns = [
+            r'\[Current/local information for this claim could not be verified\]\s*',
+            r'\[Current/local information could not be verified\]\s*',
+            r'\[This information could not be verified\]\s*',
+            r'\[Verification pending\]\s*',
+            r'\[The information is not available in the provided documents\]\s*',
+        ]
+        for pattern in disclaimer_patterns:
+            answer = re.sub(pattern, '', answer, flags=re.IGNORECASE)
+
+        # Clean up multiple spaces
+        answer = re.sub(r'\s+', ' ', answer).strip()
 
         if (
             answer.startswith("```")

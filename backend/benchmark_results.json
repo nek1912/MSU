@@ -1,0 +1,32 @@
+{
+  "sarvam": {
+    "provider": "Sarvam-105B",
+    "latency_seconds": 27.07,
+    "prompt_tokens": 61,
+    "completion_tokens": 532,
+    "total_tokens": 593,
+    "output_text": "\n**પીએમ-કુસુમ (PM-KUSUM) સોલાર પંપ યોજના** એ ભારત સરકારની એક મહત્વપૂર્ણ યોજના છે, જેનો મુખ્ય ઉદ્દેશ્ય ખેડૂતોને સિંચાઈ માટે સૌર ઊર્જા આધારિત પંપ પૂરા પાડવાનો છે. \n\nઆ યોજના વિશેની મુખ્ય માહિતી નીચે મુજબ છે:\n\n૧. **યોજનાનો હેતુ:** \nઆ યોજના દ્વારા ખેડૂતોને ડીઝલ અને વીજળી આધારિત પંપના બદલે સૌર ઊર્જા (Solar Energy) આધારિત પંપ લગાવવા માટે પ્રોત્સાહિત કરવામાં આવે છે. આનાથી ખેડૂતોનો ડીઝલનો ખર્ચ બચશે અને પર્યાવરણને પણ ફાયદો થશે.\n\n૨. **યોજનાના મુખ્ય ભાગો (Components):**\n* **ભાગ-૧ (Component A):** ખેડૂતોની માલિકીના અલગ સોલાર પાવર પ્લાન્ટ સ્થાપવા માટે નાણાકીય સહાય (૫૦% સબસિડી).\n* **ભાગ-૨ (Component B):** ખેડૂતોના ખેતરમાં સિંચાઈ માટે વ્યક્તિગત ડીઝલ પંપને સૌર પંપમાં રૂપાંતરિત કરવા માટે સબસિડી (૩૦% થી ૬૦% સુધી).\n* **ભાગ-૩ (Component C):** ગ્રામીણ વિસ્તારોમાં વિકેન્દ્રિત ગ્રીડ-કનેક્ટેડ સોલાર પાવર પ્લાન્ટ્સ સ્થાપવા માટે સહાય.\n\n૩. **આર્થિક સહાય (સબસિડી):** \nસામાન્ય વર્ગના ખેડૂતોને આ યોજના હેઠળ ૩૦% સબસિડી આપવામાં આવે છે. જ્યારે અનુસૂચિત જાતિ (SC), અનુસૂચિત જનજાતિ (ST) અને મહિલાઓને ૬૦% સુધીની સબસિડી આપવામાં આવે છે. બાકીની રકમ ખેડૂત પોતાના હિસ્સામાંથી અથવા બેંક લોન દ્વારા ચૂકવી શકે છે.\n\n૪. **લાભો:**\n* ખેડૂતોને વીજળી અને ડીઝલના ઊંચા બિલમાંથી મુક્તિ મળે છે.\n* ખેતીના કામમાં વીજળીની કોઈ અડચણ રહેતી નથી.\n* કાર્બન ઉત્સર્જન ઘટાડીને પર્યાવરણનું રક્ષણ થાય છે.\n* ખેડૂતો વધારાની વીજળી ગ્રીડને વેચીને વધારાની આવક પણ મેળવી શકે છે.\n\n૫. **અરજી પ્રક્રિયા:** \nઆ યોજનાનો લાભ લેવા માટે ખેડૂતોએ તેમના રાજ્યના **ઊર્જા વિભાગ (Energy Department)** અથવા **નવી અને નવીનીકરણીય ઊર્જા મંત્રાલય (MNRE)** ની સત્તાવાર વેબસાઇટ પર જઈને ઓનલાઈન અરજી કરવાની હોય છે. \n\nવધુ સચોટ માહિતી અને અરજી પ્રક્રિયા માટે તમે તમારા રાજ્યના સંબંધિત વિભાગની વેબસાઇટની મુલાકાત લઈ શકો છો.",
+    "chars_per_second": 60.2
+  },
+  "groq_direct": {
+    "provider": "Groq Direct",
+    "latency_seconds": 3.0,
+    "prompt_tokens": 92,
+    "completion_tokens": 1000,
+    "total_tokens": 1092,
+    "output_text": "**PM‑KUSUM (Pradhan Mantri Kisan Urja Suraksha evam Utthaan Mahabhiyan) – Solar Pump Scheme**  \n*Government of India, Ministry of New & Renewable Energy (MNRE)*  \n\n---\n\n## 1. What is PM‑KUSUM?\n\nPM‑KUSUM is a flagship central‑government programme launched on **1 January 2019** to promote the use of solar energy in agriculture. Its primary goal is to **replace diesel‑run irrigation pumps with solar‑powered pumps**, thereby:\n\n| Objective | Expected Outcome |\n|-----------|-------------------|\n| **Energy security for farmers** | Reliable, low‑cost power for irrigation |\n| **Reduction of diesel consumption** | Savings of ~ ₹ 1 lakh per farmer per year; ↓ ≈ 15 million litres of diesel annually |\n| **Lower greenhouse‑gas emissions** | ≈ 30 million tCO₂e avoided by 2030 |\n| **Increase farm income** | Higher net returns due to lower operating costs |\n| **Rural electrification & job creation** | New jobs in solar‑pump manufacturing, installation, and O&M |\n\nThe scheme is part of the broader **National Solar Mission** and aligns with India’s commitment to achieve **450 GW of renewable capacity by 2030**.\n\n---\n\n## 2. Structure of the Scheme – Three Sub‑Components\n\n| Component | Description | Target | Subsidy / Funding |\n|-----------|-------------|--------|-------------------|\n| **KUSUM‑I** (Solar Pump Sets for Individual Farmers) | Installation of **solar‑powered pump sets (SPPS)** for individual cultivators. | **10 million** pump sets (≈ 5 million kW) by FY 2030. | **Up‑front subsidy of 70 %** of the pump‑set cost (capped at ₹ 1.5 lakh per kW). The remaining 30 % is financed through bank loans (often at 0 % interest under the **Kisan Credit Card (KCC)**). |\n| **KUSUM‑II** (Solar Pump Sets for Farmer‑Producer Organizations – FPOs) | Group‑based solar pumps serving **multiple farms** (e.g., community wells, tankers). | **2 million** pump sets (≈ 1 million kW) by FY 2030. | Same 70 % subsidy, but the **cap is higher** (₹ 2 lakh per kW) because of larger capacities. |\n| **KUSUM‑III** (Solarisation of Existing Grid‑Connected Pumps) | Retrofit of **grid‑connected electric pumps** with solar PV + battery to reduce grid draw. | **1 million** pumps (≈ 500 MW) by FY 2030. | **30 % subsidy** on the solar‑PV system (including battery), the rest financed by the farmer. |\n\n> **Key point:** The subsidy is **directly transferred to the vendor/installer** after verification, so the farmer pays only the financed portion.\n\n---\n\n## 3. Who Can Apply? – Eligibility Criteria\n\n| Parameter | Requirement |\n|-----------|--------------|\n| **",
+    "chars_per_second": 850.2
+  },
+  "groq_translation": {
+    "provider": "Groq + Translation",
+    "latency_seconds": 2.39,
+    "translation_gu_en": 0.62,
+    "groq_llm": 1.16,
+    "translation_en_gu": 0.61,
+    "prompt_tokens": 71,
+    "completion_tokens": 75,
+    "total_tokens": 146,
+    "output_text": "",
+    "chars_per_second": 0.0
+  }
+}

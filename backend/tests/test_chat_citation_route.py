@@ -17,7 +17,7 @@ from app.main import app
 client = TestClient(app)
 EMBED_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent"
 RPC_PATH = "/rest/v1/rpc/match_chunks"
-GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+SARVAM_URL = "https://api.sarvam.ai/v1/chat/completions"
 
 PAYLOAD = {"question": "What is PACS?", "session_id": str(uuid.uuid4()),
            "language": "en", "state": None}
@@ -47,7 +47,7 @@ def test_answered_with_valid_citations(respx_mock):
             "source_url": "https://pmfby.gov.in/guidelines",
             "source_file": "pmfby.gov.in/guidelines",
             "domain": "pmfby", "jurisdiction": "central", "state": None}]))
-    respx_mock.post(GROQ_URL).mock(
+    respx_mock.post(SARVAM_URL).mock(
         return_value=httpx.Response(200, json={"choices": [{"message": {
             "content": "PACS requires membership [chunk:aaaaaaaa]."}}]}))
     r = client.post("/chat", json=PAYLOAD)

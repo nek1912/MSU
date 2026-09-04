@@ -1,19 +1,18 @@
-"""RAG Orchestrator — async dual-pipeline RAG with evidence bundle + claim verification.
+"""RAG Orchestrator — async dual-pipeline RAG with evidence bundle.
 
 Runs static RAG (Supabase pgvector) and web RAG (Tavily/Firecrawl) in
 parallel via asyncio.gather, merges evidence chunks into an EvidenceBundle,
 builds a curated source-priority prompt, generates an answer via LLM with
-provider fallback, verifies claims, recalculates claim-level confidence,
+provider fallback, verifies citations, calculates confidence,
 and returns a typed RAGResponse.
 
 Architecture:
   1. asyncio.gather runs both pipelines concurrently (return_exceptions=True)
   2. EvidenceController builds an EvidenceBundle + curated prompt
-  3. LLM generates answer (Groq primary, Gemini fallback)
-  4. ClaimVerifier checks claims against evidence
-  5. Citations are verified
-  6. Claim-level confidence is calculated
-  7. RAGResponse is returned
+  3. LLM generates answer (Sarvam primary, Groq fallback)
+  4. Citations are verified
+  5. Confidence is calculated
+  6. RAGResponse is returned
 """
 
 from __future__ import annotations
@@ -23,7 +22,6 @@ import logging
 import re
 from typing import Any
 
-from app.claim_verifier import ClaimVerifier
 from app.citation_verifier import verify_citations
 from app.config import Settings, get_settings
 from app.contracts import (
@@ -77,7 +75,6 @@ class RAGOrchestrator:
         self._web_rag = WebRAGService()
         self._evidence_controller = EvidenceController()
         self._query_classifier = QueryRequirementClassifier()
-        self._claim_verifier = ClaimVerifier()
         # Initialize Sarvam provider once, reuse across requests
         try:
             from app.providers.sarvam_chat import SarvamChatProvider
@@ -224,23 +221,20 @@ class RAGOrchestrator:
         clean_answer, extracted_ids = strip_citations(answer)
         answer = clean_answer
 
-        # Step 11: Claim verification
-        answer, claim_verifications, was_modified = self._claim_verifier.verify(answer, bundle)
-
-        # Step 12: Calculate claim-level confidence
+        # Step 11: Calculate confidence
         confidence, confidence_band = self._calculate_confidence(
             static_result, web_result, has_static, has_web,
-            claim_verifications,
+            [],  # No claim verifications
         )
 
-        # Step 13: Build citations list
+        # Step 12: Build citations list
         citations = self._build_citations(all_chunks)
 
-        # Step 14: Prepare speech text
+        # Step 13: Prepare speech text
         speech_text = prepare_speech_text(answer)
         speech_segments = segment_speech(answer, lang)
 
-        # Step 15: Determine mode
+        # Step 14: Determine mode
         if mode == "sarvam":
             if has_static and has_web:
                 mode = "dual_rag_sarvam"
@@ -257,8 +251,8 @@ class RAGOrchestrator:
                 mode = "web"
 
         logger.info(
-            "RAGOrchestrator response: confidence=%.2f band=%s mode=%s citations=%d claim_verified=%s",
-            confidence, confidence_band.value, mode, len(citations), not was_modified,
+            "RAGOrchestrator response: confidence=%.2f band=%s mode=%s citations=%d",
+            confidence, confidence_band.value, mode, len(citations),
         )
 
         return RAGResponse(

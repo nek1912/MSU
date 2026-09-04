@@ -50,18 +50,38 @@ class GeminiReranker:
         candidates: list[dict],
         classification: dict,
     ) -> dict | None:
-        """Make a structured Gemini API call with response_schema."""
+        """Make a structured Gemini API call with response_schema.
+        
+        Falls back to Jina reranker when Gemini fails (503, rate limit, etc.).
+        """
         if not self._enabled or not self.client:
             return None
 
-        domain = classification.get("domain")
-        jurisdiction = classification.get("jurisdiction")
-        state = classification.get("state")
+        # Try Gemini first
+        result = self._try_gemini(query, candidates, classification)
+        if result is not None:
+            return result
+        
+        # Fallback to Jina reranker
+        logger.info("Gemini failed, falling back to Jina reranker")
+        return self._try_jina_fallback(query, candidates)
+    
+    def _try_gemini(
+        self,
+        query: str,
+        candidates: list[dict],
+        classification: dict,
+    ) -> dict | None:
+        """Attempt Gemini reranking."""
+        try:
+            domain = classification.get("domain")
+            jurisdiction = classification.get("jurisdiction")
+            state = classification.get("state")
 
-        candidate_payload = self._build_candidate_payload(candidates)
-        system_prompt = self._build_system_prompt(domain, jurisdiction, state)
+            candidate_payload = self._build_candidate_payload(candidates)
+            system_prompt = self._build_system_prompt(domain, jurisdiction, state)
 
-        user_prompt = f"""
+            user_prompt = f"""
 USER QUERY:
 {query}
 
@@ -73,7 +93,6 @@ DOCUMENT CANDIDATES:
 {json.dumps(candidate_payload, ensure_ascii=False, indent=2)}
 """
 
-        try:
             response = self.client.models.generate_content(
                 model=self.model,
                 contents=[system_prompt, user_prompt],
@@ -116,6 +135,46 @@ DOCUMENT CANDIDATES:
             return json.loads(text)
         except Exception as e:
             logger.warning(f"Gemini reranking call failed: {e}")
+            return None
+    
+    def _try_jina_fallback(
+        self,
+        query: str,
+        candidates: list[dict],
+    ) -> dict | None:
+        """Use Jina reranker as fallback when Gemini fails."""
+        try:
+            from app.providers.reranker import JinaReranker
+            jina = JinaReranker()
+            
+            # Prepare documents for Jina
+            docs = []
+            for c in candidates:
+                text = str(c.get("text", c.get("content", "")))
+                if len(text) > MAX_TEXT_CHARS:
+                    text = text[:MAX_TEXT_CHARS] + "..."
+                docs.append({"text": text, "chunk_id": c.get("chunk_id")})
+            
+            # Call Jina reranker
+            reranked = jina.rerank(query=query, documents=docs, top_n=len(docs))
+            
+            # Convert Jina results to Gemini format
+            ranked_chunks = []
+            for r in reranked:
+                score = r.get("reranker_score", 0.0) * 100  # Jina returns 0-1, convert to 0-100
+                ranked_chunks.append({
+                    "chunk_id": r.get("chunk_id"),
+                    "relevance_score": score,
+                    "applicable": score >= 20,  # Threshold for applicability
+                    "applicability_reason": f"Jina reranker score: {score:.1f}",
+                })
+            
+            return {
+                "ranked_chunks": ranked_chunks,
+                "merge_groups": [],
+            }
+        except Exception as e:
+            logger.warning(f"Jina fallback reranking failed: {e}")
             return None
 
     @staticmethod

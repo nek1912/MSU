@@ -42,6 +42,8 @@ class Settings(BaseSettings):
     # Sarvam AI (STT, TTS, Translation — Indian languages)
     sarvam_api_key: str = ""
     sarvam_api_key_2: str = ""
+    sarvam_chat_model: str = "sarvam-105b"
+    sarvam_chat_url: str = "https://api.sarvam.ai/v1/chat/completions"
 
     # Groq LLM (primary) — multiple keys for rotation
     groq_api_key_1: str = ""

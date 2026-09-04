@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import hashlib
-import re
 import logging
+import re
 
 from app.contracts import (
-    EvidenceBundle, FlaggedClaim, ClaimVerification, FilterOutcome,
+    ClaimVerification,
+    EvidenceBundle,
+    FilterOutcome,
+    FlaggedClaim,
 )
 
 logger = logging.getLogger(__name__)

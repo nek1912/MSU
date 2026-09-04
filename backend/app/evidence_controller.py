@@ -7,9 +7,8 @@ import logging
 import re
 
 from app.contracts import (
-    EvidenceBundle,
     DynamicEvidence,
-    EvidenceChunk,
+    EvidenceBundle,
     QueryRequirements,
     RAGResult,
     StaticEvidence,
@@ -85,7 +84,7 @@ class QueryRequirementClassifier:
         years = _YEAR_PATTERN.findall(q)
         if years:
             latest = max(int(y) for y in years)
-            current_year = datetime.datetime.now().year
+            current_year = datetime.datetime.now(tz=datetime.UTC).year
             if latest >= current_year:
                 return str(latest)
             return "historical"
@@ -164,10 +163,7 @@ class QueryRequirementClassifier:
         # Current indicator or explicit future/current year → needs dynamic
         if temporal == "current":
             return True
-        if temporal not in ("general", "historical"):
-            # Explicit year → needs dynamic
-            return True
-        return False
+        return temporal not in ("general", "historical")
 
 
 # ---------------------------------------------------------------------------

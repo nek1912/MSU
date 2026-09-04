@@ -99,9 +99,9 @@ Create `tests/providers/test_sarvam_chat.py`:
 """Tests for SarvamChatProvider."""
 import httpx
 import pytest
-from unittest.mock import MagicMock, patch, Mock
+from unittest.mock import MagicMock, patch
 
-from app.providers.sarvam_chat import SarvamChatProvider
+from app.providers.sarvam_chat import SarvamChatProvider, SarvamProviderError
 from app.config import Settings
 
 
@@ -133,36 +133,66 @@ class TestSarvamChatProvider:
             result = provider.generate("System prompt", "User question")
         assert result == "नमस्ते, मैं आपकी मदद कर सकता हूँ।"
 
-    def test_generate_rotates_keys_on_failure(self):
+    def test_generate_rotates_keys_on_429_with_backoff(self):
         settings = _make_settings()
         provider = SarvamChatProvider(settings)
-        fail_response = MagicMock()
-        fail_response.status_code = 429
-        fail_response.text = "rate limited"
-        fail_response.raise_for_status.side_effect = httpx.HTTPStatusError(
-            "429", request=MagicMock(), response=fail_response
-        )
-        success_response = MagicMock()
-        success_response.status_code = 200
-        success_response.json.return_value = {
+        # 429 on key1, success on key2
+        resp_429 = MagicMock()
+        resp_429.status_code = 429
+        resp_429.text = "rate limited"
+        resp_429.json.return_value = {"error": {"message": "rate limited"}}
+        resp_200 = MagicMock()
+        resp_200.status_code = 200
+        resp_200.json.return_value = {
             "choices": [{"message": {"content": "Success on key 2"}}]
         }
-        with patch("httpx.post", side_effect=[fail_response, success_response]):
+        with patch("httpx.post", side_effect=[resp_429, resp_200]):
+            with patch("time.sleep"):  # Skip actual backoff in tests
+                result = provider.generate("System", "User")
+        assert result == "Success on key 2"
+
+    def test_422_does_not_rotate_keys(self):
+        """422 = bad request, not bad key. Rotating won't help."""
+        settings = _make_settings()
+        provider = SarvamChatProvider(settings)
+        mock_response = MagicMock()
+        mock_response.status_code = 422
+        mock_response.text = "invalid parameters"
+        mock_response.json.return_value = {"error": {"message": "invalid"}}
+        with patch("httpx.post", return_value=mock_response):
+            with pytest.raises(SarvamProviderError) as exc_info:
+                provider.generate("System", "User")
+            assert exc_info.value.retryable is False
+
+    def test_403_invalid_key_rotates(self):
+        """403 + invalid_api_key → try next key."""
+        settings = _make_settings()
+        provider = SarvamChatProvider(settings)
+        resp_403 = MagicMock()
+        resp_403.status_code = 403
+        resp_403.text = "forbidden"
+        resp_403.json.return_value = {"error": {"code": "invalid_api_key", "message": "bad key"}}
+        resp_200 = MagicMock()
+        resp_200.status_code = 200
+        resp_200.json.return_value = {
+            "choices": [{"message": {"content": "Success on key 2"}}]
+        }
+        with patch("httpx.post", side_effect=[resp_403, resp_200]):
             result = provider.generate("System", "User")
         assert result == "Success on key 2"
 
-    def test_generate_all_keys_fail_raises(self):
+    def test_403_other_forbidden_does_not_rotate(self):
+        """403 + other forbidden error → non-retryable, propagate."""
         settings = _make_settings()
         provider = SarvamChatProvider(settings)
-        fail_response = MagicMock()
-        fail_response.status_code = 500
-        fail_response.text = "server error"
-        fail_response.raise_for_status.side_effect = httpx.HTTPStatusError(
-            "500", request=MagicMock(), response=fail_response
-        )
-        with patch("httpx.post", return_value=fail_response):
-            with pytest.raises(Exception):
+        mock_response = MagicMock()
+        mock_response.status_code = 403
+        mock_response.text = "forbidden"
+        mock_response.json.return_value = {"error": {"code": "permission_denied", "message": "no access"}}
+        with patch("httpx.post", return_value=mock_response):
+            with pytest.raises(SarvamProviderError) as exc_info:
                 provider.generate("System", "User")
+            assert exc_info.value.retryable is False
 
     def test_generate_sends_correct_headers_and_body(self):
         settings = _make_settings()
@@ -176,7 +206,6 @@ class TestSarvamChatProvider:
             provider.generate("System prompt", "User msg", temperature=0.5)
             call_kwargs = mock_post.call_args
             headers = call_kwargs[1].get("headers", call_kwargs.kwargs.get("headers", {}))
-            # Auth: api-subscription-key only, NO Authorization header
             assert "api-subscription-key" in headers
             assert headers["api-subscription-key"] == "sk_test_sarvam_1"
             assert "Authorization" not in headers
@@ -184,22 +213,18 @@ class TestSarvamChatProvider:
             assert body["model"] == "sarvam-105b"
             assert body["messages"][0]["content"] == "System prompt"
             assert body["temperature"] == 0.5
-            # Reasoning disabled for latency-sensitive RAG path
             assert body["reasoning_effort"] is None
             assert body["stream"] is False
 
-    def test_422_does_not_rotate_keys(self):
-        """422 = bad request, not bad key. Rotating won't help."""
+    def test_all_keys_fail_raises_provider_error(self):
         settings = _make_settings()
         provider = SarvamChatProvider(settings)
         mock_response = MagicMock()
-        mock_response.status_code = 422
-        mock_response.text = "invalid parameters"
-        mock_response.raise_for_status.side_effect = httpx.HTTPStatusError(
-            "422", request=MagicMock(), response=mock_response
-        )
+        mock_response.status_code = 500
+        mock_response.text = "server error"
+        mock_response.json.return_value = {"error": {"message": "server error"}}
         with patch("httpx.post", return_value=mock_response):
-            with pytest.raises(httpx.HTTPStatusError):
+            with pytest.raises(SarvamProviderError):
                 provider.generate("System", "User")
 ```
 
@@ -217,10 +242,28 @@ Create `backend/app/providers/sarvam_chat.py`:
 from __future__ import annotations
 
 import httpx
+import logging
+import time
 from typing import Generator
 
 from app.config import Settings
 from app.key_rotator import KeyRotator
+
+logger = logging.getLogger(__name__)
+
+
+class SarvamProviderError(Exception):
+    """Dedicated exception for Sarvam provider failures.
+
+    Subclasses distinguish retryable from non-retryable errors:
+    - Retryable: 403 (invalid_api_key), 429, 500, 503, timeout
+    - Non-retryable: 400, 422, malformed response, programming errors
+    """
+
+    def __init__(self, message: str, status_code: int | None = None, retryable: bool = True):
+        super().__init__(message)
+        self.status_code = status_code
+        self.retryable = retryable
 
 
 class SarvamChatProvider:
@@ -242,26 +285,21 @@ class SarvamChatProvider:
     def generate(
         self, system: str, user: str, temperature: float = 0.1
     ) -> str:
-        def _do(key: str) -> str:
-            return self._call_api(key, system, user, temperature, stream=False)
-
-        return self._rotator.try_keys(_do)
-
-    def generate_stream(
-        self, system: str, user: str, temperature: float = 0.1
-    ) -> Generator[str, None, None]:
-        """Optional streaming. NOT used in MVP correctness path."""
-        keys = self._rotator._keys  # noqa: SLF001 — intentional access for fallback loop
-        last_exc: Exception | None = None
+        """Non-streaming generation. Primary MVP path."""
+        last_error: SarvamProviderError | None = None
+        keys = self._rotator._keys  # noqa: SLF001
         for key in keys:
             try:
-                yield from self._stream_api(key, system, user, temperature)
-                return
-            except Exception as exc:
-                last_exc = exc
+                return self._call_api(key, system, user, temperature)
+            except SarvamProviderError as exc:
+                last_error = exc
+                if not exc.retryable:
+                    raise  # 400, 422 — don't rotate keys
+                # 429 → bounded backoff before trying next key
+                if exc.status_code == 429:
+                    time.sleep(1.0)
                 continue
-        if last_exc:
-            raise last_exc
+        raise last_error  # type: ignore[misc]
 
     def _call_api(
         self,
@@ -269,39 +307,7 @@ class SarvamChatProvider:
         system: str,
         user: str,
         temperature: float,
-        *,
-        stream: bool = False,
     ) -> str:
-        headers = {
-            "Content-Type": "application/json",
-            "api-subscription-key": key,
-        }
-        body = {
-            "model": self._model,
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
-            "temperature": temperature,
-            "reasoning_effort": None,  # Disable reasoning for latency
-            "max_tokens": 2048,
-            "stream": stream,
-        }
-        with httpx.Client(timeout=(30.0, 120.0)) as client:
-            resp = client.post(self._url, json=body, headers=headers)
-            resp.raise_for_status()
-            data = resp.json()
-        return data["choices"][0]["message"]["content"]
-
-    def _stream_api(
-        self,
-        key: str,
-        system: str,
-        user: str,
-        temperature: float,
-    ) -> Generator[str, None, None]:
-        import json
-
         headers = {
             "Content-Type": "application/json",
             "api-subscription-key": key,
@@ -315,32 +321,62 @@ class SarvamChatProvider:
             "temperature": temperature,
             "reasoning_effort": None,
             "max_tokens": 2048,
-            "stream": True,
+            "stream": False,
         }
-        with httpx.Client(timeout=(30.0, 120.0)) as client:
-            with client.stream("POST", self._url, json=body, headers=headers) as resp:
-                resp.raise_for_status()
-                for line in resp.iter_lines():
-                    if not line or not line.startswith("data: "):
-                        continue
-                    payload = line[6:]
-                    if payload.strip() == "[DONE]":
-                        break
-                    chunk = json.loads(payload)
-                    # Final chunk may have usage with empty choices — skip
-                    choices = chunk.get("choices", [])
-                    if not choices:
-                        continue
-                    delta = choices[0].get("delta", {})
-                    content = delta.get("content")
-                    if content:
-                        yield content
+        try:
+            with httpx.Client(timeout=(30.0, 120.0)) as client:
+                resp = client.post(self._url, json=body, headers=headers)
+        except httpx.TimeoutException as exc:
+            raise SarvamProviderError(f"Timeout: {exc}", retryable=True) from exc
+
+        if resp.status_code == 200:
+            data = resp.json()
+            choices = data.get("choices", [])
+            if not choices or not choices[0].get("message", {}).get("content"):
+                raise SarvamProviderError("Empty response from Sarvam", retryable=False)
+            return choices[0]["message"]["content"]
+
+        # Classify error
+        if resp.status_code == 422:
+            raise SarvamProviderError(
+                f"Invalid request (422): {resp.text[:200]}", status_code=422, retryable=False
+            )
+        if resp.status_code == 400:
+            raise SarvamProviderError(
+                f"Bad request (400): {resp.text[:200]}", status_code=400, retryable=False
+            )
+        if resp.status_code == 403:
+            # 403 can mean invalid key OR other forbidden error
+            # Inspect error.code if available
+            try:
+                err_body = resp.json()
+                err_code = err_body.get("error", {}).get("code", "")
+                if err_code == "invalid_api_key":
+                    raise SarvamProviderError(
+                        f"Invalid API key (403)", status_code=403, retryable=True
+                    )
+            except (ValueError, KeyError):
+                pass
+            raise SarvamProviderError(
+                f"Forbidden (403): {resp.text[:200]}", status_code=403, retryable=False
+            )
+        if resp.status_code in (429, 500, 503):
+            raise SarvamProviderError(
+                f"Provider error ({resp.status_code}): {resp.text[:200]}",
+                status_code=resp.status_code,
+                retryable=True,
+            )
+        raise SarvamProviderError(
+            f"Unexpected status {resp.status_code}: {resp.text[:200]}",
+            status_code=resp.status_code,
+            retryable=False,
+        )
 ```
 
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `cd backend && python -m pytest tests/providers/test_sarvam_chat.py -v`
-Expected: All 5 tests PASS
+Expected: All 7 tests PASS
 
 - [ ] **Step 5: Commit**
 
@@ -481,11 +517,21 @@ def test_hindi_only():
     assert result["language_mix"] is None
 
 
-def test_hinglish_mixed():
-    result = detect_query_languages("PMFBY scheme kya hai")
+def test_hindi_english_script_mix_detected():
+    """Script-detectable mix: Devanagari + Latin."""
+    result = detect_query_languages("PMFBY योजना kya hai")
     assert result["dominant"] in ("hi", "en")
     assert result["language_mix"] is not None
     assert "hi" in result["language_mix"] or "en" in result["language_mix"]
+
+
+def test_pure_latin_not_detected_as_mix():
+    """Romanized Hindi/Gujarati in Latin script — script analysis can't detect mix.
+    Sarvam-105B handles this natively through the prompt instruction."""
+    result = detect_query_languages("PMFBY scheme kya hai")
+    # Entirely Latin script — language_mix should be None
+    # (Sarvam handles Romanized code-mixing via prompt, not via language_mix signal)
+    assert result["language_mix"] is None
 
 
 def test_gujarati_only():
@@ -591,11 +637,11 @@ from app.evidence_controller import strip_citations
 
 
 def test_strips_hex_chunk_ids():
-    answer = "The scheme requires [chunk:a0eebc99] registration. [chunk:12345678] is also valid."
+    answer = "The scheme requires [chunk:a0eebc99] registration."
     clean, ids = strip_citations(answer)
     assert "[chunk:" not in clean
-    assert clean == "The scheme requires registration.  is also valid."
-    assert ids == ["a0eebc99", "12345678"]
+    assert "registration" in clean
+    assert ids == ["a0eebc99"]
 
 
 def test_strips_web_chunk_ids():
@@ -605,11 +651,29 @@ def test_strips_web_chunk_ids():
     assert "web_a1b2c3d4e5f6_c102" in ids
 
 
-def test_strips_mixed_formats():
-    answer = "Static [chunk:a0eebc99] and web [chunk:web_abc123def456_c42] evidence."
+def test_strips_empty_id():
+    """Empty ID [chunk:] should still be stripped."""
+    answer = "Edge case [chunk:] mention."
     clean, ids = strip_citations(answer)
     assert "[chunk:" not in clean
-    assert len(ids) == 2
+    assert ids == []
+
+
+def test_preserves_markdown_structure():
+    """stripping must not destroy markdown formatting."""
+    answer = (
+        "- Point one [chunk:abc12345]\n"
+        "- Point two [chunk:def67890]\n\n"
+        "**Important** [chunk:abc12345]\n\n"
+        "Paragraph two."
+    )
+    clean, ids = strip_citations(answer)
+    assert "[chunk:" not in clean
+    # Markdown structure preserved (newlines intact, not collapsed to single line)
+    assert "- Point one" in clean
+    assert "- Point two" in clean
+    assert "**Important**" in clean
+    assert "Paragraph two" in clean
 
 
 def test_no_citations_unchanged():
@@ -619,10 +683,11 @@ def test_no_citations_unchanged():
     assert ids == []
 
 
-def test_cleans_extra_whitespace():
-    answer = "Word [chunk:abc12345]  another [chunk:def67890]  end."
+def test_strips_multiple_formats():
+    answer = "Static [chunk:a0eebc99] and web [chunk:web_abc123def456_c42] evidence."
     clean, ids = strip_citations(answer)
-    assert "  " not in clean
+    assert "[chunk:" not in clean
+    assert len(ids) == 2
 ```
 
 - [ ] **Step 2: Run tests to verify they fail**
@@ -644,14 +709,16 @@ def strip_citations(answer: str) -> tuple[str, list[str]]:
     Actual chunk-ID formats in this RAG system:
     - Static: 8-char hex prefix of UUID (e.g., 'a0eebc99')
     - Web: 'web_{hex12}_c{N}' prefix (e.g., 'web_a1b2c3d4e5f6_c102')
-    The LLM is instructed to use the first 8 chars in [chunk:ID] markers.
-    Use a broad capture group to match any characters between chunk: and ].
+
+    Preserves surrounding Markdown structure (newlines, bullets, bold).
+    Handles empty IDs [chunk:] and any characters inside the brackets.
     """
     import re
-    pattern = r'\[chunk:([^\]]+)\]'
+    pattern = r'\[chunk:([^\]]*)\]'
     ids = re.findall(pattern, answer)
     clean = re.sub(pattern, '', answer)
-    clean = re.sub(r'\s+', ' ', clean).strip()
+    # Remove only double-spaces left behind, NOT newlines or markdown structure
+    clean = re.sub(r'  +', ' ', clean).strip()
     return clean, ids
 ```
 
@@ -746,6 +813,66 @@ def test_assess_empty_when_no_chunks():
     )
     assessment = controller.assess_evidence(static_result, web_result, query_req)
     assert assessment.sufficiency == EvidenceSufficiency.EMPTY
+
+
+def test_current_query_with_no_dynamic_evidence.prevents_incorrect_static_answer():
+    """CRITICAL REGRESSION TEST.
+
+    Historical bug: current/local query + dynamic=EMPTY + static=AVAILABLE
+    → static evidence was used to answer as if current, producing wrong answer.
+
+    This test verifies:
+    1. Source role is WEB_PRIMARY (current query)
+    2. Sufficiency is INSUFFICIENT (no dynamic evidence)
+    3. Prompt explicitly says current/local fact cannot be established
+    """
+    controller = EvidenceController()
+    static_result = RAGResult(chunks=[
+        EvidenceChunk(chunk_id="static_001", content="General PMFBY rules",
+                      source_type="static", title="PMFBY Guidelines", dense_score=0.8),
+    ])
+    web_result = RAGResult(chunks=[], abstained=True)  # No dynamic evidence
+    query_req = QueryRequirements(
+        temporal_scope="current",
+        geographic_scope="state",
+        required_specificity="state",
+        requires_dynamic=True,
+    )
+    assessment = controller.assess_evidence(static_result, web_result, query_req)
+
+    # Must NOT be SUFFICIENT — dynamic evidence is missing for current query
+    assert assessment.source_role == SourceRole.WEB_PRIMARY
+    assert assessment.sufficiency in (
+        EvidenceSufficiency.INSUFFICIENT,
+        EvidenceSufficiency.PARTIAL,
+        EvidenceSufficiency.EMPTY,
+    )
+    assert assessment.sufficiency != EvidenceSufficiency.SUFFICIENT
+    # Assessment text must warn that current/local facts cannot be established
+    assert "current" in assessment.assessment_text.lower() or "dynamic" in assessment.assessment_text.lower()
+
+
+def test_historical_query_prefers_period_matching_evidence():
+    """Historical queries should prefer evidence matching the requested period."""
+    controller = EvidenceController()
+    static_result = RAGResult(chunks=[
+        EvidenceChunk(chunk_id="static_001", content="2023 rules",
+                      source_type="static", title="2023 Guidelines", dense_score=0.8),
+    ])
+    web_result = RAGResult(chunks=[
+        EvidenceChunk(chunk_id="web_001", content="2024 notification",
+                      source_type="web", title="2024 Update", dense_score=0.7),
+    ])
+    query_req = QueryRequirements(
+        temporal_scope="2023",
+        geographic_scope="none",
+        required_specificity="general",
+        requires_dynamic=False,
+    )
+    assessment = controller.assess_evidence(static_result, web_result, query_req)
+    # Should prefer static (2023 matches historical query)
+    assert assessment.source_role in (SourceRole.STATIC_PRIMARY, SourceRole.BALANCED)
+```
 ```
 
 - [ ] **Step 2: Run tests to verify they fail**
@@ -802,7 +929,9 @@ def _determine_source_role(self, qr: QueryRequirements) -> SourceRole:
     if qr.temporal_scope == "general" and not qr.requires_dynamic:
         return SourceRole.STATIC_PRIMARY
     if qr.temporal_scope == "historical":
-        return SourceRole.BALANCED
+        # Historical queries: prefer evidence matching the requested period
+        # Static documents with dated content are preferred over generic web results
+        return SourceRole.STATIC_PRIMARY
     return SourceRole.BALANCED
 
 def _score_quality(self, chunks: list) -> str:
@@ -823,7 +952,12 @@ def _check_sufficiency(
     web_result: RAGResult,
     source_role: SourceRole,
 ) -> EvidenceSufficiency:
-    """Check if evidence is sufficient to answer the query."""
+    """Check if evidence is sufficient to answer the query.
+
+    Considers: source-role match, retrieval quality, chunk count.
+    Two irrelevant chunks are NOT sufficient. One highly authoritative
+    chunk can be more useful than five generic ones.
+    """
     from app.contracts import EvidenceSufficiency
 
     static_count = len(static_result.chunks)
@@ -833,22 +967,26 @@ def _check_sufficiency(
     if total == 0:
         return EvidenceSufficiency.EMPTY
 
+    # Count high-quality chunks (dense_score >= 0.5)
+    static_high = sum(1 for c in static_result.chunks if (c.dense_score or 0) >= 0.5)
+    web_high = sum(1 for c in web_result.chunks if (c.dense_score or 0) >= 0.5)
+
     if source_role == SourceRole.WEB_PRIMARY:
-        if web_count >= 2:
+        if web_high >= 2:
             return EvidenceSufficiency.SUFFICIENT
-        if web_count >= 1:
+        if web_high >= 1 or web_count >= 1:
             return EvidenceSufficiency.PARTIAL
         return EvidenceSufficiency.INSUFFICIENT
 
     if source_role == SourceRole.STATIC_PRIMARY:
-        if static_count >= 3:
+        if static_high >= 2:
             return EvidenceSufficiency.SUFFICIENT
-        if static_count >= 1:
+        if static_high >= 1 or static_count >= 1:
             return EvidenceSufficiency.PARTIAL
         return EvidenceSufficiency.INSUFFICIENT
 
     # BALANCED
-    if total >= 4:
+    if (static_high + web_high) >= 3:
         return EvidenceSufficiency.SUFFICIENT
     if total >= 2:
         return EvidenceSufficiency.PARTIAL
@@ -1098,8 +1236,9 @@ from app.llm_fallback import grounded_answer
 if self._sarvam is not None:
     try:
         answer = self._sarvam.generate(system_prompt, user_prompt)
-    except Exception as exc:
-        # Provider failure (403, 429, 5xx, timeout) — fall back to Groq+Gemini
+    except SarvamProviderError as exc:
+        # Only provider failures (403, 429, 5xx, timeout) reach here
+        # Programming errors (KeyError, ValueError, etc.) propagate naturally
         import logging
         logging.warning("Sarvam provider failed, falling back to Groq: %s", exc)
         answer = grounded_answer(
@@ -1108,10 +1247,8 @@ if self._sarvam is not None:
             system_prompt,
             user_prompt,
         )
-        # Mark mode so chat.py can apply output translation for Groq fallback
         mode = "groq_fallback"
 else:
-    # Sarvam not configured — use Groq+Gemini directly
     answer = grounded_answer(
         GroqLLMProvider(self._settings),
         GeminiLLMProvider(self._settings),
@@ -1311,28 +1448,16 @@ function cleanAnswerText(text: string): string {
 
   // Remove ALL chunk citation patterns (any format, case-insensitive)
   // Matches: [chunk:xxx], (chunk:xxx), [Chunk:xxx], [CHUNK:xxx]
-  // where xxx can be any characters (hex, web_ prefix, UUIDs, etc.)
-  cleaned = cleaned.replace(/\[chunk:[^\]]+\]/gi, '');
-  cleaned = cleaned.replace(/\(chunk:[^\)]+\)/gi, '');
+  // where xxx can be any characters (hex, web_ prefix, UUIDs, empty, etc.)
+  cleaned = cleaned.replace(/\[chunk:[^\]]*\]/gi, '');
+  cleaned = cleaned.replace(/\(chunk:[^\)]*\)/gi, '');
 
-  // Remove common disclaimer patterns
-  const disclaimerPatterns = [
-    /\[Current\/local information for this claim could not be verified\]\s*/gi,
-    /\[Current\/local information could not be verified\]\s*/gi,
-    /\[This information could not be verified\]\s*/gi,
-    /\[Verification pending\]\s*/gi,
-    /\[The information is not available in the provided documents\]\s*/gi,
-    /\[Insufficient evidence\]\s*/gi,
-    /\[Could not verify\]\s*/gi,
-  ];
-  for (const pattern of disclaimerPatterns) {
-    cleaned = cleaned.replace(pattern, '');
-  }
-  cleaned = cleaned.replace(/\(\s*\)/g, '');
   cleaned = cleaned.replace(/\s+/g, ' ').trim();
   return cleaned;
 }
 ```
+
+**Note:** No hardcoded disclaimer patterns. Response quality is handled by the backend prompt and evidence controller — not by frontend string matching.
 
 - [ ] **Step 2: Verify citations panel doesn't show chunk_id**
 

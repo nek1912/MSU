@@ -314,8 +314,8 @@ async def chat(req: ChatRequest) -> dict:
             language_mix=ctx.language_mix,
         )
 
-        # Sarvam generates directly in user's language; only translate for Groq fallback
-        if rag_response.mode == "groq_fallback" and ctx.lang != "en":
+        # Groq generates in English; translate to user's language if needed
+        if ctx.lang != "en":
             rag_response.answer = _translate_from_english(rag_response.answer, ctx.lang, ctx.settings)
             rag_response.speech_text = prepare_speech_text(rag_response.answer)
             rag_response.speech_segments = segment_speech(rag_response.answer, ctx.lang)

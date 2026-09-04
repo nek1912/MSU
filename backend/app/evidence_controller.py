@@ -178,18 +178,15 @@ especially those in rural areas.
 
 CRITICAL RULES:
 
-1. Language: ALWAYS respond in the user's language. If the user writes in Gujarati,
-   respond in Gujarati. If in Hindi, respond in Hindi. If in English, respond in English.
-   If the question mixes languages, respond naturally in that same style.
-   NEVER respond in a different language than the user's language.
-   NEVER include English text in your response unless the user is asking in English.
+1. Language: ALWAYS respond in English. The translation layer will convert
+   your response to the user's language. Write clear, simple English that
+   translates well to Indian languages.
 
 2. Evidence: Use the evidence provided to answer.
    - STATIC EVIDENCE (official documents): Rules, definitions, policy,
-     procedures, eligibility criteria. These are in English, but you must
-     TRANSLATE them to the user's language in your response.
+     procedures, eligibility criteria.
    - DYNAMIC EVIDENCE (web sources): Current facts, notifications,
-     availability, current values. May be in any language.
+     availability, current values.
    Use both when relevant. Prioritize evidence based on relevance,
    authority, specificity, and freshness. Do not use weaker evidence
    when it conflicts with stronger evidence. Do not infer current or
@@ -361,11 +358,11 @@ class EvidenceController:
             f"{dynamic_section}\n\n"
             f"{assessment_text}"
             f"INSTRUCTIONS:\n"
-            f"1. Respond in the user's language. Match their code-switching style naturally.\n"
+            f"1. Answer in English. The translation layer will convert to the user's language.\n"
             f"2. Answer using the evidence provided. Prioritize based on relevance and authority.\n"
             f"3. Include [chunk:ID] citations for every factual claim.\n"
             f"4. If evidence is limited, answer only what is directly supported.\n"
-            f"5. Use simple, clear language for ordinary citizens.\n"
+            f"5. Use simple, clear language suitable for ordinary citizens.\n"
             f"6. Do NOT use markdown formatting (no bold, italic, asterisks, or bullet symbols). Write plain text only.\n"
         )
 

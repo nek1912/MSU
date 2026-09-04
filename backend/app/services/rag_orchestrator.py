@@ -9,7 +9,7 @@ and returns a typed RAGResponse.
 Architecture:
   1. asyncio.gather runs both pipelines concurrently (return_exceptions=True)
   2. EvidenceController builds an EvidenceBundle + curated prompt
-  3. LLM generates answer (Sarvam primary, Groq fallback)
+  3. LLM generates answer (Groq primary, Gemini fallback)
   4. Citations are verified
   5. Confidence is calculated
   6. RAGResponse is returned
@@ -75,12 +75,6 @@ class RAGOrchestrator:
         self._web_rag = WebRAGService()
         self._evidence_controller = EvidenceController()
         self._query_classifier = QueryRequirementClassifier()
-        # Initialize Sarvam provider once, reuse across requests
-        try:
-            from app.providers.sarvam_chat import SarvamChatProvider
-            self._sarvam = SarvamChatProvider(self._settings)
-        except (ValueError, ImportError):
-            self._sarvam = None  # Will fall back to Groq+Gemini
 
     async def run(
         self,
@@ -164,30 +158,15 @@ class RAGOrchestrator:
             assessment=assessment,
         )
 
-        # Step 7: Generate answer via LLM (Sarvam primary, Groq+Gemini fallback)
-        mode = "sarvam"
+        # Step 7: Generate answer via LLM (Groq primary, Gemini fallback)
+        mode = "groq"
         try:
-            if self._sarvam is not None:
-                from app.providers.sarvam_chat import SarvamProviderError
-                try:
-                    answer = self._sarvam.generate(system_prompt, user_prompt)
-                except SarvamProviderError as exc:
-                    logger.warning("Sarvam provider failed, falling back to Groq: %s", exc)
-                    answer = grounded_answer(
-                        GroqLLMProvider(self._settings),
-                        GeminiLLMProvider(self._settings),
-                        system_prompt,
-                        user_prompt,
-                    )
-                    mode = "groq_fallback"
-            else:
-                answer = grounded_answer(
-                    GroqLLMProvider(self._settings),
-                    GeminiLLMProvider(self._settings),
-                    system_prompt,
-                    user_prompt,
-                )
-                mode = "groq_fallback"
+            answer = grounded_answer(
+                GroqLLMProvider(self._settings),
+                GeminiLLMProvider(self._settings),
+                system_prompt,
+                user_prompt,
+            )
             answer = answer.replace("\u3010", "[").replace("\u3011", "]")
         except AllProvidersFailedError:
             logger.exception("All LLM providers failed")
@@ -235,20 +214,12 @@ class RAGOrchestrator:
         speech_segments = segment_speech(answer, lang)
 
         # Step 14: Determine mode
-        if mode == "sarvam":
-            if has_static and has_web:
-                mode = "dual_rag_sarvam"
-            elif has_static:
-                mode = "static_sarvam"
-            else:
-                mode = "web_sarvam"
+        if has_static and has_web:
+            mode = "dual_rag"
+        elif has_static:
+            mode = "static"
         else:
-            if has_static and has_web:
-                mode = "dual_rag"
-            elif has_static:
-                mode = "static"
-            else:
-                mode = "web"
+            mode = "web"
 
         logger.info(
             "RAGOrchestrator response: confidence=%.2f band=%s mode=%s citations=%d",

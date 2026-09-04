@@ -62,7 +62,7 @@ SUPPORTED_DOMAINS = {
 
 # Minimum relevance score for evidence to pass the relevance gate
 # (matching eGovAssistant DEFAULT_MIN_RELEVANCE_SCORE = 60.0)
-DEFAULT_MIN_RELEVANCE_SCORE = 60.0
+DEFAULT_MIN_RELEVANCE_SCORE = 40.0
 
 
 class WebRAGService:
@@ -145,19 +145,22 @@ class WebRAGService:
         # ── Step 1: Domain scope gate ───────────────────────────────
         logger.info("[Step 1] Domain scope gate")
 
-        if (
-            classification is not None
-            and classification.domain == "general"
-        ):
+        # Use AnchorStore domain (embedding-based) if available, fall back to classification domain
+        effective_domain_for_gate = effective_domain
+        if classification is not None and classification.domain != "general":
+            effective_domain_for_gate = classification.domain
+
+        if effective_domain_for_gate == "general" or not effective_domain_for_gate:
             logger.info(
-                "Domain scope gate: UNSUPPORTED DOMAIN (general). Abstaining."
+                "Domain scope gate: UNSUPPORTED DOMAIN (%s). Abstaining.",
+                effective_domain_for_gate or "unknown",
             )
             return RAGResult(
                 chunks=[],
                 abstained=True,
                 reason=AbstentionReason.DOMAIN_MISMATCH,
                 band=ConfidenceBand.LOW,
-                domain=classification.domain,
+                domain=effective_domain_for_gate or "general",
                 metadata={"step": "domain_scope_gate"},
             )
 

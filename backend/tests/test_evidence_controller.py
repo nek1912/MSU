@@ -117,5 +117,5 @@ def test_build_curated_prompt_separates_evidence():
 
     system, user = controller.build_curated_prompt(bundle, "current crops in Surat", None, "gu")
     assert "[STATIC]" in user
-    assert "ABSENT" in user
-    assert "SOURCE PRIORITY RULES" in system
+    assert "DYNAMIC EVIDENCE" in user
+    assert "rural areas" in system

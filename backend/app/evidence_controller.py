@@ -173,60 +173,56 @@ class QueryRequirementClassifier:
 # Source Priority Prompt
 # ---------------------------------------------------------------------------
 
-_SOURCE_PRIORITY_PROMPT = """You are a government information assistant helping citizens understand
-cooperative governance, agriculture schemes, and financial inclusion in India.
+_SOURCE_PRIORITY_PROMPT = """You are a helpful government information assistant for Indian citizens,
+especially those in rural areas.
 
-CRITICAL LANGUAGE RULE - YOU MUST FOLLOW THIS:
-The question is in a specific language. You MUST respond ENTIRELY in that SAME language.
-If the question is in Gujarati, respond ENTIRELY in Gujarati.
-If the question is in Hindi, respond ENTIRELY in Hindi.
-If the question is in English, respond ENTIRELY in English.
-DO NOT mix languages. DO NOT use English words when responding in Indian languages.
-Translate ALL technical terms to the target language.
+CRITICAL RULES:
 
-Answer based on the evidence provided, following these rules:
+1. Language: Respond in the user's language. If the question mixes languages
+   (e.g., Hindi + English), respond naturally in that same style. Preserve the
+   user's language and code-switching style naturally. Do not force everything
+   into one language.
 
-ANSWER STYLE:
-- Use simple, clear language that ordinary citizens can understand
-- Avoid technical jargon
-- Be helpful and informative
-- Answer what CAN be answered from the available evidence
+2. Evidence: Use the evidence provided to answer.
+   - STATIC EVIDENCE (official documents): Rules, definitions, policy,
+     procedures, eligibility criteria. Always in English.
+   - DYNAMIC EVIDENCE (web sources): Current facts, notifications,
+     availability, current values. May be in any language.
+   Use both when relevant. Prioritize evidence based on relevance,
+   authority, specificity, and freshness. Do not use weaker evidence
+   when it conflicts with stronger evidence. Do not infer current or
+   local facts from static evidence alone.
 
-FORMATTING RULES:
-- Use proper markdown formatting for readability
-- For lists of items, use markdown bullet points with hyphens (- item)
-- For numbered steps, use markdown numbered lists (1. item)
-- Use **bold** for important terms or document names
-- Keep paragraphs short (2-3 sentences maximum)
-- Use line breaks between sections for better readability
+3. Citations: After each factual statement, add [chunk:ID] markers.
+   These are for internal tracking and will be extracted by the system.
+   You must include them for every factual claim.
 
-EVIDENCE RULES:
-1. STATIC EVIDENCE (official documents) provides:
-   - Policy rules, procedures, eligibility criteria
-   - How schemes work (application process, documentation)
-   - General framework and structure
+4. When evidence is limited:
+   - Answer only what is directly supported by the available evidence
+   - Add ONE brief note at the END if important context is missing
+   - Do NOT repeat disclaimers. Do NOT refuse to answer what evidence supports.
 
-2. DYNAMIC EVIDENCE (web sources) provides:
-   - Current year notifications, active status
-   - District/state-specific current information
-   - Current premium rates, insurer assignments
+5. When evidence is insufficient:
+   - Answer only what is directly supported
+   - Explain what information is missing
+   - Suggest what type of official source the user should consult
+     (e.g., district cooperative office, block development officer)
 
-3. WHEN DYNAMIC EVIDENCE IS MISSING:
-   - Answer using static evidence what CAN be answered
-   - At the END of your answer (not during), add ONE short note in the target language
-   - Do NOT repeat this disclaimer multiple times
-   - Do NOT refuse to answer what static evidence supports
+6. When no evidence is found:
+   - Explain that no relevant evidence was found
+   - Suggest the type of official source the user should consult
+   - Do NOT generate a general knowledge answer
 
-CITATION RULES:
-- After each factual sentence, add [chunk:ID] citation
-- Use EXACT citation markers from the evidence
-- Use ONLY half-width square brackets []
+7. Tone: Simple, clear, helpful. Use short sentences. Explain technical
+   terms (like PMFBY, PACS) briefly when first mentioned. Be kind and
+   patient — the user may be asking for the first time.
 
-IMPORTANT:
-- Be helpful, not restrictive
-- Answer what you CAN from available evidence
-- Only note limitations ONCE at the end if needed
-- NEVER include chunk IDs like [chunk:xxx] in your visible response to users"""
+8. Formatting:
+   - Use bullet points for lists
+   - Bold important terms or document names
+   - Keep paragraphs short (2-3 sentences)
+   - Use markdown for readability
+"""
 
 
 def strip_citations(answer: str) -> tuple[str, list[str]]:
@@ -293,6 +289,8 @@ class EvidenceController:
         english_query: str,
         history: list[dict] | None,
         lang: str,
+        language_mix: dict[str, float] | None = None,
+        assessment: EvidenceAssessment | None = None,
     ) -> tuple[str, str]:
         system_prompt = _SOURCE_PRIORITY_PROMPT
 
@@ -333,24 +331,31 @@ class EvidenceController:
             dynamic_section = "No dynamic evidence available."
             dynamic_status = f"ABSENT — {bundle.dynamic.reason or 'No applicable web evidence found'}"
 
+        # Build assessment text
+        assessment_text = ""
+        if assessment:
+            assessment_text = f"\n== EVIDENCE ASSESSMENT ==\n{assessment.assessment_text}\n"
+
+        # Build language context
+        lang_context = f"User language: {lang}"
+        if language_mix:
+            lang_context += f" (code-mixed: {language_mix})"
+
         user_prompt = (
             f"{hist_text}"
             f"Question: {english_query}\n\n"
+            f"{lang_context}\n\n"
             f"== STATIC EVIDENCE (official documents — may not reflect current status) ==\n"
             f"{static_section}\n\n"
             f"== DYNAMIC EVIDENCE (web sources — current information) ==\n"
             f"{dynamic_section}\n\n"
-            f"== EVIDENCE AVAILABILITY ==\n"
-            f"Static: {len(bundle.static.chunks)} chunks available\n"
-            f"Dynamic: {dynamic_status}\n\n"
+            f"{assessment_text}"
             f"INSTRUCTIONS:\n"
-            f"1. CRITICAL: Respond in the SAME language as the question. If question is in Gujarati, respond ENTIRELY in Gujarati.\n"
-            f"2. Answer using static evidence what CAN be answered.\n"
-            f"3. If dynamic evidence is missing for current/local details, "
-            f"add ONE short note at the END of your answer (not during).\n"
-            f"4. Do NOT repeat disclaimers. Do NOT refuse to answer what static evidence supports.\n"
+            f"1. Respond in the user's language. Match their code-switching style naturally.\n"
+            f"2. Answer using the evidence provided. Prioritize based on relevance and authority.\n"
+            f"3. Include [chunk:ID] citations for every factual claim.\n"
+            f"4. If evidence is limited, answer only what is directly supported.\n"
             f"5. Use simple, clear language for ordinary citizens.\n"
-            f"6. Do NOT include chunk IDs like [chunk:xxx] in your visible response."
         )
 
         return system_prompt, user_prompt

@@ -168,6 +168,7 @@ class _ChatContext:
     classification: QueryClassification
     history: list[dict] | None
     resolved_state: str | None
+    language_mix: dict[str, float] | None = None
 
 
 def _resolve_context(req: ChatRequest) -> _ChatContext:
@@ -177,6 +178,7 @@ def _resolve_context(req: ChatRequest) -> _ChatContext:
     lang = resolve_and_remember(req.session_id, req.question, ui_code)
     detected = detect_query_languages(req.question)
     input_lang = detected.get("dominant") or "en"
+    language_mix = detected.get("language_mix")
 
     english_query = _translate_to_english(req.question, input_lang, settings)
 
@@ -233,6 +235,7 @@ def _resolve_context(req: ChatRequest) -> _ChatContext:
         classification=classification,
         history=history,
         resolved_state=resolved_state,
+        language_mix=language_mix,
     )
 
 
@@ -308,10 +311,11 @@ async def chat(req: ChatRequest) -> dict:
             history=ctx.history,
             lang=ctx.lang,
             session_id=req.session_id,
+            language_mix=ctx.language_mix,
         )
 
-        # Translate answer back to user's language
-        if ctx.lang != "en":
+        # Sarvam generates directly in user's language; only translate for Groq fallback
+        if rag_response.mode == "groq_fallback" and ctx.lang != "en":
             rag_response.answer = _translate_from_english(rag_response.answer, ctx.lang, ctx.settings)
             rag_response.speech_text = prepare_speech_text(rag_response.answer)
             rag_response.speech_segments = segment_speech(rag_response.answer, ctx.lang)
@@ -415,10 +419,11 @@ async def chat_stream(req: ChatRequest):
                 history=ctx.history,
                 lang=ctx.lang,
                 session_id=req.session_id,
+                language_mix=ctx.language_mix,
             )
 
-            # Translate answer back to user's language
-            if ctx.lang != "en":
+            # Sarvam generates directly in user's language; only translate for Groq fallback
+            if rag_response.mode == "groq_fallback" and ctx.lang != "en":
                 rag_response.answer = _translate_from_english(rag_response.answer, ctx.lang, ctx.settings)
                 rag_response.speech_text = prepare_speech_text(rag_response.answer)
                 rag_response.speech_segments = segment_speech(rag_response.answer, ctx.lang)

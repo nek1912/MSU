@@ -301,19 +301,26 @@ class EvidenceController:
     ) -> tuple[str, str]:
         system_prompt = _SOURCE_PRIORITY_PROMPT
 
-        # Build history text
+        # Limit chunks to reduce prompt size and latency
+        MAX_STATIC_CHUNKS = 6
+        MAX_DYNAMIC_CHUNKS = 4
+        MAX_HISTORY_TURNS = 3
+
+        # Build history text (limit to recent turns)
         hist_text = ""
         if history:
+            recent_history = history[-MAX_HISTORY_TURNS:] if len(history) > MAX_HISTORY_TURNS else history
             turns = "\n".join(
                 f"{'User' if h.get('role') == 'user' else 'Assistant'}: {h.get('content', '')}"
-                for h in history if isinstance(h, dict)
+                for h in recent_history if isinstance(h, dict)
             )
             if turns:
                 hist_text = f"Previous conversation:\n{turns}\n\n"
 
-        # Build static evidence section
+        # Build static evidence section (limit chunks)
+        static_chunks = bundle.static.chunks[:MAX_STATIC_CHUNKS]
         static_parts: list[str] = []
-        for chunk in bundle.static.chunks:
+        for chunk in static_chunks:
             short_id = chunk.chunk_id[:8]
             meta_parts = [chunk.title]
             if chunk.section:
@@ -324,16 +331,17 @@ class EvidenceController:
             static_parts.append(f"[STATIC] [chunk:{short_id}] ({meta_str})\n{chunk.content}")
         static_section = "\n\n---\n\n".join(static_parts) if static_parts else "No static evidence available."
 
-        # Build dynamic evidence section
+        # Build dynamic evidence section (limit chunks)
         if bundle.dynamic.available:
+            dynamic_chunks = bundle.dynamic.chunks[:MAX_DYNAMIC_CHUNKS]
             dynamic_parts: list[str] = []
-            for chunk in bundle.dynamic.chunks:
+            for chunk in dynamic_chunks:
                 short_id = chunk.chunk_id[:8]
                 dynamic_parts.append(
                     f"[DYNAMIC] [chunk:{short_id}] ({chunk.title} — web — {chunk.url})\n{chunk.content}"
                 )
             dynamic_section = "\n\n---\n\n".join(dynamic_parts)
-            dynamic_status = f"available — {len(bundle.dynamic.chunks)} chunks"
+            dynamic_status = f"available — {len(dynamic_chunks)} chunks (of {len(bundle.dynamic.chunks)})"
         else:
             dynamic_section = "No dynamic evidence available."
             dynamic_status = f"ABSENT — {bundle.dynamic.reason or 'No applicable web evidence found'}"

@@ -26,6 +26,11 @@ class SarvamProviderError(Exception):
         self.retryable = retryable
 
 
+def _estimate_tokens(text: str) -> int:
+    """Rough token estimate: ~4 chars per token for English, ~2 for Devanagari."""
+    return len(text) // 3
+
+
 class SarvamChatProvider:
     """Sarvam-105B chat completions adapter.
 
@@ -46,11 +51,28 @@ class SarvamChatProvider:
         self, system: str, user: str, temperature: float = 0.1
     ) -> str:
         """Non-streaming generation. Primary MVP path."""
+        # Log prompt size for optimization
+        sys_tokens = _estimate_tokens(system)
+        user_tokens = _estimate_tokens(user)
+        total_input_tokens = sys_tokens + user_tokens
+        logger.info(
+            "Sarvam prompt: system=%d chars (~%d tokens), user=%d chars (~%d tokens), total ~%d tokens",
+            len(system), sys_tokens, len(user), user_tokens, total_input_tokens,
+        )
+        
+        start_time = time.monotonic()
         last_error: SarvamProviderError | None = None
         keys = self._rotator._keys  # noqa: SLF001
         for key in keys:
             try:
-                return self._call_api(key, system, user, temperature)
+                result = self._call_api(key, system, user, temperature)
+                elapsed = time.monotonic() - start_time
+                output_tokens = _estimate_tokens(result)
+                logger.info(
+                    "Sarvam response: %.1fs, output ~%d tokens, total ~%d tokens",
+                    elapsed, output_tokens, total_input_tokens + output_tokens,
+                )
+                return result
             except SarvamProviderError as exc:
                 last_error = exc
                 if not exc.retryable:
@@ -93,6 +115,15 @@ class SarvamChatProvider:
             choices = data.get("choices", [])
             if not choices or not choices[0].get("message", {}).get("content"):
                 raise SarvamProviderError("Empty response from Sarvam", retryable=False)
+            
+            # Log usage if available
+            usage = data.get("usage", {})
+            if usage:
+                logger.info(
+                    "Sarvam usage: prompt_tokens=%s, completion_tokens=%s, total_tokens=%s",
+                    usage.get("prompt_tokens"), usage.get("completion_tokens"), usage.get("total_tokens"),
+                )
+            
             return choices[0]["message"]["content"]
 
         # Classify error

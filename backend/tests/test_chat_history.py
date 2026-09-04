@@ -1,5 +1,5 @@
 import uuid
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import respx
@@ -74,7 +74,7 @@ def test_chat_sends_history_to_prompt(
         resp.speech_segments = [{"text": "Answer.", "language": "en"}]
         resp.follow_up_question = None
         resp.mode = "static"
-        mock_orch.return_value.run.return_value = resp
+        mock_orch.return_value.run = AsyncMock(return_value=resp)
 
         payload = {
             "question": "What are the criteria?",
@@ -159,7 +159,7 @@ def test_chat_persists_on_success(
         resp.speech_segments = [{"text": "Answer.", "language": "en"}]
         resp.follow_up_question = None
         resp.mode = "static"
-        mock_orch.return_value.run.return_value = resp
+        mock_orch.return_value.run = AsyncMock(return_value=resp)
 
         payload = {
             "question": "What is PMFBY?",

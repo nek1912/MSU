@@ -125,7 +125,7 @@ async def voice_chat(
         session_id=session_id,
         state=state,
     )
-    rag_result = chat_handler(chat_request)
+    rag_result = await chat_handler(chat_request)
 
     answer_text = rag_result.get("answer", "")
     # TTS must consume the citation-stripped speech copy, never the raw answer

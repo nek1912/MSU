@@ -6,7 +6,7 @@ internally, these tests verify the orchestrator integration rather than
 the old route-level verifier.
 """
 import uuid
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import respx
@@ -90,7 +90,7 @@ def test_route_delegates_citation_handling_to_orchestrator(
         resp.speech_segments = [{"text": "PACS requires membership.", "language": "en"}]
         resp.follow_up_question = None
         resp.mode = "static"
-        mock_orch.return_value.run.return_value = resp
+        mock_orch.return_value.run = AsyncMock(return_value=resp)
 
         payload = {
             "question": "What is PACS?",

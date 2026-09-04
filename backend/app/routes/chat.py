@@ -240,7 +240,7 @@ def _resolve_context(req: ChatRequest) -> _ChatContext:
 
 
 @router.post("/chat")
-def chat(req: ChatRequest) -> dict:
+async def chat(req: ChatRequest) -> dict:
     question = req.question.strip()
     if not question:
         return _abstain(req.language, session_id=req.session_id)
@@ -298,7 +298,7 @@ def chat(req: ChatRequest) -> dict:
 
         # ── Core RAG via orchestrator ────────────────────────────────────
         orchestrator = _get_rag_orchestrator(ctx.settings)
-        rag_response = orchestrator.run(
+        rag_response = await orchestrator.run(
             query=req.question,
             english_query=ctx.english_query,
             embedding=ctx.embedding,
@@ -346,10 +346,10 @@ def _sse_event(event: str, data: dict | str) -> str:
 
 
 @router.post("/chat/stream")
-def chat_stream(req: ChatRequest):
+async def chat_stream(req: ChatRequest):
     """Streaming version — delegates to orchestrator, emits SSE events."""
 
-    def generate():
+    async def generate():
         try:
             # Fire first thinking event IMMEDIATELY so user sees feedback
             initial_lang = req.language or "en"
@@ -405,7 +405,7 @@ def chat_stream(req: ChatRequest):
             yield _sse_event("thinking", {"text": thinking_msgs[1]})
 
             orchestrator = _get_rag_orchestrator(ctx.settings)
-            rag_response = orchestrator.run(
+            rag_response = await orchestrator.run(
                 query=req.question,
                 english_query=ctx.english_query,
                 embedding=ctx.embedding,

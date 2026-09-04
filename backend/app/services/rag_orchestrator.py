@@ -1,36 +1,41 @@
-"""RAG Orchestrator — unified dual-pipeline RAG with evidence merging.
+"""RAG Orchestrator — async dual-pipeline RAG with evidence bundle + claim verification.
 
 Runs static RAG (Supabase pgvector) and web RAG (Tavily/Firecrawl) in
-parallel, merges evidence chunks, builds a grounded prompt, generates an
-answer via LLM with provider fallback, and returns a typed RAGResponse.
+parallel via asyncio.gather, merges evidence chunks into an EvidenceBundle,
+builds a curated source-priority prompt, generates an answer via LLM with
+provider fallback, verifies claims, recalculates claim-level confidence,
+and returns a typed RAGResponse.
 
 Architecture:
-  1. ThreadPoolExecutor runs both pipelines concurrently
-  2. Evidence chunks are merged (static first, then web)
-  3. Context and prompt are built from merged evidence
-  4. LLM generates answer (Groq primary, Gemini fallback)
-  5. Citations are auto-appended if the LLM omitted them
-  6. Confidence is computed from evidence bands + source count
-  7. Speech text/segments are prepared
-  8. RAGResponse is returned
+  1. asyncio.gather runs both pipelines concurrently (return_exceptions=True)
+  2. EvidenceController builds an EvidenceBundle + curated prompt
+  3. LLM generates answer (Groq primary, Gemini fallback)
+  4. ClaimVerifier checks claims against evidence
+  5. Citations are verified
+  6. Claim-level confidence is calculated
+  7. RAGResponse is returned
 """
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
-from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
+from app.claim_verifier import ClaimVerifier
 from app.citation_verifier import verify_citations
 from app.config import Settings, get_settings
 from app.contracts import (
     AbstentionReason,
     ConfidenceBand,
+    EvidenceBundle,
     EvidenceChunk,
+    QueryRequirements,
     RAGResponse,
     RAGResult,
 )
+from app.evidence_controller import EvidenceController, QueryRequirementClassifier
 from app.llm_fallback import AllProvidersFailedError, grounded_answer
 from app.providers.gemini_llm import GeminiLLMProvider
 from app.providers.groq_llm import GroqLLMProvider
@@ -48,30 +53,13 @@ _BAND_TO_CONFIDENCE: dict[str, float] = {
     "low": 0.4,
 }
 
-_SYSTEM_PROMPT = (
-    "You are a helpful government information assistant. "
-    "Synthesize an accurate answer from ALL provided evidence. "
-    "Evidence is marked with [chunk:ID] citations — use the EXACT citation "
-    "marker shown in the evidence. Treat all evidence as EQUAL inputs. "
-    "After EVERY factual sentence, add the citation: [chunk:ID]. "
-    "Use ONLY half-width square brackets []. "
-    "If evidence is insufficient, say so clearly. "
-    "Do NOT mention source types or priorities in your answer — just cite the evidence. "
-    "CRITICAL: The question is written in the user's language. "
-    "You MUST respond in the SAME language as the question. "
-    "If the question is in Hindi, respond in Hindi. "
-    "If the question is in Gujarati, respond in Gujarati. "
-    "If the question is in English, respond in English. "
-    "Never switch languages mid-response."
-)
-
 
 class RAGOrchestrator:
-    """Runs dual-pipeline RAG, merges evidence, and generates grounded answers.
+    """Runs async dual-pipeline RAG with evidence bundling and claim verification.
 
     Usage:
         orchestrator = RAGOrchestrator(settings)
-        response = orchestrator.run(
+        response = await orchestrator.run(
             query="What is PMFBY?",
             english_query="What is PMFBY?",
             embedding=[0.1] * 768,
@@ -88,8 +76,11 @@ class RAGOrchestrator:
         self._settings = settings or get_settings()
         self._static_rag = StaticRAGService(self._settings)
         self._web_rag = WebRAGService()
+        self._evidence_controller = EvidenceController()
+        self._query_classifier = QueryRequirementClassifier()
+        self._claim_verifier = ClaimVerifier()
 
-    def run(
+    async def run(
         self,
         query: str,
         english_query: str,
@@ -101,7 +92,7 @@ class RAGOrchestrator:
         lang: str,
         session_id: str,
     ) -> RAGResponse:
-        """Execute the full dual-pipeline RAG flow.
+        """Execute the full async dual-pipeline RAG flow.
 
         Args:
             query: Original user query (may be non-English).
@@ -117,34 +108,34 @@ class RAGOrchestrator:
         Returns:
             RAGResponse with answer, citations, confidence, and speech data.
         """
-        self._user_lang = lang  # store for prompt building
+        self._user_lang = lang
         logger.info(
             "RAGOrchestrator.run: domain=%s state=%s lang=%s session=%s",
             domain, state, lang, session_id,
         )
 
-        # Step 1: Run both pipelines in parallel
-        static_result, web_result = self._run_pipelines(
+        # Step 1: Classify query requirements
+        query_requirements = self._query_classifier.classify(query, lang)
+
+        # Step 2: Run both pipelines in parallel via asyncio.gather
+        static_result, web_result = await self._run_pipelines(
             english_query=english_query,
             embedding=embedding,
             domain=domain,
             state=state,
-            query=query,
             classification=classification,
         )
 
-        static_chunks = static_result.chunks
-        web_chunks = web_result.chunks
-        has_static = not static_result.abstained and len(static_chunks) > 0
-        has_web = not web_result.abstained and len(web_chunks) > 0
+        has_static = not static_result.abstained and len(static_result.chunks) > 0
+        has_web = not web_result.abstained and len(web_result.chunks) > 0
 
         logger.info(
             "Pipeline results: static=%d chunks (abstained=%s), web=%d chunks (abstained=%s)",
-            len(static_chunks), static_result.abstained,
-            len(web_chunks), web_result.abstained,
+            len(static_result.chunks), static_result.abstained,
+            len(web_result.chunks), web_result.abstained,
         )
 
-        # Step 2: If both pipelines abstained, return abstain response
+        # Step 3: If both pipelines abstained, return abstain response
         if not has_static and not has_web:
             return self._abstain_response(
                 lang=lang,
@@ -153,20 +144,23 @@ class RAGOrchestrator:
                 session_id=session_id,
             )
 
-        # Step 3: Merge evidence chunks
-        all_chunks = self._merge_evidence(static_chunks, web_chunks)
+        # Step 4: Build evidence bundle
+        bundle = self._evidence_controller.build_bundle(
+            static_result, web_result, query_requirements, query,
+        )
 
-        # Step 4: Build context and prompt
-        context = self._build_context(all_chunks, history, english_query)
-        prompt = self._build_prompt(english_query, context, history, len(static_chunks), len(web_chunks))
+        # Step 5: Build curated prompt with source-priority rules
+        system_prompt, user_prompt = self._evidence_controller.build_curated_prompt(
+            bundle, english_query, history, lang,
+        )
 
-        # Step 5: Generate answer via LLM
+        # Step 6: Generate answer via LLM
         try:
             answer = grounded_answer(
                 GroqLLMProvider(self._settings),
                 GeminiLLMProvider(self._settings),
-                _SYSTEM_PROMPT,
-                prompt,
+                system_prompt,
+                user_prompt,
             )
             answer = answer.replace("\u3010", "[").replace("\u3011", "]")
         except AllProvidersFailedError:
@@ -178,37 +172,42 @@ class RAGOrchestrator:
                 session_id=session_id,
             )
 
-        # Step 6: Auto-append citations if missing
+        # Step 7: Auto-append citations if missing
+        all_chunks = self._merge_evidence(static_result.chunks, web_result.chunks)
         answer = self._auto_append_citations(answer, all_chunks)
 
-        # Step 6b: Verify citations against evidence
+        # Step 8: Verify citations against evidence
         all_chunk_ids = [chunk.chunk_id for chunk in all_chunks]
-        verification = verify_citations(answer, all_chunk_ids)
-        if not verification.is_valid:
+        citation_verification = verify_citations(answer, all_chunk_ids)
+        if not citation_verification.is_valid:
             logger.warning(
                 "Citation verification failed: reason=%s invalid_prefixes=%s",
-                verification.reason, verification.invalid_prefixes,
+                citation_verification.reason, citation_verification.invalid_prefixes,
             )
             return self._abstain_response(
                 lang=lang,
-                reason=verification.reason or AbstentionReason.CITATION_FAILURE,
+                reason=citation_verification.reason or AbstentionReason.CITATION_FAILURE,
                 domain=domain,
                 session_id=session_id,
             )
 
-        # Step 7: Calculate confidence
+        # Step 9: Claim verification
+        answer, claim_verifications, was_modified = self._claim_verifier.verify(answer, bundle)
+
+        # Step 10: Calculate claim-level confidence
         confidence, confidence_band = self._calculate_confidence(
             static_result, web_result, has_static, has_web,
+            claim_verifications,
         )
 
-        # Step 8: Build citations list
+        # Step 11: Build citations list
         citations = self._build_citations(all_chunks)
 
-        # Step 9: Prepare speech text
+        # Step 12: Prepare speech text
         speech_text = prepare_speech_text(answer)
         speech_segments = segment_speech(answer, lang)
 
-        # Step 10: Determine mode
+        # Step 13: Determine mode
         if has_static and has_web:
             mode = "dual_rag"
         elif has_static:
@@ -217,8 +216,8 @@ class RAGOrchestrator:
             mode = "web"
 
         logger.info(
-            "RAGOrchestrator response: confidence=%.2f band=%s mode=%s citations=%d",
-            confidence, confidence_band.value, mode, len(citations),
+            "RAGOrchestrator response: confidence=%.2f band=%s mode=%s citations=%d claim_verified=%s",
+            confidence, confidence_band.value, mode, len(citations), not was_modified,
         )
 
         return RAGResponse(
@@ -236,34 +235,56 @@ class RAGOrchestrator:
             conversation_id=session_id,
         )
 
-    def _run_pipelines(
+    async def _run_pipelines(
         self,
         english_query: str,
         embedding: list[float],
         domain: str,
         state: str | None,
-        query: str,
         classification: QueryClassification | None,
     ) -> tuple[RAGResult, RAGResult]:
-        """Run static and web RAG pipelines in parallel via ThreadPoolExecutor."""
-        with ThreadPoolExecutor(max_workers=2, thread_name_prefix="rag-orch") as executor:
-            static_future = executor.submit(
-                self._static_rag.retrieve,
-                embedding=embedding,
-                query=english_query,
-                domain=domain,
-                state=state,
-            )
-            web_future = executor.submit(
-                self._web_rag.retrieve,
-                query=english_query,
-                domain=domain,
-                state=state,
-                classification=classification,
-            )
+        """Run static and web RAG pipelines in parallel via asyncio.gather."""
+        static_coro = asyncio.to_thread(
+            self._static_rag.retrieve,
+            embedding=embedding,
+            query=english_query,
+            domain=domain,
+            state=state,
+        )
+        web_coro = asyncio.to_thread(
+            self._web_rag.retrieve,
+            query=english_query,
+            domain=domain,
+            state=state,
+            classification=classification,
+        )
 
-            static_result = static_future.result()
-            web_result = web_future.result()
+        results = await asyncio.gather(static_coro, web_coro, return_exceptions=True)
+
+        static_result: RAGResult
+        web_result: RAGResult
+
+        if isinstance(results[0], Exception):
+            logger.exception("Static RAG pipeline failed: %s", results[0])
+            static_result = RAGResult(
+                chunks=[],
+                abstained=True,
+                reason=AbstentionReason.PROVIDER_UNAVAILABLE,
+                domain=domain,
+            )
+        else:
+            static_result = results[0]
+
+        if isinstance(results[1], Exception):
+            logger.exception("Web RAG pipeline failed: %s", results[1])
+            web_result = RAGResult(
+                chunks=[],
+                abstained=True,
+                reason=AbstentionReason.PROVIDER_UNAVAILABLE,
+                domain=domain,
+            )
+        else:
+            web_result = results[1]
 
         return static_result, web_result
 
@@ -275,8 +296,6 @@ class RAGOrchestrator:
         """Merge evidence from both pipelines with equal priority.
 
         Static chunks come first (official documents), then web chunks.
-        Deduplication by chunk_id is not needed since the two pipelines
-        produce non-overlapping IDs.
         """
         merged = list(static_chunks) + list(web_chunks)
         logger.info(
@@ -284,74 +303,6 @@ class RAGOrchestrator:
             len(static_chunks), len(web_chunks), len(merged),
         )
         return merged
-
-    def _build_context(
-        self,
-        chunks: list[EvidenceChunk],
-        history: list[dict] | None,
-        english_query: str,
-    ) -> str:
-        """Build the context string from merged evidence chunks."""
-        if not chunks:
-            return "No evidence available."
-
-        parts: list[str] = []
-        for chunk in chunks:
-            short_id = chunk.chunk_id[:8]
-            if chunk.source_type == "static":
-                parts.append(
-                    f"[chunk:{short_id}] ({chunk.title} \u2014 {chunk.section} \u2014 p.{chunk.page})\n{chunk.content}"
-                )
-            else:
-                parts.append(
-                    f"[chunk:{short_id}] ({chunk.title} \u2014 web \u2014 {chunk.url})\n{chunk.content}"
-                )
-
-        return "\n\n---\n\n".join(parts)
-
-    def _build_prompt(
-        self,
-        english_query: str,
-        context: str,
-        history: list[dict] | None,
-        static_count: int,
-        web_count: int,
-    ) -> str:
-        """Build the user prompt for the LLM from context and history."""
-        hist_text = ""
-        if history:
-            turns = "\n".join(
-                f"{'User' if h.get('role') == 'user' else 'Assistant'}: {h.get('content', '')}"
-                for h in history
-                if isinstance(h, dict)
-            )
-            if turns:
-                hist_text = f"Previous conversation:\n{turns}\n\n"
-
-        source_hint: list[str] = []
-        if static_count > 0:
-            source_hint.append(f"{static_count} chunks from official documents")
-        if web_count > 0:
-            source_hint.append(f"{web_count} chunks from web sources")
-        source_str = " and ".join(source_hint) if source_hint else "no evidence sources"
-
-        lang_instruction = ""
-        if hasattr(self, '_user_lang') and self._user_lang and self._user_lang != "en":
-            lang_instruction = (
-                f"\n\nIMPORTANT: The user's language is '{self._user_lang}'. "
-                f"You MUST respond in this language. "
-                f"Do NOT respond in English."
-            )
-
-        return (
-            f"{hist_text}"
-            f"Question: {english_query}\n\n"
-            f"{context}\n\n"
-            f"Available sources: {source_str}\n"
-            f"Synthesize an answer using whichever evidence best answers the question. "
-            f"Combine evidence from multiple sources when it strengthens the answer."
-            f"{lang_instruction}"
-        )
 
     def _auto_append_citations(
         self,
@@ -412,10 +363,14 @@ class RAGOrchestrator:
         web_result: RAGResult,
         has_static: bool,
         has_web: bool,
+        claim_verifications: list | None = None,
     ) -> tuple[float, ConfidenceBand]:
-        """Compute confidence score and band from evidence.
+        """Compute claim-level confidence score and band from evidence.
 
-        Dual-source evidence gets a boost; single-source uses its own band.
+        After claim verification, confidence is adjusted based on:
+        - Number of unsupported claims (lower confidence)
+        - Number of filtered claims (lower confidence)
+        - Source quality (static + web dual-source boost)
         """
         # Static confidence from evidence gate band
         static_band = static_result.band
@@ -439,6 +394,16 @@ class RAGOrchestrator:
             confidence = web_conf
         else:
             confidence = 0.0
+
+        # Adjust confidence based on claim verification results
+        if claim_verifications is not None and len(claim_verifications) > 0:
+            unsupported = sum(1 for v in claim_verifications if not v.is_supported)
+            total_verified = len(claim_verifications)
+            if total_verified > 0:
+                # Each unsupported claim reduces confidence by a factor
+                unsupported_ratio = unsupported / total_verified
+                penalty = unsupported_ratio * 0.3  # up to 30% penalty
+                confidence = max(confidence - penalty, 0.0)
 
         # Map to band
         if confidence >= 0.7:

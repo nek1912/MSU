@@ -1,4 +1,4 @@
-"""Tests for RAGOrchestrator — dual-pipeline RAG with evidence merging."""
+"""Tests for RAGOrchestrator — async dual-pipeline RAG with evidence bundle + claim verification."""
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
@@ -10,9 +10,14 @@ from app.config import Settings
 from app.contracts import (
     AbstentionReason,
     ConfidenceBand,
+    ClaimVerification,
     EvidenceChunk,
+    EvidenceBundle,
+    QueryRequirements,
     RAGResponse,
     RAGResult,
+    StaticEvidence,
+    DynamicEvidence,
 )
 from app.llm_fallback import AllProvidersFailedError
 from app.services.rag_orchestrator import RAGOrchestrator
@@ -96,6 +101,32 @@ def _make_classification(
     )
 
 
+def _make_bundle(
+    static_chunks: list[EvidenceChunk] | None = None,
+    web_chunks: list[EvidenceChunk] | None = None,
+    requires_dynamic: bool = False,
+) -> EvidenceBundle:
+    """Create a minimal EvidenceBundle for claim verifier mocks."""
+    return EvidenceBundle(
+        static=StaticEvidence(
+            available=bool(static_chunks),
+            chunks=static_chunks or [],
+            summary="test static",
+        ),
+        dynamic=DynamicEvidence(
+            available=bool(web_chunks),
+            chunks=web_chunks or [],
+        ),
+        query_requirements=QueryRequirements(
+            temporal_scope="general",
+            geographic_scope="none",
+            required_specificity="general",
+            requires_dynamic=requires_dynamic,
+        ),
+        query="test query",
+    )
+
+
 # ---------------------------------------------------------------------------
 # Initialization
 # ---------------------------------------------------------------------------
@@ -118,13 +149,19 @@ class TestInitialization:
         assert orch._static_rag is not None
         assert orch._web_rag is not None
 
+    def test_initializes_evidence_controller(self):
+        settings = _make_settings()
+        orch = RAGOrchestrator(settings)
+        assert orch._evidence_controller is not None
+        assert orch._claim_verifier is not None
+
 
 # ---------------------------------------------------------------------------
 # Pipeline parallelism
 # ---------------------------------------------------------------------------
 
 class TestPipelineParallelism:
-    def test_both_pipelines_called(self):
+    async def test_both_pipelines_called(self):
         settings = _make_settings()
         orch = RAGOrchestrator(settings)
         classification = _make_classification()
@@ -138,11 +175,21 @@ class TestPipelineParallelism:
             band=ConfidenceBand.MEDIUM,
         )
 
+        bundle = _make_bundle(
+            static_chunks=[_make_evidence_chunk()],
+            web_chunks=[_make_evidence_chunk(source_type="web")],
+        )
+
         with patch.object(orch._static_rag, "retrieve", return_value=static_result) as mock_static, \
              patch.object(orch._web_rag, "retrieve", return_value=web_result) as mock_web, \
-             patch("app.services.rag_orchestrator.grounded_answer", return_value="Answer about PMFBY [chunk:chunk-abc12345]"):
+             patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
+             patch("app.services.rag_orchestrator.grounded_answer", return_value="Answer about PMFBY [chunk:chunk-abc12345]"), \
+             patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)), \
+             patch.object(orch._claim_verifier, "verify",
+                         return_value=("Answer about PMFBY [chunk:chunk-abc12345]", [], False)):
 
-            response = orch.run(
+            response = await orch.run(
                 query="What is PMFBY?",
                 english_query="What is PMFBY?",
                 embedding=[0.1] * 768,
@@ -164,7 +211,7 @@ class TestPipelineParallelism:
 # ---------------------------------------------------------------------------
 
 class TestAbstention:
-    def test_both_pipelines_abstained_returns_abstain(self):
+    async def test_both_pipelines_abstained_returns_abstain(self):
         settings = _make_settings()
         orch = RAGOrchestrator(settings)
 
@@ -182,7 +229,7 @@ class TestAbstention:
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result):
 
-            response = orch.run(
+            response = await orch.run(
                 query="What is the weather?",
                 english_query="What is the weather?",
                 embedding=[0.1] * 768,
@@ -199,7 +246,7 @@ class TestAbstention:
             assert response.citations == []
             assert response.answer
 
-    def test_static_abstained_web_has_chunks_proceeds(self):
+    async def test_static_abstained_web_has_chunks_proceeds(self):
         settings = _make_settings()
         orch = RAGOrchestrator(settings)
         classification = _make_classification()
@@ -215,12 +262,18 @@ class TestAbstention:
             band=ConfidenceBand.MEDIUM,
         )
 
+        bundle = _make_bundle(web_chunks=[_make_evidence_chunk(source_type="web")])
+
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
+             patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer", return_value="Web answer [chunk:chunk-abc12345]"), \
-             patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)):
+             patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)), \
+             patch.object(orch._claim_verifier, "verify",
+                         return_value=("Web answer [chunk:chunk-abc12345]", [], False)):
 
-            response = orch.run(
+            response = await orch.run(
                 query="Tell me about PMFBY",
                 english_query="Tell me about PMFBY",
                 embedding=[0.1] * 768,
@@ -235,7 +288,7 @@ class TestAbstention:
             assert response.abstained is False
             assert response.mode == "web"
 
-    def test_web_abstained_static_has_chunks_proceeds(self):
+    async def test_web_abstained_static_has_chunks_proceeds(self):
         settings = _make_settings()
         orch = RAGOrchestrator(settings)
         classification = _make_classification()
@@ -251,12 +304,18 @@ class TestAbstention:
             band=ConfidenceBand.LOW,
         )
 
+        bundle = _make_bundle(static_chunks=[_make_evidence_chunk()])
+
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
+             patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer", return_value="Static answer [chunk:chunk-abc12345]"), \
-             patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)):
+             patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)), \
+             patch.object(orch._claim_verifier, "verify",
+                         return_value=("Static answer [chunk:chunk-abc12345]", [], False)):
 
-            response = orch.run(
+            response = await orch.run(
                 query="PMFBY details",
                 english_query="PMFBY details",
                 embedding=[0.1] * 768,
@@ -305,92 +364,6 @@ class TestEvidenceMerging:
         merged = orch._merge_evidence([], chunks)
         assert len(merged) == 1
         assert merged[0].source_type == "web"
-
-
-# ---------------------------------------------------------------------------
-# Context building
-# ---------------------------------------------------------------------------
-
-class TestBuildContext:
-    def test_build_context_with_static_chunks(self):
-        orch = RAGOrchestrator(_make_settings())
-        chunks = [
-            _make_evidence_chunk(
-                chunk_id="abc12345def67890",
-                title="PMFBY Guide",
-                section="Premium",
-                page=5,
-                content="Premium is 2% for kharif.",
-            ),
-        ]
-        context = orch._build_context(chunks, None, "PMFBY premium")
-        assert "abc12345" in context
-        assert "Premium is 2% for kharif" in context
-        assert "PMFBY Guide" in context
-
-    def test_build_context_with_web_chunks(self):
-        orch = RAGOrchestrator(_make_settings())
-        chunks = [
-            _make_evidence_chunk(
-                chunk_id="web12345",
-                source_type="web",
-                title="Web Article",
-                url="https://example.com",
-                content="PMFBY coverage details.",
-            ),
-        ]
-        context = orch._build_context(chunks, None, "PMFBY coverage")
-        assert "web12345" in context
-        assert "Web Article" in context
-        assert "https://example.com" in context
-
-    def test_build_context_empty_chunks(self):
-        orch = RAGOrchestrator(_make_settings())
-        context = orch._build_context([], None, "query")
-        assert context == "No evidence available."
-
-    def test_build_context_with_history(self):
-        orch = RAGOrchestrator(_make_settings())
-        history = [
-            {"role": "user", "content": "What is PMFBY?"},
-            {"role": "assistant", "content": "PMFBY is a crop insurance scheme."},
-        ]
-        chunks = [_make_evidence_chunk()]
-        context = orch._build_context(chunks, history, "Tell me more")
-        assert "PMFBY" in context
-
-
-# ---------------------------------------------------------------------------
-# Prompt building
-# ---------------------------------------------------------------------------
-
-class TestBuildPrompt:
-    def test_prompt_contains_question(self):
-        orch = RAGOrchestrator(_make_settings())
-        prompt = orch._build_prompt("What is PMFBY?", "context", None, 1, 0)
-        assert "What is PMFBY?" in prompt
-
-    def test_prompt_contains_context(self):
-        orch = RAGOrchestrator(_make_settings())
-        prompt = orch._build_prompt("q", "some context text", None, 0, 0)
-        assert "some context text" in prompt
-
-    def test_prompt_contains_source_counts(self):
-        orch = RAGOrchestrator(_make_settings())
-        prompt = orch._build_prompt("q", "ctx", None, 3, 2)
-        assert "3 chunks from official documents" in prompt
-        assert "2 chunks from web sources" in prompt
-
-    def test_prompt_contains_history(self):
-        orch = RAGOrchestrator(_make_settings())
-        history = [{"role": "user", "content": "previous question"}]
-        prompt = orch._build_prompt("q", "ctx", history, 0, 0)
-        assert "previous question" in prompt
-
-    def test_prompt_no_history(self):
-        orch = RAGOrchestrator(_make_settings())
-        prompt = orch._build_prompt("q", "ctx", None, 0, 0)
-        assert "Previous conversation" not in prompt
 
 
 # ---------------------------------------------------------------------------
@@ -532,6 +505,29 @@ class TestCalculateConfidence:
         assert conf == 0.0
         assert band == ConfidenceBand.LOW
 
+    def test_unsupported_claims_reduce_confidence(self):
+        orch = RAGOrchestrator(_make_settings())
+        static = _make_rag_result(band=ConfidenceBand.HIGH)
+        web = _make_rag_result(band=ConfidenceBand.MEDIUM)
+        verifications = [
+            ClaimVerification(
+                claim_id="c1", claim_text="claim1", is_supported=True,
+                claim_type="static", source_type_needed="any",
+                evidence_found=True, evidence_ids=["e1"],
+            ),
+            ClaimVerification(
+                claim_id="c2", claim_text="claim2", is_supported=False,
+                claim_type="dynamic", source_type_needed="dynamic",
+                evidence_found=False, evidence_ids=[],
+            ),
+        ]
+        conf, band = orch._calculate_confidence(static, web, True, True, verifications)
+        # Base = (0.9 + 0.7) / 2 + 0.10 = 0.90
+        # Penalty: 1/2 * 0.3 = 0.15
+        # 0.90 - 0.15 = 0.75
+        assert conf == 0.75
+        assert band == ConfidenceBand.HIGH
+
 
 # ---------------------------------------------------------------------------
 # Abstain response
@@ -571,7 +567,7 @@ class TestAbstainResponse:
 # ---------------------------------------------------------------------------
 
 class TestLLMFailure:
-    def test_all_providers_failed_returns_abstain(self):
+    async def test_all_providers_failed_returns_abstain(self):
         settings = _make_settings()
         orch = RAGOrchestrator(settings)
         classification = _make_classification()
@@ -585,11 +581,15 @@ class TestLLMFailure:
             reason=AbstentionReason.NO_ELIGIBLE_SOURCE,
         )
 
+        bundle = _make_bundle(static_chunks=[_make_evidence_chunk()])
+
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
+             patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer", side_effect=AllProvidersFailedError("all failed")):
 
-            response = orch.run(
+            response = await orch.run(
                 query="PMFBY",
                 english_query="PMFBY",
                 embedding=[0.1] * 768,
@@ -610,7 +610,7 @@ class TestLLMFailure:
 # ---------------------------------------------------------------------------
 
 class TestFullPipeline:
-    def test_dual_rag_successful_flow(self):
+    async def test_dual_rag_successful_flow(self):
         settings = _make_settings()
         orch = RAGOrchestrator(settings)
         classification = _make_classification()
@@ -644,13 +644,19 @@ class TestFullPipeline:
             band=ConfidenceBand.MEDIUM,
         )
 
+        bundle = _make_bundle(static_chunks=static_chunks, web_chunks=web_chunks)
+
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
+             patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer",
                    return_value="PMFBY provides crop insurance with 2% premium [chunk:static-abc12345] and covers all food crops [chunk:web-abc12345]"), \
-             patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)):
+             patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)), \
+             patch.object(orch._claim_verifier, "verify",
+                         return_value=("PMFBY provides crop insurance with 2% premium [chunk:static-abc12345] and covers all food crops [chunk:web-abc12345]", [], False)):
 
-            response = orch.run(
+            response = await orch.run(
                 query="What is PMFBY?",
                 english_query="What is PMFBY?",
                 embedding=[0.1] * 768,
@@ -672,7 +678,7 @@ class TestFullPipeline:
             assert response.speech_text
             assert response.conversation_id == "sess-full-1"
 
-    def test_hindi_response_flow(self):
+    async def test_hindi_response_flow(self):
         settings = _make_settings()
         orch = RAGOrchestrator(settings)
 
@@ -683,13 +689,19 @@ class TestFullPipeline:
         )
         web_result = _make_rag_result(abstained=True)
 
+        bundle = _make_bundle(static_chunks=static_chunks)
+
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
+             patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer",
                    return_value="PMFBY is a crop insurance scheme [chunk:chunk-abc12345]"), \
-             patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)):
+             patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)), \
+             patch.object(orch._claim_verifier, "verify",
+                         return_value=("PMFBY is a crop insurance scheme [chunk:chunk-abc12345]", [], False)):
 
-            response = orch.run(
+            response = await orch.run(
                 query="PMFBY क्या है?",
                 english_query="What is PMFBY?",
                 embedding=[0.1] * 768,
@@ -710,7 +722,7 @@ class TestFullPipeline:
 # ---------------------------------------------------------------------------
 
 class TestCitationVerification:
-    def test_valid_citations_pass_verification(self):
+    async def test_valid_citations_pass_verification(self):
         """Valid citations from evidence pass verification and return normal response."""
         settings = _make_settings()
         orch = RAGOrchestrator(settings)
@@ -726,17 +738,23 @@ class TestCitationVerification:
         static_result = _make_rag_result(chunks=static_chunks, band=ConfidenceBand.HIGH)
         web_result = _make_rag_result(abstained=True)
 
+        bundle = _make_bundle(static_chunks=static_chunks)
+
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
+             patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer",
                    return_value="PMFBY premium is 2% [chunk:chunk-abc12345]"), \
-             patch("app.services.rag_orchestrator.verify_citations") as mock_verify:
+             patch("app.services.rag_orchestrator.verify_citations") as mock_verify, \
+             patch.object(orch._claim_verifier, "verify",
+                         return_value=("PMFBY premium is 2% [chunk:chunk-abc12345]", [], False)):
             mock_verify.return_value = VerificationResult(
                 is_valid=True,
                 valid_citations=[],
             )
 
-            response = orch.run(
+            response = await orch.run(
                 query="PMFBY premium",
                 english_query="PMFBY premium",
                 embedding=[0.1] * 768,
@@ -751,7 +769,7 @@ class TestCitationVerification:
             assert response.abstained is False
             mock_verify.assert_called_once()
 
-    def test_invalid_citations_return_abstained(self):
+    async def test_invalid_citations_return_abstained(self):
         """Invalid citations cause verification failure and return abstained response."""
         settings = _make_settings()
         orch = RAGOrchestrator(settings)
@@ -763,8 +781,12 @@ class TestCitationVerification:
         static_result = _make_rag_result(chunks=static_chunks, band=ConfidenceBand.HIGH)
         web_result = _make_rag_result(abstained=True)
 
+        bundle = _make_bundle(static_chunks=static_chunks)
+
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
+             patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer",
                    return_value="Some answer [chunk:fffffffffff]"), \
              patch("app.services.rag_orchestrator.verify_citations") as mock_verify:
@@ -774,7 +796,7 @@ class TestCitationVerification:
                 reason=AbstentionReason.CITATION_FAILURE,
             )
 
-            response = orch.run(
+            response = await orch.run(
                 query="test query",
                 english_query="test query",
                 embedding=[0.1] * 768,
@@ -790,7 +812,7 @@ class TestCitationVerification:
             assert response.confidence == 0.0
             assert response.citations == []
 
-    def test_verification_receives_all_chunk_ids(self):
+    async def test_verification_receives_all_chunk_ids(self):
         """Verification receives chunk IDs from all evidence chunks."""
         settings = _make_settings()
         orch = RAGOrchestrator(settings)
@@ -806,14 +828,20 @@ class TestCitationVerification:
         static_result = _make_rag_result(chunks=static_chunks, band=ConfidenceBand.HIGH)
         web_result = _make_rag_result(chunks=web_chunks, band=ConfidenceBand.MEDIUM)
 
+        bundle = _make_bundle(static_chunks=static_chunks, web_chunks=web_chunks)
+
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
+             patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer",
                    return_value="Answer [chunk:static-aaa11111] [chunk:web-ccc33333]"), \
-             patch("app.services.rag_orchestrator.verify_citations") as mock_verify:
+             patch("app.services.rag_orchestrator.verify_citations") as mock_verify, \
+             patch.object(orch._claim_verifier, "verify",
+                         return_value=("Answer [chunk:static-aaa11111] [chunk:web-ccc33333]", [], False)):
             mock_verify.return_value = VerificationResult(is_valid=True)
 
-            orch.run(
+            await orch.run(
                 query="test",
                 english_query="test",
                 embedding=[0.1] * 768,
@@ -831,7 +859,7 @@ class TestCitationVerification:
             assert "static-bbb22222" in chunk_ids
             assert "web-ccc33333" in chunk_ids
 
-    def test_auto_appended_citations_verified(self):
+    async def test_auto_appended_citations_verified(self):
         """Auto-appended citations also go through verification."""
         settings = _make_settings()
         orch = RAGOrchestrator(settings)
@@ -843,15 +871,21 @@ class TestCitationVerification:
         static_result = _make_rag_result(chunks=static_chunks, band=ConfidenceBand.HIGH)
         web_result = _make_rag_result(abstained=True)
 
+        bundle = _make_bundle(static_chunks=static_chunks)
+
         # LLM returns no citations, auto-append adds them, then verify
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
+             patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer",
                    return_value="PMFBY is crop insurance."), \
-             patch("app.services.rag_orchestrator.verify_citations") as mock_verify:
+             patch("app.services.rag_orchestrator.verify_citations") as mock_verify, \
+             patch.object(orch._claim_verifier, "verify",
+                         return_value=("PMFBY is crop insurance. [chunk:chunk-ab]", [], False)):
             mock_verify.return_value = VerificationResult(is_valid=True)
 
-            response = orch.run(
+            response = await orch.run(
                 query="PMFBY",
                 english_query="PMFBY",
                 embedding=[0.1] * 768,
@@ -869,3 +903,111 @@ class TestCitationVerification:
             # Auto-append truncates chunk_id to 8 chars: chunk-abc12345 -> chunk-ab
             assert "[chunk:chunk-ab]" in answer_arg
             assert response.abstained is False
+
+
+# ---------------------------------------------------------------------------
+# Claim verification integration
+# ---------------------------------------------------------------------------
+
+class TestClaimVerification:
+    async def test_unsupported_claims_reduce_confidence(self):
+        """Claims flagged as unsupported reduce overall confidence."""
+        settings = _make_settings()
+        orch = RAGOrchestrator(settings)
+        classification = _make_classification()
+
+        static_chunks = [_make_evidence_chunk()]
+        static_result = _make_rag_result(chunks=static_chunks, band=ConfidenceBand.HIGH)
+        web_result = _make_rag_result(abstained=True)
+
+        bundle = _make_bundle(static_chunks=static_chunks)
+
+        verifications = [
+            ClaimVerification(
+                claim_id="c1", claim_text="PMFBY premium is 2%",
+                is_supported=True, claim_type="static",
+                source_type_needed="any", evidence_found=True,
+                evidence_ids=["chunk-abc12"],
+            ),
+            ClaimVerification(
+                claim_id="c2", claim_text="PMFBY covers all crops in 2026",
+                is_supported=False, claim_type="dynamic",
+                source_type_needed="dynamic", evidence_found=False,
+                evidence_ids=[],
+            ),
+        ]
+
+        with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
+             patch.object(orch._web_rag, "retrieve", return_value=web_result), \
+             patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
+             patch("app.services.rag_orchestrator.grounded_answer",
+                   return_value="PMFBY premium is 2% [chunk:chunk-abc12345]. PMFBY covers all crops in 2026 [chunk:chunk-abc12345]."), \
+             patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)), \
+             patch.object(orch._claim_verifier, "verify",
+                         return_value=("PMFBY premium is 2% [chunk:chunk-abc12345]. PMFBY covers all crops in 2026 [chunk:chunk-abc12345].", verifications, True)):
+
+            response = await orch.run(
+                query="PMFBY details",
+                english_query="PMFBY details",
+                embedding=[0.1] * 768,
+                domain="pmfby",
+                state=None,
+                classification=classification,
+                history=None,
+                lang="en",
+                session_id="sess-claim-1",
+            )
+
+            # Confidence should be lower due to unsupported claim
+            # Base static = 0.9, penalty = 1/2 * 0.3 = 0.15, final = 0.75
+            assert response.confidence == 0.75
+            assert response.confidence_level == ConfidenceBand.HIGH
+
+    async def test_claim_verifier_filters_unsupported(self):
+        """Claim verifier removes unsupported claims from answer."""
+        settings = _make_settings()
+        orch = RAGOrchestrator(settings)
+        classification = _make_classification()
+
+        static_chunks = [_make_evidence_chunk()]
+        static_result = _make_rag_result(chunks=static_chunks, band=ConfidenceBand.HIGH)
+        web_result = _make_rag_result(abstained=True)
+
+        bundle = _make_bundle(static_chunks=static_chunks)
+
+        verifications = [
+            ClaimVerification(
+                claim_id="c1", claim_text="Some unsupported claim",
+                is_supported=False, claim_type="dynamic",
+                source_type_needed="dynamic", evidence_found=False,
+                evidence_ids=[],
+            ),
+        ]
+
+        with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
+             patch.object(orch._web_rag, "retrieve", return_value=web_result), \
+             patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
+             patch("app.services.rag_orchestrator.grounded_answer",
+                   return_value="Some unsupported claim [chunk:chunk-abc12345]"), \
+             patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)), \
+             patch.object(orch._claim_verifier, "verify",
+                         return_value=("Filtered answer", verifications, True)):
+
+            response = await orch.run(
+                query="test",
+                english_query="test",
+                embedding=[0.1] * 768,
+                domain="pmfby",
+                state=None,
+                classification=classification,
+                history=None,
+                lang="en",
+                session_id="sess-claim-2",
+            )
+
+            # The answer should be the filtered one from ClaimVerifier
+            assert response.answer == "Filtered answer"
+            # Confidence should be reduced due to unsupported claim
+            assert response.confidence < 0.9

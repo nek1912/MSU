@@ -92,7 +92,7 @@ class TestChatEndpoint:
         mock_anchor.return_value.classify.return_value = ("pmfby", 0.9)
         mock_anchor.return_value.rules = {}
         mock_classifier.return_value.classify.return_value = _make_classification()
-        mock_orchestrator.return_value.run.return_value = _make_rag_response()
+        mock_orchestrator.return_value.run = AsyncMock(return_value=_make_rag_response())
 
         resp = client.post("/chat", json={
             "question": "What is PMFBY?",
@@ -221,9 +221,9 @@ class TestChatEndpoint:
         mock_anchor.return_value.classify.return_value = ("pmfby", 0.9)
         mock_anchor.return_value.rules = {}
         mock_classifier.return_value.classify.return_value = _make_classification()
-        mock_orchestrator.return_value.run.return_value = _make_rag_response(
+        mock_orchestrator.return_value.run = AsyncMock(return_value=_make_rag_response(
             answer="No answer found.", abstained=True, confidence=0.0, citations=[],
-        )
+        ))
 
         resp = client.post("/chat", json={
             "question": "What is XYZ?",
@@ -259,7 +259,7 @@ class TestChatEndpoint:
         mock_anchor.return_value.classify.return_value = ("pmfby", 0.9)
         mock_anchor.return_value.rules = {}
         mock_classifier.return_value.classify.return_value = _make_classification()
-        mock_orchestrator.return_value.run.return_value = _make_rag_response()
+        mock_orchestrator.return_value.run = AsyncMock(return_value=_make_rag_response())
         mock_translate_back.return_value = "PMFBY एक फसल बीमा योजना है।"
 
         resp = client.post("/chat", json={
@@ -295,7 +295,7 @@ class TestChatEndpoint:
         mock_anchor.return_value.classify.return_value = ("pmfby", 0.9)
         mock_anchor.return_value.rules = {}
         mock_classifier.return_value.classify.return_value = _make_classification()
-        mock_orchestrator.return_value.run.side_effect = RuntimeError("LLM failed")
+        mock_orchestrator.return_value.run = AsyncMock(side_effect=RuntimeError("LLM failed"))
 
         resp = client.post("/chat", json={
             "question": "What is PMFBY?",
@@ -336,7 +336,7 @@ class TestChatStreamEndpoint:
         mock_anchor.return_value.classify.return_value = ("pmfby", 0.9)
         mock_anchor.return_value.rules = {}
         mock_classifier.return_value.classify.return_value = _make_classification()
-        mock_orchestrator.return_value.run.return_value = _make_rag_response()
+        mock_orchestrator.return_value.run = AsyncMock(return_value=_make_rag_response())
 
         resp = client.post("/chat/stream", json={
             "question": "What is PMFBY?",
@@ -460,7 +460,7 @@ class TestContextDisambiguation:
         mock_anchor.return_value = anchor_mock
 
         mock_classifier.return_value.classify.return_value = _make_classification()
-        mock_orchestrator.return_value.run.return_value = _make_rag_response()
+        mock_orchestrator.return_value.run = AsyncMock(return_value=_make_rag_response())
 
         resp = client.post("/chat", json={
             "question": "What is the premium?",
@@ -530,3 +530,4 @@ class TestConfidenceLevel:
     def test_none(self):
         from app.routes.chat import _confidence_level
         assert _confidence_level(0.0) == "none"
+

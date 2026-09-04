@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 
 DATA_DIR = Path(__file__).parent.parent / "data"
-DOMAIN_FLOOR = 0.45  # provisional; calibrated in Phase 4 alongside retrieval gates
+DOMAIN_FLOOR = 0.30  # lowered to be more lenient with domain classification
 
 
 def load_rules(path: Path = DATA_DIR / "keyword_rules.json") -> dict[str, list[str]]:
@@ -37,10 +37,25 @@ class AnchorStore:
 def load_anchor_store(embed_texts, rules_path: Path = DATA_DIR / "keyword_rules.json",
                       anchors_path: Path = DATA_DIR / "domain_anchors.json") -> AnchorStore:
     anchors = json.loads(anchors_path.read_text(encoding="utf-8"))
+    
+    # Batch all phrases into a single embedding call for efficiency
+    all_phrases = []
+    domain_phrase_counts = {}
+    for domain, phrases in anchors.items():
+        domain_phrase_counts[domain] = len(all_phrases)
+        all_phrases.extend(phrases)
+    
+    # Single batch embedding call
+    all_vecs = np.asarray(embed_texts(all_phrases), dtype=float)
+    
+    # Split back by domain and compute mean vectors
     domain_vectors = {}
     for domain, phrases in anchors.items():
-        vecs = np.asarray(embed_texts(phrases), dtype=float)
-        domain_vectors[domain] = vecs.mean(axis=0)  # average per domain
+        start_idx = domain_phrase_counts[domain]
+        end_idx = start_idx + len(phrases)
+        vecs = all_vecs[start_idx:end_idx]
+        domain_vectors[domain] = vecs.mean(axis=0)
+    
     return AnchorStore(load_rules(rules_path), domain_vectors)
 
 

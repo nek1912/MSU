@@ -22,6 +22,20 @@ import { createSpeechService, speakSegments } from "@/lib/speech";
 import { EvidenceBand } from "@/components/EvidenceBand";
 import { evidenceBand } from "@/lib/band";
 
+function cleanAnswerText(text: string): string {
+  if (!text) return text;
+  let cleaned = text;
+
+  // Remove ALL chunk citation patterns (any format, case-insensitive)
+  // Matches: [chunk:xxx], (chunk:xxx), [Chunk:xxx], [CHUNK:xxx]
+  // where xxx can be any characters (hex, web_ prefix, UUIDs, empty, etc.)
+  cleaned = cleaned.replace(/\[chunk:[^\]]*\]/gi, '');
+  cleaned = cleaned.replace(/\(chunk:[^\)]*\)/gi, '');
+
+  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+  return cleaned;
+}
+
 export function MessageBubble({ resp, isStreaming = false }: { resp: ChatResponse; isStreaming?: boolean }) {
   const { t } = useI18n();
   const speech = useMemo(() => createSpeechService(), []);
@@ -46,7 +60,8 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
       if (hasSegments) {
         await speakSegments(segments);
       } else {
-        await speech.speak(resp.answer.replace(/\[chunk:[a-f0-9]+\]/g, "").trim(), resp.language);
+        const cleanText = cleanAnswerText(resp.answer);
+        await speech.speak(cleanText, resp.language);
       }
     } finally {
       setSpeaking(false);
@@ -54,7 +69,7 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
   }
 
   function handleCopy() {
-    const cleanText = resp.answer.replace(/\[chunk:[a-f0-9]+\]/g, "").trim();
+    const cleanText = cleanAnswerText(resp.answer);
     navigator.clipboard.writeText(cleanText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -95,7 +110,7 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
         {/* Answer Content */}
         <div className={`font-answer text-sm sm:text-base leading-relaxed text-[var(--ink)] prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-[var(--ink)] prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-strong:text-[var(--ink)] prose-table:text-xs prose-th:font-semibold prose-td:py-1 prose-th:py-1 prose-pre:bg-[var(--dark)] prose-pre:text-[var(--on-dark-strong)] prose-code:text-[var(--accent-primary)] ${isStreaming ? "streaming-text" : ""}`}>
           <Markdown remarkPlugins={[remarkGfm]}>
-            {resp.answer.replace(/\[chunk:[a-f0-9]+\]/g, "").trim()}
+            {cleanAnswerText(resp.answer)}
           </Markdown>
         </div>
         {isStreaming && (

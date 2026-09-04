@@ -27,13 +27,24 @@ function cleanAnswerText(text: string): string {
   let cleaned = text;
 
   // Remove ALL chunk citation patterns (any format, case-insensitive)
-  // Matches: [chunk:xxx], (chunk:xxx), [Chunk:xxx], [CHUNK:xxx]
-  // where xxx can be any characters (hex, web_ prefix, UUIDs, empty, etc.)
   cleaned = cleaned.replace(/\[chunk:[^\]]*\]/gi, '');
   cleaned = cleaned.replace(/\(chunk:[^\)]*\)/gi, '');
 
   // Fix escaped asterisks from LLM (e.g., \*\*text\*\* -> **text**)
   cleaned = cleaned.replace(/\\\*/g, '*');
+
+  // Strip all markdown formatting — render as plain text for rural users
+  // **bold** -> bold, *italic* -> italic, remove stray asterisks
+  cleaned = cleaned.replace(/\*\*([^*]+)\*\*/g, '$1');
+  cleaned = cleaned.replace(/\*([^*]+)\*/g, '$1');
+  // Remove any remaining stray asterisks
+  cleaned = cleaned.replace(/\*/g, '');
+
+  // Convert markdown bullet lists to plain text with bullet characters
+  cleaned = cleaned.replace(/^[\s]*[-*+]\s+/gm, '• ');
+
+  // Convert markdown numbered lists to plain text
+  cleaned = cleaned.replace(/^[\s]*\d+\.\s+/gm, (match) => match.replace(/\d+\./, '•'));
 
   cleaned = cleaned.replace(/\s+/g, ' ').trim();
   return cleaned;

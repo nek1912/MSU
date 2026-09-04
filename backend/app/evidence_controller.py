@@ -371,6 +371,7 @@ class EvidenceController:
             f"3. Include [chunk:ID] citations for every factual claim.\n"
             f"4. If evidence is limited, answer only what is directly supported.\n"
             f"5. Use simple, clear language for ordinary citizens.\n"
+            f"6. Do NOT use markdown formatting (no bold, italic, asterisks, or bullet symbols). Write plain text only.\n"
         )
 
         return system_prompt, user_prompt

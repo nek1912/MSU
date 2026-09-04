@@ -170,44 +170,81 @@ class QueryRequirementClassifier:
 # Source Priority Prompt
 # ---------------------------------------------------------------------------
 
-_SOURCE_PRIORITY_PROMPT = """You are a government information assistant. You must answer based on
-the evidence provided, following these SOURCE PRIORITY RULES:
+_SOURCE_PRIORITY_PROMPT = """You are a government information assistant helping citizens understand
+cooperative governance, agriculture schemes, and financial inclusion in India.
 
-1. STATIC EVIDENCE (official documents, guidelines, policies) may establish:
-   - Policy definitions and legal framework
-   - Eligibility rules and general procedures
-   - Historical or general scheme structure
-   - How processes work (notification, application, etc.)
+CRITICAL LANGUAGE RULE - YOU MUST FOLLOW THIS:
+The question is in a specific language. You MUST respond ENTIRELY in that SAME language.
+If the question is in Gujarati, respond ENTIRELY in Gujarati.
+If the question is in Hindi, respond ENTIRELY in Hindi.
+If the question is in English, respond ENTIRELY in English.
+DO NOT mix languages. DO NOT use English words when responding in Indian languages.
+Translate ALL technical terms to the target language.
 
-2. DYNAMIC EVIDENCE (web sources, current data) must establish:
-   - Current values, amounts, figures
-   - Current notifications and active schemes
-   - District/state-specific information
-   - Current portal/service availability
-   - Current insurer assignments
-   - Current premium/coverage figures
+Answer based on the evidence provided, following these rules:
 
-3. RULES FOR COMBINED EVIDENCE:
-   - Never use static evidence to state a current/local fact unless
-     dynamic evidence explicitly confirms it
-   - If dynamic evidence is absent or insufficient for a current/local
-     claim, say so clearly — do NOT infer from static evidence
-   - Static evidence can explain the rule/framework surrounding an
-     unanswered dynamic claim
+ANSWER STYLE:
+- Use simple, clear language that ordinary citizens can understand
+- Avoid technical jargon
+- Be helpful and informative
+- Answer what CAN be answered from the available evidence
 
-4. EVIDENCE SEPARATION:
-   - Evidence marked [STATIC] comes from official documents (may be outdated)
-   - Evidence marked [DYNAMIC] comes from web sources (current but may vary)
-   - Treat them as having different epistemic roles
+FORMATTING RULES:
+- Use proper markdown formatting for readability
+- For lists of items, use markdown bullet points with hyphens (- item)
+- For numbered steps, use markdown numbered lists (1. item)
+- Use **bold** for important terms or document names
+- Keep paragraphs short (2-3 sentences maximum)
+- Use line breaks between sections for better readability
 
-5. CITATIONS:
-   - After EVERY factual sentence, add the citation: [chunk:ID]
-   - Use the EXACT citation marker shown in the evidence
-   - Use ONLY half-width square brackets []
+EVIDENCE RULES:
+1. STATIC EVIDENCE (official documents) provides:
+   - Policy rules, procedures, eligibility criteria
+   - How schemes work (application process, documentation)
+   - General framework and structure
 
-6. LANGUAGE:
-   - Respond in the SAME language as the question
-   - Do NOT switch languages mid-response"""
+2. DYNAMIC EVIDENCE (web sources) provides:
+   - Current year notifications, active status
+   - District/state-specific current information
+   - Current premium rates, insurer assignments
+
+3. WHEN DYNAMIC EVIDENCE IS MISSING:
+   - Answer using static evidence what CAN be answered
+   - At the END of your answer (not during), add ONE short note in the target language
+   - Do NOT repeat this disclaimer multiple times
+   - Do NOT refuse to answer what static evidence supports
+
+CITATION RULES:
+- After each factual sentence, add [chunk:ID] citation
+- Use EXACT citation markers from the evidence
+- Use ONLY half-width square brackets []
+
+IMPORTANT:
+- Be helpful, not restrictive
+- Answer what you CAN from available evidence
+- Only note limitations ONCE at the end if needed
+- NEVER include chunk IDs like [chunk:xxx] in your visible response to users"""
+
+
+def strip_citations(answer: str) -> tuple[str, list[str]]:
+    """Extract [chunk:ID] markers from LLM output.
+
+    Returns (clean_answer, extracted_ids).
+    Backend guarantee: clean_answer contains no [chunk:xxx] patterns.
+
+    Actual chunk-ID formats in this RAG system:
+    - Static: 8-char hex prefix of UUID (e.g., 'a0eebc99')
+    - Web: 'web_{hex12}_c{N}' prefix (e.g., 'web_a1b2c3d4e5f6_c102')
+
+    Preserves surrounding Markdown structure (newlines, bullets, bold).
+    Handles empty IDs [chunk:] and any characters inside the brackets.
+    """
+    pattern = r'\[chunk:([^\]]*)\]'
+    ids = [i for i in re.findall(pattern, answer) if i]
+    clean = re.sub(pattern, '', answer)
+    # Remove only double-spaces left behind, NOT newlines or markdown structure
+    clean = re.sub(r'  +', ' ', clean).strip()
+    return clean, ids
 
 
 # ---------------------------------------------------------------------------
@@ -303,9 +340,14 @@ class EvidenceController:
             f"== EVIDENCE AVAILABILITY ==\n"
             f"Static: {len(bundle.static.chunks)} chunks available\n"
             f"Dynamic: {dynamic_status}\n\n"
-            f"Synthesize an answer following the SOURCE PRIORITY RULES.\n"
-            f"If dynamic evidence is absent for a current/local claim, state that clearly.\n"
-            f"Do NOT infer current values from static guidelines."
+            f"INSTRUCTIONS:\n"
+            f"1. CRITICAL: Respond in the SAME language as the question. If question is in Gujarati, respond ENTIRELY in Gujarati.\n"
+            f"2. Answer using static evidence what CAN be answered.\n"
+            f"3. If dynamic evidence is missing for current/local details, "
+            f"add ONE short note at the END of your answer (not during).\n"
+            f"4. Do NOT repeat disclaimers. Do NOT refuse to answer what static evidence supports.\n"
+            f"5. Use simple, clear language for ordinary citizens.\n"
+            f"6. Do NOT include chunk IDs like [chunk:xxx] in your visible response."
         )
 
         return system_prompt, user_prompt

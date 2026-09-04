@@ -145,10 +145,37 @@ def detect_query_languages(text: str) -> dict:
             dominant = "mr" if _stopword_bias(text, "mr") > _stopword_bias(text, "hi") else "hi"
     elif latin_letters:
         dominant = "en"
+    language_mix = None
+    if len(languages) > 1:
+        ratios_mix = _script_ratios(text)
+        letters = [c for c in text if c.isalpha()]
+        if letters:
+            ratios_mix["latin"] = len([c for c in letters if c.isascii()]) / len(letters)
+        script_to_lang = {
+            "devanagari": "hi",
+            "gujarati": "gu",
+            "bengali": "bn",
+            "tamil": "ta",
+            "telugu": "te",
+            "kannada": "kn",
+            "gurmukhi": "pa",
+            "odia": "or",
+            "malayalam": "ml",
+            "latin": "en",
+        }
+        mix = {}
+        for script, ratio in ratios_mix.items():
+            if ratio >= 0.15:
+                lang_code = script_to_lang.get(script)
+                if lang_code:
+                    mix[lang_code] = round(ratio, 2)
+        if len(mix) >= 2:
+            language_mix = mix
     return {
         "languages": languages,
         "dominant": dominant,
         "explicit_request": _detect_explicit_request(text),
+        "language_mix": language_mix,
     }
 
 

@@ -8,9 +8,12 @@ import re
 
 from app.contracts import (
     DynamicEvidence,
+    EvidenceAssessment,
     EvidenceBundle,
+    EvidenceSufficiency,
     QueryRequirements,
     RAGResult,
+    SourceRole,
     StaticEvidence,
 )
 
@@ -351,3 +354,119 @@ class EvidenceController:
         )
 
         return system_prompt, user_prompt
+
+    def assess_evidence(
+        self,
+        static_result: RAGResult,
+        web_result: RAGResult,
+        query_requirements: QueryRequirements,
+    ) -> EvidenceAssessment:
+        """Assess evidence quality and determine source priority.
+
+        Source-role rules override raw retrieval scores.
+        """
+        source_role = self._determine_source_role(query_requirements)
+        static_quality = self._score_quality(static_result.chunks)
+        web_quality = self._score_quality(web_result.chunks)
+        sufficiency = self._check_sufficiency(static_result, web_result, source_role)
+        assessment_text = self._generate_assessment_text(
+            source_role, sufficiency, static_quality, web_quality,
+        )
+        return EvidenceAssessment(
+            source_role=source_role,
+            sufficiency=sufficiency,
+            static_quality=static_quality,
+            web_quality=web_quality,
+            assessment_text=assessment_text,
+        )
+
+    # -- private helpers ----------------------------------------------------
+
+    def _determine_source_role(self, qr: QueryRequirements) -> SourceRole:
+        """Which source SHOULD have the answer based on query type."""
+        if qr.requires_dynamic and qr.temporal_scope in ("current",):
+            return SourceRole.WEB_PRIMARY
+        if qr.temporal_scope == "general" and not qr.requires_dynamic:
+            return SourceRole.STATIC_PRIMARY
+        if qr.temporal_scope == "historical":
+            return SourceRole.STATIC_PRIMARY
+        if qr.temporal_scope not in ("general", "historical", "current"):
+            # Explicit year (e.g. "2023") — prefer static with period-matching
+            return SourceRole.STATIC_PRIMARY
+        return SourceRole.BALANCED
+
+    def _score_quality(self, chunks: list) -> str:
+        """Score evidence quality based on retrieval scores."""
+        if not chunks:
+            return "low"
+        high_scores = sum(1 for c in chunks if (c.dense_score or 0) >= 0.7)
+        ratio = high_scores / len(chunks) if chunks else 0
+        if ratio >= 0.5:
+            return "high"
+        if ratio >= 0.2:
+            return "medium"
+        return "low"
+
+    def _check_sufficiency(
+        self,
+        static_result: RAGResult,
+        web_result: RAGResult,
+        source_role: SourceRole,
+    ) -> EvidenceSufficiency:
+        """Check if evidence is sufficient to answer the query.
+
+        Considers: source-role match, retrieval quality, chunk count.
+        Two irrelevant chunks are NOT sufficient. One highly authoritative
+        chunk can be more useful than five generic ones.
+        """
+        static_count = len(static_result.chunks)
+        web_count = len(web_result.chunks)
+        total = static_count + web_count
+
+        if total == 0:
+            return EvidenceSufficiency.EMPTY
+
+        static_high = sum(1 for c in static_result.chunks if (c.dense_score or 0) >= 0.5)
+        web_high = sum(1 for c in web_result.chunks if (c.dense_score or 0) >= 0.5)
+
+        if source_role == SourceRole.WEB_PRIMARY:
+            if web_high >= 2:
+                return EvidenceSufficiency.SUFFICIENT
+            if web_high >= 1 or web_count >= 1:
+                return EvidenceSufficiency.PARTIAL
+            return EvidenceSufficiency.INSUFFICIENT
+
+        if source_role == SourceRole.STATIC_PRIMARY:
+            if static_high >= 2:
+                return EvidenceSufficiency.SUFFICIENT
+            if static_high >= 1 or static_count >= 1:
+                return EvidenceSufficiency.PARTIAL
+            return EvidenceSufficiency.INSUFFICIENT
+
+        # BALANCED
+        if (static_high + web_high) >= 3:
+            return EvidenceSufficiency.SUFFICIENT
+        if total >= 2:
+            return EvidenceSufficiency.PARTIAL
+        return EvidenceSufficiency.INSUFFICIENT
+
+    def _generate_assessment_text(
+        self,
+        source_role: SourceRole,
+        sufficiency: EvidenceSufficiency,
+        static_quality: str,
+        web_quality: str,
+    ) -> str:
+        """Generate human-readable assessment for the prompt."""
+        role_text = {
+            SourceRole.STATIC_PRIMARY: "Static evidence (official documents) is the primary source for this query.",
+            SourceRole.WEB_PRIMARY: "Dynamic evidence (web sources) is the primary source for this query.",
+            SourceRole.BALANCED: "Both static and dynamic evidence are relevant.",
+        }
+        sufficiency_text = {
+            EvidenceSufficiency.SUFFICIENT: "Evidence is sufficient to answer.",
+            EvidenceSufficiency.PARTIAL: "Evidence partially covers the query. Fill gaps carefully.",
+            EvidenceSufficiency.INSUFFICIENT: "Limited evidence available. Answer only what is directly supported.",
+            EvidenceSufficiency.EMPTY: "No relevant evidence found. Do not generate a general knowledge answer.",
+        }
+        return f"{role_text[source_role]} {sufficiency_text[sufficiency]}"

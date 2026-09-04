@@ -19,6 +19,7 @@ from app.contracts import (
     StaticEvidence,
     DynamicEvidence,
 )
+from app.contracts import EvidenceAssessment, EvidenceSufficiency, SourceRole
 from app.llm_fallback import AllProvidersFailedError
 from app.services.rag_orchestrator import RAGOrchestrator
 from app.web_rag.query_classifier import QueryClassification
@@ -36,6 +37,8 @@ def _make_settings(**overrides) -> Settings:
         "supabase_url": "https://test.supabase.co",
         "supabase_service_key": "test-key",
         "reranker_enabled": False,
+        "sarvam_api_key": "",
+        "sarvam_api_key_2": "",
     }
     defaults.update(overrides)
     return Settings(**defaults)
@@ -183,11 +186,16 @@ class TestPipelineParallelism:
         with patch.object(orch._static_rag, "retrieve", return_value=static_result) as mock_static, \
              patch.object(orch._web_rag, "retrieve", return_value=web_result) as mock_web, \
              patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "assess_evidence", return_value=EvidenceAssessment(
+                 source_role=SourceRole.BALANCED, sufficiency=EvidenceSufficiency.SUFFICIENT,
+                 static_quality="high", web_quality="medium", assessment_text="test"
+             )), \
              patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer", return_value="Answer about PMFBY [chunk:chunk-abc12345]"), \
              patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)), \
+             patch("app.services.rag_orchestrator.strip_citations", return_value=("Answer about PMFBY", ["chunk-abc12345"])), \
              patch.object(orch._claim_verifier, "verify",
-                         return_value=("Answer about PMFBY [chunk:chunk-abc12345]", [], False)):
+                         return_value=("Answer about PMFBY", [], False)):
 
             response = await orch.run(
                 query="What is PMFBY?",
@@ -267,11 +275,16 @@ class TestAbstention:
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
              patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "assess_evidence", return_value=EvidenceAssessment(
+                 source_role=SourceRole.WEB_PRIMARY, sufficiency=EvidenceSufficiency.SUFFICIENT,
+                 static_quality="low", web_quality="medium", assessment_text="test"
+             )), \
              patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer", return_value="Web answer [chunk:chunk-abc12345]"), \
              patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)), \
+             patch("app.services.rag_orchestrator.strip_citations", return_value=("Web answer", ["chunk-abc12345"])), \
              patch.object(orch._claim_verifier, "verify",
-                         return_value=("Web answer [chunk:chunk-abc12345]", [], False)):
+                         return_value=("Web answer", [], False)):
 
             response = await orch.run(
                 query="Tell me about PMFBY",
@@ -309,11 +322,16 @@ class TestAbstention:
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
              patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "assess_evidence", return_value=EvidenceAssessment(
+                 source_role=SourceRole.STATIC_PRIMARY, sufficiency=EvidenceSufficiency.SUFFICIENT,
+                 static_quality="high", web_quality="low", assessment_text="test"
+             )), \
              patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer", return_value="Static answer [chunk:chunk-abc12345]"), \
              patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)), \
+             patch("app.services.rag_orchestrator.strip_citations", return_value=("Static answer", ["chunk-abc12345"])), \
              patch.object(orch._claim_verifier, "verify",
-                         return_value=("Static answer [chunk:chunk-abc12345]", [], False)):
+                         return_value=("Static answer", [], False)):
 
             response = await orch.run(
                 query="PMFBY details",
@@ -586,6 +604,10 @@ class TestLLMFailure:
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
              patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "assess_evidence", return_value=EvidenceAssessment(
+                 source_role=SourceRole.STATIC_PRIMARY, sufficiency=EvidenceSufficiency.SUFFICIENT,
+                 static_quality="high", web_quality="low", assessment_text="test"
+             )), \
              patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer", side_effect=AllProvidersFailedError("all failed")):
 
@@ -649,12 +671,19 @@ class TestFullPipeline:
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
              patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "assess_evidence", return_value=EvidenceAssessment(
+                 source_role=SourceRole.BALANCED, sufficiency=EvidenceSufficiency.SUFFICIENT,
+                 static_quality="high", web_quality="medium", assessment_text="test"
+             )), \
              patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer",
                    return_value="PMFBY provides crop insurance with 2% premium [chunk:static-abc12345] and covers all food crops [chunk:web-abc12345]"), \
              patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)), \
+             patch("app.services.rag_orchestrator.strip_citations",
+                   return_value=("PMFBY provides crop insurance with 2% premium and covers all food crops",
+                                 ["static-abc12345", "web-abc12345"])), \
              patch.object(orch._claim_verifier, "verify",
-                         return_value=("PMFBY provides crop insurance with 2% premium [chunk:static-abc12345] and covers all food crops [chunk:web-abc12345]", [], False)):
+                         return_value=("PMFBY provides crop insurance with 2% premium and covers all food crops", [], False)):
 
             response = await orch.run(
                 query="What is PMFBY?",
@@ -694,12 +723,18 @@ class TestFullPipeline:
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
              patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "assess_evidence", return_value=EvidenceAssessment(
+                 source_role=SourceRole.STATIC_PRIMARY, sufficiency=EvidenceSufficiency.SUFFICIENT,
+                 static_quality="high", web_quality="low", assessment_text="test"
+             )), \
              patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer",
                    return_value="PMFBY is a crop insurance scheme [chunk:chunk-abc12345]"), \
              patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)), \
+             patch("app.services.rag_orchestrator.strip_citations",
+                   return_value=("PMFBY is a crop insurance scheme", ["chunk-abc12345"])), \
              patch.object(orch._claim_verifier, "verify",
-                         return_value=("PMFBY is a crop insurance scheme [chunk:chunk-abc12345]", [], False)):
+                         return_value=("PMFBY is a crop insurance scheme", [], False)):
 
             response = await orch.run(
                 query="PMFBY क्या है?",
@@ -743,12 +778,18 @@ class TestCitationVerification:
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
              patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "assess_evidence", return_value=EvidenceAssessment(
+                 source_role=SourceRole.STATIC_PRIMARY, sufficiency=EvidenceSufficiency.SUFFICIENT,
+                 static_quality="high", web_quality="low", assessment_text="test"
+             )), \
              patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer",
                    return_value="PMFBY premium is 2% [chunk:chunk-abc12345]"), \
              patch("app.services.rag_orchestrator.verify_citations") as mock_verify, \
+             patch("app.services.rag_orchestrator.strip_citations",
+                   return_value=("PMFBY premium is 2%", ["chunk-abc12345"])), \
              patch.object(orch._claim_verifier, "verify",
-                         return_value=("PMFBY premium is 2% [chunk:chunk-abc12345]", [], False)):
+                         return_value=("PMFBY premium is 2%", [], False)):
             mock_verify.return_value = VerificationResult(
                 is_valid=True,
                 valid_citations=[],
@@ -786,6 +827,10 @@ class TestCitationVerification:
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
              patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "assess_evidence", return_value=EvidenceAssessment(
+                 source_role=SourceRole.STATIC_PRIMARY, sufficiency=EvidenceSufficiency.SUFFICIENT,
+                 static_quality="high", web_quality="low", assessment_text="test"
+             )), \
              patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer",
                    return_value="Some answer [chunk:fffffffffff]"), \
@@ -833,12 +878,18 @@ class TestCitationVerification:
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
              patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "assess_evidence", return_value=EvidenceAssessment(
+                 source_role=SourceRole.BALANCED, sufficiency=EvidenceSufficiency.SUFFICIENT,
+                 static_quality="high", web_quality="medium", assessment_text="test"
+             )), \
              patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer",
                    return_value="Answer [chunk:static-aaa11111] [chunk:web-ccc33333]"), \
              patch("app.services.rag_orchestrator.verify_citations") as mock_verify, \
+             patch("app.services.rag_orchestrator.strip_citations",
+                   return_value=("Answer", ["static-aaa11111", "web-ccc33333"])), \
              patch.object(orch._claim_verifier, "verify",
-                         return_value=("Answer [chunk:static-aaa11111] [chunk:web-ccc33333]", [], False)):
+                         return_value=("Answer", [], False)):
             mock_verify.return_value = VerificationResult(is_valid=True)
 
             await orch.run(
@@ -877,12 +928,18 @@ class TestCitationVerification:
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
              patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "assess_evidence", return_value=EvidenceAssessment(
+                 source_role=SourceRole.STATIC_PRIMARY, sufficiency=EvidenceSufficiency.SUFFICIENT,
+                 static_quality="high", web_quality="low", assessment_text="test"
+             )), \
              patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer",
                    return_value="PMFBY is crop insurance."), \
              patch("app.services.rag_orchestrator.verify_citations") as mock_verify, \
+             patch("app.services.rag_orchestrator.strip_citations",
+                   return_value=("PMFBY is crop insurance.", ["chunk-ab"])), \
              patch.object(orch._claim_verifier, "verify",
-                         return_value=("PMFBY is crop insurance. [chunk:chunk-ab]", [], False)):
+                         return_value=("PMFBY is crop insurance.", [], False)):
             mock_verify.return_value = VerificationResult(is_valid=True)
 
             response = await orch.run(
@@ -940,12 +997,19 @@ class TestClaimVerification:
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
              patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "assess_evidence", return_value=EvidenceAssessment(
+                 source_role=SourceRole.STATIC_PRIMARY, sufficiency=EvidenceSufficiency.SUFFICIENT,
+                 static_quality="high", web_quality="low", assessment_text="test"
+             )), \
              patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer",
                    return_value="PMFBY premium is 2% [chunk:chunk-abc12345]. PMFBY covers all crops in 2026 [chunk:chunk-abc12345]."), \
              patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)), \
+             patch("app.services.rag_orchestrator.strip_citations",
+                   return_value=("PMFBY premium is 2%. PMFBY covers all crops in 2026.",
+                                 ["chunk-abc12345"])), \
              patch.object(orch._claim_verifier, "verify",
-                         return_value=("PMFBY premium is 2% [chunk:chunk-abc12345]. PMFBY covers all crops in 2026 [chunk:chunk-abc12345].", verifications, True)):
+                         return_value=("PMFBY premium is 2%. PMFBY covers all crops in 2026.", verifications, True)):
 
             response = await orch.run(
                 query="PMFBY details",
@@ -988,10 +1052,16 @@ class TestClaimVerification:
         with patch.object(orch._static_rag, "retrieve", return_value=static_result), \
              patch.object(orch._web_rag, "retrieve", return_value=web_result), \
              patch.object(orch._evidence_controller, "build_bundle", return_value=bundle), \
+             patch.object(orch._evidence_controller, "assess_evidence", return_value=EvidenceAssessment(
+                 source_role=SourceRole.STATIC_PRIMARY, sufficiency=EvidenceSufficiency.SUFFICIENT,
+                 static_quality="high", web_quality="low", assessment_text="test"
+             )), \
              patch.object(orch._evidence_controller, "build_curated_prompt", return_value=("system", "user prompt")), \
              patch("app.services.rag_orchestrator.grounded_answer",
                    return_value="Some unsupported claim [chunk:chunk-abc12345]"), \
              patch("app.services.rag_orchestrator.verify_citations", return_value=VerificationResult(is_valid=True)), \
+             patch("app.services.rag_orchestrator.strip_citations",
+                   return_value=("Some unsupported claim", ["chunk-abc12345"])), \
              patch.object(orch._claim_verifier, "verify",
                          return_value=("Filtered answer", verifications, True)):
 

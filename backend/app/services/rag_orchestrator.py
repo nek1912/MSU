@@ -34,7 +34,7 @@ from app.contracts import (
     RAGResponse,
     RAGResult,
 )
-from app.evidence_controller import EvidenceController, QueryRequirementClassifier
+from app.evidence_controller import EvidenceController, QueryRequirementClassifier, strip_citations
 from app.llm_fallback import AllProvidersFailedError, grounded_answer
 from app.providers.gemini_llm import GeminiLLMProvider
 from app.providers.groq_llm import GroqLLMProvider
@@ -78,6 +78,12 @@ class RAGOrchestrator:
         self._evidence_controller = EvidenceController()
         self._query_classifier = QueryRequirementClassifier()
         self._claim_verifier = ClaimVerifier()
+        # Initialize Sarvam provider once, reuse across requests
+        try:
+            from app.providers.sarvam_chat import SarvamChatProvider
+            self._sarvam = SarvamChatProvider(self._settings)
+        except (ValueError, ImportError):
+            self._sarvam = None  # Will fall back to Groq+Gemini
 
     async def run(
         self,
@@ -90,6 +96,7 @@ class RAGOrchestrator:
         history: list[dict] | None,
         lang: str,
         session_id: str,
+        language_mix: dict[str, float] | None = None,
     ) -> RAGResponse:
         """Execute the full async dual-pipeline RAG flow.
 
@@ -148,19 +155,42 @@ class RAGOrchestrator:
             static_result, web_result, query_requirements, query,
         )
 
-        # Step 5: Build curated prompt with source-priority rules
-        system_prompt, user_prompt = self._evidence_controller.build_curated_prompt(
-            bundle, english_query, history, lang,
+        # Step 5: Assess evidence
+        assessment = self._evidence_controller.assess_evidence(
+            static_result, web_result, query_requirements,
         )
 
-        # Step 6: Generate answer via LLM
+        # Step 6: Build curated prompt with source-priority rules
+        system_prompt, user_prompt = self._evidence_controller.build_curated_prompt(
+            bundle, english_query, history, lang,
+            language_mix=language_mix,
+            assessment=assessment,
+        )
+
+        # Step 7: Generate answer via LLM (Sarvam primary, Groq+Gemini fallback)
+        mode = "sarvam"
         try:
-            answer = grounded_answer(
-                GroqLLMProvider(self._settings),
-                GeminiLLMProvider(self._settings),
-                system_prompt,
-                user_prompt,
-            )
+            if self._sarvam is not None:
+                from app.providers.sarvam_chat import SarvamProviderError
+                try:
+                    answer = self._sarvam.generate(system_prompt, user_prompt)
+                except SarvamProviderError as exc:
+                    logger.warning("Sarvam provider failed, falling back to Groq: %s", exc)
+                    answer = grounded_answer(
+                        GroqLLMProvider(self._settings),
+                        GeminiLLMProvider(self._settings),
+                        system_prompt,
+                        user_prompt,
+                    )
+                    mode = "groq_fallback"
+            else:
+                answer = grounded_answer(
+                    GroqLLMProvider(self._settings),
+                    GeminiLLMProvider(self._settings),
+                    system_prompt,
+                    user_prompt,
+                )
+                mode = "groq_fallback"
             answer = answer.replace("\u3010", "[").replace("\u3011", "]")
         except AllProvidersFailedError:
             logger.exception("All LLM providers failed")
@@ -171,11 +201,11 @@ class RAGOrchestrator:
                 session_id=session_id,
             )
 
-        # Step 7: Auto-append citations if missing
+        # Step 8: Auto-append citations if missing
         all_chunks = self._merge_evidence(static_result.chunks, web_result.chunks)
         answer = self._auto_append_citations(answer, all_chunks)
 
-        # Step 8: Verify citations against evidence
+        # Step 9: Verify citations against evidence
         all_chunk_ids = [chunk.chunk_id for chunk in all_chunks]
         citation_verification = verify_citations(answer, all_chunk_ids)
         if not citation_verification.is_valid:
@@ -190,29 +220,41 @@ class RAGOrchestrator:
                 session_id=session_id,
             )
 
-        # Step 9: Claim verification
+        # Step 10: Strip internal citation markers from visible answer
+        clean_answer, extracted_ids = strip_citations(answer)
+        answer = clean_answer
+
+        # Step 11: Claim verification
         answer, claim_verifications, was_modified = self._claim_verifier.verify(answer, bundle)
 
-        # Step 10: Calculate claim-level confidence
+        # Step 12: Calculate claim-level confidence
         confidence, confidence_band = self._calculate_confidence(
             static_result, web_result, has_static, has_web,
             claim_verifications,
         )
 
-        # Step 11: Build citations list
+        # Step 13: Build citations list
         citations = self._build_citations(all_chunks)
 
-        # Step 12: Prepare speech text
+        # Step 14: Prepare speech text
         speech_text = prepare_speech_text(answer)
         speech_segments = segment_speech(answer, lang)
 
-        # Step 13: Determine mode
-        if has_static and has_web:
-            mode = "dual_rag"
-        elif has_static:
-            mode = "static"
+        # Step 15: Determine mode
+        if mode == "sarvam":
+            if has_static and has_web:
+                mode = "dual_rag_sarvam"
+            elif has_static:
+                mode = "static_sarvam"
+            else:
+                mode = "web_sarvam"
         else:
-            mode = "web"
+            if has_static and has_web:
+                mode = "dual_rag"
+            elif has_static:
+                mode = "static"
+            else:
+                mode = "web"
 
         logger.info(
             "RAGOrchestrator response: confidence=%.2f band=%s mode=%s citations=%d claim_verified=%s",

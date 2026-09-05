@@ -4,6 +4,10 @@ jobs:
   backend:
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: backend } }
+    env:
+      GROQ_API_KEY: test
+      SUPABASE_URL: http://testsupa
+      SUPABASE_SERVICE_KEY: test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

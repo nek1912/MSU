@@ -1,0 +1,32 @@
+eval/gold_cases.yaml
+  s_418bc698c878f5::t_15194a069f295b 1102-1103,1106,1109-1111,1124-1125,1128,1131-1132,1151-1152,1155,1158-1162,1165,1168-1172,1175,1178-1179,1186-1187,1190,1193-1194,1207-1208,1211,1214-1216,1241-1242,1245,1248-1249,1256-1257,1260,1263-1265,1272-1273,1276,1279-1280,1293-1294,1297,1300-1302,1321-1387,1808-1990
+corpus/manifests/mvp_sources.yaml
+  s_418bc698c878f5::t_15194a069f295b 129-947
+backend/data/domain_anchors.json
+  s_418bc698c878f5::t_15194a069f295b 61-71
+backend/ingest_seed.py
+  s_418bc698c878f5::t_15194a069f295b 120-626
+backend/data/keyword_rules.json
+  s_418bc698c878f5::t_030912346e9d8a 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "7e927ea198cd0946fa7fdcf71c90383b74ae9b36",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_418bc698c878f5": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f94cda1beffeHKPpT40XLyaeke",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

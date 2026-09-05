@@ -6,8 +6,10 @@ jobs:
     defaults: { run: { working-directory: backend } }
     env:
       GROQ_API_KEY: test
+      GEMINI_API_KEY: test
       SUPABASE_URL: http://testsupa
       SUPABASE_SERVICE_KEY: test
+      EMBED_MODEL: gemini-embedding-2
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

@@ -11,7 +11,7 @@ worse than none — the next session will trust it.
 
 ## Last updated
 
-`2026-09-04` — Full codebase audit. All status entries verified against actual source files.
+`2026-09-05` — Model config hardened, Evidence Panel polished, corpus expanded to 11 docs (4778 chunks).
 
 ## Current state
 
@@ -21,6 +21,8 @@ implemented and wired together.
 
 **Selected state:** `gujarat` (`selected_state: "gujarat"` in `backend/app/config.py`)
 
+**LLM config (locked):** Primary=`openai/gpt-oss-120b` (Groq), Fallback=`qwen/qwen3.8-27b` (Groq), Ultimate=Gemini `gemini-2.5-flash`
+
 ---
 
 ## Component status
@@ -29,13 +31,14 @@ implemented and wired together.
 
 | Component | File(s) | Status | Notes |
 |---|---|---|---|
-| FastAPI app + `/health`, `/health/providers` | `app/main.py` | working | 5 routers registered |
+| FastAPI app + `/health`, `/health/providers` | `app/main.py` | working | 6 routers registered (including documents) |
 | `/chat` (sync) | `app/routes/chat.py` | working | Language detect → domain classify → RAGOrchestrator or GrievanceWorkflow |
 | `/chat/stream` (SSE) | `app/routes/chat.py` | working | Same pipeline, Server-Sent Events with `thinking/token/metadata/done` events |
 | `/voice`, `/voice/transcribe`, `/voice/speak` | `app/routes/voice.py` | working | Full audio→STT→RAG→TTS pipeline |
 | `/conversations` | `app/routes/conversations.py` | working | Session history retrieval |
 | `/evidence` | `app/routes/evidence.py` | working | Evidence endpoint |
 | `/grievance` (route) | `app/routes/grievance.py` | working | Grievance REST endpoint |
+| `/documents/pdf/{filename}` | `app/routes/documents.py` | working | Safe PDF serving with path traversal prevention |
 | Domain classifier (AnchorStore) | `app/domains.py` | working | Keyword rules + embedding cosine; floor 0.30 |
 | Session store | `app/session_store.py` | working | Supabase-backed, keeps last 50 messages |
 | Language detection | `app/language.py` | working | Detects dominant language and language mix |
@@ -45,7 +48,7 @@ implemented and wired together.
 | WebRAGService | `app/services/web_rag.py` | working | 10-step web RAG: Tavily/Firecrawl → BM25 → Gemini pre-rank → RRF → Gemini final-rank → source verify → EvidenceChunks |
 | EvidenceController + prompt builder | `app/evidence_controller.py` | working | Merges chunks, builds curated source-priority prompt |
 | Evidence gate | `app/evidence_gate.py` | working | Threshold: `TOP1_THRESHOLD=0.25`, `SECONDARY_THRESHOLD=0.30`, `MIN_CHUNKS_ABOVE_SECONDARY=2` |
-| Citation verifier | `app/citation_verifier.py` | working | Set-membership check — every `[chunk:id]` must map to a retrieved chunk |
+| Citation verifier | `app/citation_verifier.py` | working | Set-membership check — every `[chunk:id]` must map to a retrieved chunk; web IDs `web_*` supported; ambiguity-safe prefix matching |
 | Confidence calculation | `app/services/rag_orchestrator.py` | working | Band-based; dual-source gets +0.10 boost |
 | GrievanceWorkflow (9-stage state machine) | `app/grievance/workflow.py` | working | INTAKE → CLASSIFICATION → ENTITY_EXTRACTION → MISSING_FIELDS → FOLLOWUP → DRAFT_READY → SUBMISSION_GUIDE → STATUS_LOOKUP → COMPLETE |
 | Grievance classifier | `app/grievance/classifier.py` | working | |
@@ -61,8 +64,8 @@ implemented and wired together.
 | Azure STT fallback | `app/providers/azure_voice.py` | working | Fallback STT only |
 | Embeddings (Jina primary, Gemini fallback) | `app/providers/embeddings.py` | working | Jina v3 768d, task-typed (`retrieval.query` / `retrieval.passage`) |
 | Jina reranker | `app/providers/reranker.py` | working | Wired in StaticRAGService but **disabled** (`RERANKER_ENABLED=false`) |
-| Gemini LLM provider (fallback) | `app/providers/gemini_llm.py` | working | |
-| Groq LLM provider (primary) | `app/providers/groq_llm.py` | working | Key rotation via `groq_keys` property |
+| Gemini LLM provider (fallback) | `app/providers/gemini_llm.py` | working | `_classify_error()` for structured error classification; tiered model fallback |
+| Groq LLM provider (primary) | `app/providers/groq_llm.py` | working | Primary=`openai/gpt-oss-120b`, Fallback=`qwen/qwen3.8-27b`; key rotation + `_classify_error()` |
 | Sarvam chat provider | `app/providers/sarvam_chat.py` | working | |
 | Web discovery (Tavily / Firecrawl) | `app/web_rag/service.py` | working | |
 | Query classifier (web RAG) | `app/web_rag/query_classifier.py` | working | Domain, jurisdiction, state classification for web queries |
@@ -71,6 +74,7 @@ implemented and wired together.
 | Frontend pages | `frontend/src/app/` | working | `/` (home), `/chat`, `/grievance`, `/schemes`, `/services`, `/library`, `/faq`, `/legal` |
 | Frontend i18n (6 languages) | `frontend/src/lib/i18n/` | working | EN, HI, GU, MR, BN, TA |
 | ChatWindow (streaming SSE) | `frontend/src/components/ChatWindow.tsx` | working | Handles `thinking/token/metadata/done` SSE events, voice recording, citation display |
+| Evidence Panel | `frontend/src/components/chat/MessageBubble.tsx` | working | Unified `EvidencePanel` + `EvidenceCard` components; `data-evidence="true"` attribute; citation tags with `aria-expanded`/`aria-label`; keyboard-focusable; scroll-into-view on expand |
 | Document ingestion pipeline | `backend/seed_parser.py`, `backend/ingest_seed.py` | working | Parses MinerU `content_list_v2.json` → JSONL → embeds → Supabase |
 | Database schema | `backend/schema.sql` | working | `documents`, `chunks` (vector 768d, HNSW), `sessions`, `grievance_states` |
 
@@ -99,6 +103,12 @@ implemented and wired together.
 - **Agriculture corpus missing**: `agriculture` domain routes to `out_of_scope` — no docs ingested, not a bug.
 - **Gold eval set is retriever-anchored**: Recall metrics are optimistic (measures if retriever surfaces its own best-matching chunk, not true answer span). Manual curation needed for production eval.
 - **Supabase free-tier pausing**: May pause after inactivity. Reactivate before demos.
+- **Dead Groq model**: `llama-3.3-70b-versatile` is DEAD on Groq (HTTP 404). Use `openai/gpt-oss-120b` (primary) and `qwen/qwen3.8-27b` (fallback) only.
+- **MoC_Young_Professionals_YPs.pdf**: Scanned/image-based PDF processed via EasyOCR + pymupdf. OCR text is lower quality than MinerU extraction. 213 chunks embedded (611 raw from OCR).
+- **Pre-existing test failures (backend)**: 1 multilingual test (`test_hindi_query_used_for_embedding` IndexError).
+- **Pre-existing test failures (frontend)**: 7 tests (4 ChatWindow sendChat mock, 1 LOCALES expectation, 1 Gujarati missing key, 1 read-aloud button test).
+- **PDF endpoint**: Regex allows `A-Za-z0-9_\-\.(), ` for filenames. Path traversal blocked. Non-PDF extensions rejected.
+- **`chunks.source_file` column**: Does NOT exist in live Supabase DB. `source_file` is stored in `chunks.metadata` JSONB instead.
 
 ---
 
@@ -109,14 +119,23 @@ via `backend/seed_parser.py` → `backend/ingest_seed.py`. Embeddings: Jina v3 7
 
 | Domain | Chunks embedded | Source |
 |---|---|---|
-| pacs_governance | 337 | Model Byelaws 05.01.2023 |
+| pacs_governance | 1294 | Model Byelaws (337) + HR Policy V21 (601) + MoC YPs (213) + CSM Scheme (43) |
 | pacs_computerization | 214 | Revised Scheme guidelines (192) + Corrigendum (22) |
 | pmfby | 1266 | operational_guidelines_pmfby |
-| financial_inclusion | 371 | NSFI_2025_30 |
-| schemes | 0 | not ingested |
-| agriculture | 0 | not ingested |
+| financial_inclusion | 2004 | NSFI_2025_30 (371) + RBI FAME (579) + RBI BE(A)WARE (429) + IRDAI Insurance (725) |
 
-**Total: 5 documents, 2188 embedded chunks, 768d Jina v3**
+**Total: 11 documents, 4778 embedded chunks, 768d Jina v3**
+
+### PDF provenance chain
+
+```
+PDF (corpus/seeds/*.pdf)
+  -> pypdf extraction -> corpus/seeds/chunks_jsonl/*.jsonl (source_file per chunk)
+    -> ingest_seed.py (DOC_META -> Supabase documents + chunks.metadata)
+      -> StaticRAGService -> EvidenceChunk.metadata["source_file"]
+        -> _build_citations() -> citation["source_file"]
+          -> Frontend EvidenceCard -> /api/documents/pdf/{source_file}#page={page}
+```
 
 ---
 

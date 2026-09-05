@@ -1,4 +1,5 @@
 import json
+import re
 from functools import lru_cache
 from pathlib import Path
 
@@ -22,8 +23,16 @@ class AnchorStore:
     def classify(self, text: str, query_embedding: list[float]) -> tuple[str, float]:
         lowered = text.lower()
         for domain, keywords in self.rules.items():
-            if any(kw in lowered for kw in keywords):
-                return domain, 1.0
+            for kw in keywords:
+                # Multi-word phrases: substring match (e.g. "crop insurance")
+                # Single words: word-boundary match to avoid false positives
+                # (e.g. "pmfby" must not match inside "pmjjby")
+                if " " in kw:
+                    if kw in lowered:
+                        return domain, 1.0
+                else:
+                    if re.search(r"\b" + re.escape(kw) + r"\b", lowered):
+                        return domain, 1.0
         q = np.asarray(query_embedding, dtype=float)
         q = q / max(np.linalg.norm(q), 1e-9)
         scores = self.vectors @ q

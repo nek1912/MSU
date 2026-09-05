@@ -11,13 +11,31 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def _classify_error(exc: Exception) -> str:
+    """Classify an exception into a human-readable error category."""
+    if isinstance(exc, httpx.TimeoutException):
+        return "timeout"
+    if isinstance(exc, httpx.ConnectError):
+        return "transient_connect"
+    if isinstance(exc, httpx.HTTPStatusError):
+        code = exc.response.status_code
+        if code == 429:
+            return "rate_limit"
+        if 500 <= code < 600:
+            return f"provider_5xx({code})"
+        if code == 404:
+            return "model_not_found"
+        return f"http_{code}"
+    return type(exc).__name__
+
+
 class GeminiLLMProvider:
     def __init__(self, settings: Settings):
         self._key = settings.gemini_api_key
         self._model = settings.gemini_model
         self._fallback_models = settings.gemini_model_list
 
-    def generate(self, system: str, user: str, temperature: float = 0.1) -> str:
+    def generate(self, system: str, user: str, temperature: float = 0.0) -> str:
         if not self._key:
             raise RuntimeError("Gemini API key not configured")
 
@@ -40,15 +58,16 @@ class GeminiLLMProvider:
                 return r.json()["candidates"][0]["content"]["parts"][0]["text"]
             except Exception as exc:
                 last_exc = exc
+                category = _classify_error(exc)
                 logger.warning(
-                    "Gemini model %s failed: %s — trying next fallback model",
-                    model, str(exc)[:200],
+                    "Gemini model %s failed [%s]: %s — trying next fallback model",
+                    model, category, str(exc)[:200],
                 )
 
         raise last_exc or RuntimeError("All Gemini models failed")
 
     def generate_stream(self, system: str, user: str,
-                        temperature: float = 0.1) -> Generator[str, None, None]:
+                        temperature: float = 0.0) -> Generator[str, None, None]:
         """Yield text tokens as they arrive from Gemini's streaming API."""
         with httpx.stream(
             "POST", f"{self._stream_url}?key={self._key}",

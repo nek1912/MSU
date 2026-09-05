@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Link from "next/link";
@@ -15,13 +15,260 @@ import {
   IconCheck,
   IconThumbsUp,
   IconThumbsDown,
-  IconBot,
 } from "@/components/ui/Icons";
 import { deco } from "@/lib/data/deco";
 import { createSpeechService, speakSegments } from "@/lib/speech";
 import { EvidenceBand } from "@/components/EvidenceBand";
 import { evidenceBand } from "@/lib/band";
 
+type Citation = ChatResponse["citations"][number];
+
+// ── Citation chunk-tag pattern ────────────────────────────────────────────────
+const CHUNK_TAG_RE = /\[chunk:([^\]]+)\]/gi;
+
+/**
+ * Split answer text into alternating text / citation-tag segments.
+ * Returns [{ type: "text", value }, { type: "cite", id, raw }]
+ */
+function parseAnswerSegments(
+  answer: string,
+): Array<{ type: "text"; value: string } | { type: "cite"; id: string; raw: string }> {
+  const segments: Array<{ type: "text"; value: string } | { type: "cite"; id: string; raw: string }> = [];
+  let lastIndex = 0;
+  for (const m of answer.matchAll(CHUNK_TAG_RE)) {
+    if (m.index! > lastIndex) {
+      segments.push({ type: "text", value: answer.slice(lastIndex, m.index) });
+    }
+    segments.push({ type: "cite", id: m[1].toLowerCase(), raw: m[0] });
+    lastIndex = m.index! + m[0].length;
+  }
+  if (lastIndex < answer.length) {
+    segments.push({ type: "text", value: answer.slice(lastIndex) });
+  }
+  return segments;
+}
+
+/**
+ * Build a chunk_id → citation lookup.  Uses exact match first, then
+ * prefix match (for the 8-char short IDs the backend returns).
+ */
+function buildCitationMap(citations: Citation[]): Map<string, Citation> {
+  const map = new Map<string, Citation>();
+  for (const c of citations) {
+    if (c.chunk_id) map.set(c.chunk_id.toLowerCase(), c);
+  }
+  return map;
+}
+
+function resolveCitation(
+  id: string,
+  citationMap: Map<string, Citation>,
+): Citation | undefined {
+  // 1. Exact match (the common case — backend returns 8-char short_id)
+  const exact = citationMap.get(id);
+  if (exact) return exact;
+  // 2. Prefix match — the tag id may be longer or shorter than the stored key
+  for (const [key, cit] of citationMap) {
+    if (key.startsWith(id) || id.startsWith(key)) return cit;
+  }
+  return undefined;
+}
+
+// ── Evidence Card (individual expandable evidence within the panel) ────────────
+function EvidenceCard({
+  citation,
+  isHighlighted,
+  isExpanded,
+  onToggle,
+}: {
+  citation: Citation;
+  isHighlighted: boolean;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) {
+  const { t } = useI18n();
+  const isWeb = citation.source === "web";
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isHighlighted && cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [isHighlighted]);
+
+  return (
+    <div
+      ref={cardRef}
+      id={citation.chunk_id ? `evidence-${citation.chunk_id}` : undefined}
+      className={`rounded-[var(--radius-md)] border transition-colors ${
+        isHighlighted
+          ? "border-[var(--accent-primary)] bg-[var(--accent-tint-soft)]"
+          : "border-[var(--border-soft)] bg-white/60"
+      }`}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isExpanded}
+        className="flex w-full items-center gap-2 p-2.5 text-left"
+      >
+        <span
+          className={`inline-flex shrink-0 items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${
+            isWeb ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"
+          }`}
+        >
+          {citation.source_label || (isWeb ? "Web" : "Doc")}
+        </span>
+        <span className="min-w-0 flex-1 text-xs font-semibold text-[var(--ink)] truncate">
+          {citation.title}
+        </span>
+        {citation.page && (
+          <span className="text-[10px] text-[var(--text-faint)]">p.{citation.page}</span>
+        )}
+        <IconChevronRight
+          className={`h-3 w-3 shrink-0 text-[var(--text-faint)] transition-transform ${
+            isExpanded ? "rotate-90" : ""
+          }`}
+        />
+      </button>
+
+      {isExpanded && citation.content && (
+        <div className="px-2.5 pb-2.5 space-y-2">
+          <div className="rounded bg-[var(--cream)] p-2 text-xs leading-relaxed text-[var(--ink)] whitespace-pre-wrap max-h-64 overflow-y-auto">
+            {citation.content}
+          </div>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[var(--text-faint)]">
+            {citation.section && <span>Section: {citation.section}</span>}
+            {citation.page && <span>Page: {citation.page}</span>}
+            {isWeb && citation.url && (
+              <a
+                href={citation.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link inline-flex items-center gap-1 hover:text-[var(--accent-primary)]"
+              >
+                {t("chat.openSource")} ↗
+              </a>
+            )}
+            {!isWeb && citation.source_file && (
+              <a
+                href={`/api/documents/pdf/${encodeURIComponent(citation.source_file)}${citation.page ? `#page=${citation.page}` : ""}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link inline-flex items-center gap-1 hover:text-[var(--accent-primary)]"
+              >
+                {t("chat.openDocument")} ↗
+              </a>
+            )}
+            {!isWeb && !citation.source_file && citation.url && (
+              <a
+                href={citation.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link inline-flex items-center gap-1 hover:text-[var(--accent-primary)]"
+              >
+                {t("chat.openDocument")} ↗
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Evidence Panel (unified panel showing all citations) ──────────────────────
+function EvidencePanel({
+  citations,
+  expandedChunkId,
+  onToggleChunk,
+  onClose,
+}: {
+  citations: Citation[];
+  expandedChunkId: string | null;
+  onToggleChunk: (chunkId: string) => void;
+  onClose: () => void;
+}) {
+  const { t } = useI18n();
+  return (
+    <div
+      data-evidence="true"
+      className="mt-2 rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--cream)] p-3 space-y-2"
+    >
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold text-[var(--text-tertiary)]">
+          {t("chat.sourcesReferences")}
+        </p>
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-[var(--text-tertiary)] hover:text-[var(--ink)] text-xs"
+          aria-label="Close evidence panel"
+        >
+          ✕
+        </button>
+      </div>
+      <div className="space-y-1.5">
+        {citations.map((c, i) => (
+          <EvidenceCard
+            key={c.chunk_id || i}
+            citation={c}
+            isHighlighted={expandedChunkId === c.chunk_id}
+            isExpanded={expandedChunkId === c.chunk_id}
+            onToggle={() => onToggleChunk(c.chunk_id || `idx-${i}`)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Clickable Citation Tag ────────────────────────────────────────────────────
+function CitationTag({
+  id,
+  citationMap,
+  isExpanded,
+  onToggle,
+}: {
+  id: string;
+  citationMap: Map<string, Citation>;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) {
+  const citation = resolveCitation(id, citationMap);
+  if (!citation) {
+    // Unknown ID — render as inert text
+    return (
+      <span
+        className="inline-flex items-center rounded bg-gray-100 px-1 py-0.5 text-[10px] font-mono text-gray-500"
+        aria-label={`Unknown citation: ${id}`}
+      >
+        [{id}]
+      </span>
+    );
+  }
+
+  return (
+    <span className="relative inline-block">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isExpanded}
+        aria-label={`Evidence for citation ${id}`}
+        className={`inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] font-semibold transition-colors ${
+          citation.source === "web"
+            ? "bg-blue-50 text-blue-700 hover:bg-blue-100"
+            : "bg-green-50 text-green-700 hover:bg-green-100"
+        } ${isExpanded ? "ring-1 ring-current" : ""}`}
+      >
+        <IconDoc className="h-2.5 w-2.5" />
+        {id}
+      </button>
+    </span>
+  );
+}
+
+// ── MessageBubble ─────────────────────────────────────────────────────────────
 export function cleanMarkdownForDisplay(text: string): string {
   if (!text) return "";
   let cleaned = text;
@@ -81,14 +328,24 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
   const { t } = useI18n();
   const speech = useMemo(() => createSpeechService(), []);
   const [speaking, setSpeaking] = useState(false);
-  const [openCitations, setOpenCitations] = useState(false);
   const [copied, setCopied] = useState(false);
   const [rating, setRating] = useState<"up" | "down" | null>(null);
+  const [expandedChunkId, setExpandedChunkId] = useState<string | null>(null);
+  const [evidencePanelOpen, setEvidencePanelOpen] = useState(false);
 
   const segments = resp.speech_segments ?? [];
   const hasSegments = segments.length > 0;
   const domainKey = `domain.${resp.domain}`;
   const domainLabel = t(domainKey).startsWith("domain.") ? resp.domain : t(domainKey);
+
+  // Build citation lookup map (memoised per response)
+  const citationMap = useMemo(() => buildCitationMap(resp.citations), [resp.citations]);
+
+  // Parse answer into text + citation segments
+  const answerSegments = useMemo(
+    () => parseAnswerSegments(resp.answer),
+    [resp.answer],
+  );
 
   async function handleSpeak() {
     if (speaking) {
@@ -148,24 +405,61 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
           <span className="text-[11px] sm:text-xs text-[var(--text-faint)]">{(resp.confidence * 100).toFixed(0)}% match</span>
         </div>
 
-        {/* Answer Content */}
+        {/* Answer Content — with inline citation tags */}
         <div className={`font-answer text-sm sm:text-base leading-relaxed text-[var(--ink)] prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-[var(--ink)] prose-p:my-2 prose-p:leading-relaxed prose-ul:my-2.5 prose-ul:list-disc prose-ul:pl-5 prose-ol:my-2.5 prose-ol:list-decimal prose-ol:pl-5 prose-li:my-1 prose-strong:font-semibold prose-strong:text-[var(--ink)] prose-table:text-xs prose-th:font-semibold prose-td:py-1 prose-th:py-1 prose-pre:bg-[var(--dark)] prose-pre:text-[var(--on-dark-strong)] prose-code:text-[var(--accent-primary)] ${isStreaming ? "streaming-text" : ""}`}>
-          <Markdown
-            remarkPlugins={[remarkGfm]}
-            components={{
-              p: ({ children }) => <p className="mb-2.5 leading-relaxed text-[var(--ink)]">{children}</p>,
-              ul: ({ children }) => <ul className="my-2.5 list-disc pl-5 space-y-1 text-[var(--ink)]">{children}</ul>,
-              ol: ({ children }) => <ol className="my-2.5 list-decimal pl-5 space-y-1 text-[var(--ink)]">{children}</ol>,
-              li: ({ children }) => <li className="pl-1 leading-relaxed">{children}</li>,
-              strong: ({ children }) => <strong className="font-semibold text-[var(--ink)]">{children}</strong>,
-              h1: ({ children }) => <h1 className="text-lg font-bold my-2 text-[var(--ink)]">{children}</h1>,
-              h2: ({ children }) => <h2 className="text-base font-bold my-2 text-[var(--ink)]">{children}</h2>,
-              h3: ({ children }) => <h3 className="text-sm font-semibold my-1.5 text-[var(--ink)]">{children}</h3>,
-            }}
-          >
-            {cleanMarkdownForDisplay(resp.answer)}
-          </Markdown>
+          {answerSegments.map((seg, i) => {
+            if (seg.type === "text") {
+              return (
+                <Markdown
+                  key={i}
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    p: ({ children }) => <p className="mb-2.5 leading-relaxed text-[var(--ink)]">{children}</p>,
+                    ul: ({ children }) => <ul className="my-2.5 list-disc pl-5 space-y-1 text-[var(--ink)]">{children}</ul>,
+                    ol: ({ children }) => <ol className="my-2.5 list-decimal pl-5 space-y-1 text-[var(--ink)]">{children}</ol>,
+                    li: ({ children }) => <li className="pl-1 leading-relaxed">{children}</li>,
+                    strong: ({ children }) => <strong className="font-semibold text-[var(--ink)]">{children}</strong>,
+                    h1: ({ children }) => <h1 className="text-lg font-bold my-2 text-[var(--ink)]">{children}</h1>,
+                    h2: ({ children }) => <h2 className="text-base font-bold my-2 text-[var(--ink)]">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-sm font-semibold my-1.5 text-[var(--ink)]">{children}</h3>,
+                  }}
+                >
+                  {cleanMarkdownForDisplay(seg.value)}
+                </Markdown>
+              );
+            }
+            // Citation tag — clickable
+            return (
+              <span key={i} className="inline-block align-middle mx-0.5">
+                <CitationTag
+                  id={seg.id}
+                  citationMap={citationMap}
+                  isExpanded={expandedChunkId === seg.id}
+                  onToggle={() => {
+                    setEvidencePanelOpen(true);
+                    setExpandedChunkId((prev) => (prev === seg.id ? null : seg.id));
+                  }}
+                />
+              </span>
+            );
+          })}
         </div>
+
+        {/* Unified Evidence Panel */}
+        {evidencePanelOpen && resp.citations.length > 0 && (
+          <EvidencePanel
+            citations={resp.citations}
+            expandedChunkId={expandedChunkId}
+            onToggleChunk={(chunkId) =>
+              setExpandedChunkId((prev) => (prev === chunkId ? null : chunkId))
+            }
+            onClose={() => {
+              setEvidencePanelOpen(false);
+              setExpandedChunkId(null);
+            }}
+          />
+        )}
+
         {isStreaming && (
           <style jsx>{`
             .streaming-text :global(p:last-child)::after {
@@ -247,48 +541,22 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
           {resp.citations.length > 0 && (
             <button
               type="button"
-              onClick={() => setOpenCitations((o) => !o)}
-              aria-expanded={openCitations}
+              onClick={() => {
+                setEvidencePanelOpen((o) => !o);
+                setExpandedChunkId(null);
+              }}
+              aria-expanded={evidencePanelOpen}
               className="ml-auto inline-flex items-center gap-1 rounded-[var(--radius-md)] bg-[var(--cream-2)] px-2 py-1 text-xs text-[var(--text-body)] transition-colors hover:bg-[var(--border-soft)] hover:text-[var(--ink)]"
             >
               <IconDoc className="h-3.5 w-3.5 text-[var(--accent-primary)]" />
               <span>{resp.citations.length} {t("common.source")}</span>
-              <IconChevronRight className={`h-3 w-3 transition-transform ${openCitations ? "rotate-90" : ""}`} />
+              <IconChevronRight className={`h-3 w-3 transition-transform ${evidencePanelOpen ? "rotate-90" : ""}`} />
             </button>
           )}
         </div>
 
-        {/* Citations Expandable Content */}
-        {openCitations && resp.citations.length > 0 && (
-          <div className="mt-2 rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--cream)] p-3">
-            <p className="mb-1.5 text-xs font-semibold text-[var(--text-tertiary)]">{t("chat.sourcesReferences")}</p>
-            <ul className="space-y-1">
-              {resp.citations.map((c, j) => (
-                <li key={j} className="flex items-start gap-2">
-                  <span
-                    className={`mt-0.5 inline-flex shrink-0 items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${
-                      c.source === "web"
-                        ? "bg-blue-100 text-blue-700"
-                        : "bg-green-100 text-green-700"
-                    }`}
-                  >
-                    {c.source_label || (c.source === "web" ? "Web" : "Doc")}
-                  </span>
-                  <a
-                    href={c.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="link block truncate text-xs font-medium"
-                  >
-                    {c.title} {c.page ? `(p. ${c.page})` : ""}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {/* Evidence Panel replaces the legacy sources list */}
       </div>
     </div>
   );
 }
-

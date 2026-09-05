@@ -1,4 +1,4 @@
-import sys; sys.path.insert(0, '.')
+import sys; sys.path.insert(0, 'backend')
 from supabase import create_client
 from app.config import get_settings
 from app.providers.embeddings import get_embedding_provider

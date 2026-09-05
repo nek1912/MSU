@@ -117,6 +117,11 @@ class Settings(BaseSettings):
 EMBED_DIMS = 768
 REQUEST_TIMEOUT_S = 30.0
 
+# Generation limits (transplanted from eGovAssistant proven defaults)
+GENERATION_MAX_TOKENS = 1800
+GENERATION_TEMPERATURE = 0.0
+MAX_CHARS_PER_CHUNK = 3000
+
 # Retrieval gate thresholds (spec §2.4)
 TOP1_THRESHOLD = 0.25
 SECONDARY_THRESHOLD = 0.30

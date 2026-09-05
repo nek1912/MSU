@@ -26,16 +26,14 @@ from app.contracts import (
 )
 
 
-_CITE_PATTERN = re.compile(r"\[chunk:([0-9a-fA-F]{8,})\]")
+_CITE_PATTERN = re.compile(r"\[chunk:([0-9a-fA-F]{8,}|web_[0-9a-f]+(?:_c\d+)?)\]")
 
-# LLMs (esp. Llama-3.3-70b on Groq) sometimes emit the right chunk-ID prefix
-# in the wrong *format* — full-width brackets 【ID】 or a bare half-width hex
-# bracket [ID] missing the `chunk:` prefix. These are normalised to the
-# canonical [chunk:ID] form. Only the *format* changes; which IDs are valid is
-# still decided against the retrieved evidence set, so a non-retrieved or
-# fabricated ID remains rejected (never silently accepted).
-_FULLWIDTH_CITE = re.compile(r"【\s*(?:chunk:)?\s*([0-9a-fA-F]{8,})\s*】")
-_BARE_HEX_CITE = re.compile(r"\[\s*([0-9a-fA-F]{8,})\s*\]")
+# LLMs sometimes emit the right chunk-ID prefix in the wrong *format* —
+# full-width brackets 【ID】 or a bare half-width hex bracket [ID] missing the
+# `chunk:` prefix. These are normalised to the canonical [chunk:ID] form.
+# Handles both UUID-prefix (a0eebc99) and web-style (web_a1b2c3d4e5f6_c102) IDs.
+_FULLWIDTH_CITE = re.compile(r"【\s*(?:chunk:)?\s*([0-9a-fA-F]{8,}|web_[0-9a-f]+(?:_c\d+)?)\s*】")
+_BARE_HEX_CITE = re.compile(r"\[\s*([0-9a-fA-F]{8,}|web_[0-9a-f]+(?:_c\d+)?)\s*\]")
 
 
 def normalize_citation_markers(answer: str) -> str:
@@ -84,18 +82,21 @@ def verify_citation_ids(
     """Verify all citation prefixes map to actual evidence chunk IDs.
 
     Returns (valid_ids, invalid_prefixes).
+
+    Ambiguity rule: if a prefix matches MORE THAN ONE evidence chunk ID,
+    it is treated as invalid (ambiguous) and must NOT silently select
+    the first match.
     """
     valid: list[str] = []
     invalid: list[str] = []
 
     for full_match, prefix in extract_citations_from_answer(answer):
-        matched = any(cid.startswith(prefix) for cid in evidence_chunk_ids)
-        if matched:
-            for cid in evidence_chunk_ids:
-                if cid.startswith(prefix) and cid not in valid:
-                    valid.append(cid)
-                    break
+        matches = [cid for cid in evidence_chunk_ids if cid.startswith(prefix)]
+        if len(matches) == 1:
+            if matches[0] not in valid:
+                valid.append(matches[0])
         else:
+            # 0 matches → invalid; >1 matches → ambiguous, also invalid
             if prefix not in invalid:
                 invalid.append(prefix)
 
@@ -114,8 +115,8 @@ def verify_no_fabricated_content(answer: str, allowed_urls: set[str] | None = No
             continue
         issues.append(f"fabricated URL: {url}")
 
-    # Non-citation markers like [1], [Source], etc.
-    bad_markers = re.compile(r"\[(?!\s*chunk:)[A-Za-z0-9\s]+\]")
+    # Non-citation markers like [1], [Source], etc. — but NOT [chunk:...] or [web_*]
+    bad_markers = re.compile(r"\[(?!\s*chunk:)(?!\s*web_)[A-Za-z0-9\s]+\]")
     for match in bad_markers.finditer(answer):
         issues.append(f"non-citation marker: {match.group(0)}")
 

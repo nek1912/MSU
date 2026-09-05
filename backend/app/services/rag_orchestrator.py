@@ -20,10 +20,11 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
+import time
 from typing import Any
 
 from app.citation_verifier import verify_citations
-from app.config import Settings, get_settings
+from app.config import GENERATION_MAX_TOKENS, GENERATION_TEMPERATURE, Settings, get_settings
 from app.contracts import (
     AbstentionReason,
     ConfidenceBand,
@@ -94,6 +95,7 @@ class RAGOrchestrator:
         lang: str,
         session_id: str,
         language_mix: dict[str, float] | None = None,
+        model_override: str | None = None,
     ) -> RAGResponse:
         """Execute the full async dual-pipeline RAG flow.
 
@@ -164,22 +166,24 @@ class RAGOrchestrator:
         )
 
         # Step 6: Build curated prompt with source-priority rules
+        _t_prompt_start = time.monotonic()
         system_prompt, user_prompt = self._evidence_controller.build_curated_prompt(
             bundle, english_query, history, lang,
             language_mix=language_mix,
             assessment=assessment,
         )
+        _t_prompt_ready = time.monotonic()
+        prompt_build_ms = (_t_prompt_ready - _t_prompt_start) * 1000
 
-        # Step 7: Generate answer via LLM (Groq primary, Gemini fallback)
-        # Tiered Model Selection
-        model_name = self._settings.groq_model
-        if classification and classification.domain in ("out_of_scope", "general"):
-            model_name = getattr(self._settings, "groq_fallback_model", self._settings.groq_model)
-            
+        # Step 7: Generate answer via LLM (Groq primary → Gemini fallback → Sarvam tertiary)
+        # Always use the primary model; the provider's own fallback iteration
+        # handles model list traversal (GPT-OSS → Qwen → Gemini → Sarvam).
+        model_name = model_override or self._settings.groq_model
+
         mode = "groq"
         try:
             primary_provider = GroqLLMProvider(self._settings)
-            primary_provider._model = model_name  # Override with tiered model
+            primary_provider._model = model_name  # Override for model_override support
 
             tertiary_provider = None
             try:
@@ -188,6 +192,7 @@ class RAGOrchestrator:
             except Exception as e:
                 logger.warning("Could not initialize SarvamChatProvider for fallback: %s", e)
 
+            _t_groq_start = time.monotonic()
             answer = grounded_answer(
                 primary_provider,
                 GeminiLLMProvider(self._settings),
@@ -195,6 +200,7 @@ class RAGOrchestrator:
                 user_prompt,
                 tertiary=tertiary_provider,
             )
+            _t_groq_done = time.monotonic()
             answer = answer.replace("\u3010", "[").replace("\u3011", "]")
         except AllProvidersFailedError:
             logger.exception("All LLM providers failed")
@@ -233,6 +239,8 @@ class RAGOrchestrator:
                     session_id=session_id,
                 )
 
+        _t_citation_done = time.monotonic()
+
         # Step 10: Strip internal citation markers from visible answer
         clean_answer, extracted_ids = strip_citations(answer)
         answer = clean_answer
@@ -257,6 +265,26 @@ class RAGOrchestrator:
             mode = "static"
         else:
             mode = "web"
+
+        # Generation latency instrumentation
+        _t_gen_end = time.monotonic()
+        groq_http_ms = (_t_groq_done - _t_groq_start) * 1000
+        citation_validation_ms = (_t_citation_done - _t_groq_done) * 1000
+        generation_total_ms = (_t_gen_end - _t_prompt_start) * 1000
+
+        # Prompt token estimation (~4 chars per token)
+        _input_chars = len(system_prompt) + len(user_prompt)
+        _input_tokens_est = _input_chars // 4
+        _output_tokens_est = len(answer) // 4
+
+        logger.info(
+            "Generation timing: prompt_build=%.0fms groq_http=%.0fms citation_val=%.0fms total=%.0fms | "
+            "model=%s input_chars=%d input_tokens~%d output_tokens~%d llm_calls=1 | "
+            "citations=%d abstained=False",
+            prompt_build_ms, groq_http_ms, citation_validation_ms, generation_total_ms,
+            model_name, _input_chars, _input_tokens_est, _output_tokens_est,
+            len(citations),
+        )
 
         logger.info(
             "RAGOrchestrator response: confidence=%.2f band=%s mode=%s citations=%d",
@@ -369,7 +397,7 @@ class RAGOrchestrator:
     ) -> str:
         """Auto-append citation markers if omitted, and clean non-citation bracket markers."""
         # Clean loose non-citation brackets like [1], [Note], [Source]
-        answer = re.sub(r"\[(?!\s*chunk:)[A-Za-z0-9\s]+\]", "", answer)
+        answer = re.sub(r"\[(?!\s*chunk:)(?!\s*web_)[A-Za-z0-9\s]+\]", "", answer)
 
         has_citation = bool(re.search(r"\[chunk:", answer))
         if (has_citation and not force) or not chunks:
@@ -408,11 +436,15 @@ class RAGOrchestrator:
                 "source": chunk.source_type,
                 "source_label": "Official Document" if chunk.source_type == "static" else "Web Source",
                 "url": chunk.url,
+                "content": chunk.content,
             }
             if chunk.page is not None:
                 citation["page"] = chunk.page
             if chunk.section:
                 citation["section"] = chunk.section
+            source_file = chunk.metadata.get("source_file", "") if chunk.metadata else ""
+            if source_file:
+                citation["source_file"] = source_file
 
             citations.append(citation)
 

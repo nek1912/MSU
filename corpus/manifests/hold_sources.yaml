@@ -146,9 +146,9 @@ sources:
 
   - source_id: pacs_hr_policy_2026
     filename: "Model_HR_Policy_V21.pdf"
-    target_domain: "pacs_hr"
-    status: "deferred"
-    reason: "Useful later PACS HR feature expansion."
+    target_domain: "pacs_governance"
+    status: "collected"
+    reason: "Now collected and added to MVP sources. OCR/MinerU processing required for ingestion."
 
   - source_id: pacs_initiatives_compilation_2026
     filename: "Compilation of All Initiatives of the Ministry*.pdf"

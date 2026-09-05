@@ -10,6 +10,7 @@ from app.routes.voice import router as voice_router
 from app.routes.conversations import router as conversations_router
 from app.routes.evidence import router as evidence_router
 from app.routes.grievance import router as grievance_router
+from app.routes.documents import router as documents_router
 
 logging.basicConfig(level=logging.INFO,
                     format='{"level":"%(levelname)s","msg":"%(message)s"}')
@@ -31,6 +32,7 @@ app.include_router(voice_router)
 app.include_router(conversations_router)
 app.include_router(evidence_router)
 app.include_router(grievance_router)
+app.include_router(documents_router)
 
 
 @app.get("/health")

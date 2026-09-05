@@ -5,15 +5,15 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pacs_governance
   expected_state: null
   gold_rationale: Definitions define byelaw terms, Objectives state society purpose,
     Intro provides context
   question: What are the byelaws for a cooperative society?
   relevant_chunk_ids:
-  - 0b3e94c9-7cb6-4b7a-8784-74da12c4bc52
-  - dd4e1fcc-ce41-4785-a643-aa87086c06ca
+  - Model Byelaws 05.01.2023_00045
+  - Model Byelaws 05.01.2023_00260
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -23,15 +23,15 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pacs_governance
   expected_state: null
   gold_rationale: ce6579bc defines voting rights for A class members, 9a5a665f clarifies
     nominal member voting restrictions
   question: Voting rights in a cooperative society
   relevant_chunk_ids:
-  - 8633e68b-4f4b-4aa2-8728-fca3deb3a20d
-  - 6e52fc6c-5226-42aa-a8d0-337b85eb71a6
+  - Model Byelaws 05.01.2023_00195
+  - Model Byelaws 05.01.2023_00134
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -59,27 +59,27 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pacs_governance
   expected_state: null
   gold_rationale: 4e776d7e describes General Body Meeting requirements including quorum-related
     provisions, 8afc52a3 defines General Body composition
   question: Quorum requirements for cooperative society meetings
   relevant_chunk_ids:
-  - 8633e68b-4f4b-4aa2-8728-fca3deb3a20d
-  - 8c31c0ed-c467-439b-8330-2e566dee254e
+  - Model Byelaws 05.01.2023_00195
+  - Model Byelaws 05.01.2023_00190
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pacs_governance
   expected_state: null
   gold_rationale: 5ba71f1e defines who can/cannot become member, 8f055eab defines
     member terms
   question: How to become a member of a cooperative society?
   relevant_chunk_ids:
-  - cff94806-afd6-4efe-94e0-4cfed1ea5b06
-  - 715aadb3-549d-47fc-a322-fffeec0c327d
+  - Model Byelaws 05.01.2023_00115
+  - Model Byelaws 05.01.2023_00109
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -95,27 +95,27 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pacs_governance
   expected_state: null
   gold_rationale: a0443b33 covers transfer of assets and liabilities including share
     transfer provisions
   question: Share transfer rules in cooperative society
   relevant_chunk_ids:
-  - c37b0334-88e7-4b10-a1ef-a8a5d56e8e7f
-  - fc7970df-f319-49d5-bed3-3ac1b5664399
+  - Model Byelaws 05.01.2023_00367
+  - Model Byelaws 05.01.2023_00264
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pacs_governance
   expected_state: null
   gold_rationale: 96f05884 describes Board election process, 8afc52a3 defines General
     Body authority
   question: Election process for cooperative society committee
   relevant_chunk_ids:
-  - 8633e68b-4f4b-4aa2-8728-fca3deb3a20d
-  - f014cc4d-977e-48be-944c-c888ce409b32
+  - Model Byelaws 05.01.2023_00195
+  - Model Byelaws 05.01.2023_00112
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -137,14 +137,14 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pacs_governance
   expected_state: null
   gold_rationale: 9b01036d includes borrowing and financial decision powers
   question: Restrictions on cooperative society borrowing
   relevant_chunk_ids:
-  - fa822ae3-38ff-41f4-9d66-0c49ac31537a
-  - 72a812ac-1124-4f04-8f72-b6466ed3035c
+  - Model Byelaws 05.01.2023_00155
+  - Model Byelaws 05.01.2023_00250
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -154,15 +154,15 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pacs_governance
   expected_state: null
   gold_rationale: 96f05884 defines Board/committee structure, 5816041a defines CEO
     duties
   question: Managing committee powers under cooperative act
   relevant_chunk_ids:
-  - 8633e68b-4f4b-4aa2-8728-fca3deb3a20d
-  - 9085bf20-33a8-4f16-aa8e-4914d00f6bfb
+  - Model Byelaws 05.01.2023_00195
+  - Model Byelaws 05.01.2023_00390
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -172,14 +172,14 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pacs_governance
   expected_state: null
   gold_rationale: 294d77e1 includes surplus/dividend distribution powers
   question: Surplus distribution in cooperative society
   relevant_chunk_ids:
-  - e4a25b32-23a0-457d-a479-7f3530e5a3fa
-  - 7131413c-7e7f-48ab-b02e-c8a34d3e5388
+  - Model Byelaws 05.01.2023_00393
+  - Model Byelaws 05.01.2023_00369
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -195,26 +195,26 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pacs_governance
   expected_state: null
   gold_rationale: 5ba71f1e defines grounds for member expulsion/disqualification
   question: Member expulsion from cooperative society
   relevant_chunk_ids:
-  - 24c6e385-3a59-4092-b742-ddd68666768f
-  - 12b2f56b-5a03-4f0c-8d1f-f192f5790120
+  - Model Byelaws 05.01.2023_00147
+  - Model Byelaws 05.01.2023_00101
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pacs_governance
   expected_state: null
   gold_rationale: Definitions define amendment terms, General Body has authority to
     amend byelaws
   question: Cooperative society bylaw amendment process
   relevant_chunk_ids:
-  - 6a57ce2a-1a36-42b7-9ec4-6471c7888e45
-  - 24c6e385-3a59-4092-b742-ddd68666768f
+  - Model Byelaws 05.01.2023_00376
+  - Model Byelaws 05.01.2023_00147
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -224,26 +224,26 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pacs_governance
   expected_state: null
   gold_rationale: Services section covers surplus/dividend distribution
   question: Dividend declaration rules for cooperative
   relevant_chunk_ids:
-  - 2e0a0ec8-d063-4163-b067-ab0f02b9d95c
-  - 1a24450c-9c74-422a-ac2f-627aecd62027
+  - Model Byelaws 05.01.2023_00127
+  - Model Byelaws 05.01.2023_00152
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pacs_governance
   expected_state: null
   gold_rationale: 4e776d7e describes resolution requirements for meetings, 1c372a66
     shows resolution usage
   question: Cooperative society special resolution requirements
   relevant_chunk_ids:
-  - 24c6e385-3a59-4092-b742-ddd68666768f
-  - 9085bf20-33a8-4f16-aa8e-4914d00f6bfb
+  - Model Byelaws 05.01.2023_00147
+  - Model Byelaws 05.01.2023_00390
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -277,15 +277,15 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pacs_governance
   expected_state: null
   gold_rationale: 96f05884 defines Board/committee structure, 5816041a defines CEO
     duties
   question: Election of the PACS managing committee
   relevant_chunk_ids:
-  - fd021aa4-dfbd-4672-9eef-423c3c1dc226
-  - 15ac735f-aeca-441d-b92b-9f8da362a542
+  - Model Byelaws 05.01.2023_00008
+  - Model Byelaws 05.01.2023_00360
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -361,14 +361,14 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pacs_governance
   expected_state: null
   gold_rationale: General Body section defines meeting requirements
   question: PACS meeting frequency requirements
   relevant_chunk_ids:
-  - 15ac735f-aeca-441d-b92b-9f8da362a542
-  - 437f3b9e-00ac-4efd-8892-077bb843d5ab
+  - Model Byelaws 05.01.2023_00360
+  - Model Byelaws 05.01.2023_00009
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -414,15 +414,15 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pacs_governance
   expected_state: null
   gold_rationale: Definitions define amendment terms, General Body has authority to
     amend byelaws
   question: PACS bylaw amendment procedure
   relevant_chunk_ids:
-  - fd021aa4-dfbd-4672-9eef-423c3c1dc226
-  - f80708d8-42b7-48e2-a001-f9f6e64535c6
+  - Model Byelaws 05.01.2023_00008
+  - Model Byelaws 05.01.2023_00012
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -432,14 +432,14 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pacs_governance
   expected_state: null
   gold_rationale: General Body section defines annual meeting rules
   question: PACS annual general meeting rules
   relevant_chunk_ids:
-  - 18bce0e8-0f9a-449c-803d-ad01c3a94d60
-  - 613fc46e-1c48-41ce-b2fb-c6f106181cc0
+  - Model Byelaws 05.01.2023_00178
+  - Model Byelaws 05.01.2023_00183
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -641,25 +641,25 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: null
   gold_rationale: f945e35d directly covers risk coverage under PMFBY
   question: What risks does PMFBY cover for standing crops?
   relevant_chunk_ids:
-  - fdc569dd-a7a7-426c-8f63-d8615311fefe
-  - 7e330934-aa95-4eb6-9a48-0bc3fd93906a
+  - operational_guidelines_pmfby_00011
+  - operational_guidelines_pmfby_00591
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: null
   gold_rationale: 589fe861 covers premium and subsidy
   question: PMFBY premium rates for food crops
   relevant_chunk_ids:
-  - bf6c23a5-7fa1-46b4-a64b-c6fe7e14e568
-  - fdc569dd-a7a7-426c-8f63-d8615311fefe
+  - operational_guidelines_pmfby_00339
+  - operational_guidelines_pmfby_00011
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: false
@@ -669,25 +669,25 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: null
   gold_rationale: 'Semantically corrected: eligible for PMFBY'
   question: Who is eligible for PMFBY coverage?
   relevant_chunk_ids:
-  - fdc569dd-a7a7-426c-8f63-d8615311fefe
-  - 9e380f21-228c-41dd-af99-5f8d73146cf1
+  - operational_guidelines_pmfby_00011
+  - operational_guidelines_pmfby_00056
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: null
   gold_rationale: 'Semantically corrected: PMFBY enrollment deadline'
   question: PMFBY enrollment deadline for kharif crops
   relevant_chunk_ids:
-  - 00c5fecb-4dd7-4159-917a-dd3efcfd2056
-  - fdc569dd-a7a7-426c-8f63-d8615311fefe
+  - operational_guidelines_pmfby_00368
+  - operational_guidelines_pmfby_00011
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: false
@@ -697,36 +697,36 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: gujarat
   gold_rationale: 'Semantically corrected: Gujarat PMFBY crop insurance portal'
   question: Gujarat PMFBY crop insurance portal
   relevant_chunk_ids:
-  - fdc569dd-a7a7-426c-8f63-d8615311fefe
-  - 46adbe0d-6d59-4b20-bb99-eb9ff3e4e456
+  - operational_guidelines_pmfby_00011
+  - operational_guidelines_pmfby_00020
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: null
   gold_rationale: f945e35d covers PMFBY risk coverage
   question: PMFBY coverage for horticultural crops
   relevant_chunk_ids:
-  - fdc569dd-a7a7-426c-8f63-d8615311fefe
-  - 7e330934-aa95-4eb6-9a48-0bc3fd93906a
+  - operational_guidelines_pmfby_00011
+  - operational_guidelines_pmfby_00591
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: null
   gold_rationale: 'FIXED: Question asks about preventive sowing'
   question: PMFBY preventive sowing provision
   relevant_chunk_ids:
-  - fdc569dd-a7a7-426c-8f63-d8615311fefe
-  - 7e330934-aa95-4eb6-9a48-0bc3fd93906a
+  - operational_guidelines_pmfby_00011
+  - operational_guidelines_pmfby_00591
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: false
@@ -736,25 +736,25 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: null
   gold_rationale: f945e35d covers PMFBY risk coverage (default for general PMFBY questions)
   question: PMFBY add-on coverage options
   relevant_chunk_ids:
-  - e81fcf35-e750-4903-b724-4b8e9c7d945e
-  - 9590de53-fd26-41b0-aea3-8aac20bb743f
+  - operational_guidelines_pmfby_01194
+  - operational_guidelines_pmfby_01218
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: null
   gold_rationale: 'Semantically corrected: PMFBY use of technology'
   question: PMFBY use of technology for crop cutting experiments
   relevant_chunk_ids:
-  - f5bb1c01-4da9-4232-9da2-e4164a207dcc
-  - 3e12dec5-02a7-4bb7-aec7-dcecc33ad0cc
+  - operational_guidelines_pmfby_00461
+  - operational_guidelines_pmfby_00588
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: false
@@ -764,47 +764,47 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: null
   gold_rationale: 589fe861 covers premium and subsidy
   question: PMFBY premium subsidy by state government
   relevant_chunk_ids:
-  - fdc569dd-a7a7-426c-8f63-d8615311fefe
-  - 39b9fc96-091b-481b-b189-76100669ae3d
+  - operational_guidelines_pmfby_00011
+  - operational_guidelines_pmfby_00323
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: gujarat
   gold_rationale: 'Semantically corrected: Gujarat PMFBY farmer enrollment'
   question: Gujarat PMFBY farmer enrollment drive
   relevant_chunk_ids:
-  - e436a13f-34f3-4c51-8596-3aa93f04aedc
-  - fdc569dd-a7a7-426c-8f63-d8615311fefe
+  - operational_guidelines_pmfby_00178
+  - operational_guidelines_pmfby_00011
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: null
   gold_rationale: 'Semantically corrected: PMFBY coverage for perennial crops'
   question: PMFBY coverage for perennial crops
   relevant_chunk_ids:
-  - fdc569dd-a7a7-426c-8f63-d8615311fefe
-  - 7e330934-aa95-4eb6-9a48-0bc3fd93906a
+  - operational_guidelines_pmfby_00011
+  - operational_guidelines_pmfby_00591
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: null
   gold_rationale: 'Semantically corrected: PMFBY insurance company empanelment'
   question: PMFBY insurance company empanelment
   relevant_chunk_ids:
-  - a79a2b94-521e-49b8-8d27-528c5b93a421
-  - 5207928c-23e6-4efb-8746-36cc9f81a9df
+  - operational_guidelines_pmfby_00161
+  - operational_guidelines_pmfby_00920
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: false
@@ -814,14 +814,14 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: null
   gold_rationale: 'FIXED: Question asks about coverage area'
   question: PMFBY coverage area definition
   relevant_chunk_ids:
-  - fdc569dd-a7a7-426c-8f63-d8615311fefe
-  - 9e380f21-228c-41dd-af99-5f8d73146cf1
+  - operational_guidelines_pmfby_00011
+  - operational_guidelines_pmfby_00056
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: false
@@ -837,69 +837,69 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: null
   gold_rationale: 'FIXED: Question asks about private companies'
   question: PMFBY private crop insurance companies list
   relevant_chunk_ids:
-  - b9d4ce3e-c76c-41e3-bfc0-9a87e6791df2
-  - 5f55cfb2-c417-463c-9d6f-93a885cb0896
+  - operational_guidelines_pmfby_00119
+  - operational_guidelines_pmfby_01173
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: null
   gold_rationale: 'FIXED: Question asks about weather-based scheme'
   question: PMFBY restructured weather-based scheme
   relevant_chunk_ids:
-  - fdc569dd-a7a7-426c-8f63-d8615311fefe
-  - 31dbd091-fa30-4b9f-a500-843f8b6e69e3
+  - operational_guidelines_pmfby_00011
+  - operational_guidelines_pmfby_00705
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: gujarat
   gold_rationale: 'FIXED: Question asks about premium rates'
   question: Gujarat PMFBY district-wise premium rates
   relevant_chunk_ids:
-  - fdc569dd-a7a7-426c-8f63-d8615311fefe
-  - bf6c23a5-7fa1-46b4-a64b-c6fe7e14e568
+  - operational_guidelines_pmfby_00011
+  - operational_guidelines_pmfby_00339
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: null
   gold_rationale: 'FIXED: Question asks about indemnity calculation'
   question: PMFBY indemnity level calculation
   relevant_chunk_ids:
-  - 81d4e63f-b9df-4f46-b78b-4915953b3628
-  - 19d9121c-a372-4214-af8d-6e3803aed0af
+  - operational_guidelines_pmfby_01218
+  - operational_guidelines_pmfby_00590
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: null
   gold_rationale: 'FIXED: Question asks about exclusion period'
   question: PMFBY exclusion period for prevented sowing
   relevant_chunk_ids:
-  - 31dbd091-fa30-4b9f-a500-843f8b6e69e3
-  - dccae059-452e-4287-a719-b1870c0ecc58
+  - operational_guidelines_pmfby_00705
+  - operational_guidelines_pmfby_00767
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: null
   gold_rationale: 4b146fd4 covers claim settlement
   question: PMFBY claim amount based on yield estimation
   relevant_chunk_ids:
-  - 7e330934-aa95-4eb6-9a48-0bc3fd93906a
-  - 348c51fa-f5c5-42fb-ab17-2a64e30eb8ca
+  - operational_guidelines_pmfby_00591
+  - operational_guidelines_pmfby_00997
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: false
@@ -909,14 +909,14 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: null
   gold_rationale: 'Semantically corrected: PMFBY notification date'
   question: PMFBY notification date for each season
   relevant_chunk_ids:
-  - fdc569dd-a7a7-426c-8f63-d8615311fefe
-  - 1f64b93a-3d4c-42af-be5e-eda525455567
+  - operational_guidelines_pmfby_00011
+  - operational_guidelines_pmfby_00903
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: false
@@ -1592,15 +1592,15 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pacs_governance
   expected_state: null
   gold_rationale: NSFI document covers deposit insurance coverage
   note: 'adversarial: cooperative keyword wins over finlit'
   question: Cooperative society deposit insurance coverage
   relevant_chunk_ids:
-  - 72b35412-d2c6-477c-bec1-b4b0fa59d406
-  - e4a25b32-23a0-457d-a479-7f3530e5a3fa
+  - Model Byelaws 05.01.2023_00156
+  - Model Byelaws 05.01.2023_00393
   relevant_source_ids:
   - pacs_model_bylaws_2023
 - answerable: false
@@ -1611,15 +1611,15 @@
   relevant_chunk_ids: []
   relevant_source_ids: []
 - answerable: true
-  corpus_snapshot: jina-v3-mineru-v2-2188
+  corpus_snapshot: post-corpus-expansion-4778
   expected_domain: pmfby
   expected_state: null
   gold_rationale: 589fe861 covers premium and subsidy
   note: 'adversarial: pmfby keyword wins over pacs'
   question: PMFBY premium subsidy through PACS
   relevant_chunk_ids:
-  - 39b9fc96-091b-481b-b189-76100669ae3d
-  - 62d379d7-fe01-487e-82be-cface91b98a9
+  - operational_guidelines_pmfby_00323
+  - operational_guidelines_pmfby_00343
   relevant_source_ids:
   - pmfby_operational_guidelines
 - answerable: false

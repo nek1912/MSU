@@ -48,7 +48,7 @@ class SarvamChatProvider:
         self._url = settings.sarvam_chat_url
 
     def generate(
-        self, system: str, user: str, temperature: float = 0.1
+        self, system: str, user: str, temperature: float = 0.0
     ) -> str:
         """Non-streaming generation. Primary MVP path."""
         # Log prompt size for optimization

@@ -27,6 +27,7 @@ export interface ChatResponse {
     url: string;
     source?: "static" | "web";
     source_label?: string;
+    content?: string;
   }[];
   abstained: boolean;
   mode?: string;

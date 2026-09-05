@@ -16,6 +16,7 @@ from app.contracts import (
     SourceRole,
     StaticEvidence,
 )
+from app.config import MAX_CHARS_PER_CHUNK
 
 logger = logging.getLogger(__name__)
 
@@ -327,7 +328,8 @@ class EvidenceController:
             if chunk.page is not None:
                 meta_parts.append(f"p.{chunk.page}")
             meta_str = " — ".join(meta_parts)
-            static_parts.append(f"[STATIC] [chunk:{short_id}] ({meta_str})\n{chunk.content}")
+            content = chunk.content[:MAX_CHARS_PER_CHUNK] if len(chunk.content) > MAX_CHARS_PER_CHUNK else chunk.content
+            static_parts.append(f"[STATIC] [chunk:{short_id}] ({meta_str})\n{content}")
         static_section = "\n\n---\n\n".join(static_parts) if static_parts else "No static evidence available."
 
         # Build dynamic evidence section (cap to top 3 highest-quality chunks)
@@ -336,8 +338,9 @@ class EvidenceController:
             dynamic_chunks = bundle.dynamic.chunks[:3]
             for chunk in dynamic_chunks:
                 short_id = chunk.chunk_id[:8]
+                content = chunk.content[:MAX_CHARS_PER_CHUNK] if len(chunk.content) > MAX_CHARS_PER_CHUNK else chunk.content
                 dynamic_parts.append(
-                    f"[DYNAMIC] [chunk:{short_id}] ({chunk.title} — web — {chunk.url})\n{chunk.content}"
+                    f"[DYNAMIC] [chunk:{short_id}] ({chunk.title} — web — {chunk.url})\n{content}"
                 )
             dynamic_section = "\n\n---\n\n".join(dynamic_parts)
             dynamic_status = f"available — {len(dynamic_chunks)} chunks"

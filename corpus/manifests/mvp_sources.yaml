@@ -126,6 +126,135 @@ sources:
     base_incorporates: null
     verification_note: "Rename the locally downloaded NSFI PDF to NSFI_2025_30.pdf if its current filename is the long RBI-generated filename."
 
+  # ── Benchmark corpus additions ──────────────────────────────────
+
+  - source_id: rbi_fame_financial_awareness
+    filename: "RBI_FAME_Financial_Awareness_Messages.pdf"
+    path: "corpus/seeds/RBI_FAME_Financial_Awareness_Messages.pdf"
+    actual_title: "Financial Awareness Messages (FAME) - Fourth Edition"
+    issuing_organization: "Reserve Bank of India, Financial Inclusion and Development Department"
+    document_date: "2024-02-26"
+    effective_date: "2024-02-26"
+    document_type: "financial_literacy_booklet"
+    jurisdiction: "central"
+    state: null
+    official_source_url: "https://www.rbi.org.in/commonman/images/FAME202426022024.pdf"
+    digital_scanned: "digital_text"
+    status: "current_reference"
+    primary_supplementary: "primary"
+    target_domain: "financial_inclusion"
+    target_seed: "rbi_financial_literacy"
+    collection_status: "collected"
+    mvp_required: false
+    modifies: null
+    base_incorporates: null
+
+  - source_id: rbi_beaware_fraud_awareness
+    filename: "RBI_BEAWARE_Financial_Fraud_Awareness.pdf"
+    path: "corpus/seeds/RBI_BEAWARE_Financial_Fraud_Awareness.pdf"
+    actual_title: "BE(A)WARE - A Booklet on Modus Operandi of Financial Frauds"
+    issuing_organization: "Reserve Bank of India, Consumer Education and Protection Department"
+    document_date: "2022-03-07"
+    effective_date: "2022-03-07"
+    document_type: "fraud_awareness_booklet"
+    jurisdiction: "central"
+    state: null
+    official_source_url: "https://www.rbi.org.in/commonperson/Upload/english/Content/PDFs/English%20BEAWARE.pdf"
+    digital_scanned: "digital_text"
+    status: "current_reference"
+    primary_supplementary: "primary"
+    target_domain: "financial_inclusion"
+    target_seed: "rbi_financial_literacy"
+    collection_status: "collected"
+    mvp_required: false
+    modifies: null
+    base_incorporates: null
+
+  - source_id: irdai_introduction_to_insurance
+    filename: "Introduction_To_Insurance_IRDAI.pdf"
+    path: "corpus/seeds/Introduction_To_Insurance_IRDAI.pdf"
+    actual_title: "Introduction to Insurance - Insurance Education Series"
+    issuing_organization: "Insurance Regulatory and Development Authority of India (IRDAI)"
+    document_date: null
+    effective_date: null
+    document_type: "insurance_education"
+    jurisdiction: "central"
+    state: null
+    official_source_url: "https://irdai.gov.in/documents/37343/621990/IntroductionToInsurance.pdf"
+    digital_scanned: "digital_text"
+    status: "current_reference"
+    primary_supplementary: "primary"
+    target_domain: "financial_inclusion"
+    target_seed: "rbi_financial_literacy"
+    collection_status: "collected"
+    mvp_required: false
+    modifies: null
+    base_incorporates: null
+
+  - source_id: pacs_hr_policy_2026
+    filename: "Model_HR_Policy_V21.pdf"
+    path: "corpus/seeds/Model_HR_Policy_V21.pdf"
+    actual_title: "Model HR Policy for Transformation of Primary Agricultural Credit Societies (PACS)"
+    issuing_organization: "Ministry of Cooperation, Government of India"
+    document_date: "2026-04-08"
+    effective_date: "2026-04-08"
+    document_type: "hr_policy"
+    jurisdiction: "central"
+    state: null
+    official_source_url: "https://cooperation.gov.in/en/node/3210"
+    digital_scanned: "digital_text"
+    status: "current_reference"
+    primary_supplementary: "primary"
+    target_domain: "pacs_governance"
+    target_seed: "pacs_model_bylaws"
+    collection_status: "collected"
+    mvp_required: false
+    modifies: null
+    base_incorporates: null
+
+  - source_id: cooperative_sugar_mills_csm_scheme
+    filename: "Cooperative_Sugar_Mills_CSM_Scheme.pdf"
+    path: "corpus/seeds/Cooperative_Sugar_Mills_CSM_Scheme.pdf"
+    actual_title: "Grant-in-aid to NCDC for Strengthening of Cooperative Sugar Mills (CSMs)"
+    issuing_organization: "Ministry of Cooperation, Government of India"
+    document_date: "2023-07-01"
+    effective_date: "2023-07-01"
+    document_type: "scheme_brief"
+    jurisdiction: "central"
+    state: null
+    official_source_url: "https://cooperation.gov.in/en/node/3007"
+    digital_scanned: "digital_text"
+    status: "current_reference"
+    primary_supplementary: "primary"
+    target_domain: "pacs_governance"
+    target_seed: "pacs_model_bylaws"
+    collection_status: "collected"
+    mvp_required: false
+    modifies: null
+    base_incorporates: null
+
+  - source_id: moc_young_professionals_yps
+    filename: "MoC_Young_Professionals_YPs.pdf"
+    path: "corpus/seeds/MoC_Young_Professionals_YPs.pdf"
+    actual_title: "Inviting Applications for Engagement of Young Professionals in Ministry of Cooperation"
+    issuing_organization: "Ministry of Cooperation, Government of India"
+    document_date: "2026-04-16"
+    effective_date: "2026-04-16"
+    document_type: "recruitment_notice"
+    jurisdiction: "central"
+    state: null
+    official_source_url: "https://cooperation.gov.in/en/node/2964"
+    digital_scanned: "scanned"
+    status: "current_reference"
+    primary_supplementary: "supplementary"
+    target_domain: "pacs_governance"
+    target_seed: "pacs_model_bylaws"
+    collection_status: "collected_ocr_required"
+    mvp_required: false
+    modifies: null
+    base_incorporates: null
+    verification_note: "Scanned/image-based PDF. Text extraction via OCR/MinerU required before ingestion."
+
 # ================================================================
 # EXPLICIT MVP LIMITATIONS
 # ================================================================

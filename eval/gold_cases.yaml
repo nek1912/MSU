@@ -1099,12 +1099,16 @@
   question: Farming subsidy application process
   relevant_chunk_ids: []
   relevant_source_ids: []
-- answerable: false
+- answerable: true
+  corpus_snapshot: jina-v3-3900
   expected_domain: financial_inclusion
   expected_state: null
+  gold_rationale: Deposit insurance covered in NSFI and RBI financial education docs
   question: How does deposit insurance protect my savings?
   relevant_chunk_ids: []
-  relevant_source_ids: []
+  relevant_source_ids:
+  - nsfi_2025_30
+  - rbi_financial_education_guide
 - answerable: false
   expected_domain: financial_inclusion
   expected_state: null
@@ -1117,12 +1121,15 @@
   question: RBI guidelines for cooperative banks
   relevant_chunk_ids: []
   relevant_source_ids: []
-- answerable: false
+- answerable: true
+  corpus_snapshot: jina-v3-3900
   expected_domain: financial_inclusion
   expected_state: null
+  gold_rationale: UPI safety covered in RBI FAME financial awareness messages
   question: Safe use of UPI payments
   relevant_chunk_ids: []
-  relevant_source_ids: []
+  relevant_source_ids:
+  - rbi_fame_financial_awareness
 - answerable: false
   expected_domain: financial_inclusion
   expected_state: null
@@ -1141,36 +1148,50 @@
   question: PMJDY overdraft facility details
   relevant_chunk_ids: []
   relevant_source_ids: []
-- answerable: false
+- answerable: true
+  corpus_snapshot: jina-v3-3900
   expected_domain: financial_inclusion
   expected_state: null
+  gold_rationale: RBI financial literacy centers covered in RBI FAME and GUIDE310113_F
   question: RBI financial literacy centers
   relevant_chunk_ids: []
-  relevant_source_ids: []
-- answerable: false
+  relevant_source_ids:
+  - rbi_fame_financial_awareness
+  - rbi_financial_education_guide
+- answerable: true
+  corpus_snapshot: jina-v3-3900
   expected_domain: financial_inclusion
   expected_state: null
+  gold_rationale: RuPay card benefits covered in RBI FAME and NSFI docs
   question: PMJDY RuPay card benefits
   relevant_chunk_ids: []
-  relevant_source_ids: []
-- answerable: false
+  relevant_source_ids:
+  - rbi_fame_financial_awareness
+  - nsfi_2025_30
+- answerable: true
+  corpus_snapshot: jina-v3-3900
   expected_domain: financial_inclusion
   expected_state: null
+  gold_rationale: Banking complaint process with RBI Ombudsman covered in RBI BE(A)WARE
   question: How to file a banking complaint with RBI?
   relevant_chunk_ids: []
-  relevant_source_ids: []
+  relevant_source_ids:
+  - rbi_beware_fraud_awareness
 - answerable: false
   expected_domain: financial_inclusion
   expected_state: null
   question: Jan Dhan account zero balance rules
   relevant_chunk_ids: []
   relevant_source_ids: []
-- answerable: false
+- answerable: true
+  corpus_snapshot: jina-v3-3900
   expected_domain: financial_inclusion
   expected_state: null
+  gold_rationale: Digital banking safety covered in RBI BE(A)WARE fraud awareness
   question: Digital banking safety tips
   relevant_chunk_ids: []
-  relevant_source_ids: []
+  relevant_source_ids:
+  - rbi_beware_fraud_awareness
 - answerable: false
   expected_domain: financial_inclusion
   expected_state: null
@@ -1183,12 +1204,16 @@
   question: RBI guidelines on interest rates
   relevant_chunk_ids: []
   relevant_source_ids: []
-- answerable: false
+- answerable: true
+  corpus_snapshot: jina-v3-3900
   expected_domain: financial_inclusion
   expected_state: null
+  gold_rationale: PMJDY/PMSBY accident insurance covered in IntroductionToInsurance and RBI FAME
   question: PMJDY accident insurance coverage
   relevant_chunk_ids: []
-  relevant_source_ids: []
+  relevant_source_ids:
+  - introduction_to_insurance
+  - rbi_fame_financial_awareness
 - answerable: false
   expected_domain: financial_inclusion
   expected_state: gujarat
@@ -1213,36 +1238,46 @@
   question: PMJDY mobile banking registration
   relevant_chunk_ids: []
   relevant_source_ids: []
-- answerable: false
+- answerable: true
+  corpus_snapshot: jina-v3-3900
   expected_domain: financial_inclusion
   expected_state: null
+  gold_rationale: Ponzi scheme warnings covered in RBI BE(A)WARE fraud awareness
   question: RBI warnings about Ponzi schemes
   relevant_chunk_ids: []
-  relevant_source_ids: []
+  relevant_source_ids:
+  - rbi_beware_fraud_awareness
 - answerable: false
   expected_domain: financial_inclusion
   expected_state: null
   question: PMJDY scheme statistics and coverage
   relevant_chunk_ids: []
   relevant_source_ids: []
-- answerable: false
+- answerable: true
+  corpus_snapshot: jina-v3-3900
   expected_domain: financial_inclusion
   expected_state: null
+  gold_rationale: ATM safety guidelines covered in RBI BE(A)WARE and RBI FAME
   question: Safe ATM usage guidelines
   relevant_chunk_ids: []
-  relevant_source_ids: []
+  relevant_source_ids:
+  - rbi_beware_fraud_awareness
+  - rbi_fame_financial_awareness
 - answerable: false
   expected_domain: financial_inclusion
   expected_state: null
   question: Jan Dhan account for minors
   relevant_chunk_ids: []
   relevant_source_ids: []
-- answerable: false
+- answerable: true
+  corpus_snapshot: jina-v3-3900
   expected_domain: financial_inclusion
   expected_state: null
+  gold_rationale: RBI banking ombudsman scheme covered in RBI BE(A)WARE
   question: RBI banking ombudsman scheme
   relevant_chunk_ids: []
-  relevant_source_ids: []
+  relevant_source_ids:
+  - rbi_beware_fraud_awareness
 - answerable: false
   expected_domain: financial_inclusion
   expected_state: null
@@ -1255,12 +1290,16 @@
   question: Gujarat banking correspondents network
   relevant_chunk_ids: []
   relevant_source_ids: []
-- answerable: false
+- answerable: true
+  corpus_snapshot: jina-v3-3900
   expected_domain: financial_inclusion
   expected_state: null
+  gold_rationale: KYC documents covered in RBI financial education and IntroductionToInsurance
   question: RBI guidelines on KYC documents
   relevant_chunk_ids: []
-  relevant_source_ids: []
+  relevant_source_ids:
+  - rbi_financial_education_guide
+  - introduction_to_insurance
 - answerable: false
   expected_domain: financial_inclusion
   expected_state: null
@@ -1279,6 +1318,73 @@
   question: PMJDY account closure rules
   relevant_chunk_ids: []
   relevant_source_ids: []
+- answerable: true
+  corpus_snapshot: jina-v3-3900
+  expected_domain: financial_inclusion
+  expected_state: null
+  gold_rationale: PMJJBY life insurance scheme covered in RBI FAME and IntroductionToInsurance
+  question: What is PMJJBY and what are its benefits?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - rbi_fame_financial_awareness
+  - introduction_to_insurance
+- answerable: true
+  corpus_snapshot: jina-v3-3900
+  expected_domain: financial_inclusion
+  expected_state: null
+  gold_rationale: PMSBY accident insurance scheme covered in RBI FAME and IntroductionToInsurance
+  question: What is PMSBY and how does it work?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - rbi_fame_financial_awareness
+  - introduction_to_insurance
+- answerable: true
+  corpus_snapshot: jina-v3-3900
+  expected_domain: financial_inclusion
+  expected_state: null
+  gold_rationale: Insurance types covered in IntroductionToInsurance RBI/NABARD material
+  question: What are the different types of insurance available in India?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - introduction_to_insurance
+- answerable: true
+  corpus_snapshot: jina-v3-3900
+  expected_domain: financial_inclusion
+  expected_state: null
+  gold_rationale: Financial fraud awareness and how to identify scams covered in RBI BE(A)WARE
+  question: How to identify and avoid financial fraud?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - rbi_beware_fraud_awareness
+- answerable: true
+  corpus_snapshot: jina-v3-3900
+  expected_domain: financial_inclusion
+  expected_state: null
+  gold_rationale: National Strategy for Financial Inclusion 2025-30 goals and targets
+  question: What are the goals of the National Strategy for Financial Inclusion?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - nsfi_2025_30
+- answerable: true
+  corpus_snapshot: jina-v3-3900
+  expected_domain: financial_inclusion
+  expected_state: null
+  gold_rationale: RBI role in financial literacy and education covered in GUIDE310113_F
+  question: What is RBI doing for financial literacy in India?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - rbi_financial_education_guide
+  - rbi_fame_financial_awareness
+- answerable: true
+  corpus_snapshot: jina-v3-3900
+  expected_domain: financial_inclusion
+  expected_state: null
+  gold_rationale: Digital payment safety and UPI fraud prevention in RBI BE(A)WARE
+  question: How to stay safe while making digital payments?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - rbi_beware_fraud_awareness
+  - rbi_fame_financial_awareness
 - answerable: false
   expected_domain: grievance
   expected_state: null
@@ -1699,3 +1805,186 @@
   question: Ministry scheme for cooperative agriculture credit
   relevant_chunk_ids: []
   relevant_source_ids: []
+- answerable: true
+  corpus_snapshot: jina-v3-4270
+  expected_domain: pacs_governance
+  expected_state: null
+  gold_rationale: PACS HR Policy document covers recruitment, tenure, and service conditions
+  question: What is the HR policy for PACS employees?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - pacs_hr_policy
+- answerable: true
+  corpus_snapshot: jina-v3-4270
+  expected_domain: pacs_governance
+  expected_state: null
+  gold_rationale: PACS HR Policy covers appointment and eligibility criteria
+  question: How are employees appointed in PACS?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - pacs_hr_policy
+- answerable: true
+  corpus_snapshot: jina-v3-4433
+  expected_domain: schemes
+  expected_state: null
+  gold_rationale: Cooperative Sugar Mills scheme covers government support for cooperative sugar mills
+  question: What government support is available for cooperative sugar mills?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - cooperative_sugar_mills_scheme
+- answerable: true
+  corpus_snapshot: jina-v3-4433
+  expected_domain: schemes
+  expected_state: null
+  gold_rationale: Cooperative Sugar Mills scheme covers funding and subsidies
+  question: What is the centrally sponsored scheme for cooperative sugar mills?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - cooperative_sugar_mills_scheme
+- answerable: true
+  corpus_snapshot: jina-v3-4433
+  expected_domain: pacs_governance
+  expected_state: null
+  gold_rationale: Central Registrar Order covers cooperative society registration authority
+  question: What is the role of the Central Registrar of Cooperative Societies?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - central_registrar_order
+- answerable: true
+  corpus_snapshot: jina-v3-4433
+  expected_domain: pacs_computerization
+  expected_state: null
+  gold_rationale: GeM hiring notice covers computer system maintenance for cooperative societies
+  question: How does the Ministry of Cooperation hire agencies for computer system maintenance?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - moc_hiring_agency_gem
+- answerable: true
+  corpus_snapshot: jina-v3-4433
+  expected_domain: schemes
+  expected_state: null
+  gold_rationale: Multiple recruitment notices cover Young Professional engagement in cooperative bodies
+  question: How are Young Professionals recruited in the Ministry of Cooperation?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - moc_advertisement_yps
+  - moc_yp_finance_crcs
+  - moc_yp_legal_cea
+- answerable: true
+  corpus_snapshot: jina-v3-4270
+  expected_domain: schemes
+  expected_state: null
+  gold_rationale: Cooperative Sugar Mills scheme covers funding and subsidies
+  question: What is the centrally sponsored scheme for cooperative sugar mills?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - cooperative_sugar_mills_scheme
+- answerable: true
+  corpus_snapshot: jina-v3-5011
+  expected_domain: pacs_governance
+  expected_state: null
+  gold_rationale: Introduction guide covers cooperative member rights and responsibilities
+  question: What are the rights and responsibilities of cooperative society members?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - cooperative_member_introduction
+- answerable: true
+  corpus_snapshot: jina-v3-5011
+  expected_domain: pacs_governance
+  expected_state: gujarat
+  gold_rationale: Gujarat Cooperative Act 1961 covers state cooperative society legislation
+  question: What does the Gujarat Co-operative Societies Act 1961 say about cooperative societies?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - gujarat_cooperative_act_1961
+- answerable: true
+  corpus_snapshot: jina-v3-5011
+  expected_domain: pacs_governance
+  expected_state: gujarat
+  gold_rationale: Gujarat Act covers registration and governance of cooperative societies
+  question: How are cooperative societies registered in Gujarat?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - gujarat_cooperative_act_1961
+- answerable: true
+  corpus_snapshot: jina-v3-5525
+  expected_domain: pmfby
+  expected_state: null
+  gold_rationale: PMFBY operational guidelines cover crop insurance claim process
+  question: What is the claim settlement process under PMFBY?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - operational_guidelines_pmfby
+  - revamped_operational_guidelines_2020
+- answerable: true
+  corpus_snapshot: jina-v3-5525
+  expected_domain: pmfby
+  expected_state: null
+  gold_rationale: WBCIS guidelines cover weather-based crop insurance
+  question: How does Weather Based Crop Insurance Scheme work?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - wbcis_operational_guidelines
+- answerable: true
+  corpus_snapshot: jina-v3-5525
+  expected_domain: pmfby
+  expected_state: null
+  gold_rationale: RWBCIS covers revitalized weather-based crop insurance
+  question: What is RWBCIS crop insurance?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - rwbcis_revised_guidelines
+- answerable: true
+  corpus_snapshot: jina-v3-5525
+  expected_domain: pmfby
+  expected_state: null
+  gold_rationale: NAIS covers national agricultural insurance scheme
+  question: What was the National Agricultural Insurance Scheme?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - nais_scheme
+- answerable: true
+  corpus_snapshot: jina-v3-5525
+  expected_domain: pmfby
+  expected_state: null
+  gold_rationale: UPIS covers unified package insurance scheme
+  question: What is the Unified Package Insurance Scheme?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - upis_operational_guidelines
+- answerable: true
+  corpus_snapshot: jina-v3-5525
+  expected_domain: pmfby
+  expected_state: null
+  gold_rationale: PMFBY features brochure covers key benefits
+  question: What are the features and benefits of PMFBY?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - pmfby_features
+- answerable: true
+  corpus_snapshot: jina-v3-5525
+  expected_domain: pmfby
+  expected_state: null
+  gold_rationale: Bank SOP covers how banks implement PMFBY
+  question: How do bank branches implement PMFBY?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - sop_bank_branch_pmfby
+- answerable: true
+  corpus_snapshot: jina-v3-5525
+  expected_domain: pmfby
+  expected_state: null
+  gold_rationale: WINDS manual covers hyperlocal weather data for crop insurance
+  question: How is weather data collected for PMFBY?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - pmfby_winds_manual
+- answerable: true
+  corpus_snapshot: jina-v3-11010
+  expected_domain: pmfby
+  expected_state: null
+  gold_rationale: YESTECH manual covers technology for crop insurance implementation
+  question: What technology is used for crop insurance under PMFBY?
+  relevant_chunk_ids: []
+  relevant_source_ids:
+  - yestech_manual_2023

@@ -114,11 +114,9 @@ export function ChatWindow() {
   const router = useRouter();
   const { t, locale } = useI18n();
   const speech = useMemo(() => createSpeechService(), []);
-  const [speechReady, setSpeechReady] = useState(false);
   const sp = useSearchParams();
-  const [micSupported, setMicSupported] = useState(false);
-  useEffect(() => setMicSupported(speech.supported), [speech]);
   const [hydrated, setHydrated] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setHydrated(true), []);
   const [input, setInput] = useState("");
   const [msgs, setMsgs] = useState<Msg[]>(() => {
@@ -165,14 +163,10 @@ export function ChatWindow() {
   const abortRef = useRef<AbortController | null>(null);
   const tokenBufferRef = useRef("");
 
-  // Client-only speech readiness
-  useEffect(() => {
-    setSpeechReady(true);
-  }, []);
-
   // Auto-expand sidebar on large screens
   useEffect(() => {
     if (typeof window !== "undefined" && window.innerWidth >= 1024) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSidebarOpen(true);
     }
   }, []);
@@ -194,6 +188,7 @@ export function ChatWindow() {
   );
   useEffect(() => {
     if (msgs.length === 0 || !activeConvId) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setConversations((prev) => {
       const next = prev.map((c) =>
         c.id === activeConvId
@@ -316,6 +311,7 @@ export function ChatWindow() {
       } else if (useServiceMatch) {
         formattedQ = formatServiceQuestion(useServiceMatch[1], lang);
       }
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setInput(formattedQ);
       setMsgs([]);
       setActiveConvId(null);
@@ -947,7 +943,7 @@ export function ChatWindow() {
               {/* Input Toolbar */}
               <div className="mt-2 flex items-center justify-end pt-1 gap-2">
                 {/* Speech Mic */}
-                {speechReady && speech.supported && (
+                {hydrated && speech.supported && (
                   <button
                     type="button"
                     aria-label={listening ? t("common.stopMic") : t("common.mic")}

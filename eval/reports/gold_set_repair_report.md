@@ -50,6 +50,8 @@ It did NOT select based on:
 | Embedding dimension | 768 |
 | Git commit | 861bae9 |
 
+**Note:** This snapshot reflects the 5-document corpus at the time of gold-set repair. The current corpus has 11 documents and 4,778 chunks.
+
 ---
 
 ## 5. Cases Audited
@@ -109,6 +111,8 @@ These cases could not be automatically matched:
 | MRR | 0.249 | 0.161 | -0.088 |
 | Domain accuracy | 1.000 | 1.000 | — |
 | Jurisdiction contamination | 0 | 0 | — |
+
+**Note:** These metrics are from the 5-document, 226-chunk corpus (historical baseline). The current canonical benchmark (11 documents, 4,778 chunks, 40 answerable queries) is in `eval/benchmark_full_report.json`.
 
 **Interpretation:**
 - The "Before" metrics were INVALID (measuring against mechanically-generated gold)

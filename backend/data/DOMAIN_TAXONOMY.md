@@ -10,10 +10,10 @@
 
 | Canonical ID | Description | Database Documents |
 |--------------|-------------|-------------------|
-| `pacs_governance` | PACS byelaws, governance, membership, cooperative society registration | `pacs_model_bylaws_2023` |
-| `pacs_computerization` | PACS computerization scheme, digitization guidelines | `pacs_computerization_guidelines`, `pacs_computerization_corrigendum_2023_06_12` |
-| `pmfby` | PMFBY crop insurance, claims, premiums, eligibility | `pmfby_operational_guidelines` |
-| `financial_inclusion` | RBI, Jan Dhan, financial literacy, deposit insurance, RuPay | `nsfi_2025_30` |
+| `pacs_governance` | PACS byelaws, governance, membership, cooperative society registration | `pacs_model_bylaws_2023` (337 chunks), `model_hr_policy_v21` (601 chunks), `moc_young_professionals` (213 chunks), `cooperative_sugar_mills_csm_scheme` (43 chunks) |
+| `pacs_computerization` | PACS computerization scheme, digitization guidelines | `pacs_computerization_guidelines` (192 chunks), `pacs_computerization_corrigendum_2023_06_12` (22 chunks) |
+| `pmfby` | PMFBY crop insurance, claims, premiums, eligibility | `pmfby_operational_guidelines` (1266 chunks) |
+| `financial_inclusion` | RBI, Jan Dhan, financial literacy, deposit insurance, RuPay | `nsfi_2025_30` (371 chunks), `rbi_fame_financial_awareness` (579 chunks), `rbi_beaware_financial_fraud` (429 chunks), `irdai_introduction_to_insurance` (725 chunks) |
 | `schemes` | Ministry of Cooperation schemes (no DB documents yet) | — |
 | `agriculture` | Agriculture practices, MSP, mandi, fertilizer (no DB documents yet) | — |
 | `grievance` | Complaint filing, grievance redressal (no DB documents yet) | — |

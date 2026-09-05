@@ -8,7 +8,7 @@
 
 ## Trigger
 
-**Event:** Manifest file changes (`corpus/manifests/mvp_sources.yaml`) OR seed file changes (`corpus/seeds/*.md`)
+**Event:** Seed file changes (`corpus/seeds/chunks_jsonl/*.jsonl`) OR source PDF changes (`corpus/seeds/*.pdf`)
 
 **Schedule:** None — event-driven only. Ingestion runs when corpus changes, not on a timer.
 
@@ -20,9 +20,9 @@
 
 | Input | Source | Required | Validation |
 |-------|--------|----------|------------|
-| MVP manifest | `corpus/manifests/mvp_sources.yaml` | Yes | Must parse as valid YAML |
-| Seed/MD files | `corpus/seeds/*.md` | Yes | Every manifest `path` must resolve to existing file |
-| PDF files | `corpus/seeds/*.pdf` | No | Extracted if present, not required for MVP |
+| Seed JSONL files | `corpus/seeds/chunks_jsonl/*.jsonl` | Yes | Must be valid JSONL with content, metadata fields |
+| Seed/MD files | `corpus/seeds/*.md` | No | Pre-extracted markdown (legacy) |
+| PDF files | `corpus/seeds/*.pdf` | Yes | Source PDFs for ingestion |
 | Embedding provider | `JINA_API_KEY` env var | Yes | Must be non-empty |
 | Supabase credentials | `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` env vars | Yes | Must be non-empty |
 | Chunker config | Hardcoded in `ingestion/chunker.py` | Yes | Target 600 tokens, min 400, max 800, overlap 80 |
@@ -207,7 +207,7 @@ After each run, output:
 
 ```
 INGESTION COMPLETE
-  Sources processed: N/5
+  Sources processed: N/11
   Succeeded: N
   Failed: N (list source_ids)
   Total chunks: N
@@ -243,7 +243,7 @@ If any source failed, list:
 
 ## Acceptance Criteria
 
-- [ ] All 5 MVP sources ingested without error
+- [ ] All 11 sources ingested without error
 - [ ] No duplicate documents in `documents` table
 - [ ] No orphan chunks in `chunks` table
 - [ ] All embeddings are 768-dimensional

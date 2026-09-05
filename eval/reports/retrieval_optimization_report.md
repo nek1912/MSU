@@ -72,6 +72,8 @@ The system works correctly for user-facing queries. The low Recall@5 is due to g
 | MRR | 0.450 | 0.50 | -0.05 |
 | Recall@20 | 1.000 | — | ✅ |
 
+**Note:** These metrics are from the 5-document corpus (historical baseline). The current canonical benchmark (11 documents, 4,778 chunks, 40 answerable queries) is in `eval/benchmark_full_report.json`.
+
 ---
 
 ## Verdict

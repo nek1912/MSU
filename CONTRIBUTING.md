@@ -112,9 +112,13 @@ to `CLAUDE.md` rather than silently doing it.
 | Provider | Purpose | Free Tier |
 |---|---|---|
 | Supabase | Database + pgvector | 500MB, 50K MAU |
-| Gemini | Embeddings | Rate limited |
-| Groq | LLM inference | Rate limited |
-| Bhashini | Hindi STT/TTS | PoC/hackathon |
+| Jina | Primary embeddings (jina-embeddings-v3, 768d) | Rate limited |
+| Groq | Primary LLM (openai/gpt-oss-120b) | Rate limited |
+| Gemini | Fallback LLM + reranker | Rate limited |
+| Sarvam AI | Primary STT, TTS, translation | Rate limited |
+| Tavily | Primary web search | Rate limited |
+| Firecrawl | Web crawl / scrape fallback | Rate limited |
+| Azure Cognitive Services | Fallback STT only | Rate limited |
 | Render | Backend hosting | Sleeps on inactivity |
 | Vercel | Frontend hosting | Hobby tier |
 

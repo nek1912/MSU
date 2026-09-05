@@ -33,11 +33,14 @@ Follow this exact order to create all provider accounts and populate `.env`.
    GEMINI_API_KEY=...
    ```
 
-## 4. Bhashini (Voice — Hindi STT/TTS)
+## 4. Sarvam AI (Voice — STT, TTS, Translation)
 
-1. Go to https://bhashini.gov.in
-2. Register for a ULCA API key request
-3. **Approval lead time is unverified** — submit NOW, record submission date in `PROJECT_STATUS.md` Blocking issues; do not block other work on it.
+1. Go to https://sarvam.ai
+2. Register and obtain API key
+3. Add to `.env`:
+   ```
+   SARVAM_API_KEY=...
+   ```
 
 ## 5. Render (Backend hosting)
 
@@ -66,7 +69,7 @@ python scripts/smoke_supabase.py
 
 ## Model ID Verification
 
-- **Groq**: `llama-3.3-70b-versatile` — verify at https://console.groq.com/docs/models
+- **Groq**: `openai/gpt-oss-120b` (primary), `qwen/qwen3.8-27b` (fallback) — verify at https://console.groq.com/docs/models
 - **Gemini LLM**: `gemini-2.5-flash` — verify at https://ai.google.dev/gemini-api/docs
 
 If model IDs have changed, use the documented successor and update `config.py`.

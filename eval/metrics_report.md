@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-28
 **Test Environment:** Backend + Supabase (live)
-**Corpus:** 500 chunks, 5 documents
+**Corpus:** 4,778 chunks, 11 documents
 
 ---
 

@@ -87,7 +87,7 @@ FINAL VERDICT: PASS / FAIL / PASS WITH DEFERRED RISKS
 **Failure:** ABORT — cannot ingest invalid corpus.
 
 ### GATE 2: Ingestion
-- All 5 MVP sources ingested
+- All 11 sources ingested
 - No ingestion errors
 
 **Failure:** ABORT — cannot evaluate empty corpus.

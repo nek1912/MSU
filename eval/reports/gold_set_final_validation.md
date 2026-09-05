@@ -51,6 +51,8 @@
 | Recall@5 | 0.600 | 0.625 | 0.80 | -0.175 |
 | MRR | 0.450 | 0.475 | 0.50 | -0.025 |
 
+**Note:** These are historical metrics from the 5-document, 226-chunk corpus. The current canonical benchmark (11 documents, 4,778 chunks, 40 answerable queries) is in `eval/benchmark_full_report.json`.
+
 ---
 
 ## Failure Analysis

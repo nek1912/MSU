@@ -44,8 +44,8 @@
 
 | Check | Result |
 |-------|--------|
-| All chunks dimension = 768 | ✅ 226/226 |
-| All chunks norm ≈ 1.0 | ✅ 226/226 |
+| All chunks dimension = 768 | ✅ 4778/4778 |
+| All chunks norm ≈ 1.0 | ✅ 4778/4778 |
 | Re-embedding cosine > 0.99 | ✅ 0.999985 |
 | Python cosine = SQL cosine | ✅ 0.000000 difference |
 

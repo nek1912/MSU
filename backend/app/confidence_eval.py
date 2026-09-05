@@ -127,7 +127,7 @@ def compute_calibration_stats(records: list[ConfidenceEvalRecord]) -> Confidence
     median_c = sorted_confs[len(sorted_confs) // 2] if sorted_confs else 0.0
 
     # Per-domain stats
-    domains = set(r.domain for r in records)
+    domains = {r.domain for r in records}
     domain_stats = {}
     for d in domains:
         dr = [r for r in records if r.domain == d]

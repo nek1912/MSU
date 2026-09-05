@@ -6,7 +6,6 @@ citation/URL/markdown-free copy of the answer, while the original `answer`
 and for citation verification.
 """
 
-import pytest
 
 from app.speech_text import prepare_speech_text
 

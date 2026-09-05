@@ -1,5 +1,4 @@
 """LLM failure injection tests — provider fallback, retryable vs non-retryable errors."""
-import json
 
 import httpx
 import pytest

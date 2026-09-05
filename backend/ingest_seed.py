@@ -35,10 +35,10 @@ BACKEND = Path(__file__).resolve().parent
 sys.path.insert(0, str(BACKEND))
 load_dotenv(BACKEND / ".env", override=True)
 
-from supabase import Client, create_client  # noqa: E402
+from supabase import Client, create_client
 
-from app.config import get_settings  # noqa: E402
-from app.providers.embeddings import get_embedding_provider  # noqa: E402
+from app.config import get_settings
+from app.providers.embeddings import get_embedding_provider
 
 SEED_JSONL_DIR = BACKEND.parent / "corpus" / "seeds" / "chunks_jsonl"
 IMAGE_PLACEHOLDER = re.compile(r"\[Image asset:\s*[^]]*\]", re.IGNORECASE)

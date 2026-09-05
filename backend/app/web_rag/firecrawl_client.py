@@ -158,8 +158,6 @@ class FirecrawlClient:
                 "https://" + (" ".join(str(d).lstrip("/") for d in include_domains))
             )
 
-        errors = []
-
         try:
 
             response = requests.post(

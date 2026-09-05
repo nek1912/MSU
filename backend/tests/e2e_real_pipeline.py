@@ -11,7 +11,6 @@ collected in the default suite (named e2e_ and slow); run explicitly:
 
 import uuid
 
-import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app

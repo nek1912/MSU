@@ -1,9 +1,8 @@
 
 from __future__ import annotations
 
-from typing import Any
 
-from .models import GrievanceDraft, GrievanceEntity, GrievanceSubCategory
+from .models import GrievanceDraft, GrievanceSubCategory
 from .entity_extractor import GrievanceEntityExtractor
 
 
@@ -164,7 +163,6 @@ class GrievanceFieldDetector:
 
             "scheme_name": "What is the name of the government scheme?",
             "application_id": "What is the application/registration ID?",
-            "beneficiary_name": "What is the beneficiary's name?",
 
             "police_station": "Which police station?",
             "date_of_incident": "When did the incident occur? (date)",
@@ -173,18 +171,14 @@ class GrievanceFieldDetector:
             "accused_details": "Do you have details of the accused person(s)?",
             "witnesses": "Are there any witnesses?",
             "evidence": "Do you have any evidence (photos, documents, etc.)?",
-            "complaint_number": "What is the complaint/diary number?",
             "followup_dates": "When did you follow up?",
-            "officer_name": "What is the officer's name/designation?",
             "officer_details": "Can you describe the officer (name, rank, badge number)?",
             "medical_report": "Is there a medical report?",
 
             "district": "Which district?",
             "tehsil": "Which tehsil/taluk?",
             "village": "Which village?",
-            "survey_number": "What is the survey/khasra number?",
             "error_description": "What is the error in the land record?",
-            "owner_name": "What is the owner's name?",
             "khata_number": "What is the khata number?",
             "patta_number": "What is the patta number?",
             "document_reference": "Any document reference number?",
@@ -221,7 +215,6 @@ class GrievanceFieldDetector:
             "date_noticed": "When did you first notice this?",
             "connection_type": "What type of connection? (domestic, commercial, agricultural, industrial)",
             "load_required": "What is the required load (kW)?",
-            "category": "What category? (BPL, APL, etc.)",
             "area": "Which area/locality?",
             "frequency": "How frequent are the power cuts? (daily, weekly, etc.)",
             "duration": "How long does each power cut last?",
@@ -283,7 +276,6 @@ class GrievanceFieldDetector:
             "received_quantity": "What quantity did you receive?",
             "ration_card_number": "Ration card number?",
             "beneficiary_name": "Beneficiary name on card?",
-            "dealer_name": "Dealer name?",
             "quality_issue": "Describe the quality issue.",
             "sample_available": "Do you have a sample?",
 
@@ -294,7 +286,6 @@ class GrievanceFieldDetector:
 
             "employer_name": "Employer/company name?",
             "employee_name": "Employee name?",
-            "period": "For which period? (month/year)",
             "amount_claimed": "Amount claimed?",
             "wage_type": "Type of wages? (basic, overtime, bonus, etc.)",
             "employer_address": "Employer address?",

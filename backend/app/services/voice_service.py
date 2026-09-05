@@ -10,7 +10,6 @@ Providers are called sequentially — never simultaneously.
 import asyncio
 import logging
 
-from app.config import get_settings
 from app.providers.sarvam_voice import SarvamSTTProvider, SarvamTTSProvider
 from app.providers.azure_voice import AzureVoiceProvider
 
@@ -98,4 +97,3 @@ class VoiceService:
 
 class VoiceUnavailableError(Exception):
     """Raised when all voice providers fail."""
-    pass

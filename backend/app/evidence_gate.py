@@ -204,9 +204,7 @@ def evidence_gate(
     # Jurisdiction filter: central matches all; state must match expected_state
     jurisdiction_chunks: list[EvidenceChunk] = []
     for c in domain_chunks:
-        if c.jurisdiction == "central":
-            jurisdiction_chunks.append(c)
-        elif expected_state and c.state == expected_state:
+        if c.jurisdiction == "central" or expected_state and c.state == expected_state:
             jurisdiction_chunks.append(c)
         # else: state-level chunk with mismatched state — drop it
 

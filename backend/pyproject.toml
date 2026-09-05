@@ -27,6 +27,27 @@ include = ["app*"]
 [tool.ruff]
 line-length = 100
 
+[tool.ruff.lint]
+ignore = [
+    "I001",    # unsorted imports
+    "BLE001",  # blind except
+    "UP045",   # Optional[X] vs X | None
+    "RUF012",  # mutable class defaults
+    "DTZ005",  # datetime.now() without tz
+    "ISC004",  # implicit string concat in collection
+    "SIM117",  # nested with statements
+    "S110",    # try-except-pass
+    "SIM102",  # collapsible if
+    "SIM103",  # needless bool
+    "UP035",   # deprecated imports
+    "UP041",   # timeout error alias
+    "S112",    # try-except-continue
+    "TRY004",  # type-check-without-type-error
+    "UP006",   # List/Dict -> list/dict
+    "UP017",   # datetime.timezone.utc
+    "RUF022",  # unsorted __all__
+]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]

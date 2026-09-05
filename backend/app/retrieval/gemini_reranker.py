@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import json
 import logging
-import re
 
 from google import genai
 from google.genai import types
@@ -598,7 +597,7 @@ Every supplied candidate must appear exactly once.
         if not data:
             return self._passthrough_pre_rank(query, candidates, top_k)
 
-        ranked_results, merge_groups = self._build_ranked_results(candidates, data)
+        ranked_results, _merge_groups = self._build_ranked_results(candidates, data)
 
         final_results = []
         for rank, result in enumerate(ranked_results[:top_k], start=1):
@@ -648,7 +647,7 @@ Every supplied candidate must appear exactly once.
         if not data:
             return self._passthrough_final_rerank(query, candidates, top_k)
 
-        ranked_results, merge_groups = self._build_ranked_results(candidates, data)
+        ranked_results, _merge_groups = self._build_ranked_results(candidates, data)
 
         final_results = []
         for rank, result in enumerate(ranked_results, start=1):

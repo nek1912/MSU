@@ -38,7 +38,7 @@ def _resolve_pdf(filename: str) -> Path:
 
 @router.get("/pdf/{filename}")
 async def serve_pdf(filename: str) -> FileResponse:
-    """Serve a PDF from the canonical corpus directory.
+    r"""Serve a PDF from the canonical corpus directory.
 
     Only serves files matching ``[A-Za-z0-9_\-\. ]+\.pdf`` from
     ``corpus/seeds/``.  Path traversal and arbitrary filesystem access

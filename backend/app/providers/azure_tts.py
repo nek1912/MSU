@@ -66,6 +66,6 @@ class AzureTTSProvider:
                 _log.warning("Azure TTS canceled: %s", result.cancellation_details)
                 return b""
             return b""
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             _log.warning("Azure TTS failed: %r", exc)
             return b""

@@ -247,8 +247,7 @@ def normalize_domain(
 
         hostname = hostname.lower().strip()
 
-        if hostname.startswith("www."):
-            hostname = hostname[4:]
+        hostname = hostname.removeprefix("www.")
 
         return hostname
 
@@ -609,7 +608,7 @@ def identify_known_source(
         source_url
     )
 
-    combined = " ".join(
+    combined = " ".join(  # noqa: FLY002
         [
             title,
             issuer,
@@ -1142,11 +1141,7 @@ def evaluate_provenance(
         if (
             has_url
             and identity.get("chunk_id")
-        ):
-
-            status = "strong"
-
-        elif has_url and has_document_identity:
+        ) or has_url and has_document_identity:
 
             status = "strong"
 

@@ -188,9 +188,7 @@ def verify_citations(
     # Map to abstention reason if invalid
     reason = None
     if not is_valid:
-        if invalid_prefixes:
-            reason = AbstentionReason.CITATION_FAILURE
-        elif fabrication_issues:
+        if invalid_prefixes or fabrication_issues:
             reason = AbstentionReason.CITATION_FAILURE
         elif unsupported_claims:
             reason = AbstentionReason.INSUFFICIENT_EVIDENCE
@@ -235,7 +233,7 @@ def verify_and_repair(
             )
             repaired_result.repair_attempted = True
             return repaired_result
-        except Exception:  # noqa: BLE001
+        except Exception:
             pass
 
     return result

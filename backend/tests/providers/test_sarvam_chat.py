@@ -1,5 +1,4 @@
 """Tests for SarvamChatProvider."""
-import httpx
 import pytest
 from unittest.mock import MagicMock, patch
 

@@ -43,7 +43,7 @@ def test_no_confident_answer_when_dynamic_absent():
 
     # Full verification pass: nothing should pass through as supported
     answer_text = "In 2026, PMFBY premium is 2% in Surat district."
-    answer, vers, modified = verifier.verify(answer_text, bundle)
+    _answer, vers, modified = verifier.verify(answer_text, bundle)
     assert modified is True
     assert any(not v.is_supported for v in vers)
 
@@ -134,7 +134,7 @@ def test_retrieval_failure_produces_abstained_result():
     assert len(bundle.dynamic.chunks) == 0
 
     # Verifier must not crash on empty bundle
-    answer, vers, modified = verifier.verify("Some answer.", bundle)
+    _answer, vers, _modified = verifier.verify("Some answer.", bundle)
     # No claims to flag since answer is short static
     assert isinstance(vers, list)
 

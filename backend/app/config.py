@@ -23,7 +23,6 @@ class Settings(BaseSettings):
     reranker_model: str = ""
     reranker_enabled: bool = False
     retrieval_strategy: str = "dense"  # dense | hybrid | hybrid_reranked
-    grievance_gemini_model: str = ""
 
     @property
     def groq_model_list(self) -> list[str]:

@@ -87,10 +87,10 @@ class TestEmbeddingProfile:
 
 class TestDocumentMetadata:
     def _make_doc(self, **overrides) -> DocumentMetadata:
-        defaults = dict(
-            source_id="src-001", document_id="doc-001", version_id="v1",
-            title="Test Doc", domain="schemes",
-        )
+        defaults = {
+            "source_id": "src-001", "document_id": "doc-001", "version_id": "v1",
+            "title": "Test Doc", "domain": "schemes",
+        }
         defaults.update(overrides)
         return DocumentMetadata(**defaults)
 

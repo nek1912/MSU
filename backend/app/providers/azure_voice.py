@@ -60,7 +60,7 @@ class AzureVoiceProvider:
 
         try:
             return importlib.import_module("azure.cognitiveservices.speech")
-        except (ImportError, ModuleNotFoundError) as exc:  # noqa: BLE001
+        except (ImportError, ModuleNotFoundError) as exc:
             raise RuntimeError("azure-cognitiveservices-speech SDK not installed") from exc
 
     async def speech_to_text(self, audio_bytes: bytes, language: str = "en") -> str:
@@ -79,7 +79,7 @@ class AzureVoiceProvider:
             stream.write(audio_bytes)
             stream.close()
             result = recognizer.recognize_once()
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.warning("Azure STT failed: %r", exc)
             raise RuntimeError("Azure STT failed") from exc
         if result.reason == speechsdk.ResultReason.RecognizedSpeech:
@@ -98,7 +98,7 @@ class AzureVoiceProvider:
             config.speech_synthesis_voice_name = self._voice(language)
             synthesizer = speechsdk.SpeechSynthesizer(speech_config=config, audio_config=None)
             result = synthesizer.speak_text_async(text).get()
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.warning("Azure TTS failed: %r", exc)
             raise RuntimeError("Azure TTS failed") from exc
         if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
@@ -142,7 +142,7 @@ class AzureVoiceProvider:
             config = speechsdk.SpeechConfig(subscription=self.speech_key, region=self.speech_region)
             synthesizer = speechsdk.SpeechSynthesizer(speech_config=config, audio_config=None)
             result = synthesizer.speak_ssml_async(ssml).get()
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.warning("Azure TTS segments failed: %r", exc)
             raise RuntimeError("Azure TTS failed") from exc
         if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:

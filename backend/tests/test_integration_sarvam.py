@@ -1,6 +1,4 @@
 """Integration test for Sarvam LLM migration end-to-end flow."""
-import pytest
-from unittest.mock import patch, MagicMock
 
 from app.evidence_controller import EvidenceController, strip_citations
 from app.contracts import (
@@ -19,7 +17,7 @@ def test_strip_citations_removes_all_formats():
         "Edge case: [chunk:] empty id.",
     ]
     for answer in answers:
-        clean, ids = strip_citations(answer)
+        clean, _ids = strip_citations(answer)
         assert "[chunk:" not in clean, f"Chunk ID leaked in: {clean}"
         assert "(chunk:" not in clean, f"Chunk ID leaked in: {clean}"
 

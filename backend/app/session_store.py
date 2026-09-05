@@ -20,7 +20,7 @@ def touch_session(session_id: str, selected_state: str | None, language: str) ->
     sb = get_supabase()
     try:
         sb.rpc("purge_expired_sessions", {}).execute()
-    except Exception:  # noqa: BLE001,S110 — RPC may not exist until migration 0002 is applied
+    except Exception:
         pass
     expires = (datetime.now(UTC) + timedelta(hours=24)).isoformat()
     try:

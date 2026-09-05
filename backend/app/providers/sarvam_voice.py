@@ -4,7 +4,6 @@ Supports multiple API keys — tries each on failure.
 """
 
 import asyncio
-import io
 import logging
 import base64
 import re

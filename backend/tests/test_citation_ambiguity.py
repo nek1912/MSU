@@ -6,11 +6,8 @@ Verifies that verify_citation_ids handles three cases:
   3. Ambiguous prefix (multiple matches) → treated as invalid, NOT silently resolved
 """
 
-import pytest
 
 from app.citation_verifier import (
-    VerificationResult,
-    extract_citations_from_answer,
     verify_citation_ids,
     verify_citations,
 )

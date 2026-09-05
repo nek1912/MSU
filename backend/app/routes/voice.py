@@ -13,7 +13,6 @@ import logging
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
 
-from app.config import get_settings
 from app.routes.chat import chat as chat_handler
 from app.routes.chat import ChatRequest
 from app.services.voice_service import VoiceService, VoiceUnavailableError
@@ -90,7 +89,7 @@ async def speak_text(req: SpeakRequest) -> dict:
 
 @router.post("")
 async def voice_chat(
-    audio: UploadFile = File(...),
+    audio: UploadFile = File(...),  # noqa: B008
     language: str = Form(default="hi"),
     session_id: str = Form(default=""),
     state: str | None = Form(default=None),

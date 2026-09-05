@@ -5,7 +5,6 @@ import json
 import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any
 
 from app.db import get_supabase
 
@@ -309,7 +308,7 @@ class GrievanceWorkflow:
         draft = self.draft_builder.update_draft(draft, user_message)
         state.draft = draft
 
-        missing_required, missing_optional = self.field_detector.detect_missing_fields(
+        missing_required, _missing_optional = self.field_detector.detect_missing_fields(
             draft, user_message
         )
 

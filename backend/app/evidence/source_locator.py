@@ -208,9 +208,7 @@ class SourceLocator:
                             locator
                         )
 
-                    except (
-                        json.JSONDecodeError,
-                    ):
+                    except json.JSONDecodeError:
 
                         locator = None
 

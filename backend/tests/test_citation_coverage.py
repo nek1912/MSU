@@ -5,8 +5,6 @@ These tests verify that no code path can return a successful answer without
 passing through the verifier.
 """
 
-import pytest
-from unittest.mock import patch, MagicMock
 
 
 class TestCitationVerifierCoverage:

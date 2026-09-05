@@ -7,16 +7,12 @@ Mocks external dependencies (Supabase, LLM, embeddings, translation).
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch, AsyncMock
-import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
 from app.contracts import (
-    AbstentionReason,
     ConfidenceBand,
-    EvidenceChunk,
     RAGResponse,
-    RAGResult,
 )
 
 
@@ -483,7 +479,7 @@ class TestRagResponseToDict:
     """Tests for the response format converter."""
 
     def test_basic_conversion(self):
-        from app.routes.chat import _rag_response_to_dict, _confidence_level
+        from app.routes.chat import _rag_response_to_dict
 
         resp = _make_rag_response(confidence=0.85)
         result = _rag_response_to_dict(resp, "en", "sess-123")

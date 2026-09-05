@@ -138,12 +138,9 @@ class SarvamTranslator:
         """Translate a single chunk of text."""
         if not text.strip():
             return text
-        try:
-            return self._rotator.try_keys(  # type: ignore[union-attr]
-                lambda key: _raw_translate(key, text, source, target)
-            )
-        except Exception:
-            raise
+        return self._rotator.try_keys(  # type: ignore[union-attr]
+            lambda key: _raw_translate(key, text, source, target)
+        )
 
     def translate(self, text: str, to: str = "en", source: str | None = None) -> str:
         if not self.configured or not text.strip():

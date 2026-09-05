@@ -1,6 +1,5 @@
 """Tests for refactored RAG components: evidence gate, citation verifier."""
 
-import pytest
 
 from app.contracts import (
     AbstentionReason,
@@ -11,14 +10,10 @@ from app.contracts import (
 from app.services.static_rag import _reciprocal_rank_fusion as reciprocal_rank_fusion
 from app.evidence_gate import (
     apply_hard_filters,
-    check_domain_match,
-    check_evidence_sufficient,
     check_jurisdiction,
-    compute_confidence_band,
     evidence_gate_v2,
 )
 from app.citation_verifier import (
-    VerificationResult,
     extract_citations_from_answer,
     verify_and_repair,
     verify_citation_ids,
@@ -106,7 +101,7 @@ class TestHybridRetrieval:
 
 class TestEvidenceGateV2:
     def test_empty_candidates_abstains(self):
-        abstained, reason, band = evidence_gate_v2(
+        abstained, reason, _band = evidence_gate_v2(
             [], expected_domain="schemes"
         )
         assert abstained is True
@@ -118,7 +113,7 @@ class TestEvidenceGateV2:
             _make_candidate("b", dense_score=0.5),
             _make_candidate("c", dense_score=0.4),
         ]
-        abstained, reason, band = evidence_gate_v2(
+        abstained, _reason, band = evidence_gate_v2(
             candidates, expected_domain="schemes"
         )
         assert abstained is False
@@ -126,7 +121,7 @@ class TestEvidenceGateV2:
 
     def test_below_top1_abstains(self):
         candidates = [_make_candidate("a", dense_score=0.2)]
-        abstained, reason, band = evidence_gate_v2(
+        abstained, reason, _band = evidence_gate_v2(
             candidates, expected_domain="schemes"
         )
         assert abstained is True
@@ -134,7 +129,7 @@ class TestEvidenceGateV2:
 
     def test_insufficient_supporting_chunks(self):
         candidates = [_make_candidate("a", dense_score=0.5)]
-        abstained, reason, band = evidence_gate_v2(
+        abstained, reason, _band = evidence_gate_v2(
             candidates, expected_domain="schemes"
         )
         assert abstained is True

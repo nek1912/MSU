@@ -4,7 +4,6 @@ from __future__ import annotations
 import httpx
 import logging
 import time
-from typing import Generator
 
 from app.config import Settings
 from app.key_rotator import KeyRotator
@@ -62,7 +61,7 @@ class SarvamChatProvider:
         
         start_time = time.monotonic()
         last_error: SarvamProviderError | None = None
-        keys = self._rotator._keys  # noqa: SLF001
+        keys = self._rotator._keys
         for key in keys:
             try:
                 result = self._call_api(key, system, user, temperature)
@@ -143,7 +142,7 @@ class SarvamChatProvider:
                 err_code = err_body.get("error", {}).get("code", "")
                 if err_code == "invalid_api_key":
                     raise SarvamProviderError(
-                        f"Invalid API key (403)", status_code=403, retryable=True
+                        "Invalid API key (403)", status_code=403, retryable=True
                     )
             except (ValueError, KeyError):
                 pass

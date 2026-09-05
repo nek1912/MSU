@@ -10,10 +10,8 @@ Tests the voice I/O layer:
 
 All provider calls are mocked — no real Azure calls in tests.
 """
-import sys
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from app.config import get_settings
 from app.providers.azure_stt import AzureSTTProvider

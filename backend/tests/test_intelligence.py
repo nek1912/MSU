@@ -11,7 +11,6 @@ Verifies that the intelligence layer does NOT:
 - Bypass the evidence gate
 - Answer when retrieval fails
 """
-import pytest
 
 from app.intelligence import QueryAnalysis, analyze_query
 
@@ -216,7 +215,7 @@ class TestIntelligenceLayerConstraints:
         result = analyze_query("What is PMFBY?")
         # Domain might be extracted as informational, but it's not used for retrieval
         # The AnchorStore is authoritative for domain classification
-        assert isinstance(result.domain, type(None)) or isinstance(result.domain, str)
+        assert (result.domain is None) or isinstance(result.domain, str)
 
     def test_no_factual_evidence(self):
         """Intelligence layer must not invent factual evidence."""

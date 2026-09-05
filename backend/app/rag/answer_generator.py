@@ -898,8 +898,8 @@ Do not return an empty response.
 
 
                 print(
-                    f"RAG generation "
-                    f"successful."
+                    "RAG generation "
+                    "successful."
                 )
 
                 return {

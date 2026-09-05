@@ -152,7 +152,7 @@ class StaticRAGService:
         dense_chunks = _dense_retrieve(supabase, query_embedding, domain, state, k=k)
         try:
             lexical_chunks = _lexical_retrieve(supabase, query_text, domain, state, k=k)
-        except Exception:  # noqa: BLE001
+        except Exception:
             lexical_chunks = []
 
         if not lexical_chunks:
@@ -351,7 +351,7 @@ def _enrich_chunks(supabase, chunks: list[RetrievedChunk]) -> list[RetrievedChun
             .execute()
             .data or []
         )
-    except Exception:  # noqa: BLE001
+    except Exception:
         return chunks
     by_id = {str(r["id"]): r for r in rows}
     for c in chunks:

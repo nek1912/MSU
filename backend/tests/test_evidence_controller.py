@@ -1,6 +1,5 @@
 """Tests for QueryRequirementClassifier and EvidenceController."""
 
-import pytest
 
 from app.evidence_controller import QueryRequirementClassifier
 

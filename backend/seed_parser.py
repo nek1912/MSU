@@ -21,7 +21,6 @@ from __future__ import annotations
 import html
 import json
 import re
-import sys
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -83,7 +82,7 @@ def _table_text(block: dict) -> str:
             txt = ex.text()
             if txt:
                 return txt
-        except Exception:  # noqa: BLE001
+        except Exception:
             pass
     return ""
 

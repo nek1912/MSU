@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Any
 
 from .models import GrievanceEntity, GrievanceSubCategory
 
@@ -274,7 +273,6 @@ class GrievanceEntityExtractor:
 
     def extract(self, text: str, sub_category: GrievanceSubCategory) -> ExtractionResult:
         """Extract entities from grievance text."""
-        text_lower = text.lower()
         entities = {}
         raw_extractions = {}
 

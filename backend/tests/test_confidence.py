@@ -11,7 +11,6 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.confidence_eval import (
-    ConfidenceCalibrationStats,
     ConfidenceEvalRecord,
     compute_calibration_stats,
 )

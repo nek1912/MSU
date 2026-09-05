@@ -74,6 +74,6 @@ class AzureSTTProvider:
                 _log.warning("Azure STT canceled: %s", result.cancellation_details)
                 return ""
             return ""
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             _log.warning("Azure STT failed: %r", exc)
             return ""

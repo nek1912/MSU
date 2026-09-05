@@ -33,7 +33,7 @@ def test_preserves_markdown_structure():
         "**Important** [chunk:abc12345]\n\n"
         "Paragraph two."
     )
-    clean, ids = strip_citations(answer)
+    clean, _ids = strip_citations(answer)
     assert "[chunk:" not in clean
     # Markdown structure preserved (newlines intact, not collapsed to single line)
     assert "- Point one" in clean

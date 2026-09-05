@@ -1,9 +1,8 @@
 """Tests for RAGOrchestrator — async dual-pipeline RAG with evidence bundle + claim verification."""
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import pytest
 
 from app.citation_verifier import VerificationResult
 from app.config import Settings

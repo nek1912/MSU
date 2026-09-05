@@ -1,9 +1,8 @@
 
 from __future__ import annotations
 
-from typing import Any
 
-from .models import GrievanceDraft, GrievanceSubCategory
+from .models import GrievanceDraft
 from .field_detector import GrievanceFieldDetector
 
 

@@ -1,12 +1,11 @@
 """Tests for StaticRAGService — static RAG pipeline encapsulation."""
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import pytest
 
 from app.config import Settings
-from app.contracts import AbstentionReason, ConfidenceBand, EvidenceChunk, RAGResult
+from app.contracts import AbstentionReason, ConfidenceBand, RAGResult
 from app.retrieval import RetrievedChunk
 from app.services.static_rag import StaticRAGService
 
@@ -200,7 +199,7 @@ class TestEvidenceChunkConversion:
         )
         service = StaticRAGService(_make_settings())
 
-        result = service.retrieve(
+        _result = service.retrieve(
             embedding=[0.1] * 768,
             query="PMFBY premium",
             domain="pmfby",

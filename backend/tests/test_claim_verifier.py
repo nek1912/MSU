@@ -1,10 +1,9 @@
 """Tests for ClaimVerifier — heuristic + LLM claim verification."""
 
-import pytest
 from app.claim_verifier import HeuristicClaimVerifier, ClaimVerifier
 from app.contracts import (
     EvidenceBundle, StaticEvidence, DynamicEvidence, QueryRequirements,
-    EvidenceChunk, ClaimVerification,
+    EvidenceChunk,
 )
 
 
@@ -46,7 +45,7 @@ def test_verifier_fast_path_no_flags():
     v = ClaimVerifier()
     v.heuristic = MagicMock(return_value=[])
     bundle = _make_bundle()
-    answer, vers, modified = v.verify("Simple answer.", bundle)
+    _answer, vers, modified = v.verify("Simple answer.", bundle)
     assert modified is False
     assert vers == []
 
@@ -54,7 +53,7 @@ def test_verifier_fast_path_no_flags():
 def test_verifier_rejects_unsupported_dynamic():
     v = ClaimVerifier()
     bundle = _make_bundle(dynamic_available=False)
-    answer, vers, modified = v.verify(
+    _answer, vers, _modified = v.verify(
         "In 2026, the premium is 2% and crops are cotton.", bundle
     )
     # Should have verifications

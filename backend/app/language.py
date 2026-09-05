@@ -65,7 +65,6 @@ def normalize_language(selected: str, text: str) -> str:
         raise ValueError(f"unsupported language: {selected}")
     ratios = _script_ratios(text)
     threshold = cfg["script_threshold"]
-    latin_thresh = cfg["latin_threshold"]
 
     # Devanagari covers both Hindi and Marathi; disambiguate by stopword bias.
     if ratios.get("devanagari", 0.0) >= threshold:

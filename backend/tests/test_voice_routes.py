@@ -1,6 +1,5 @@
 """Tests for voice routes (transcribe and speak)."""
 
-import pytest
 from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
 from app.main import app

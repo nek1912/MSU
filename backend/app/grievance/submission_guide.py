@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import re
 from dataclasses import replace
-from typing import Any
 from urllib.parse import urlparse
 
 from .models import (

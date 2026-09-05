@@ -24,11 +24,10 @@ import time
 from typing import Any
 
 from app.citation_verifier import verify_citations
-from app.config import GENERATION_MAX_TOKENS, GENERATION_TEMPERATURE, Settings, get_settings
+from app.config import Settings, get_settings
 from app.contracts import (
     AbstentionReason,
     ConfidenceBand,
-    EvidenceBundle,
     EvidenceChunk,
     RAGResponse,
     RAGResult,
@@ -242,7 +241,7 @@ class RAGOrchestrator:
         _t_citation_done = time.monotonic()
 
         # Step 10: Strip internal citation markers from visible answer
-        clean_answer, extracted_ids = strip_citations(answer)
+        clean_answer, _extracted_ids = strip_citations(answer)
         answer = clean_answer
 
         # Step 11: Calculate confidence

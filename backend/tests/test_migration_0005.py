@@ -11,7 +11,6 @@ Does NOT require a live database. Validates:
 import re
 from pathlib import Path
 
-import pytest
 
 MIGRATION_PATH = Path(__file__).resolve().parent.parent / "migrations" / "0005_rag_contracts.sql"
 INIT_MIGRATION_PATH = Path(__file__).resolve().parent.parent / "migrations" / "0001_init.sql"

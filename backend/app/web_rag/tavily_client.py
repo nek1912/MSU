@@ -410,7 +410,7 @@ class TavilyClient:
 
             try:
                 data = response.json()
-            except ValueError as error:
+            except ValueError:
                 errors.append(f"key_{key_index + 1}: non-JSON response")
                 continue
 

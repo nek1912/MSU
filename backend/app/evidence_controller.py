@@ -343,10 +343,8 @@ class EvidenceController:
                     f"[DYNAMIC] [chunk:{short_id}] ({chunk.title} — web — {chunk.url})\n{content}"
                 )
             dynamic_section = "\n\n---\n\n".join(dynamic_parts)
-            dynamic_status = f"available — {len(dynamic_chunks)} chunks"
         else:
             dynamic_section = "No dynamic evidence available."
-            dynamic_status = f"ABSENT — {bundle.dynamic.reason or 'No applicable web evidence found'}"
 
         # Build assessment text
         assessment_text = ""

@@ -1,0 +1,40 @@
+frontend/src/components/chat/MessageBubble.tsx
+  s_22e827b4d17c91::t_e666f390df6f45 174,189,192,254
+  s_22e827b4d17c91::t_9200dfad0040fc 152
+  s_22e827b4d17c91::t_f18c95313d4150 205,216,228,240,264
+  s_22e827b4d17c91::t_63cba862476184 263
+  s_22e827b4d17c91::t_8c8910fc1e2cc0 148,199
+  s_22e827b4d17c91::t_a552f2e67952cb 215,227,239
+  s_22e827b4d17c91::t_75a526884e31a3 252
+frontend/src/components/chat/ThinkingBubble.tsx
+  s_22e827b4d17c91::t_7b77ac5e7c5a67 42
+  s_22e827b4d17c91::t_2f2204814d129f 35
+  s_22e827b4d17c91::t_abf0f26a2022e0 33
+frontend/src/components/ChatWindow.tsx
+  s_22e827b4d17c91::t_e1bc50cb70b073 559,783,849,900
+  s_22e827b4d17c91::t_4f3edc3b2b1eaa 547,648,658,678,682,690,745,869
+  s_22e827b4d17c91::t_6d8f4bb43cfc68 957,971
+  s_22e827b4d17c91::t_cf58852315a199 543,618,624,630,661,717,726,749,752,761,769,788,824,944,979
+  s_22e827b4d17c91::t_0d6e702d21e29f 542,595,646,676,743
+  s_22e827b4d17c91::t_394c710513d5e2 511,532,570,577,617,781,797
+  s_22e827b4d17c91::t_af18b5be2cf65f 517,527,583,596,607,804,815,835,855,958
+  s_22e827b4d17c91::t_e4290b0b3c8fac 656,702,704,875
+  s_22e827b4d17c91::t_96a467081fc5da 889
+  s_22e827b4d17c91::t_1a459001547bfa 935
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "7705653f7da738db6ab28bf8f70bb077b8328b69",
+  "prompts": {},
+  "sessions": {
+    "s_22e827b4d17c91": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f644346bbffe4f4vhdzvLgt002",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

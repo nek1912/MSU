@@ -1,0 +1,42 @@
+frontend/src/app/schemes/page.tsx
+  s_37d908270b53ae::t_5658d45c581d42 44,46-48,51
+  s_37d908270b53ae::t_48b49fca6a56f7 72-73
+frontend/src/app/library/page.tsx
+  s_37d908270b53ae::t_7383810a396e52 37,39-41
+  s_37d908270b53ae::t_042f14701d7620 52-53
+  s_37d908270b53ae::t_39d9cd5ea245d8 69,71-72,76
+frontend/src/app/legal/[slug]/page.tsx
+  s_37d908270b53ae::t_b6a011ecbd6d48 40,42,44-46
+  s_37d908270b53ae::t_e4a212556335bb 34-35
+  s_37d908270b53ae::t_b60cb999b1bdcb 56-58,61-63,70-72
+frontend/src/app/services/page.tsx
+  s_37d908270b53ae::t_0ab890a75813d7 67-68
+  s_37d908270b53ae::t_957e0fcb71fecd 41,43-45,48
+frontend/src/app/legal/page.tsx
+  s_37d908270b53ae::t_a4957787d20498 67-68
+  s_37d908270b53ae::t_0af03af2281f8c 41,43-45,48
+frontend/src/app/schemes/[slug]/page.tsx
+  s_37d908270b53ae::t_3434dae94a6d66 46,48,50-52
+  s_37d908270b53ae::t_9a3cee31021769 32-33
+  s_37d908270b53ae::t_824381897baf8d 63-64,66,72
+frontend/src/app/services/[slug]/page.tsx
+  s_37d908270b53ae::t_ba88ff951de696 32-33
+  s_37d908270b53ae::t_3ce8169c118fd1 38,40,42-44
+  s_37d908270b53ae::t_5b0d4887d51486 54-56,58-60,64-66,70-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6e0dea202f2c155f69712cdca7d35d94894c358e",
+  "prompts": {},
+  "sessions": {
+    "s_37d908270b53ae": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f644a946effe32uCHYNvxYYh9M",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

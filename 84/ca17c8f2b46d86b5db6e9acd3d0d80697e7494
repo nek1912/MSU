@@ -1,0 +1,37 @@
+frontend/src/components/ui/Badge.tsx
+  s_0df88178ee99cc::t_ec07bc242d92d7 31
+  s_0df88178ee99cc::t_33b51ad425cb0d 6-9
+frontend/src/components/ui/Alert.tsx
+  s_0df88178ee99cc::t_a44599ba5369da 7-9
+  s_0df88178ee99cc::t_c54a81f877d4bc 32
+frontend/src/app/globals.css
+  s_0df88178ee99cc::t_be492ae7c7b039 366
+frontend/src/components/ui/Button.tsx
+  s_0df88178ee99cc::t_a68e535897e2fe 15,17,19,21-22
+  s_0df88178ee99cc::t_3d50a84a2b37d9 60
+frontend/src/components/ui/Card.tsx
+  s_0df88178ee99cc::t_15fa9cf76709ae 3-16,26,28-31,34-35
+frontend/src/components/ui/Stepper.tsx
+  s_0df88178ee99cc::t_c25efced68aa99 36
+  s_0df88178ee99cc::t_b20428e06cf335 21,23-24
+frontend/src/components/ui/Chips.tsx
+  s_0df88178ee99cc::t_900f3c6f791806 27,29-30
+frontend/src/components/ui/EmptyState.tsx
+  s_0df88178ee99cc::t_17b5e06842f069 16-17,20-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "84ca17c8f2b46d86b5db6e9acd3d0d80697e7494",
+  "prompts": {},
+  "sessions": {
+    "s_0df88178ee99cc": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f6452d327ffe2TQFXQP8TWuk3T",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+frontend/src/app/page.tsx
+  s_9b56c92407cabb::t_12aab621eef6af 8-21,23-77,79-95,106,111-113,115-127,129-130,133-134,136-139,143-154,159-160,162-167,169-171,173-178,180-181,184-192,199-223,226-230,234-251,253-258,264-265,267-270,273-275,278-280,283-285
+frontend/src/lib/i18n/dictionaries.ts
+  s_9b56c92407cabb::t_cabd08ef82da53 1382-1387
+  s_9b56c92407cabb::t_60de44ca9322e2 304-309
+  s_9b56c92407cabb::t_e6364146009154 973-978
+  s_9b56c92407cabb::t_e0706f4703bde0 527-532
+  s_9b56c92407cabb::t_f2317f17dfc5a8 81-86
+  s_9b56c92407cabb::t_319a3455d27e94 750-755
+  s_9b56c92407cabb::t_1a282b7e77e743 1196-1201
+  s_9b56c92407cabb::t_08e7a8254fd447 1568-1573
+  s_9b56c92407cabb::t_8ad3ae92223591 1754-1759
+  s_9b56c92407cabb::t_3275a92e11e491 1978-1983
+  s_9b56c92407cabb::t_ac282031a9a96a 2164-2169
+  s_9b56c92407cabb::t_52cce50d2a3ec3 2350-2355
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e31965d56646c634002325e69d524471f8e49aea",
+  "prompts": {},
+  "sessions": {
+    "s_9b56c92407cabb": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f642dd37bffeGBKwo9VGqQUN9X",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

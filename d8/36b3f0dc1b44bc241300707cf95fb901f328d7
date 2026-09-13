@@ -1,0 +1,21 @@
+frontend/src/components/layout/HamburgerMenu.tsx
+  s_2f34d9923fd6f5::t_f44ff5d31bb154 8
+frontend/src/components/layout/TopNav.tsx
+  s_2f34d9923fd6f5::t_5fdb18b4a37469 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "d836b3f0dc1b44bc241300707cf95fb901f328d7",
+  "prompts": {},
+  "sessions": {
+    "s_2f34d9923fd6f5": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f6491b4f1ffecLQMSTvh0x5UuI",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

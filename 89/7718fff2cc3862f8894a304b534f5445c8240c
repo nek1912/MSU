@@ -1,0 +1,36 @@
+frontend/src/lib/i18n/dictionaries.ts
+  s_c32ffdc6b8cf92::t_9e7629b316e811 876-878
+  s_c32ffdc6b8cf92::t_a5eedd62aa7680 225-227
+  s_c32ffdc6b8cf92::t_0baecc7af9f9fd 1820-1822
+  s_c32ffdc6b8cf92::t_8f815a49bc964a 442-444
+  s_c32ffdc6b8cf92::t_42dcc8db38b11c 1093-1095
+  s_c32ffdc6b8cf92::t_c1504b791fd186 659-661
+frontend/src/components/layout/Footer.tsx
+  s_c32ffdc6b8cf92::t_ee8239d9196f49 37
+  s_c32ffdc6b8cf92::t_b41e24eb323ba3 64-74,76
+frontend/src/components/layout/HamburgerMenu.tsx
+  s_c32ffdc6b8cf92::t_e2ec745b1788cc 25,27-30
+frontend/src/components/layout/ConditionalNavs.tsx
+  s_c32ffdc6b8cf92::t_a8b3fdc375e782 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "897718fff2cc3862f8894a304b534f5445c8240c",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_c32ffdc6b8cf92": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f645b4c9bffe033lN8r7yCrxNh",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

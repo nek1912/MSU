@@ -1,0 +1,19 @@
+frontend/src/app/page.tsx
+  s_01575c18203a13::t_4c6d0b512c5ba7 9,12-14,33-35,38-40,42,47,50,53,56,58-79,85-86,90-94,100-101,103-107,109-117,119-124,130,132-135,140-143,145,151-157,163
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "5d0667ae94dd8b9196166ab69a533a11420ecfe7",
+  "prompts": {},
+  "sessions": {
+    "s_01575c18203a13": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f644e9091ffeOoCSkySOVzxyCm",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

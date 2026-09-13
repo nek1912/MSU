@@ -1,0 +1,34 @@
+frontend/src/components/ui/Select.tsx
+  s_02082cfcb49fb4::t_2a18eb5aa73c91 16
+frontend/src/components/chat/__tests__/MessageBubble.test.tsx
+  s_02082cfcb49fb4::t_a3d1affed38818 81,83
+frontend/src/components/__tests__/ChatWindow.test.tsx
+  s_02082cfcb49fb4::t_a846bd5060208f 147,149-150
+  s_02082cfcb49fb4::t_d9b41d2de6a8ba 42-50
+  s_02082cfcb49fb4::t_804357e5434194 92,94-95
+  s_02082cfcb49fb4::t_6dd72293e0f0b7 176,178-179,189,191-192
+  s_02082cfcb49fb4::t_56c4c5d51402ff 124,126-127
+frontend/src/components/layout/LanguageSwitcher.tsx
+  s_02082cfcb49fb4::t_729cacadd8f997 50
+  s_02082cfcb49fb4::t_8d7f2601a66000 91
+frontend/src/lib/i18n/i18n.test.ts
+  s_02082cfcb49fb4::t_4ac37b58be75b4 6
+frontend/src/lib/i18n/dictionaries.ts
+  s_02082cfcb49fb4::t_f2c3231f853a14 1771-1801
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "15564fb94c80b2b8a66be2a012c6cfe234058f1d",
+  "prompts": {},
+  "sessions": {
+    "s_02082cfcb49fb4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f643cedf7ffee9GfN5oo5DVJPk",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

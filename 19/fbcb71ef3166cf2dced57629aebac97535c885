@@ -1,0 +1,40 @@
+frontend/src/lib/i18n/dictionaries.ts
+  s_7f36ff30f92810::t_3c103a65e9e409 649-652
+  s_7f36ff30f92810::t_e2ac1643653eb0 435-438
+  s_7f36ff30f92810::t_b6864831904f34 1801-1804
+  s_7f36ff30f92810::t_c2b28d00bc650c 863-866
+  s_7f36ff30f92810::t_aca2e5f6eba93f 221-224
+  s_7f36ff30f92810::t_ecf9fb8c133bdd 1077-1080
+frontend/src/components/layout/ConditionalNavs.tsx
+  s_7f36ff30f92810::t_8780655f16190d 5,7,11-12
+frontend/src/app/layout.tsx
+  s_7f36ff30f92810::t_d91bfe99bdf7d3 92-95
+  s_7f36ff30f92810::t_9dc6e4fedbf4e9 19
+frontend/src/components/layout/Footer.tsx
+  s_7f36ff30f92810::t_94b72cf1e68cd1 1-76
+frontend/src/components/layout/HamburgerMenu.tsx
+  s_7f36ff30f92810::t_c66b09656a44d7 1-97
+frontend/src/components/layout/TopNav.tsx
+  s_7f36ff30f92810::t_ef4ce8718846d0 6,19-20,22-23,26-29,40,42-43,52,56,60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "19fbcb71ef3166cf2dced57629aebac97535c885",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_7f36ff30f92810": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f6467c872fferrh9I5a0w102D6",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

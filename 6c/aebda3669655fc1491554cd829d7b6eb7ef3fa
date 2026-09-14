@@ -1,0 +1,14 @@
+frontend/src/components/layout/SmoothScroll.tsx
+  h_c5a3d01edfee72 1-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6caebda3669655fc1491554cd829d7b6eb7ef3fa",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

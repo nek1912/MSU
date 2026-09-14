@@ -1,0 +1,39 @@
+docs/superpowers/specs/2026-09-13-clay-runway-ui-refactor.md
+  s_2f34d9923fd6f5::t_9b9e8932dfa278 174
+README.md
+  s_2f34d9923fd6f5::t_e62d2b965ace78 1
+frontend/src/components/layout/Footer.tsx
+  s_2f34d9923fd6f5::t_bbe3a659dbb59b 33
+  s_2f34d9923fd6f5::t_9449a4cb7a82eb 82
+docs/superpowers/plans/2026-09-13-clay-runway-ui-refactor.md
+  s_2f34d9923fd6f5::t_b295da169e5e59 653
+  s_2f34d9923fd6f5::t_89d33bf9c75b79 411,615
+frontend/src/components/layout/TopNav.tsx
+  s_2f34d9923fd6f5::t_76724582c3199e 26
+frontend/src/app/layout.tsx
+  s_2f34d9923fd6f5::t_67e8719cb00b2c 71
+backend/data/ui_strings.json
+  s_2f34d9923fd6f5::t_6228125ad771e6 4
+frontend/src/lib/i18n/dictionaries.ts
+  s_2f34d9923fd6f5::t_1ee439fdd0894d 63,286,389-390,394,509,612-613,617
+  s_2f34d9923fd6f5::t_c4d5544da17e4d 232,455,678,901,1124,1906
+  s_2f34d9923fd6f5::t_7513fde3d9a121 166-167,171
+frontend/src/components/ChatWindow.tsx
+  s_2f34d9923fd6f5::t_ab438459d539da 46-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a51468223c0e6b589f1de0d4c1f2a3553edfb7af",
+  "prompts": {},
+  "sessions": {
+    "s_2f34d9923fd6f5": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f6491b4f1ffecLQMSTvh0x5UuI",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

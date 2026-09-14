@@ -1,0 +1,339 @@
+docs/runbooks/provider-setup.md
+  s_8653450cef6a0a::t_ae95cd320d1bb0 36,38-43,72
+frontend/src/components/ui/Input.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 24
+backend/app/services/voice_service.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 4,30,62,69-72,78-93,95,99,106-109,115-130,132
+frontend/src/components/chat/GrievanceFieldPanel.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-218
+frontend/src/components/ui/Select.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 13
+backend/data/keyword_rules.json
+  s_8653450cef6a0a::t_ae95cd320d1bb0 2,4
+backend/tests/test_grievance_classifier_narrative.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-103
+backend/tests/test_grievance_structured_response.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-534
+backend/tests/test_language_boundary.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-483
+corpus/seeds/chunks_jsonl/RBI_FAME_Financial_Awareness_Messages.jsonl
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-1330
+frontend/src/components/chat/__tests__/GrievanceFlow.test.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-282
+frontend/src/components/motion/Reveal.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 16
+frontend/src/app/grievance/status/page.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 31-33,37
+backend/app/evidence_gate.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 49
+backend/tests/test_services_static_rag.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 4,8,202
+frontend/src/app/services/page.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 13-14,20-29,53-55,58,60-81,89-109
+backend/app/session_store.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 23
+backend/tests/test_speech_text.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 128-467
+backend/app/routes/grievance.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1,3-14,17-27,32-71,82,105-460
+backend/tests/test_grievance_english_mirror_location.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-179
+backend/tests/test_grievance_submission_guide.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-495
+corpus/manifests/hold_sources.yaml
+  s_8653450cef6a0a::t_ae95cd320d1bb0 149-151
+backend/app/grievance/models.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 4,128-190,208,211,231-347,373
+backend/tests/test_integration_sarvam.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 20
+frontend/src/components/ui/Icons.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 305-352
+frontend/src/components/chat/GrievanceFlow.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-252
+backend/app/grievance/input_types.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-50
+backend/tests/test_grievance_fixes_abc.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-540
+frontend/src/components/ui/Badge.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 7-9,26,31,33
+.gitattributes
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1
+backend/tests/test_grievance_semantic_extractor.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-362
+backend/app/grievance/semantic_extractor.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 132-142,150,155-218,224-226,229,247,253-256,403-410,413-427,430-432,434-438,456-462,621-627,673,700,703-743,804-810
+frontend/src/components/ui/Button.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 15,17,19,59
+backend/app/conversation_store.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 17-34
+backend/app/web_rag/tavily_client.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 413
+backend/pyproject.toml
+  s_8653450cef6a0a::t_ae95cd320d1bb0 11-12,21,33-53
+backend/tests/conftest.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 23-28,35-36
+backend/migrations/0004_effective_date_filter.sql
+  s_8653450cef6a0a::t_ae95cd320d1bb0 44,103
+backend/tests/test_grievance_fk_fix.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-159
+frontend/src/app/legal/[slug]/page.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 42,54-57,60-62,69-70
+backend/app/evidence/source_locator.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 211
+backend/app/routes/voice.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 92
+frontend/src/app/services/[slug]/page.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 40,52-55,57-59,63-65,69-70
+frontend/src/components/chat/ThinkingBubble.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 33-38,46
+backend/app/providers/sarvam_chat.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 50,64,145
+backend/ingest_seed.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 38,40-41,120-158,224-236,250-262,276-288,733-754,771,818
+frontend/src/app/layout.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 87
+backend/app/grievance/field_detector.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 5,25,143-332,384
+backend/app/security/source_verifier.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 250,611,1144
+backend/app/config.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 119-123
+backend/app/web_rag/query_classifier.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 411-416,419-420
+frontend/src/app/grievance/page.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 4-13,15-32,34-66,68-70,73-85,90-96,99-113,115-121,123-135,137-185,188-249
+README.md
+  s_8653450cef6a0a::t_ae95cd320d1bb0 23-24,59-60,72,207,238
+frontend/src/app/api/grievance/answer/route.ts
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-36
+frontend/src/lib/api.ts
+  s_8653450cef6a0a::t_ae95cd320d1bb0 8-69,92,96-110,117-215
+backend/app/speech_text.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 15-18,119-231
+architecture.md
+  s_8653450cef6a0a::t_ae95cd320d1bb0 38-41,48-57,127-135,303-328,346-379
+frontend/src/lib/i18n/provider.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 10,21-26,36
+backend/app/grievance/entity_extractor.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 113,117,121,133,328-340,355-376
+backend/app/grievance/submission_guide.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 11,23-47,405,431,478,493-520,587,599-601,603-604,608-615,617-619,621-622,628-645,652-654,658-659
+backend/seed_parser.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 85
+backend/tests/test_services_rag_orchestrator.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1,4,194,281,326,676,725,778,800,824-832,846-850,882,930
+backend/migrations/0002_chunk_identity.sql
+  s_8653450cef6a0a::t_ae95cd320d1bb0 2-3,71
+backend/app/services/rag_orchestrator.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 23,97,168,174-180,185,194,202,241-242,244,268-287,399,438,444-446
+backend/tests/test_grievance_language_fix.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-515
+backend/tests/test_language_boundary_e2e.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-368
+frontend/src/types/speech-recognition.d.ts
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-52
+backend/app/grievance/translations.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-2721
+backend/app/routes/chat.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 26-32,39,41,43,49-118,147-563,607-613,619-621,625-627,629-677,825-926,929-935,937-938,941,947-948,953-972,1041,1056-1158,1162-1164,1166-1170,1172,1175,1177-1199
+frontend/src/app/api/documents/pdf/[filename]/route.ts
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-59
+frontend/src/app/legal/page.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 13-14,20-26,50-52,55,57-79,87-107
+corpus/manifests/mvp_sources.yaml
+  s_8653450cef6a0a::t_ae95cd320d1bb0 129-193,257-260,278-285,288,292-293,295,320-340,362-383
+workflows/01_ingestion_loop.md
+  s_8653450cef6a0a::t_ae95cd320d1bb0 11,23-25,210,246
+backend/app/providers/sarvam_translator.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1,25-27,69,129,144-146,160,175-177,181-184,196
+frontend/src/components/chat/__tests__/MessageBubble.test.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 16-46,112-132,138-331
+frontend/src/components/chat/MessageBubble.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 2,23-24,26-303,359,365-366,373-405,434-448,460,462,464-465,476-565,567-569,651-660,662,664,669
+backend/tests/test_grievance_localization.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-221
+backend/tests/test_sarvam_translator.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-414
+frontend/src/app/api/grievance/fields/route.ts
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-35
+frontend/src/components/ui/EmptyState.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 16,20
+backend/app/grievance/classifier.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 4-7,10-11,14-19,49-51,53-54,130,183-187,189-208,221-250,256,275-276,283,309-443
+frontend/src/app/api/chat/route.ts
+  s_8653450cef6a0a::t_ae95cd320d1bb0 2-3,11-14,17-18,27-31,34-42,44-46
+frontend/src/components/chat/__tests__/EvidencePanel.test.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-254
+frontend/src/components/chat/GrievanceClassificationPanel.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-153
+frontend/src/components/motion/Stagger.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 14,16
+backend/data/DOMAIN_TAXONOMY.md
+  s_8653450cef6a0a::t_ae95cd320d1bb0 13-16
+backend/app/retrieval/gemini_reranker.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 600,650
+backend/app/routes/documents.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-52
+backend/tests/test_llm_failure_injection.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 2,15-16,19
+.github/workflows/ci.yml
+  s_8653450cef6a0a::t_ae95cd320d1bb0 7-12
+backend/tests/test_grievance_area_state_fix.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-516
+corpus/seeds/chunks_jsonl/MoC_Young_Professionals_YPs.jsonl
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-611
+frontend/src/app/faq/page.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 11,17-25,59-61,63-85,110
+backend/app/main.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 13,35
+backend/tests/test_grievance_field_detector.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-161
+frontend/src/components/ui/Chips.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 27,29-30
+DECISIONS.md
+  s_8653450cef6a0a::t_ae95cd320d1bb0 113-141
+backend/app/evidence_controller.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 19,331-332,341,343
+backend/app/providers/gemini_llm.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 14-31,38,61,63-64,70
+corpus/seeds/chunks_jsonl/RBI_BEAWARE_Financial_Fraud_Awareness.jsonl
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-773
+frontend/src/app/schemes/[slug]/page.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 48,60,62-63,65,71
+backend/tests/test_strip_citations.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 36
+backend/app/services/static_rag.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 155,354
+backend/tests/test_informational_regex.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-123
+corpus/seeds/chunks_jsonl/Introduction_To_Insurance_IRDAI.jsonl
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-1058
+backend/tests/test_contracts.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 90-93
+frontend/src/app/grievance/draft/view/page.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-173
+backend/tests/test_grievance_stale_regression.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-99
+frontend/src/app/api/voice/speak/route.ts
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-43
+frontend/src/components/ChatWindow.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 2,115-136,139,152-159,161-162,169,177-181,187-197,218-220,223-236,260,265,268,290,296,339,350,411-419,422-425,442,445,449,454-473,503-506,536,538,546,551,555,562,564,567,569,577,592,601,604,614,628,644,647,669,671,683,708,730,741,757-761,778,813,815,827,830,836,844,846,865,872,875,878-943,946-947,956,958-964,966,977-991,993-1003,1041,1050,1054,1074
+frontend/src/app/page.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 2,7,10-13,15-60,62-67,69-102,104-106,110,114,117-119,130-145,147,150,168-183,190,196-209,212-223,228-350,354-355,357-358,360-369,374-375,377-383,386-390,392-404,406-416,421,423-425,428-431
+frontend/src/app/api/grievance/finalize/route.ts
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-36
+workflows/05_release_gate_loop.md
+  s_8653450cef6a0a::t_ae95cd320d1bb0 90
+corpus/seeds/chunks_jsonl/Cooperative_Sugar_Mills_CSM_Scheme.jsonl
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-57
+frontend/src/components/ui/Stepper.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 19,21,23-24,30,36
+backend/tests/test_grievance_intent_regression.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-33
+CONTRIBUTING.md
+  s_8653450cef6a0a::t_ae95cd320d1bb0 115-121
+backend/app/grievance/language_check.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-46
+backend/tests/test_chat_route_refactored.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 128,138,140,142,144,386,396,398,400,402,488,536-653
+backend/tests/test_documents_pdf_serving.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-94
+backend/tests/test_llm_fallback.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 3,11,17,26
+frontend/src/components/grievance/GrievanceWizard.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-443
+frontend/src/lib/data/deco.ts
+  s_8653450cef6a0a::t_ae95cd320d1bb0 53-80
+frontend/src/lib/speech.ts
+  s_8653450cef6a0a::t_ae95cd320d1bb0 17-21,24,26-30,33,35-39,52,61,63,65,71,74,80,83,89,92,94-95,98-101,104,110,114,118-123,125,129,132-134,136,139,143-150,152,157,160,162-163,165,170-183,189,194-226,229,231-235,240-275,278,281,287-291,294,297,299,303,307-310,312,314,316,325-326,335-349,351,358-361,364,368-371,373-376,380-387,390,393-407,413-416,420-424,437,443-447,458,469,475
+PROJECT_STATUS.md
+  s_8653450cef6a0a::t_ae95cd320d1bb0 14,24-25,34-36,41,43,51,53,55,57,59,62-65,71-72,79,81,110-115,126,129-133,135-142,150
+backend/tests/test_voice_service.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 21,39,43-45,47,90-91,95-97,99-100,104-105,110-112,114-173
+frontend/src/app/schemes/page.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 13-14,20-35,62-64,67,69-93,103-123
+frontend/src/app/api/grievance/detect/route.ts
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-38
+backend/app/providers/azure_voice.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 63,82,101,145
+frontend/src/lib/i18n/dictionaries.ts
+  s_8653450cef6a0a::t_3e9a9d886fe776 470-494
+  s_8653450cef6a0a::t_6c5f292bd429e0 712-736
+  s_8653450cef6a0a::t_44de24470f8c90 228-252
+backend/tests/test_grievance_draft_builder.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-212
+CLAUDE.md
+  s_8653450cef6a0a::t_ae95cd320d1bb0 56-59,100-101
+backend/tests/test_grievance_stale_state.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-358
+backend/app/grievance/draft_builder.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 12-15,83,287-305,311,317-343
+backend/tests/test_grievance_fixes_locality_url_desc.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-428
+backend/app/providers/sarvam_voice.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 228
+backend/tests/test_grievance_structured_fields.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-319
+frontend/src/components/chat/__tests__/GrievanceCard.test.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-126
+backend/app/citation_verifier.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 29,31-36,85-88,94-97,99,118-119,191
+backend/tests/test_citation_ambiguity.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-168
+backend/app/providers/groq_llm.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 12,18-35,47,49-50,52,65,75-83,88-89,93
+backend/tests/test_chat_citation_route.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 20-21,51
+backend/tests/test_grievance_regression_fixes.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-580
+backend/tests/test_multilingual_routing.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-164
+backend/app/grievance/workflow.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 30,32-42,51,54-67,145-181,320-327,329-335,360,625-641,709,759,768-769,772-773,776-787,796,801,803-814
+corpus/seeds/chunks_jsonl/Model_HR_Policy_V21.jsonl
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-1618
+frontend/src/components/ui/Card.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 8,14,16-18,23,26
+frontend/src/components/EvidenceBand.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 4-6,12
+backend/app/domains.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 2,26-35
+frontend/src/app/library/page.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 9-10,15-31,52-59,63-112,115,120-152,154-157
+frontend/src/components/chat/GrievanceCard.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-295
+backend/tests/test_canonical_normalization.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-615
+frontend/src/components/ui/Alert.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 7-9
+backend/app/grievance/followup_generator.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 5,7,21,35-38,45-49,57,60,67,73-81,84-85,88,92
+frontend/src/app/api/grievance/clarify/route.ts
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-36
+backend/tests/test_services_web_rag.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 20,452
+backend/tests/test_sarvam_translation_fixes.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-556
+backend/tests/test_routing_hierarchy.py
+  s_8653450cef6a0a::t_ae95cd320d1bb0 1-124
+frontend/src/components/layout/LanguageSwitcher.tsx
+  s_8653450cef6a0a::t_ae95cd320d1bb0 49,64,84
+frontend/package-lock.json
+  s_8653450cef6a0a::t_206da5e3301757 21,27,46-66,259-268,317-453,2051-2110,2122-2129,3029-3038,3056-3066,3287-3293,3600-3612,3664-3684,3698-3711,3783-3789,3846-3855,3901-3908,3952-3964,4778-4794,5164-5176,5187-5227,5628-5634,5852-5892,6317-6327,7227-7249,7430-7436,7681-7693,7809-7846,8154-8160,8240-8259,8766-8772,8777,8868-8887,8901-8926,9802-9862,9995-10033
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "63b26d537293fc7c1d6958baf1b21dabd15b75b6",
+  "prompts": {},
+  "sessions": {
+    "s_8653450cef6a0a": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f618dce04ffedyEbs7uyzltwfj",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

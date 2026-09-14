@@ -1,0 +1,47 @@
+frontend/src/lib/i18n/dictionaries.ts
+  s_8653450cef6a0a::t_804bae8b213bb4 63,81-86,166-167,171,232,311,329-334,414-415,419,480,559,577-582,662-663,667,728,825-830,976,1048-1053,1199,1271-1276,1457-1462,1643-1648,1829-1834,1900-1930,1981,2053-2058,2239-2244,2425-2430
+docs/superpowers/plans/2026-09-13-clay-runway-ui-refactor.md
+  s_8653450cef6a0a::t_804bae8b213bb4 1-1210
+frontend/src/app/globals.css
+  s_8653450cef6a0a::t_804bae8b213bb4 366
+frontend/src/components/layout/HamburgerMenu.tsx
+  s_8653450cef6a0a::t_804bae8b213bb4 8,39,42,50,58,60,66,72-83
+README.md
+  s_8653450cef6a0a::t_804bae8b213bb4 1
+docs/superpowers/specs/2026-09-13-clay-runway-ui-refactor.md
+  s_8653450cef6a0a::t_804bae8b213bb4 1-263
+frontend/src/components/layout/TopNav.tsx
+  s_8653450cef6a0a::t_804bae8b213bb4 8,13-15,22-23,26-37,39-62,69,71-72,81,84,88,91-92
+frontend/src/components/ui/Select.tsx
+  s_8653450cef6a0a::t_804bae8b213bb4 16
+frontend/src/components/layout/SmoothScroll.tsx
+  s_8653450cef6a0a::t_804bae8b213bb4 1-26
+backend/data/ui_strings.json
+  s_8653450cef6a0a::t_804bae8b213bb4 4
+frontend/src/components/__tests__/ChatWindow.test.tsx
+  s_8653450cef6a0a::t_804bae8b213bb4 42-50,92,94-95,124,126-127,147,149-150,176,178-179,189,191-192
+frontend/src/components/layout/ConditionalNavs.tsx
+  s_8653450cef6a0a::t_804bae8b213bb4 12
+frontend/src/app/layout.tsx
+  s_8653450cef6a0a::t_804bae8b213bb4 71,74-76
+frontend/src/components/layout/Footer.tsx
+  s_8653450cef6a0a::t_804bae8b213bb4 32-34,82
+frontend/src/lib/i18n/i18n.test.ts
+  s_8653450cef6a0a::t_804bae8b213bb4 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c85dc9c6f94e186b8300c15fc244dbbeffa5d05b",
+  "prompts": {},
+  "sessions": {
+    "s_8653450cef6a0a": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f618dce04ffedyEbs7uyzltwfj",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+backend/app/routes/chat.py
+  s_ad9375d855a08f::t_e5b97788055058 1308,1312-1328,1330-1339
+  s_ad9375d855a08f::t_7691e99a5f7052 1354
+  s_ad9375d855a08f::t_4ad6141fabea5c 1095,1097-1101,1104,1106-1114,1116
+  s_ad9375d855a08f::t_b2f9de77a1e6ea 1311,1329,1340-1353,1355-1359,1361
+  s_ad9375d855a08f::t_618c9a2e3000cc 16-17,1096
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "458f6354003b7b48272556134617f6617123a6f5",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_ad9375d855a08f": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f5b550c9fffeaBBGENbZ0Uze9e",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

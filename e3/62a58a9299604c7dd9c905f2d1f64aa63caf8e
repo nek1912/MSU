@@ -1,0 +1,25 @@
+backend/app/routes/chat.py
+  s_458d09f51c9b65::t_be8ae59ccb12a8 1091
+  s_458d09f51c9b65::t_08faa523d0232e 1293
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e362a58a9299604c7dd9c905f2d1f64aa63caf8e",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_458d09f51c9b65": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f5b17c058ffe5re2WIIbR7gNFM",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

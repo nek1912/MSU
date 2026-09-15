@@ -1,0 +1,49 @@
+frontend/src/components/ChatWindow.tsx
+  s_5611828a85ea34::t_b863b49b4c1082 899,901,945,951,957,965,967
+  s_ad9375d855a08f::t_ba369f2a3ca985 1011
+  s_5611828a85ea34::t_8b2a22b7126ead 900,904-933,935-944
+  s_5611828a85ea34::t_b0761ea970b0f3 1044,1048-1077,1079-1088
+  s_5611828a85ea34::t_757fdacec1cb7f 1043,1045,1089,1095,1101,1109,1111
+  s_8653450cef6a0a::t_c8049d438c7bea 902-903,1046-1047
+backend/app/routes/chat.py
+  s_5611828a85ea34::t_576caa6c46a346 575
+  s_ad9375d855a08f::t_e2a67a2c7765e1 1093-1094,1097,1099
+  s_ad9375d855a08f::t_acd2d399cb49f2 1312-1313,1315-1320
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "1c49908a3476672ca88c9ed54195ea05950c5cd9",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_5611828a85ea34": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f5b18b666ffeOg1HktdwO79jIW",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_8653450cef6a0a": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f618dce04ffedyEbs7uyzltwfj",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_ad9375d855a08f": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f5b550c9fffeaBBGENbZ0Uze9e",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

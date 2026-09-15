@@ -1,0 +1,26 @@
+PROJECT_STATUS.md
+  s_ad9375d855a08f::t_72a73f726a1fe5 14
+  s_ad9375d855a08f::t_f679c1805b150b 36
+  s_ad9375d855a08f::t_35f1028cf481df 80-81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "5abde15c764755eac37bf98dbcabe2cc958b03ab",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_ad9375d855a08f": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f5b550c9fffeaBBGENbZ0Uze9e",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

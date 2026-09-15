@@ -1,0 +1,24 @@
+docs/superpowers/plans/2026-09-15-thinking-process-animation.md
+  s_ad9375d855a08f::t_f2744a91d6d41e 1-855
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "74f0d6e5974cf46675073cfee85b604eccd8f83f",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_ad9375d855a08f": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f5b550c9fffeaBBGENbZ0Uze9e",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

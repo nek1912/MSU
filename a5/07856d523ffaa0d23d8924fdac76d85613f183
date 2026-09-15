@@ -1,0 +1,31 @@
+backend/tests/test_services_rag_orchestrator.py
+  s_a8ee90a8466a73::t_0ae450d12ec503 951-1078
+backend/app/services/rag_orchestrator.py
+  s_a8ee90a8466a73::t_274cb805bda1e2 254-255
+  s_a8ee90a8466a73::t_baff723bedb0b7 167-168
+  s_a8ee90a8466a73::t_dd2116d8a96e96 98
+  s_a8ee90a8466a73::t_15b5a4787e6348 191-192
+  s_a8ee90a8466a73::t_cde5fda0e25ccb 24
+  s_a8ee90a8466a73::t_fc13943dadec15 140-147
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a507856d523ffaa0d23d8924fdac76d85613f183",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_a8ee90a8466a73": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f5b35cdc8ffeUlasKJTc0aBVe0",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

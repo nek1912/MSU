@@ -1,0 +1,28 @@
+frontend/src/components/chat/ThinkingProcess.tsx
+  s_e0c3ce475cbb16::t_16be438a61694f 3,42-46
+  s_e0c3ce475cbb16::t_af1efe0f95acf9 1-2,4-41,47-109
+frontend/src/components/chat/__tests__/ThinkingProcess.test.tsx
+  s_e0c3ce475cbb16::t_1d60d837ce9515 3-5,8-34,36-40,42-61
+  s_e0c3ce475cbb16::t_c42120b3bd3084 1-2,6-7,35,41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "0ff9ffa4a3db092e37d60b9636018b9df1fbce74",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_e0c3ce475cbb16": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f5b0872f2ffefRT5Np0B789EAB",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+backend/app/services/rag_orchestrator.py
+  s_718bdb78c72419::t_0d80e2596e0e86 112-117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c0a713af112c423d49ce284b41454d4ef3e91322",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_718bdb78c72419": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f5b2a4817ffeRt9JftXzo5zf7j",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

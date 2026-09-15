@@ -1,0 +1,27 @@
+frontend/src/components/ui/Icons.tsx
+  s_5d686ff9503333::t_1e4fd955666d23 67-73
+frontend/src/lib/api.ts
+  s_5d686ff9503333::t_e31f3269a63b4b 233-237,240-247
+  s_5d686ff9503333::t_d4e54d63189aee 287,289
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "0cb12a080cd20d0306b69a814baf4e8fbb129414",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_5d686ff9503333": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f5b0f857dffe8xaWOUVsUNazDC",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

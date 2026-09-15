@@ -1,0 +1,24 @@
+frontend/src/components/__tests__/ChatWindow.test.tsx
+  s_b5a364580f6890::t_759eb1426118c8 47-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f2a4eacc1f3185886d0e9deae357c0327a2e2b5a",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_b5a364580f6890": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f5af4aaaaffeqMvokb3gbWTY0c",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

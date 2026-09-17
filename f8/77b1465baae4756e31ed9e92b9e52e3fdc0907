@@ -1,0 +1,21 @@
+frontend/src/app/sign-up/[[...sign-up]]/page.tsx
+  s_b58c76c917484c::t_9ba3f2d1f03ad7 1-9
+frontend/src/app/sign-in/[[...sign-in]]/page.tsx
+  s_b58c76c917484c::t_89efb77793ca79 1-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f877b1465baae4756e31ed9e92b9e52e3fdc0907",
+  "prompts": {},
+  "sessions": {
+    "s_b58c76c917484c": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4f2229c0ffeiVewnviRbkmxEN",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

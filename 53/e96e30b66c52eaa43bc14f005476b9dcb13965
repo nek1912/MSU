@@ -1,0 +1,92 @@
+frontend/src/app/services/page.tsx
+  s_00cc45c0f24036::t_ec1cabfeedeebb 25,27-28,31-32,35-36,39-40,43-44,47-48,51-52,55-56,59-60,206,218-230,243-252
+frontend/src/components/chat/MessageBubble.tsx
+  s_00cc45c0f24036::t_ec1cabfeedeebb 419-427
+backend/tests/test_evaluation_grounding.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 1-192
+backend/app/web_rag/service.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 44,65-66,969-976
+backend/app/answer_grounding.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 1-275
+PROJECT_STATUS.md
+  s_00cc45c0f24036::t_ec1cabfeedeebb 14-23,64-69
+backend/app/services/static_rag.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 75,133
+backend/eval_results.json
+  s_00cc45c0f24036::t_ec1cabfeedeebb 1-143
+backend/app/routes/translate.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 23-24
+backend/tests/test_gemini_reranker_fallback.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 1-80
+backend/app/scenario_reasoning.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 1-762
+backend/app/routes/chat.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 17-18,601-606,626-633,637-648,653-655,662-667,1040,1392,1395-1396
+backend/app/services/web_rag.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 45,102
+backend/tests/test_answer_grounding.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 1-180
+frontend/src/lib/i18n/dictionaries.ts
+  s_00cc45c0f24036::t_ec1cabfeedeebb 168-196,568-596,961-989,1616-1644,1948-1976,2231-2259,2514-2542,2813-2841,3148-3176,3431-3459,3708-3736
+backend/app/providers/embeddings.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 8,29-37,58-82
+backend/app/providers/sarvam_translator.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 63-69,92-98,151-157,162,165-171,196,204-206,210-212
+backend/app/evidence_controller.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 53-111,246-247,250-349,435,450,469-478,489-493,512-514,634-635
+backend/tests/test_services_static_rag.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 147
+backend/app/web_rag/firecrawl_client.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 38
+backend/app/config.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 11,86-93,130-135
+backend/app/contracts.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 427-498
+backend/app/services/rag_orchestrator.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 26,38,86,101,148,150,194,268-294,344-350,395,408,413,421,424,435,439-449,456,458,460-468,470-474,480-481,517,519-521,523-542,544
+backend/tests/test_retrieval_scenarios.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 1-775
+backend/tests/eval_rag_v3.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 1-856
+backend/app/retrieval/gemini_reranker.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 46-50,66-72,74-76,78-105,139-141,178-179,646-648,703-705,708-712
+backend/app/web_rag/tavily_client.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 19,29,386,393-398,400-413,415-418,420-428,430-433
+backend/tests/test_scenario_reasoning.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 1-765
+backend/app/providers/reranker.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 11,17,21-29,55-77
+backend/app/web_rag/bm25_ranker.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 30-37
+backend/app/language.py
+  s_00cc45c0f24036::t_ec1cabfeedeebb 113
+docs/superpowers/plans/2026-09-17-evidence-grounding-plan.md
+  s_00cc45c0f24036::t_ec1cabfeedeebb 1-1164
+docs/superpowers/specs/2026-09-17-evidence-grounding-design.md
+  s_00cc45c0f24036::t_ec1cabfeedeebb 1-202
+frontend/add-hooks.mjs
+  s_00cc45c0f24036::t_ec1cabfeedeebb 1-428
+.superpowers/sdd/task-1-fix-report.md
+  s_00cc45c0f24036::t_4f783ec5f44f84 1-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "53e96e30b66c52eaa43bc14f005476b9dcb13965",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_00cc45c0f24036": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4edac20dffeAC1UAgUKRXu77b",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

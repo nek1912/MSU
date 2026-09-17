@@ -1,0 +1,28 @@
+frontend/next.config.ts
+  s_1b7d165a829764::t_09ef21eea3aab2 5-12
+frontend/.env.example
+  s_1b7d165a829764::t_29a8979de34daf 13-27
+frontend/.env
+  s_1b7d165a829764::t_e77201c2d94923 2-10
+  s_1b7d165a829764::t_70c51c9cc59a4b 1
+frontend/package.json
+  s_1b7d165a829764::t_743ff7840e122b 13
+frontend/package-lock.json
+  s_1b7d165a829764::t_9cf79439d0e6d1 11,99,319-397,486,510,1813-1818,2118-2127,2202,2290,2300,2311,2367,3090,3481,3985,4279,4465,4768-4773,5043-5048,5914-5919,5956,7940,8000,8010,8373-8378,8630-8639,8890-8891,8965,9204,9469,10177
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "29fa7d33b6382480fb0c39d065224d8d311db297",
+  "prompts": {},
+  "sessions": {
+    "s_1b7d165a829764": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4f4e669fffeow9jjMvUJYjbm6",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

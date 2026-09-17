@@ -1,0 +1,35 @@
+frontend/src/lib/i18n/dictionaries.ts
+  s_a85de184eea225::t_554be694b0c538 24
+  s_a85de184eea225::t_9ffa2f6aa8e7dc 750
+  s_a85de184eea225::t_3bcb862ca08904 1674
+  s_a85de184eea225::t_a2eaed9e11f9ad 2735
+  s_a85de184eea225::t_a5c443709e6fc4 1107
+  s_a85de184eea225::t_6aa904a68d4cad 1364
+  s_a85de184eea225::t_81a675a1796d00 1923
+  s_a85de184eea225::t_df582275745a1f 2171
+  s_a85de184eea225::t_b7b12df94f0d62 2419
+  s_a85de184eea225::t_667dfa4ca2a651 3231
+  s_a85de184eea225::t_812cf9089b141a 2983
+  s_a85de184eea225::t_a763cd837b26c9 389
+frontend/src/components/layout/TopNav.tsx
+  s_a85de184eea225::t_492939c82e995d 130,132-147
+  s_a85de184eea225::t_c128caf92a29f9 5
+  s_a85de184eea225::t_d1bfe95e75c784 25
+  s_a85de184eea225::t_2b58b27f8615e4 131
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b4827a1c06373be60b6ab1dd01ab1a275148ae62",
+  "prompts": {},
+  "sessions": {
+    "s_a85de184eea225": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4f1f5a55ffetjVK02wa9s8mfY",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

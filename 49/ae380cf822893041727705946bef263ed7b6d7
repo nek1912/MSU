@@ -1,0 +1,22 @@
+backend/app/main.py
+  s_ee32d17925a1a0::t_434c53c0d74169 39
+  s_ee32d17925a1a0::t_288e5197021d25 15
+backend/app/routes/webhooks.py
+  s_ee32d17925a1a0::t_1a4582f9a0eddf 1-123
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "49ae380cf822893041727705946bef263ed7b6d7",
+  "prompts": {},
+  "sessions": {
+    "s_ee32d17925a1a0": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4f6066ceffeEEs4r33fBgyzNL",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

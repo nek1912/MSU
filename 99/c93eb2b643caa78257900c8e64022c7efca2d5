@@ -1,0 +1,33 @@
+backend/app/routes/grievance.py
+  s_63b9e4aef4eeba::t_8059170862c225 161
+  s_63b9e4aef4eeba::t_a5ba45faa8d6fc 366
+  s_63b9e4aef4eeba::t_b34500552eca05 198
+  s_63b9e4aef4eeba::t_2ec3d483d678e6 114
+  s_63b9e4aef4eeba::t_ad6d5527dbb637 14
+  s_63b9e4aef4eeba::t_cbe7abdf664e7e 17
+backend/app/routes/chat.py
+  s_63b9e4aef4eeba::t_5b7bbdb901573a 26
+  s_63b9e4aef4eeba::t_34796a38cfc228 22
+  s_63b9e4aef4eeba::t_f07ca63cee8b8e 823
+  s_63b9e4aef4eeba::t_be75f02778b106 1172
+backend/app/routes/voice.py
+  s_63b9e4aef4eeba::t_dc42fbe5bae2cd 97
+  s_63b9e4aef4eeba::t_5d67fafa166b33 16
+  s_63b9e4aef4eeba::t_4f0246d7665750 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "99c93eb2b643caa78257900c8e64022c7efca2d5",
+  "prompts": {},
+  "sessions": {
+    "s_63b9e4aef4eeba": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4f52eaa3fferqdic78OInLE2F",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

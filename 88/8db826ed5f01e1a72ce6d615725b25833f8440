@@ -1,0 +1,21 @@
+backend/app/auth.py
+  s_6e20179fa9cc37::t_f55b6146572f5d 9
+  s_6e20179fa9cc37::t_f373c591c9fbbb 76
+  s_6e20179fa9cc37::t_f3d167bb5d7f75 52-59,62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "888db826ed5f01e1a72ce6d615725b25833f8440",
+  "prompts": {},
+  "sessions": {
+    "s_6e20179fa9cc37": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4f6b8124ffeeDtQKqdb7e4hd9",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

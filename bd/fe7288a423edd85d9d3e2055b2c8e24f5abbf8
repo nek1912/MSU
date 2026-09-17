@@ -1,0 +1,19 @@
+frontend/src/proxy.ts
+  s_0bf2f32d6ab7a4::t_f5da4aeb5b77ac 1-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "bdfe7288a423edd85d9d3e2055b2c8e24f5abbf8",
+  "prompts": {},
+  "sessions": {
+    "s_0bf2f32d6ab7a4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4f2650caffe6fBwyH6kEFA6f3",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+frontend/src/lib/i18n/dictionaries.ts
+  s_c932c4f01cbc22::t_f8f7ce7d681a24 763-768
+  s_c932c4f01cbc22::t_9896c73f32579e 25-30
+  s_c932c4f01cbc22::t_54e9bba0f04003 1705-1710
+  s_c932c4f01cbc22::t_784ca4dac7e34a 2468-2473
+  s_c932c4f01cbc22::t_b85124505db982 1389-1394
+  s_c932c4f01cbc22::t_17f1558890e0a0 2790-2795
+  s_c932c4f01cbc22::t_8dc4194bd1f059 2214-2219
+  s_c932c4f01cbc22::t_7c638027a451f8 396-401
+  s_c932c4f01cbc22::t_eb12d7efc9d250 1126-1131
+  s_c932c4f01cbc22::t_58deb6e5b71bb6 3044-3049
+  s_c932c4f01cbc22::t_541e52fda1f29c 1960-1965
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "de255ee639e85d7c0018b94f047bc599b5f0ee29",
+  "prompts": {},
+  "sessions": {
+    "s_c932c4f01cbc22": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4f16b95effeyqJRWXmFYQBjPa",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+frontend/src/components/layout/ConditionalNavs.tsx
+  s_563f8f7a893ddc::t_caf484e32a3197 10-11,15,17-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "20e62172ea3b031f7605ca045c84c34fe70e5d89",
+  "prompts": {},
+  "sessions": {
+    "s_563f8f7a893ddc": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4f0fef29ffewgdsBcEkT2r2KV",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

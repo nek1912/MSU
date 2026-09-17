@@ -1,0 +1,60 @@
+docs/superpowers/specs/2026-09-17-clerk-authentication-design.md
+  s_45202b7fab6478::t_559450e02f1a4a 1-300
+frontend/src/app/api/grievance/fields/route.ts
+  s_45202b7fab6478::t_ff32958d632d00 2,17-18,24-26
+frontend/.env
+  h_c5a3d01edfee72 4-5,8-9
+frontend/src/app/api/grievance/finalize/route.ts
+  s_45202b7fab6478::t_c249b5a7ba1b73 2,16-17,23-26
+frontend/src/app/api/grievance/answer/route.ts
+  s_45202b7fab6478::t_b0d43627999e69 2,16-17,23-26
+frontend/src/app/api/chat/route.ts
+  s_45202b7fab6478::t_6b68de59389dec 1-2,19-20,27-30
+frontend/src/app/api/chat/stream/route.ts
+  s_45202b7fab6478::t_8f1982c18ca4a7 1-2,19-20,27-30
+frontend/src/app/api/grievance/clarify/route.ts
+  s_45202b7fab6478::t_b1dd8ae3cf7007 2,16-17,23-26
+frontend/src/app/api/grievance/detect/route.ts
+  s_45202b7fab6478::t_0efd28b8bc52d9 2,18-19,25-28
+frontend/src/app/api/voice/speak/route.ts
+  s_45202b7fab6478::t_d1f7a6397ecebc 2,19-20,29-32
+backend/app/auth.py
+  s_00cc45c0f24036::t_6e331ee340acfc 6,16,18-25,30,32-36,38-44,47,50,60,84
+docs/superpowers/plans/2026-09-17-clerk-authentication.md
+  s_45202b7fab6478::t_653c95d63312b5 1-959
+frontend/src/components/layout/TopNav.tsx
+  s_00cc45c0f24036::t_6e331ee340acfc 130-136,140-145
+backend/pyproject.toml
+  s_00cc45c0f24036::t_3ede6ea147faa9 22-23
+frontend/src/app/api/speak/route.ts
+  s_45202b7fab6478::t_f939c30b4eab17 2,18-19,29-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "739bfa65dec03b97cf8eedd4422114c46cbc359c",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_00cc45c0f24036": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4edac20dffeAC1UAgUKRXu77b",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_45202b7fab6478": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4ff454e8ffesd4lgVx0R1d14w",
+        "model": "unknown"
+      },
+      "human_author": null
+    }
+  }
+}

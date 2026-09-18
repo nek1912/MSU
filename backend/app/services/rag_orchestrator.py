@@ -33,7 +33,7 @@ from app.contracts import (
     RAGResponse,
     RAGResult,
 )
-from app.evidence_controller import EvidenceController, QueryRequirementClassifier, strip_citations
+from app.evidence_controller import EvidenceController, QueryRequirementClassifier, strip_citations, clean_answer
 from app.llm_fallback import AllProvidersFailedError, grounded_answer
 from app.scenario_reasoning import QueryComplexityClassifier
 from app.providers.gemini_llm import GeminiLLMProvider
@@ -297,9 +297,9 @@ class RAGOrchestrator:
             on_step({"id": "citation_verify", "detail": f"Verified {len(all_chunks)} citations against source documents", "status": "completed"})
         _t_citation_done = time.monotonic()
 
-        # Step 10: Strip internal citation markers from visible answer
-        clean_answer, _extracted_ids = strip_citations(answer)
-        answer = clean_answer
+        # Step 10: Strip internal citation markers and fix formatting
+        stripped_answer, _extracted_ids = strip_citations(answer)
+        answer = clean_answer(stripped_answer)
 
         # Step 11: Calculate confidence
         confidence, confidence_band = self._calculate_confidence(

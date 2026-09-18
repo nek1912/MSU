@@ -3,8 +3,7 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useI18n } from "@/lib/i18n/provider";
-import { getLegalDoc, getLegalDocs, legalDocs as rawLegalDocs } from "@/lib/data";
-import { useTranslatedFields } from "@/lib/useTranslatedFields";
+import { getLegalDoc, getLegalDocs } from "@/lib/data";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Reveal } from "@/components/motion/Reveal";
@@ -31,15 +30,7 @@ export default function LegalDetailPage() {
   const { t, locale } = useI18n();
 
   const doc = useMemo(() => getLegalDoc(locale, slug), [locale, slug]);
-  const rawItem = doc ? rawLegalDocs.find((d) => d.slug === slug) : undefined;
-  const translated = useTranslatedFields({
-    locale,
-    items: doc ? [doc] : [],
-    rawItems: (rawItem ? [rawItem] : []) as never,
-    textFields: ["title", "badge", "overview"],
-    listFields: ["keyProvisions", "applicability", "byLaws"],
-  });
-  const sc = translated[0] ?? doc;
+  const sc = doc;
 
   const allDocs = useMemo(() => getLegalDocs(locale), [locale]);
 

@@ -2,8 +2,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n/provider";
-import { getLegalDocs, legalDocs as rawLegalDocs } from "@/lib/data";
-import { useTranslatedFields } from "@/lib/useTranslatedFields";
+import { getLegalDocs } from "@/lib/data";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Chips } from "@/components/ui/Chips";
@@ -32,17 +31,10 @@ const CATEGORY_META: Record<Filter, { icon: React.ReactNode; color: string; deco
 export default function LegalPage() {
   const { t, locale } = useI18n();
   const all = useMemo(() => getLegalDocs(locale), [locale]);
-  const translated = useTranslatedFields({
-    locale,
-    items: all,
-    rawItems: rawLegalDocs as never,
-    textFields: ["badge", "overview"],
-    listFields: [],
-  });
   const [cat, setCat] = useState<Filter>(CATEGORY_ALL);
   const [query, setQuery] = useState("");
 
-  const filtered = translated.filter((d) => {
+  const filtered = all.filter((d) => {
     const okCat = cat === CATEGORY_ALL || d.category === cat;
     const q = query.trim().toLowerCase();
     const okQuery = !q || d.badge.toLowerCase().includes(q) || d.overview.toLowerCase().includes(q);
@@ -50,12 +42,12 @@ export default function LegalPage() {
   });
 
   const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: translated.length };
-    for (const d of translated) {
+    const counts: Record<string, number> = { all: all.length };
+    for (const d of all) {
       counts[d.category] = (counts[d.category] ?? 0) + 1;
     }
     return counts;
-  }, [translated]);
+  }, [all]);
 
   return (
     <div className="px-4 pt-6 pb-24 sm:px-6 sm:pt-8 md:px-12 md:pt-12">
@@ -82,7 +74,7 @@ export default function LegalPage() {
               {/* Total count */}
               <div className="mt-6 inline-flex items-center gap-2 rounded-[var(--radius-full)] bg-white/15 px-4 py-2 backdrop-blur-sm">
                 <span className="text-[22px] font-semibold text-white" style={{ fontFamily: "var(--font-display)" }}>
-                  {translated.length}
+                  {all.length}
                 </span>
                 <span className="text-[13px] text-white/80">
                   {t("legal.count", { n: "" }).replace(/\d+\s*/, "").trim() || "documents"}

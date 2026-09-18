@@ -2,8 +2,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useI18n } from "@/lib/i18n/provider";
-import { getScheme, schemes as rawSchemes } from "@/lib/data";
-import { useTranslatedFields } from "@/lib/useTranslatedFields";
+import { getScheme } from "@/lib/data";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -44,15 +43,7 @@ export default function SchemeDetailPage() {
   const { t, locale } = useI18n();
 
   const scheme = getScheme(locale, slug);
-  const rawItem = scheme ? rawSchemes.find((s) => s.slug === slug) : undefined;
-  const translated = useTranslatedFields({
-    locale,
-    items: scheme ? [scheme] : [],
-    rawItems: (rawItem ? [rawItem] : []) as never,
-    textFields: ["name", "benefit", "overview"],
-    listFields: ["eligibility", "benefits", "howToApply", "documents"],
-  });
-  const sc = translated[0] ?? scheme;
+  const sc = scheme;
 
   if (!sc) {
     return (

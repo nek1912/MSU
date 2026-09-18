@@ -31,6 +31,7 @@ _DOMAIN_MAP = {
     "pacs": "pacs_governance",
     "finlit": "financial_inclusion",
     "cooperative": "pacs_governance",
+    "agriculture": "pmfby",  # No agri docs yet — route to closest corpus
 }
 
 

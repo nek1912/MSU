@@ -89,7 +89,7 @@ class Settings(BaseSettings):
     # Web RAG latency budgets
     gemini_reranker_timeout_s: float = 8.0
     jina_reranker_timeout_s: float = 5.0
-    web_rag_timeout_s: float = 15.0
+    web_rag_timeout_s: float = 30.0
 
     @property
     def tts_voices(self) -> dict[str, str]:

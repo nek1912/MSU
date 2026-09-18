@@ -2,8 +2,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n/provider";
-import { getSchemes, schemes as rawSchemes } from "@/lib/data";
-import { useTranslatedFields } from "@/lib/useTranslatedFields";
+import { getSchemes } from "@/lib/data";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
@@ -38,17 +37,10 @@ const CATEGORY_META: Record<Filter, { icon: React.ReactNode; color: string; deco
 export default function SchemesPage() {
   const { t, locale } = useI18n();
   const all = useMemo(() => getSchemes(locale), [locale]);
-  const translated = useTranslatedFields({
-    locale,
-    items: all,
-    rawItems: rawSchemes as never,
-    textFields: ["name", "benefit"],
-    listFields: ["eligibility", "benefits"],
-  });
   const [cat, setCat] = useState<Filter>(CATEGORY_ALL);
   const [query, setQuery] = useState("");
 
-  const filtered = translated.filter((s) => {
+  const filtered = all.filter((s) => {
     const okCat = cat === CATEGORY_ALL || s.category === cat;
     const q = query.trim().toLowerCase();
     const okQuery = !q || s.name.toLowerCase().includes(q) || s.benefit.toLowerCase().includes(q);
@@ -56,12 +48,12 @@ export default function SchemesPage() {
   });
 
   const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: translated.length };
-    for (const s of translated) {
+    const counts: Record<string, number> = { all: all.length };
+    for (const s of all) {
       counts[s.category] = (counts[s.category] ?? 0) + 1;
     }
     return counts;
-  }, [translated]);
+  }, [all]);
 
   return (
     <div className="min-h-screen px-4 pt-10 pb-24 sm:px-6 sm:pt-12 md:px-12">
@@ -89,7 +81,7 @@ export default function SchemesPage() {
 
               <div className="mt-8 inline-flex items-center gap-3 rounded-[var(--radius-xl)] border border-[var(--hairline)] bg-white/70 px-5 py-3 backdrop-blur-sm">
                 <span className="text-[28px] font-semibold text-[var(--ink)]" style={{ fontFamily: "var(--font-display)" }}>
-                  {translated.length}
+                  {all.length}
                 </span>
                 <span className="text-[13px] leading-tight text-[var(--muted)]">
                   {t("schemes.count", { n: "" }).replace(/\d+\s*/, "").trim() || "schemes"}

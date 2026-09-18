@@ -88,7 +88,7 @@ class WebRAGService:
         final_top_k: int = 8,
         rrf_k: int = 60,
         minimum_relevance_score: float = DEFAULT_MIN_RELEVANCE_SCORE,
-        minimum_trust_score: float = 35.0,
+        minimum_trust_score: float = 20.0,
     ):
         logger.info("Initializing WebRAGService")
 
@@ -155,18 +155,28 @@ class WebRAGService:
         if classification is not None and classification.domain != "general":
             effective_domain_for_gate = classification.domain
 
-        if effective_domain_for_gate == "general" or not effective_domain_for_gate:
+        if not effective_domain_for_gate:
+            effective_domain_for_gate = "general"
+
+        # Allow "general" domain to proceed — the web discovery service
+        # has its own domain classification that may identify a specific
+        # domain from the query. Only block truly empty/unknown domains.
+        if effective_domain_for_gate not in SUPPORTED_DOMAINS and effective_domain_for_gate != "general":
             logger.info(
                 "Domain scope gate: UNSUPPORTED DOMAIN (%s). Abstaining.",
-                effective_domain_for_gate or "unknown",
+                effective_domain_for_gate,
             )
             return RAGResult(
                 chunks=[],
                 abstained=True,
                 reason=AbstentionReason.DOMAIN_MISMATCH,
                 band=ConfidenceBand.LOW,
-                domain=effective_domain_for_gate or "general",
+                domain=effective_domain_for_gate,
                 metadata={"step": "domain_scope_gate"},
+            )
+        elif effective_domain_for_gate == "general":
+            logger.info(
+                "Domain scope gate: general domain — proceeding with web discovery (internal classifier may refine)."
             )
 
         # ── Step 2: Web discovery ──────────────────────────────────

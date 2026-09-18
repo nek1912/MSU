@@ -2,8 +2,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n/provider";
-import { getServices, services as rawServices } from "@/lib/data";
-import { useTranslatedFields } from "@/lib/useTranslatedFields";
+import { getServices } from "@/lib/data";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Chips } from "@/components/ui/Chips";
@@ -78,17 +77,10 @@ const CATEGORY_META: Record<Filter, { icon: React.ReactNode; color: string; deco
 export default function ServicesPage() {
   const { t, locale } = useI18n();
   const all = useMemo(() => getServices(locale), [locale]);
-  const translated = useTranslatedFields({
-    locale,
-    items: all,
-    rawItems: rawServices as never,
-    textFields: ["name", "summary"],
-    listFields: [],
-  });
   const [cat, setCat] = useState<Filter>(CATEGORY_ALL);
   const [query, setQuery] = useState("");
 
-  const filtered = translated.filter((s) => {
+  const filtered = all.filter((s) => {
     const okCat = cat === CATEGORY_ALL || s.category === cat;
     const q = query.trim().toLowerCase();
     const okQuery = !q || s.name.toLowerCase().includes(q) || s.summary.toLowerCase().includes(q);
@@ -96,8 +88,8 @@ export default function ServicesPage() {
   });
 
   const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: translated.length };
-    for (const s of translated) {
+    const counts: Record<string, number> = { all: all.length };
+    for (const s of all) {
       counts[s.category] = (counts[s.category] ?? 0) + 1;
     }
     return counts;
@@ -128,7 +120,7 @@ export default function ServicesPage() {
               {/* Total count */}
               <div className="mt-6 inline-flex items-center gap-2 rounded-[var(--radius-full)] bg-white/15 px-4 py-2 backdrop-blur-sm">
                 <span className="text-[22px] font-semibold text-white" style={{ fontFamily: "var(--font-display)" }}>
-                  {translated.length}
+                  {all.length}
                 </span>
                 <span className="text-[13px] text-white/80">{t("services.count", { n: "" }).replace(/\d+\s*/, "").trim() || "services"}</span>
               </div>

@@ -1,0 +1,71 @@
+frontend/src/app/legal/page.tsx
+  s_fc5673dbc03f47::t_5c5ef9375073e5 5
+  s_fc5673dbc03f47::t_9a64cf772587f1 45-46,50
+  s_fc5673dbc03f47::t_2fdf49cca4eb35 77
+  s_fc5673dbc03f47::t_815eb1c89ca216 37
+backend/app/services/rag_orchestrator.py
+  s_fc5673dbc03f47::t_9373c8ae825587 300
+  s_fc5673dbc03f47::t_b0a036ec7497c4 301-302
+  s_fc5673dbc03f47::t_ae37ba0fdb8f85 36
+backend/app/services/static_rag.py
+  s_fc5673dbc03f47::t_4c785f1d6c7fb3 34
+frontend/src/app/legal/[slug]/page.tsx
+  s_fc5673dbc03f47::t_9b444291b52f83 6
+  s_fc5673dbc03f47::t_cb74313105e383 33
+frontend/src/app/services/page.tsx
+  s_fc5673dbc03f47::t_310374061ab498 91-92
+  s_fc5673dbc03f47::t_c98c9ff5072521 5
+  s_fc5673dbc03f47::t_66a3fcef1c9dec 123
+  s_fc5673dbc03f47::t_2b2208af8db79c 83
+backend/app/evidence_gate.py
+  s_fc5673dbc03f47::t_d6c3841779861c 66-67
+  s_fc5673dbc03f47::t_a4a3d9f4a8b0be 18-26,28-42
+  s_fc5673dbc03f47::t_62dc093ea067f5 27
+frontend/src/app/schemes/[slug]/page.tsx
+  s_fc5673dbc03f47::t_dd313ffb7b5fd0 46
+  s_fc5673dbc03f47::t_fa85c642786b22 5
+backend/app/config.py
+  s_fc5673dbc03f47::t_b74b6fe5fe3a5d 92
+backend/app/services/web_rag.py
+  s_fc5673dbc03f47::t_f594f2b32f2fe6 91
+  s_fc5673dbc03f47::t_ee9c775cb1fb97 158-164,167,174,177-180
+backend/tests/test_services_web_rag.py
+  s_fc5673dbc03f47::t_ba43c9b7a9c72e 97-98,101-116,118
+frontend/src/app/schemes/page.tsx
+  s_fc5673dbc03f47::t_e4d783ddd6ee16 5
+  s_fc5673dbc03f47::t_c8185cef9efe1a 43
+  s_fc5673dbc03f47::t_e28ea2e7982e39 51-52,56
+  s_fc5673dbc03f47::t_082c449ec3cb23 84
+backend/app/evidence_controller.py
+  s_fc5673dbc03f47::t_e87a17f4b8510b 238-249,260-270,295-299,314-330,332-334,413-416,419,444
+  s_fc5673dbc03f47::t_121bf94eb44c78 430-440
+  s_fc5673dbc03f47::t_279419971e3fc0 474-476,481,485-487
+  s_fc5673dbc03f47::t_e702f4d26264d4 482-484
+  s_fc5673dbc03f47::t_04b7e013fb4372 631,635
+  s_fc5673dbc03f47::t_7b9141ea58274f 335,374-412
+  s_fc5673dbc03f47::t_5c7d8fbb998982 633-634
+  s_fc5673dbc03f47::t_f5b9f0c4455fe7 469-473,477-480,488-492
+  s_fc5673dbc03f47::t_b23f9d653aea7e 336-373
+  s_fc5673dbc03f47::t_ff488cedcca7db 422-429
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "41e6daed218cb773084388116c09ab8ad6dee5fb",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_fc5673dbc03f47": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4ec6dac2ffec0GTivXA0yBvJ6",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

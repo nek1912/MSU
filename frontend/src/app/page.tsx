@@ -54,26 +54,31 @@ const HOW_STEPS = [
     num: "01",
     title: "landing.how1title",
     text: "landing.how1text",
+    image: "/images/journey/ask-anything.png",
   },
   {
     num: "02",
     title: "landing.how2title",
     text: "landing.how2text",
+    image: "/images/journey/get-answers.png",
   },
   {
     num: "03",
     title: "landing.how3title",
     text: "landing.how3text",
+    image: "/images/journey/verify-details.png",
   },
   {
     num: "04",
     title: "landing.how4title",
     text: "landing.how4text",
+    image: "/images/journey/take-action.png",
   },
   {
     num: "05",
     title: "landing.how5title",
     text: "landing.how5text",
+    image: "/images/journey/get-closure.png",
   },
 ];
 
@@ -282,6 +287,7 @@ export default function HomePage() {
               num: step.num,
               title: t(step.title),
               text: t(step.text),
+              image: step.image,
             }))}
           />
         </div>

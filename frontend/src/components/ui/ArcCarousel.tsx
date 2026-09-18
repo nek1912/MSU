@@ -6,6 +6,8 @@ interface ArcCarouselItem {
   num: string;
   title: string;
   text: string;
+  /** Path to individual illustration (e.g. /images/journey/ask-anything.png) */
+  image?: string;
 }
 
 export function ArcCarousel({ items }: { items: ArcCarouselItem[] }) {
@@ -77,24 +79,14 @@ export function ArcCarousel({ items }: { items: ArcCarouselItem[] }) {
 
     const cardWidth = isMobile ? 220 : 320;
     const cardHeight = isMobile ? 220 : 320;
-    const padding = isMobile ? "p-5" : "p-8";
-    const fontSize = isMobile ? "text-[16px]" : "text-[22px]";
-    const descMaxWidth = isMobile ? "max-w-[170px]" : "max-w-[250px]";
 
     return {
       cardWidth,
       cardHeight,
-      padding,
-      fontSize,
-      descMaxWidth,
       transform: `translateX(${translateX}px) rotateY(${rotateY}deg) scale(${scale})`,
       opacity,
       zIndex,
       willChange: "transform, opacity" as const,
-      background:
-        diff === 0
-          ? "linear-gradient(145deg, #dce8dc 0%, #c4d8c4 100%)"
-          : "linear-gradient(145deg, #f0ebe0 0%, #e6e1d4 100%)",
       border: `1px solid ${diff === 0 ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.3)"}`,
       boxShadow:
         diff === 0
@@ -114,27 +106,58 @@ export function ArcCarousel({ items }: { items: ArcCarouselItem[] }) {
             return (
               <div
                 key={item.num}
-                className={`rounded-[20px] p-5 mb-3 transition-all duration-300 ${
+                className={`relative overflow-hidden rounded-[20px] mb-3 transition-all duration-300 ${
                   isActive
-                    ? "bg-gradient-to-br from-[#dce8dc] to-[#c4d8c4] border border-white/60 shadow-lg opacity-100"
-                    : "bg-gradient-to-br from-[#f0ebe0] to-[#e6e1d4] border border-white/30 opacity-60"
+                    ? "border border-white/60 shadow-lg opacity-100"
+                    : "border border-white/30 opacity-60"
                 }`}
+                style={{
+                  backgroundColor: isActive ? "#dce8dc" : "#f0ebe0",
+                }}
                 onClick={() => setActiveIndex(i)}
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/5">
-                  <span className="text-sm font-bold text-[#1a1a2e]/50" style={{ fontFamily: "var(--font-display)" }}>
-                    {item.num}
+                {/* Illustration layer */}
+                {item.image && (
+                  <img
+                    src={item.image}
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 h-full w-full object-cover"
+                    style={{
+                      objectPosition: "center top",
+                      transition: "opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+                      opacity: isActive ? 0.85 : 0.5,
+                    }}
+                  />
+                )}
+
+                {/* Gradient overlay for text readability */}
+                <div
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    background: isActive
+                      ? "linear-gradient(180deg, rgba(220,232,220,0.15) 0%, rgba(196,216,196,0.40) 45%, rgba(196,216,196,0.82) 100%)"
+                      : "linear-gradient(180deg, rgba(240,235,224,0.15) 0%, rgba(230,225,212,0.40) 45%, rgba(230,225,212,0.82) 100%)",
+                  }}
+                />
+
+                {/* Card content */}
+                <div className="relative z-10 p-5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/5">
+                    <span className="text-sm font-bold text-[#1a1a2e]/50" style={{ fontFamily: "var(--font-display)" }}>
+                      {item.num}
+                    </span>
+                  </div>
+                  <span className="block mt-3 text-[10px] font-semibold tracking-wider text-[#1a1a2e]/40 uppercase" style={{ fontFamily: "var(--font-display)" }}>
+                    Step {item.num}
                   </span>
+                  <h3 className="mt-1 text-[16px] font-bold tracking-[-0.01em] text-[#1a1a2e]">
+                    {item.title}
+                  </h3>
+                  <p className="mt-1 text-[12px] leading-[1.5] text-[#1a1a2e]/60">
+                    {item.text}
+                  </p>
                 </div>
-                <span className="block mt-3 text-[10px] font-semibold tracking-wider text-[#1a1a2e]/40 uppercase" style={{ fontFamily: "var(--font-display)" }}>
-                  Step {item.num}
-                </span>
-                <h3 className="mt-1 text-[16px] font-bold tracking-[-0.01em] text-[#1a1a2e]">
-                  {item.title}
-                </h3>
-                <p className="mt-1 text-[12px] leading-[1.5] text-[#1a1a2e]/60">
-                  {item.text}
-                </p>
               </div>
             );
           })}
@@ -164,10 +187,11 @@ export function ArcCarousel({ items }: { items: ArcCarouselItem[] }) {
       <div className="relative w-full max-w-[1000px] h-[380px] flex items-center justify-center overflow-hidden">
         {items.map((item, i) => {
           const style = getCardStyle(i);
+          const isActive = i === activeIndex;
           return (
             <div
               key={item.num}
-              className="absolute rounded-[28px] p-8 flex flex-col justify-between cursor-pointer"
+              className="absolute rounded-[28px] flex flex-col justify-between cursor-pointer overflow-hidden"
               style={{
                 width: `${style.cardWidth}px`,
                 height: `${style.cardHeight}px`,
@@ -175,19 +199,51 @@ export function ArcCarousel({ items }: { items: ArcCarouselItem[] }) {
                 opacity: style.opacity,
                 zIndex: style.zIndex,
                 willChange: style.willChange,
-                background: style.background,
                 border: style.border,
                 boxShadow: style.boxShadow,
                 transition: style.transition,
+                backgroundColor: isActive ? "#dce8dc" : "#f0ebe0",
               }}
               onClick={() => setActiveIndex(i)}
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-black/5">
-                <span className="text-lg font-bold text-[#1a1a2e]/50" style={{ fontFamily: "var(--font-display)" }}>
-                  {item.num}
-                </span>
+              {/* Illustration background layer */}
+              {item.image && (
+                <img
+                  src={item.image}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 h-full w-full"
+                  style={{
+                    objectFit: "cover",
+                    objectPosition: "center top",
+                    transition: "opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+                    opacity: isActive ? 1 : 0.6,
+                  }}
+                />
+              )}
+
+              {/* Gradient overlay for text readability — top transparent, bottom stronger */}
+              <div
+                className="pointer-events-none absolute inset-0 rounded-[28px]"
+                style={{
+                  background: isActive
+                    ? "linear-gradient(180deg, rgba(220,232,220,0.08) 0%, rgba(196,216,196,0.25) 40%, rgba(196,216,196,0.78) 100%)"
+                    : "linear-gradient(180deg, rgba(240,235,224,0.08) 0%, rgba(230,225,212,0.25) 40%, rgba(230,225,212,0.78) 100%)",
+                  transition: "background 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              />
+
+              {/* Number badge — top left */}
+              <div className="relative z-10 p-8 pb-0">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-black/5">
+                  <span className="text-lg font-bold text-[#1a1a2e]/50" style={{ fontFamily: "var(--font-display)" }}>
+                    {item.num}
+                  </span>
+                </div>
               </div>
-              <div>
+
+              {/* Text content — bottom */}
+              <div className="relative z-10 p-8 pt-0">
                 <span
                   className="block text-[12px] font-semibold tracking-wider text-[#1a1a2e]/40 uppercase"
                   style={{ fontFamily: "var(--font-display)" }}

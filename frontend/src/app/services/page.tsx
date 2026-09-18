@@ -93,7 +93,7 @@ export default function ServicesPage() {
       counts[s.category] = (counts[s.category] ?? 0) + 1;
     }
     return counts;
-  }, [translated]);
+  }, [all]);
 
   return (
     <div className="px-4 pt-6 pb-24 sm:px-6 sm:pt-8 md:px-12 md:pt-12">

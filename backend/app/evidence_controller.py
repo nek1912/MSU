@@ -342,29 +342,25 @@ CRITICAL RULES:
     4. Use bullet points (-) for lists of items
     5. End with the follow-up question (rule 13)
 
-    TABLE FORMAT — you MUST follow this EXACTLY:
-    A markdown table has 3 parts: header row, separator row, data rows.
-    Every pipe | character must be part of a table structure. Never use
-    | as a text separator.
+    RULE: The pipe character | may ONLY appear in these 3 places:
+    1. At the start of a table header row: | Criteria | Details |
+    2. At the start of the separator row: |---|---|
+    3. At the start of a table data row: | Residence | Must live in village |
 
-    CORRECT table format:
-    | Precaution | What to do |
+    NEVER use | as a text separator. WRONG: "Precaution | What to do |"
+    RIGHT: Put it in a table with proper header and separator rows.
+
+    RULE: Every table MUST have exactly this structure:
+    | Header 1 | Header 2 |
     |---|---|
-    | Verify lender | Check bank, NBFC or cooperative official website and branch address |
-    | Keep documents secure | Do not share identity, land or income documents copies unnecessarily |
-    | Watch for forged requests | If lender submits altered or fake papers, stop the process and report |
+    | Data row 1 col 1 | Data row 1 col 2 |
+    | Data row 2 col 1 | Data row 2 col 2 |
 
-    WRONG (do NOT do this):
-    Precaution | What to do | ---|---| Verify lender | Check website...
-
-    TABLE RULES:
-    - Every table MUST have a header row, a |---|---| separator row,
-      and at least 2 data rows.
-    - Each cell is plain text only. No <br>, no **, no HTML.
-    - Keep cells short: 1-2 phrases, under 20 words each.
-    - Put each table between blank lines (one blank line before and after).
-    - The pipe | character may ONLY appear inside a properly formatted
-      table. If you are NOT inside a table, do NOT use | at all.
+    There must be:
+    - A header row with | at start and end of each cell
+    - A separator row with |---|---| (one --- per column)
+    - At least 2 data rows
+    - A blank line before and after the table
 
     WHEN TO USE TABLES:
     - Comparing categories (A-Class vs B-Class membership)
@@ -628,7 +624,17 @@ class EvidenceController:
             f"3. Include [chunk:ID] citations for every factual claim.\n"
             f"4. If evidence is limited, answer only what is directly supported.\n"
             f"5. Use simple, clear language suitable for ordinary citizens.\n"
-            f"6. ANSWER STRUCTURE: Start with a one-sentence direct answer. Then use **bold sub-headings** for each section. Use markdown TABLES for structured data (precautions, steps, criteria, rates). Tables MUST have a header row, a |---|---| separator row, and 2+ data rows. The pipe | character may ONLY appear inside properly formatted tables. Never use | as a text separator.\n"
+            f"6. ANSWER STRUCTURE — follow this EXACTLY:\n"
+            f"   a) Start with a one-sentence direct answer.\n"
+            f"   b) Use **bold text** for sub-headings (NOT ## or ###).\n"
+            f"   c) For ANY structured data (precautions, steps, criteria, documents, rates), use a markdown table with this EXACT format:\n"
+            f"      | Column 1 | Column 2 | Column 3 |\n"
+            f"      |---|---|---|\n"
+            f"      | Row 1 data | Row 1 data | Row 1 data |\n"
+            f"      | Row 2 data | Row 2 data | Row 2 data |\n"
+            f"   d) The pipe | character may ONLY appear inside a properly formatted table like the example above. NEVER use | as a text separator.\n"
+            f"   e) Use bullet points (-) for simple lists that don't need columns.\n"
+            f"   f) End with the follow-up question (rule 9).\n"
             f"7. Preserve the requested language and script throughout the answer. Translate explanatory text, but keep official scheme names, legal names, acronyms, section numbers, dates, amounts, and citation markers unchanged.\n"
             f"8. Use real-life scenarios and examples in your explanation. Instead of abstract descriptions, say things like 'If you are a farmer with 2 hectares...' or 'Say you took a loan of ₹50,000...' or 'Suppose your crop was damaged by unseasonal rain...' This makes the answer feel like advice from a knowledgeable neighbor.\n"
             f"9. End your answer with exactly ONE scenario-based follow-up question in {lang_name}. This should be a specific, realistic next question the user might ask based on their situation. Prefix it with 💬. Example: 💬 If you want to know what documents to bring to the PACS office, I can help you prepare a list.\n"

@@ -59,6 +59,53 @@ _BAND_TO_CONFIDENCE: dict[str, float] = {
 }
 
 
+def fix_broken_tables(answer: str) -> str:
+    """Detect and fix broken markdown table formatting.
+    
+    The LLM sometimes outputs pipe-separated text that isn't valid
+    markdown table syntax. This function:
+    1. Identifies lines that look like broken tables (have | but no proper header/separator)
+    2. Attempts to reconstruct them as proper tables
+    3. Falls back to stripping pipe characters if reconstruction fails
+    """
+    lines = answer.split('\n')
+    result = []
+    i = 0
+    
+    while i < len(lines):
+        line = lines[i]
+        
+        # Check if this line starts a potential table (or is an inline broken table)
+        if '|' in line:
+            # Collect consecutive lines with |
+            table_lines = []
+            j = i
+            while j < len(lines) and '|' in lines[j]:
+                table_lines.append(lines[j])
+                j += 1
+            
+            # Check if it's a valid table (has separator row)
+            has_separator = any(re.match(r'^\s*\|[\s\-|]+\|\s*$', tl) for tl in table_lines)
+            
+            if has_separator and len(table_lines) >= 3:
+                # Valid table — keep as is
+                result.extend(table_lines)
+            else:
+                # Broken table — strip pipes and convert to bullet list
+                for tl in table_lines:
+                    cleaned = tl.replace('|', ' ').strip()
+                    cleaned = re.sub(r'\s+', ' ', cleaned)
+                    if cleaned and cleaned != '---':
+                        result.append(f"- {cleaned}")
+            
+            i = j
+        else:
+            result.append(line)
+            i += 1
+    
+    return '\n'.join(result)
+
+
 class RAGOrchestrator:
     """Runs async dual-pipeline RAG with evidence bundling and claim verification.
 
@@ -300,6 +347,7 @@ class RAGOrchestrator:
         # Step 10: Strip internal citation markers and fix formatting
         stripped_answer, _extracted_ids = strip_citations(answer)
         answer = clean_answer(stripped_answer)
+        answer = fix_broken_tables(answer)
 
         # Step 11: Calculate confidence
         confidence, confidence_band = self._calculate_confidence(

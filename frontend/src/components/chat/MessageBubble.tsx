@@ -276,6 +276,12 @@ export function cleanMarkdownForDisplay(text: string): string {
   // Remove table separator patterns like "--- ----" or "|---|---|" remnants
   cleaned = cleaned.replace(/[\s]*-{3,}[\s-]*/g, " ");
 
+  // Fix missing spaces after punctuation
+  cleaned = cleaned.replace(/\.([^\s\n])/g, ". $1");
+  cleaned = cleaned.replace(/,([^\s\n])/g, ", $1");
+  cleaned = cleaned.replace(/;([^\s\n])/g, "; $1");
+  cleaned = cleaned.replace(/:([^\s\n])/g, ": $1");
+
   // Add line break after bold headings (**Heading**)
   cleaned = cleaned.replace(/(\*\*[^*]+\*\*)\s*/g, "$1\n\n");
 

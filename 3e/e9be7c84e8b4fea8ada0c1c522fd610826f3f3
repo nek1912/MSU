@@ -1,0 +1,29 @@
+frontend/src/lib/i18n/dictionaries.ts
+  s_504a314f3414ba::t_ff5913b7fe65f0 2908-2938
+frontend/src/lib/api.ts
+  s_504a314f3414ba::t_1566bcc627fe47 124
+frontend/src/components/grievance/GrievanceWizard.tsx
+  s_504a314f3414ba::t_c9d1a777579e6b 331,333-341
+  s_504a314f3414ba::t_d4b33988e79c98 173-178,190-214
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3ee9be7c84e8b4fea8ada0c1c522fd610826f3f3",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_504a314f3414ba": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4825392cffeTtvdA2Iy1dU0DN",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

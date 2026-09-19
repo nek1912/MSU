@@ -1,0 +1,28 @@
+frontend/src/components/chat/MessageBubble.tsx
+  s_504a314f3414ba::t_e1f99cba4dfe24 288-289,291-292,295-297
+backend/app/evidence_controller.py
+  s_504a314f3414ba::t_a704be5960e739 391-392,394-395,398-399,401-403,405-406,408-409,420-421,423,425,427,429,431,433,435,437,439,441-463
+  s_504a314f3414ba::t_c6c6e700332e7b 393,396-397,400,404,407,410-413,416-417,422
+  s_504a314f3414ba::t_815d351804fcd3 537-542
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a69d54d3342bc96e9e72ab5a5d7d31e5c433b7c1",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_504a314f3414ba": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4825392cffeTtvdA2Iy1dU0DN",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

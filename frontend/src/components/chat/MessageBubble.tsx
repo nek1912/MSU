@@ -285,11 +285,15 @@ export function cleanMarkdownForDisplay(text: string): string {
   // Add line break after bold headings (**Heading**)
   cleaned = cleaned.replace(/(\*\*[^*]+\*\*)\s*/g, "$1\n\n");
 
-  // Ensure numbered list items get line breaks
-  cleaned = cleaned.replace(/([^\n])\s*(\d+\.)\s+/g, "$1\n$2 ");
+  // Add line break after standalone colons used as separators
+  cleaned = cleaned.replace(/\n:\s*/g, "\n\n");
 
-  // Add line break before numbered items if not already on new line
+  // Ensure English numbered list items get line breaks
+  cleaned = cleaned.replace(/([^\n])\s*(\d+\.)\s+/g, "$1\n$2 ");
   cleaned = cleaned.replace(/([^\n])(\d+\.)/g, "$1\n$2");
+
+  // Ensure Gujarati numbered list items get line breaks (૧. ૨. ૩. etc.)
+  cleaned = cleaned.replace(/([^\n])\s*([૦-૯]+\.)/g, "$1\n$2");
 
   // Format bullet points: replace inline bullets (•) with newlines and markdown dash (- )
   cleaned = cleaned.replace(/([^\n])\s*•\s*/g, "$1\n- ");

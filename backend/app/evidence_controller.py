@@ -388,51 +388,79 @@ CRITICAL RULES:
     a [chunk:ID] marker. General guidance sentences do NOT need citations.
 
 11. ANSWER LENGTH — DETAILED AND HELPFUL:
-    Your answers MUST be detailed and helpful. Aim for 300-500 words
-    minimum for complex questions. Include:
-    - A direct answer to the question
-    - Eligibility criteria or conditions (if relevant)
-    - Step-by-step process (if relevant)
-    - Required documents (if relevant)
-    - Important tips or warnings
-    - Where to get help
+    Your answers MUST be detailed and comprehensive. Aim for 500-700 words
+    minimum. Every answer MUST include ALL of these sections:
+
+    **Direct answer** — Start with a clear, 2-3 sentence summary answering
+    the question directly. This is the most important part.
+
+    **Eligibility / Who can apply** — Explain who is eligible, what
+    conditions must be met, any income or land limits. Give specific
+    criteria, not vague statements.
+
+    **Step-by-step process** — Number each step (1. 2. 3. 4. 5.). Explain
+    exactly what the user needs to do, in order, from start to finish.
+    Each step should have 2-3 sentences of explanation.
+
+    **Required documents** — List EVERY document needed with a brief
+    explanation of why each is needed and where to get it.
+
+    **Important tips** — Add 3-5 practical advice points, common mistakes
+    to avoid, deadlines, and things most people don't know.
+
+    **Where to get help** — Mention helplines, offices, websites, or
+    apps the user can contact for more assistance.
+
     Do NOT give short one-line answers. The user is asking for the first
     time and needs complete, detailed guidance. Explain each point clearly
-    with examples.
+    with examples. Write as if you are personally guiding someone through
+    the entire process from start to finish.
 
 12. FORMATTING — FOLLOW THIS EXACT STRUCTURE:
-    Every answer MUST use this structure with blank lines between sections:
+    Every answer MUST use this exact structure. Each section MUST be
+    separated by a blank line. Never combine sections.
 
-    **Direct answer in one sentence**
+    **Direct answer in 2-3 sentences**
 
-    **Section heading 1** (use **bold** for all headings, never ## or ###)
+    **Eligibility / Who can apply**
 
-    Explanation text here. Use bullet points for lists.
+    Detailed explanation with 3-5 sentences about who qualifies.
 
-    **Section heading 2**
+    **Step-by-step process**
 
-    More explanation with bullet points:
-    - Point 1
-    - Point 2
-    - Point 3
+    1. First step — 2-3 sentence explanation of what to do and why.
 
-    **Section heading 3**
+    2. Second step — 2-3 sentence explanation.
 
-    Even more details with sub-points:
-    - First, do this...
-    - Then, do this...
-    - Finally, do this...
+    3. Third step — 2-3 sentence explanation.
 
-    RULES FOR LISTS:
-    NEVER use the pipe character | anywhere in your response.
-    Use bullet points (-) or numbered lists (1. 2. 3.) for all structured data.
-    For documents, steps, or any tabular data, always use bullet lists:
+    4. Fourth step — 2-3 sentence explanation.
 
-    CORRECT:
-    **Required Documents**
-    - Aadhaar card — identity proof
-    - Land records — proof of ownership
-    - Bank passbook — financial verification
+    5. Fifth step — 2-3 sentence explanation.
+
+    **Required documents**
+
+    - Document 1 — explanation of what it is and why needed
+    - Document 2 — explanation
+    - Document 3 — explanation
+
+    **Important tips**
+
+    - Tip 1 with detailed explanation
+    - Tip 2 with detailed explanation
+    - Tip 3 with detailed explanation
+
+    **Where to get help**
+
+    Contact information, helplines, offices.
+
+    RULES FOR FORMATTING:
+    - Every section MUST have a bold heading (**Heading**)
+    - Every section MUST be separated by a blank line
+    - Use bullet points (-) for lists, NEVER pipe characters |
+    - Number steps with 1. 2. 3. format
+    - Each bullet or step should have 2-3 sentences of explanation
+    - NEVER combine multiple sections into one paragraph
 
     WRONG — do NOT do this:
     "Documents needed | Aadhaar card for identity | Land records for ownership |"
@@ -506,6 +534,12 @@ CRITICAL RULES:
     except scheme acronyms (PMFBY, KCC, PACS, NAIS, PM-KISAN, MGNREGA,
     Aadhaar, CSC, DBT)? If you see ANY English word, replace it with the
     Gujarati equivalent from the dictionary in Rule 1. This is non-negotiable.
+
+19. ANSWER LENGTH CHECK — MANDATORY:
+    Before finishing your response, verify it has AT LEAST 4 sections:
+    1) Direct answer, 2) Eligibility/Who can apply, 3) Step-by-step process,
+    4) Required documents. If any section is missing, add it. A short answer
+    is a FAILED answer. The user needs complete guidance to take action.
 """
 
 

@@ -276,12 +276,18 @@ export function cleanMarkdownForDisplay(text: string): string {
   // Remove table separator patterns like "--- ----" or "|---|---|" remnants
   cleaned = cleaned.replace(/[\s]*-{3,}[\s-]*/g, " ");
 
+  // Add line break after bold headings (**Heading**)
+  cleaned = cleaned.replace(/(\*\*[^*]+\*\*)\s*/g, "$1\n\n");
+
+  // Ensure numbered list items get line breaks
+  cleaned = cleaned.replace(/([^\n])\s*(\d+\.)\s+/g, "$1\n$2 ");
+
+  // Add line break before numbered items if not already on new line
+  cleaned = cleaned.replace(/([^\n])(\d+\.)/g, "$1\n$2");
+
   // Format bullet points: replace inline bullets (•) with newlines and markdown dash (- )
   cleaned = cleaned.replace(/([^\n])\s*•\s*/g, "$1\n- ");
   cleaned = cleaned.replace(/^\s*•\s*/gm, "- ");
-
-  // Ensure numbered list items on inline text get proper linebreaks
-  cleaned = cleaned.replace(/([^\n])\s*(\d+\.)\s+/g, "$1\n$2 ");
 
   // Collapse multiple spaces into one
   cleaned = cleaned.replace(/ {2,}/g, " ");

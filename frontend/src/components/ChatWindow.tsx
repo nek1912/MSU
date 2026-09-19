@@ -407,26 +407,28 @@ export function ChatWindow() {
 
       // Build final response from ref (synchronous, no stale state)
       const finalAnswer = tokenBufferRef.current.replace(/INSUFFICIENT_EVIDENCE/g, "").trim();
-      const finalResp: ChatResponse = {
-        answer: finalAnswer,
-        language: (metaSnapshot.language as Locale) || lang,
-        domain: (metaSnapshot.domain as string) || "unknown",
-        intent: (metaSnapshot.domain as string) || "unknown",
-        entities: [],
-        confidence: (metaSnapshot.confidence as number) || 0,
-        confidence_level: (metaSnapshot.confidence_level as ChatResponse["confidence_level"]) || "none",
-        citations: (metaSnapshot.citations as ChatResponse["citations"]) || [],
-        abstained: (metaSnapshot.abstained as boolean) || false,
-        follow_up_question: null,
-        mode: (metaSnapshot.mode as string) || undefined,
-        grievance_stage: (metaSnapshot.grievance_stage as ChatResponse["grievance_stage"]) || undefined,
-        grievance_finalized: (metaSnapshot.grievance_finalized as boolean) || undefined,
-        grievance: (metaSnapshot.grievance as ChatResponse["grievance"]) || undefined,
-        grievance_draft_summary: (metaSnapshot.grievance_draft_summary as ChatResponse["grievance_draft_summary"]) || undefined,
-        grievance_fields_schema: (metaSnapshot.grievance_fields_schema as ChatResponse["grievance_fields_schema"]) || undefined,
-        conversation_id: (metaSnapshot.conversation_id as string) || undefined,
-        speech_segments: (metaSnapshot.speech_segments as ChatResponse["speech_segments"]) || undefined,
-      };
+      const finalResp: ChatResponse = finalAnswer
+        ? {
+            answer: finalAnswer,
+            language: (metaSnapshot.language as Locale) || lang,
+            domain: (metaSnapshot.domain as string) || "unknown",
+            intent: (metaSnapshot.domain as string) || "unknown",
+            entities: [],
+            confidence: (metaSnapshot.confidence as number) || 0,
+            confidence_level: (metaSnapshot.confidence_level as ChatResponse["confidence_level"]) || "none",
+            citations: (metaSnapshot.citations as ChatResponse["citations"]) || [],
+            abstained: (metaSnapshot.abstained as boolean) || false,
+            follow_up_question: null,
+            mode: (metaSnapshot.mode as string) || undefined,
+            grievance_stage: (metaSnapshot.grievance_stage as ChatResponse["grievance_stage"]) || undefined,
+            grievance_finalized: (metaSnapshot.grievance_finalized as boolean) || undefined,
+            grievance: (metaSnapshot.grievance as ChatResponse["grievance"]) || undefined,
+            grievance_draft_summary: (metaSnapshot.grievance_draft_summary as ChatResponse["grievance_draft_summary"]) || undefined,
+            grievance_fields_schema: (metaSnapshot.grievance_fields_schema as ChatResponse["grievance_fields_schema"]) || undefined,
+            conversation_id: (metaSnapshot.conversation_id as string) || undefined,
+            speech_segments: (metaSnapshot.speech_segments as ChatResponse["speech_segments"]) || undefined,
+          }
+        : fallback(lang);
       setMsgs((m) => [...m, { role: "assistant", resp: finalResp }]);
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") return;

@@ -624,6 +624,8 @@ def _translate_from_english(text: str, target_lang: str, settings: Settings) -> 
     if target_lang == "en":
         return text
     text = str(text)
+    if not text or not text.strip():
+        return text
     translation_start = time.monotonic()
     citation_tokens: dict[str, str] = {}
     protected_text = text
@@ -1393,14 +1395,22 @@ async def chat_stream(req: ChatRequest, user_id: str = Depends(require_auth)):
             )
 
             # Keep the final language conversion at one explicit response boundary.
-            if ctx.lang != "en":
+            if ctx.lang != "en" and rag_response.answer and rag_response.answer.strip():
                 rag_response.answer = _translate_from_english(rag_response.answer, ctx.lang, ctx.settings)
                 rag_response.speech_text = prepare_speech_text(rag_response.answer)
                 rag_response.speech_segments = segment_speech(rag_response.answer, ctx.lang)
 
+            if not rag_response.answer or not rag_response.answer.strip():
+                rag_response.answer = get_abstain_text(ctx.lang)
+                rag_response.abstained = True
+                rag_response.confidence = 0.0
+                rag_response.citations = []
+
             # Emit tokens
-            for token in rag_response.answer.split(" "):
-                yield _sse_event("token", {"text": token + " "})
+            words = rag_response.answer.split(" ")
+            for i, token in enumerate(words):
+                suffix = " " if i < len(words) - 1 else ""
+                yield _sse_event("token", {"text": token + suffix})
 
             # Session persistence
             save_message(req.session_id, "user", req.question)

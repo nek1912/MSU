@@ -386,7 +386,7 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
     setTimeout(() => setCopied(false), 2000);
   }
 
-  if (resp.abstained) {
+  if (resp.abstained || !resp.answer || !resp.answer.trim()) {
     return (
       <div className="group flex gap-3 text-sm sm:text-base leading-relaxed text-[var(--ink)]">
         <div className="min-w-0 flex-1 space-y-2">

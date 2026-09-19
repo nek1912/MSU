@@ -347,6 +347,16 @@ class RAGOrchestrator:
         answer = clean_answer(stripped_answer)
         answer = fix_broken_tables(answer)
 
+        # Safety check: if answer is empty after grounding/cleaning, abstain
+        if not answer or not answer.strip():
+            logger.warning("Answer text became empty after post-processing/grounding — abstaining")
+            return self._abstain_response(
+                lang=lang,
+                reason=AbstentionReason.INSUFFICIENT_EVIDENCE,
+                domain=domain,
+                session_id=session_id,
+            )
+
         # Step 11: Calculate confidence
         confidence, confidence_band = self._calculate_confidence(
             static_result, web_result, has_static, has_web,

@@ -87,7 +87,7 @@ class Settings(BaseSettings):
     answer_grounding_llm_enabled: bool = False  # Enable LLM verification layer
 
     # Web RAG latency budgets
-    gemini_reranker_timeout_s: float = 8.0
+    gemini_reranker_timeout_s: float = 12.0
     jina_reranker_timeout_s: float = 5.0
     web_rag_timeout_s: float = 30.0
 
@@ -137,7 +137,7 @@ EMBED_DIMS = 768
 REQUEST_TIMEOUT_S = 30.0
 
 # Generation limits (transplanted from eGovAssistant proven defaults)
-GENERATION_MAX_TOKENS = 1800
+GENERATION_MAX_TOKENS = 4096
 GENERATION_TEMPERATURE = 0.0
 MAX_CHARS_PER_CHUNK = 3000
 

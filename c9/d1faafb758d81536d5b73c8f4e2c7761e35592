@@ -1,0 +1,118 @@
+CONTRIBUTING.md
+  s_d9e094b04e7470::t_9f8a7f311b1aef 99
+  s_d9e094b04e7470::t_83eb56a5cf53b3 122
+AGENT.md
+  s_d9e094b04e7470::t_e0f209f4b8173c 115,122,129,131,133-138
+  s_d9e094b04e7470::t_f894afce93f8c0 27
+  s_d9e094b04e7470::t_4810c0fc9e9b90 58-66,75,86-87
+CLAUDE.md
+  s_d9e094b04e7470::t_c88f54395ffa84 60-61,63,65,71,75
+  s_d9e094b04e7470::t_632d8a4993749b 103,106-108
+PRD.md
+  s_d9e094b04e7470::t_ad38918e3104d0 37
+  s_d9e094b04e7470::t_965f0f28452aa0 140,144
+  s_d9e094b04e7470::t_ca699db1874336 43
+  s_d9e094b04e7470::t_c9b2c910198e3f 63,66,78-83,85,87
+  s_d9e094b04e7470::t_528c6848987133 19
+architecture.md
+  s_d9e094b04e7470::t_90e6ee9818c23e 116
+  s_d9e094b04e7470::t_f80924dff435f4 381
+  s_d9e094b04e7470::t_12d537e6061f7b 189-197
+  s_d9e094b04e7470::t_ca73d1d4b07364 37-38
+DECISIONS.md
+  s_d9e094b04e7470::t_467be60f836f1b 142-176
+backend/app/config.py
+  s_504a314f3414ba::t_e525b54a15ce59 140
+  s_2b72a83a16b84b::t_4b6603ba1ba310 90
+docs/runbooks/provider-setup.md
+  s_d9e094b04e7470::t_cb7883431e485b 36-45,54-83
+  s_d9e094b04e7470::t_3495bbcf92bc34 95,101
+README.md
+  s_d9e094b04e7470::t_71359645bd7eac 63-64
+  s_d9e094b04e7470::t_2ad147dce6ae2a 264
+  s_d9e094b04e7470::t_57527c902ba450 75,79,81-86
+  s_d9e094b04e7470::t_9dcb0892ce8f47 139
+  s_d9e094b04e7470::t_ae0c8ad4dd1153 22,28
+  s_d9e094b04e7470::t_99dd30ac65315a 229-233
+  s_d9e094b04e7470::t_1e68537353b183 17
+  s_d9e094b04e7470::t_c5d4787ad99734 1,3
+backend/app/routes/chat.py
+  s_00cc45c0f24036::t_723c2cb34a1b12 627-628,1398,1403-1408,1410-1413
+backend/app/services/rag_orchestrator.py
+  s_fc5673dbc03f47::t_aeed2f8d3a6db9 350-359
+backend/tests/test_chat_route_refactored.py
+  s_8653450cef6a0a::t_93f76bd4d8f47a 12,19,656-702
+frontend/src/components/ChatWindow.tsx
+  s_f3b82044c5e9d9::t_a742be0dc5785b 410-431
+frontend/src/components/chat/MessageBubble.tsx
+  s_00cc45c0f24036::t_f9e59cf284d394 389
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c9d1faafb758d81536d5b73c8f4e2c7761e35592",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_00cc45c0f24036": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4edac20dffeAC1UAgUKRXu77b",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_2b72a83a16b84b": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4babb3a6ffegHlB4AUPWNkf2N",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_504a314f3414ba": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4825392cffeTtvdA2Iy1dU0DN",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_8653450cef6a0a": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f618dce04ffedyEbs7uyzltwfj",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_d9e094b04e7470": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f46b1bbfcffeIX6iew0EBdyd2O",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_f3b82044c5e9d9": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f51b02361ffeCduj1pjUwH0xWP",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_fc5673dbc03f47": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4ec6dac2ffec0GTivXA0yBvJ6",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

@@ -121,6 +121,7 @@ export interface GrievanceFieldSpec {
   input_type: "int" | "date" | "text";
   mandatory: boolean;
   value: string | null;
+  suggestion?: string;
 }
 
 export interface GrievanceDetectResponse {

@@ -270,12 +270,21 @@ export function cleanMarkdownForDisplay(text: string): string {
   // Fix escaped asterisks (\*\* -> **)
   cleaned = cleaned.replace(/\\\*/g, "*");
 
+  // Strip pipe characters (LLM uses pipes as separators, not real tables)
+  cleaned = cleaned.replace(/\|/g, " ");
+
+  // Remove table separator patterns like "--- ----" or "|---|---|" remnants
+  cleaned = cleaned.replace(/[\s]*-{3,}[\s-]*/g, " ");
+
   // Format bullet points: replace inline bullets (•) with newlines and markdown dash (- )
   cleaned = cleaned.replace(/([^\n])\s*•\s*/g, "$1\n- ");
   cleaned = cleaned.replace(/^\s*•\s*/gm, "- ");
 
   // Ensure numbered list items on inline text get proper linebreaks
   cleaned = cleaned.replace(/([^\n])\s*(\d+\.)\s+/g, "$1\n$2 ");
+
+  // Collapse multiple spaces into one
+  cleaned = cleaned.replace(/ {2,}/g, " ");
 
   // Preserve double newlines for paragraph breaks, remove excess newlines
   cleaned = cleaned.replace(/\n{3,}/g, "\n\n");
@@ -294,6 +303,10 @@ export function cleanTextForSpeech(text: string): string {
   // Remove markdown headers
   cleaned = cleaned.replace(/^#+\s+/gm, "");
 
+  // Strip pipe characters and table separator remnants
+  cleaned = cleaned.replace(/\|/g, " ");
+  cleaned = cleaned.replace(/[\s]*-{3,}[\s-]*/g, " ");
+
   // Convert bullet points to sentence endings
   cleaned = cleaned.replace(/^[\s]*[-*+•]\s+/gm, ". ");
   cleaned = cleaned.replace(/([^\n])\s*•\s*/g, "$1. ");
@@ -309,7 +322,7 @@ export function cleanTextForSpeech(text: string): string {
 
   // Normalize duplicate spaces and periods
   cleaned = cleaned.replace(/\.\s*\./g, ".");
-  cleaned = cleaned.replace(/\s+/g, " ").trim();
+  cleaned = cleaned.replace(/ {2,}/g, " ").trim();
 
   return cleaned;
 }

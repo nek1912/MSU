@@ -22,6 +22,7 @@ export function FloatingChatWidget() {
   const [listening, setListening] = useState(false);
   const speech = useState(() => createSpeechService())[0];
   const cancelListen = useRef<(() => void) | null>(null);
+  const micStreamRef = useRef<MediaStream | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -127,17 +128,20 @@ export function FloatingChatWidget() {
     }
   }
 
-  function toggleMic() {
+  async function toggleMic() {
     if (listening) {
-      cancelListen.current?.();
+      micStreamRef.current?.getTracks().forEach((t) => t.stop());
+      micStreamRef.current = null;
       setListening(false);
       return;
     }
-    cancelListen.current = speech.listen(lang, (text) => {
-      setInput((prev) => (prev ? prev + " " : "") + text);
-      setListening(false);
-    });
-    setListening(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      micStreamRef.current = stream;
+      setListening(true);
+    } catch {
+      // mic permission denied
+    }
   }
 
   const starters = [

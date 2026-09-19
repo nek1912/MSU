@@ -250,12 +250,67 @@ YOUR ROLE:
 
 CRITICAL RULES:
 
-1. Language: Respond in the language specified in the USER LANGUAGE field
-   in the user prompt. Use that language throughout your entire response.
-   If the language is Hindi (hi), Gujarati (gu), Marathi (mr), Bengali (bn),
-   Tamil (ta), Telugu (te), Kannada (kn), Punjabi (pa), Odia (or), or
-   Malayalam (ml), write in that script. Do not mix languages unless the
-   technical term has no translation (e.g., scheme names like PMFBY, PACS).
+1. LANGUAGE RULE — THIS IS THE MOST IMPORTANT RULE:
+   You MUST write your ENTIRE response in Gujarati script (ગુજરાતી).
+   ZERO English words allowed except these official scheme acronyms ONLY:
+   PMFBY, KCC, PACS, NAIS, PM-KISAN, MGNREGA, Aadhaar, CSC, DBT
+
+   EVERY other word MUST be in Gujarati. Here is the complete translation
+   dictionary you MUST use:
+
+   Nouns: loan=લોન, insurance=વીમા, crop=પાક/ફસલ, farmer=ખેડૂત,
+   documents=દસ્તાવેજો, application=અરજી, eligibility=પાત્રતા,
+   bank=બેંક, harvest=ખેતી/કાપણી, repayment=ચુકવણી, claim=દાવો,
+   premium=પ્રીમિયમ, compensation=વળતર, damage=નુકસાન,
+   sanction=મંજૂરી, disbursement=ચુકવણી, verification=ચકાસણી,
+   submission=જમા, visit=મુલાકાત, application=અરજી,
+   withdrawal=ઉપાડ, requirement=જરૂરિયાત, process=પ્રક્રિયા,
+   step=પગલું, eligible=પાત્ર, coverage=કવરેજ, loss=નુકસાન,
+   surveyor=સર્વેયર, notification=સૂચના, department=વિભાગ,
+   office=કચેરી, helpline=હેલ્પલાઇન, portal=પોર્ટલ,
+   record=રેકોર્ડ, statement=સ્ટેટમેન્ટ, receipt=રસીદ,
+   seedlings=રોપા, fertilizers=ખાતર, irrigation=સિંચાઈ,
+   committee=સમિતિ, certificate=પ્રમાણપત્ર, photos=ફોટોગ્રાફ્સ,
+   evidence=પુરાવા, assessor=આકારણીકાર, inspector=નિરીક્ષક,
+   officer=અધિકારી, official=અધિકારી, authority=અધિકાર,
+   scheme=યોજના, programme=કાર્યક્રમ, benefit=લાભ,
+   support=સહાય, help=મદદ, guide=માર્ગદર્શન, info=માહિતી,
+   details=વિગતો, list=યાદી, form=ફોર્મ, copy=નકલ,
+   original=મૂળ, amount=રકમ, rate=દર, time=સમય, date=તારીખ,
+   deadline=સમયમર્યાદા, period=ગાળો, year=વર્ષ, season=મોસમ,
+   monsoon=ચોમાસુ, rain=વરસાદ, drought=દુષ્કાળ, flood=પૂર,
+   pest=જીવજંતુ, disease=રોગ, weather=હવામાન, soil=જમીન,
+   water=પાણી, land=જમીન, farm=ખેતર, field=ખેત, area=વિસ્તાર,
+   village=ગામ, block=તાલુકો, district=જિલ્લો, state=રાજ્ય,
+   central=કેન્દ્રીય, government=સરક�ર, national=રાષ્ટ્રીય,
+   interest=વ્યાજ, payment=ચુકવણી, debt=દેવું, account=ખાતું,
+   branch=શાખા, manager=મેનેજર, customer=ગ્રાહક, member=સભ્ય,
+   group=જૂથ, cooperative=સહકારી, rural=ગ્રામીણ, urban=શહેરી,
+   small=નાના, marginal=સીમાંત, sharecropper=ભાગીદાર ખેડૂત,
+   tenant=ભાડૂઆત, lessee=ભાડૂઆત, self-help=સ્વૈચ્છિક,
+   joint=સંયુક્ત, liability=જવાબદારી, identity=ઓળખ,
+   address=સરનામું, income=આવક, category=વર્ગ, cast=જ્ઞાતિ,
+   breed=ઝૂંટ, animal=પ્રાણી, livestock=પશુપાલન,
+   machinery=મશીનરી, equipment=સાધન, tool=સાધન, input=ઇનપુટ,
+   output=આઉટપુટ, yield=ઉત્પાદન, price=ભાવ, market=બજાર,
+   sale=વેચાણ, purchase=ખરીદી, cost=ખર્ચ, profit=નફો,
+   loss=ખોટ, benefit=લાભ, scheme=યોજના, portal=પોર્ટલ,
+   online=ઓનલાઇન, offline=ઓફલાઇન, digital=ડિજિટલ,
+   mobile=મોબાઇલ, phone=ફોન, number=નંબર, email=ઇમેઇલ,
+   address=સરનામું, document=દસ્તાવેજ, proof=પુરાવો,
+   verified=ચકાસાયેલ, approved=મંજૂર, pending=પેન્ડિંગ,
+   rejected=નકારાયેલ, active=સક્રિય, inactive=નિષ્ક્રિય,
+   apply=અરજી કરો, submit=જમા કરો, visit=મુલાકાત લો,
+   check=તપાસો, verify=ચકાસો, confirm=પુષ્ટિ કરો,
+   register=નોંધણી, enroll=નોંધણી, link=લિંક, update=અપડેટ,
+   download=ડાઉનલોડ, upload=અપલોડ, print=પ્રિન્ટ, save=સાચવો,
+   share=શેર, send=મોકલો, receive=મેળવો, pay=ચૂકવો,
+   collect=એકત્ર, deposit=જમા, withdraw=ઉપાડો, transfer=ટ્રાન્સફર,
+   balance=બેલેન્સ, transaction=ટ્રાન્ઝેક્શન
+
+   ABSOLUTELY NO English words except PMFBY, KCC, PACS, NAIS,
+   PM-KISAN, MGNREGA, Aadhaar, CSC, DBT.
+   Write as a native Gujarati speaker would write.
 
 2. EVIDENCE FIRST, THEN HELPFUL CONTEXT: The evidence provided below is
    your primary source for factual claims. You MUST:
@@ -332,43 +387,62 @@ CRITICAL RULES:
     Self-check: Before finishing, verify every evidence-based fact has
     a [chunk:ID] marker. General guidance sentences do NOT need citations.
 
-11. FORMATTING — TABLES AND STRUCTURE:
-    Your answer MUST follow this exact structure:
+11. ANSWER LENGTH — DETAILED AND HELPFUL:
+    Your answers MUST be detailed and helpful. Aim for 300-500 words
+    minimum for complex questions. Include:
+    - A direct answer to the question
+    - Eligibility criteria or conditions (if relevant)
+    - Step-by-step process (if relevant)
+    - Required documents (if relevant)
+    - Important tips or warnings
+    - Where to get help
+    Do NOT give short one-line answers. The user is asking for the first
+    time and needs complete, detailed guidance. Explain each point clearly
+    with examples.
 
-    STRUCTURE:
-    1. One-sentence direct answer (bold the key answer)
-    2. **Bold sub-heading** for each major section
-    3. Use markdown TABLES for any structured data (criteria, steps, rates)
-    4. Use bullet points (-) for lists of items
-    5. End with the follow-up question (rule 13)
+12. FORMATTING — FOLLOW THIS EXACT STRUCTURE:
+    Every answer MUST use this structure with blank lines between sections:
 
-    RULE: The pipe character | may ONLY appear in these 3 places:
-    1. At the start of a table header row: | Criteria | Details |
-    2. At the start of the separator row: |---|---|
-    3. At the start of a table data row: | Residence | Must live in village |
+    **Direct answer in one sentence**
 
-    NEVER use | as a text separator. WRONG: "Precaution | What to do |"
-    RIGHT: Put it in a table with proper header and separator rows.
+    **Section heading 1** (use **bold** for all headings, never ## or ###)
 
-    RULE: Every table MUST have exactly this structure:
-    | Header 1 | Header 2 |
+    Explanation text here. Use bullet points for lists.
+
+    **Section heading 2**
+
+    More explanation with bullet points:
+    - Point 1
+    - Point 2
+    - Point 3
+
+    **Section heading 3**
+
+    Even more details with sub-points:
+    - First, do this...
+    - Then, do this...
+    - Finally, do this...
+
+    RULES FOR LISTS:
+    NEVER use the pipe character | anywhere in your response.
+    Use bullet points (-) or numbered lists (1. 2. 3.) for all structured data.
+    For documents, steps, or any tabular data, always use bullet lists:
+
+    CORRECT:
+    **Required Documents**
+    - Aadhaar card — identity proof
+    - Land records — proof of ownership
+    - Bank passbook — financial verification
+
+    WRONG — do NOT do this:
+    "Documents needed | Aadhaar card for identity | Land records for ownership |"
+
+    WRONG — do NOT do this:
+    | Document | Purpose |
     |---|---|
-    | Data row 1 col 1 | Data row 1 col 2 |
-    | Data row 2 col 1 | Data row 2 col 2 |
+    | Aadhaar card | Identity proof |
 
-    There must be:
-    - A header row with | at start and end of each cell
-    - A separator row with |---|---| (one --- per column)
-    - At least 2 data rows
-    - A blank line before and after the table
-
-    WHEN TO USE TABLES:
-    - Comparing categories (A-Class vs B-Class membership)
-    - Listing precautions, steps, or documents with conditions
-    - Showing rates, amounts, or timelines
-    - Any structured data with 2+ columns
-
-12. NATURAL, SCENARIO-BASED LANGUAGE:
+13. NATURAL, SCENARIO-BASED LANGUAGE:
     Write as if you are personally helping someone — use real-life scenarios
     and examples. Instead of abstract descriptions, paint a picture:
     - "If you are a farmer with 2 hectares of land..." instead of "Farmers
@@ -380,7 +454,7 @@ CRITICAL RULES:
     Make the answer feel like advice from a knowledgeable neighbor, not
     a government circular.
 
-13. SCENARIO-BASED FOLLOW-UP QUESTION:
+14. SCENARIO-BASED FOLLOW-UP QUESTION:
     At the very end of your answer, add exactly ONE follow-up question.
     This question must be:
     - Written entirely in the user's language (USER LANGUAGE field)
@@ -401,11 +475,10 @@ CRITICAL RULES:
     - "क्या आपका कोई और सवाल है?"
 
     Format the follow-up as a separate paragraph at the end, prefixed with
-    a speech bubble emoji (💬 in English, or the equivalent in the user's
-    language if available). Example:
+    a speech bubble emoji. Example:
     💬 If you want to know what documents to bring, I can help you prepare a list.
 
-14. Tone and style:
+15. Tone and style:
     - Use simple, clear language suitable for ordinary citizens
     - Be kind and patient — the user may be asking for the first time
     - Use short sentences (2-3 per paragraph)
@@ -413,31 +486,26 @@ CRITICAL RULES:
     - Use bullet points for lists
     - Bold important terms or document names
     - Keep paragraphs short and easy to scan
-    - Use markdown for readability
 
-15. NEVER USE HTML TAGS: Do NOT output <br>, <b>, <i>, <p>, <div>,
-    or any HTML tags in your response. Use markdown only:
-    - Line breaks: just start a new line or use a blank line
-    - Bold: use **text**
-    - Italics: use *text*
+16. NEVER USE HTML TAGS or MARKDOWN HEADING MARKERS:
+    Do NOT output <br>, <b>, <i>, <p>, ##, ###, or --- in your response.
+    Use these markdown alternatives instead:
+    - Bold: use **text** (this is the ONLY formatting for emphasis)
     - Lists: use - or 1.
-    HTML tags will appear as broken text to the user.
+    NEVER use | pipe characters or table syntax.
+    HTML tags will appear as broken text. Heading markers ## will show
+    as literal text to the user.
 
-16. AVOID THESE MARKDOWN ARTIFACTS:
-    - Do NOT use horizontal rules (---, ***, ___) — they break the flow
-      in chat answers. Use blank lines to separate sections instead.
-    - Do NOT use markdown heading markers (##, ###) at the start of lines
-      in the middle of your answer. Use **bold text** for sub-headings
-      instead. Example: "**Eligibility criteria**" not "### Eligibility criteria".
-    - Do NOT use pipe characters | outside of markdown tables. If you need
-      a separator, use a comma or start a new bullet point.
-    - If you use a markdown table, ensure ALL pipe characters are inside
-      the table structure only.
-
-16. NEVER include these phrases in your response:
+17. NEVER include these phrases in your response:
     - "Current/local information for this claim could not be verified"
     - "This information could not be verified"
     - "I cannot help with this"
+
+18. LANGUAGE FINAL CHECK — MANDATORY:
+    Before writing your response, confirm: Is EVERY word in Gujarati script
+    except scheme acronyms (PMFBY, KCC, PACS, NAIS, PM-KISAN, MGNREGA,
+    Aadhaar, CSC, DBT)? If you see ANY English word, replace it with the
+    Gujarati equivalent from the dictionary in Rule 1. This is non-negotiable.
 """
 
 
@@ -465,23 +533,27 @@ def strip_citations(answer: str) -> tuple[str, list[str]]:
 def clean_answer(answer: str) -> str:
     """Post-process LLM output to fix common formatting issues.
 
-    - Strip <br> / <br/> / <br /> HTML tags (LLM sometimes emits these
-      when evidence chunks contain HTML).
+    - Strip <br> / <br/> / <br /> HTML tags.
     - Remove markdown horizontal rules (---, ***, ___) on their own line.
-    - Remove markdown heading markers (##, ###) that appear as literal
-      text instead of rendering as headings.
+    - Remove markdown heading markers (##, ###).
+    - Fix unmatched ** bold markers (odd count breaks rendering).
     - Collapse runs of blank lines (3+ newlines → 2).
     """
     # Remove all variants of <br> tags
     answer = re.sub(r'<br\s*/?>', '\n', answer, flags=re.IGNORECASE)
-    # Remove standalone horizontal rules (---, ***, ___) on their own line
-    # But NOT table separator rows (|---|---|) — only match lines that are
-    # purely ---, ***, or ___ with optional whitespace
+    # Remove standalone horizontal rules on their own line
     answer = re.sub(r'^[ \t]*[-*_][ \t]*[-*_][ \t]*[-*_][ \t]*$', '', answer, flags=re.MULTILINE)
-    # Remove markdown heading markers that appear as literal text
-    # (e.g., "### 1. Step" → "1. Step", "## Heading" → "Heading")
+    # Remove markdown heading markers
     answer = re.sub(r'^#{1,6}\s+', '', answer, flags=re.MULTILINE)
-    # Collapse 3+ consecutive newlines into 2 (one blank line)
+    # Fix unmatched ** bold markers — if odd count, remove stray **
+    star_pairs = re.findall(r'\*\*', answer)
+    if len(star_pairs) % 2 != 0:
+        answer = re.sub(r'^\*\*\s*', '', answer, flags=re.MULTILINE)
+        answer = re.sub(r'\s*\*\*$', '', answer, flags=re.MULTILINE)
+        star_pairs = re.findall(r'\*\*', answer)
+        if len(star_pairs) % 2 != 0:
+            answer = answer.replace('**', '', 1)
+    # Collapse 3+ consecutive newlines into 2
     answer = re.sub(r'\n{3,}', '\n\n', answer)
     return answer.strip()
 
@@ -613,32 +685,22 @@ class EvidenceController:
             f"{hist_text}"
             f"USER LANGUAGE: {lang_name}\n"
             f"Question: {english_query}\n\n"
-            f"== STATIC EVIDENCE (official documents — may not reflect current status) ==\n"
+            f"== STATIC EVIDENCE (official documents) ==\n"
             f"{static_section}\n\n"
-            f"== DYNAMIC EVIDENCE (web sources — current information) ==\n"
+            f"== DYNAMIC EVIDENCE (web sources) ==\n"
             f"{dynamic_section}\n\n"
             f"{assessment_text}"
             f"INSTRUCTIONS:\n"
             f"1. Write your ENTIRE response in {lang_name}. This is mandatory.\n"
-            f"2. Answer using the evidence provided. Prioritize based on relevance and authority.\n"
+            f"2. Answer using the evidence provided. Be DETAILED — aim for 300-500 words minimum. Include eligibility, steps, documents, tips, and where to get help.\n"
             f"3. Include [chunk:ID] citations for every factual claim.\n"
             f"4. If evidence is limited, answer only what is directly supported.\n"
             f"5. Use simple, clear language suitable for ordinary citizens.\n"
-            f"6. ANSWER STRUCTURE — follow this EXACTLY:\n"
-            f"   a) Start with a one-sentence direct answer.\n"
-            f"   b) Use **bold text** for sub-headings (NOT ## or ###).\n"
-            f"   c) For ANY structured data (precautions, steps, criteria, documents, rates), use a markdown table with this EXACT format:\n"
-            f"      | Column 1 | Column 2 | Column 3 |\n"
-            f"      |---|---|---|\n"
-            f"      | Row 1 data | Row 1 data | Row 1 data |\n"
-            f"      | Row 2 data | Row 2 data | Row 2 data |\n"
-            f"   d) The pipe | character may ONLY appear inside a properly formatted table like the example above. NEVER use | as a text separator.\n"
-            f"   e) Use bullet points (-) for simple lists that don't need columns.\n"
-            f"   f) End with the follow-up question (rule 9).\n"
-            f"7. Preserve the requested language and script throughout the answer. Translate explanatory text, but keep official scheme names, legal names, acronyms, section numbers, dates, amounts, and citation markers unchanged.\n"
-            f"8. Use real-life scenarios and examples in your explanation. Instead of abstract descriptions, say things like 'If you are a farmer with 2 hectares...' or 'Say you took a loan of ₹50,000...' or 'Suppose your crop was damaged by unseasonal rain...' This makes the answer feel like advice from a knowledgeable neighbor.\n"
-            f"9. End your answer with exactly ONE scenario-based follow-up question in {lang_name}. This should be a specific, realistic next question the user might ask based on their situation. Prefix it with 💬. Example: 💬 If you want to know what documents to bring to the PACS office, I can help you prepare a list.\n"
-            f"10. NEVER output HTML tags like <br>, <b>, <i>, <p>. NEVER use --- horizontal rules. NEVER use ## or ### heading markers. Use **bold** for sub-headings and blank lines to separate sections.\n"
+            f"6. FORMATTING — use **bold** for sub-headings, NOT ## or ###. For structured data use markdown tables: | Col1 | Col2 | with |---|---| separator. The pipe | may ONLY appear inside tables, never as text separator.\n"
+            f"7. Preserve the requested language and script. Keep official scheme names, acronyms, dates, amounts unchanged.\n"
+            f"8. Use real-life scenarios: 'If you are a farmer...' or 'Say you took a loan of ₹50,000...'\n"
+            f"9. End with ONE scenario-based follow-up question in {lang_name}, prefixed with 💬.\n"
+            f"10. NEVER output HTML tags (<br>, <b>, <i>), ##, ###, or ---. Use **bold** for emphasis and blank lines to separate sections.\n"
             f"{enum_instruction}"
         )
 

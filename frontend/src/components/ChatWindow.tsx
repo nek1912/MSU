@@ -153,6 +153,7 @@ export function ChatWindow() {
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [sessionId] = useState(() => crypto.randomUUID());
   const cancelListen = useRef<(() => void) | null>(null);
+  const micStreamRef = useRef<MediaStream | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const modelPickerRef = useRef<HTMLDivElement>(null);
   const [explicitPending, setExplicitPending] = useState(false);
@@ -466,17 +467,20 @@ export function ChatWindow() {
     }
   }
 
-  function toggleMic() {
+  async function toggleMic() {
     if (listening) {
-      cancelListen.current?.();
+      micStreamRef.current?.getTracks().forEach((t) => t.stop());
+      micStreamRef.current = null;
       setListening(false);
       return;
     }
-    cancelListen.current = speech.listen(lang, (text) => {
-      setInput((prev) => (prev ? prev + " " : "") + text);
-      setListening(false);
-    });
-    setListening(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      micStreamRef.current = stream;
+      setListening(true);
+    } catch {
+      // mic permission denied
+    }
   }
 
   const suggestedActions = [

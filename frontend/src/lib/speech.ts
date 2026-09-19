@@ -298,6 +298,7 @@ export function createSpeechService(): SpeechService {
       const rec = new SpeechRecognition();
 
       rec.lang = locale === "en" ? "en-IN" : locale + "-IN";
+      rec.continuous = true;
       rec.interimResults = false;
       rec.maxAlternatives = 1;
 

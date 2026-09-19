@@ -64,44 +64,42 @@ def fix_broken_tables(answer: str) -> str:
     
     The LLM sometimes outputs pipe-separated text that isn't valid
     markdown table syntax. This function:
-    1. Identifies lines that look like broken tables (have | but no proper header/separator)
-    2. Attempts to reconstruct them as proper tables
-    3. Falls back to stripping pipe characters if reconstruction fails
+    1. Identifies any line containing | that isn't a valid table row
+    2. Converts broken pipe text to clean bullet lists
+    3. Preserves valid table rows (start with | and end with |)
     """
     lines = answer.split('\n')
     result = []
-    i = 0
     
-    while i < len(lines):
-        line = lines[i]
+    for line in lines:
+        stripped = line.strip()
         
-        # Check if this line starts a potential table (or is an inline broken table)
-        if '|' in line:
-            # Collect consecutive lines with |
-            table_lines = []
-            j = i
-            while j < len(lines) and '|' in lines[j]:
-                table_lines.append(lines[j])
-                j += 1
-            
-            # Check if it's a valid table (has separator row)
-            has_separator = any(re.match(r'^\s*\|[\s\-|]+\|\s*$', tl) for tl in table_lines)
-            
-            if has_separator and len(table_lines) >= 3:
-                # Valid table — keep as is
-                result.extend(table_lines)
-            else:
-                # Broken table — strip pipes and convert to bullet list
-                for tl in table_lines:
-                    cleaned = tl.replace('|', ' ').strip()
-                    cleaned = re.sub(r'\s+', ' ', cleaned)
-                    if cleaned and cleaned != '---':
-                        result.append(f"- {cleaned}")
-            
-            i = j
-        else:
+        # Valid table row: starts with | and ends with |
+        is_valid_table_row = stripped.startswith('|') and stripped.endswith('|')
+        
+        # Valid separator row: |---|---| pattern (only |, -, spaces)
+        is_separator = bool(re.match(r'^\|[\s\-:]+\|$', stripped))
+        
+        if is_valid_table_row or is_separator:
             result.append(line)
-            i += 1
+            continue
+        
+        # If line has | but isn't a valid table row, it's broken
+        if '|' in line:
+            # Check if it contains table separator pattern
+            has_separator = '---|' in line or '|---' in line
+            
+            # Extract content, removing pipes and --- separators
+            parts = [p.strip() for p in line.split('|') if p.strip()]
+            parts = [p for p in parts if not re.match(r'^-+$', p)]
+            
+            if parts:
+                # Convert to bullet point with meaningful content
+                content = ' — '.join(parts) if len(parts) > 1 else parts[0]
+                result.append(f'- {content}')
+            continue
+        
+        result.append(line)
     
     return '\n'.join(result)
 

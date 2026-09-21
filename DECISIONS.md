@@ -121,9 +121,9 @@ Each entry: what changed, why, what it replaced, when.
 ---
 
 ### Bounded generation output
-**Date:** 2026-09-05
-**What:** `GENERATION_MAX_TOKENS = 1800` for normal generation, `REPAIR_MAX_TOKENS = 2200` for citation repair. These values are sent to Groq as `max_tokens` in the API request.
-**Why:** Intentional engineering control to bound generation output size and latency/cost. Value transplanted from eGovAssistant proven defaults.
+**Date:** 2026-09-05 (updated 2026-09-18)
+**What:** `GENERATION_MAX_TOKENS = 4096` for generation. This value is sent to Groq as `max_tokens` in the API request.
+**Why:** Intentional engineering control to bound generation output size and latency/cost.
 
 ---
 

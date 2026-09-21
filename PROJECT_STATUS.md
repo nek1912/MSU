@@ -34,7 +34,7 @@ worse than none — the next session will trust it.
 ## Current state
 
 System is **feature-complete**. Backend RAG pipeline, 9-stage grievance workflow,
-voice I/O, multi-language support (6 languages), and Next.js frontend are all
+voice I/O, multi-language support (11 languages), and Next.js frontend are all
 implemented and wired together.
 
 **Selected state:** `gujarat` (`selected_state: "gujarat"` in `backend/app/config.py`)
@@ -145,14 +145,15 @@ implemented and wired together.
 All ingested from `corpus/seeds/json_files/*_content_list_v2.json`
 via `backend/seed_parser.py` → `backend/ingest_seed.py`. Embeddings: Jina v3 768d.
 
-| Domain | Chunks embedded | Source |
-|---|---|---|
-| pacs_governance | 1294 | Model Byelaws (337) + HR Policy V21 (601) + MoC YPs (213) + CSM Scheme (43) |
-| pacs_computerization | 214 | Revised Scheme guidelines (192) + Corrigendum (22) |
-| pmfby | 1266 | operational_guidelines_pmfby |
-| financial_inclusion | 2004 | NSFI_2025_30 (371) + RBI FAME (579) + RBI BE(A)WARE (429) + IRDAI Insurance (725) |
+| Domain | Docs | Chunks | Source documents |
+|---|---|---|---|
+| pacs_governance | 8 | 2076 | Model Byelaws, HR Policy, MoC YPs, CSM Scheme, CRCS Order, Cooperative Member Rights, Gujarat Act, HR Policy Transformation |
+| pacs_computerization | 3 | 316 | Revised Scheme guidelines, Corrigendum, GeM Hiring |
+| pmfby | 16 | 8153 | PMFBY Operational Guidelines, Revamped Guidelines, WINDS Manual, WBCIS, UPIS, YESTECH, NAIS, RWBCIS, AWS, SOP |
+| financial_inclusion | 9 | 3816 | NSFI 2025-30, RBI FAME (2 editions), RBI BE(A)WARE (2 editions), RBI Financial Education, IRDAI Insurance, NABARD Literacy |
+| schemes | 14 | 641 | Lok Sabha Calendar, YP/Consultant ads, Faculty ads, Internship ToR, Cooperative Ombudsman, Election Authority, CSM Grant |
 
-**Total: 11 documents, 4778 embedded chunks, 768d Jina v3**
+**Total: 50 documents, 15,002 embedded chunks, 768d Jina v3**
 
 ### PDF provenance chain
 
@@ -171,4 +172,4 @@ PDF (corpus/seeds/*.pdf)
 
 1. **Hindi PMFBY voice query** — Audio → Sarvam STT → RAGOrchestrator → Sarvam TTS audio response
 2. **Cooperative/PACS state-filtered question** — `state="gujarat"` filtered in `static_rag.py` pgvector queries
-3. **Grievance intake + status lookup** — Multi-turn intake → entity extraction → prototype reference (`DEMO-PACS-xxxxx`) → status lookup guidance; supports 6 languages via clean input/output translation boundary
+3. **Grievance intake + status lookup** — Multi-turn intake → entity extraction → prototype reference (`DEMO-PACS-xxxxx`) → status lookup guidance; supports 11 languages via clean input/output translation boundary

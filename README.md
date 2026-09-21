@@ -212,7 +212,7 @@ python backend/seed_parser.py     # content_list_v2.json → chunks_jsonl/*.json
 python backend/ingest_seed.py     # embed (Jina v3) + insert into Supabase
 ```
 
-Current frozen corpus: **11 documents, 4,778 embedded chunks (768d Jina v3)**.
+Current corpus: **50 documents, 15,002 embedded chunks (768d Jina v3)** across 5 domains (pacs_governance, pacs_computerization, pmfby, financial_inclusion, schemes).
 
 ---
 

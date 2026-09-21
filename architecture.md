@@ -315,15 +315,11 @@ Multiple independent layers bound the amount of evidence and tokens processed:
 - Dynamic (web) evidence: top 3 highest-quality chunks only
 - Per-chunk text: truncated at `MAX_CHARS_PER_CHUNK = 3000`
 
-**Context builder** (`rag/context_builder.py`) — caps the overall context window:
-- Default `max_chunks = 8` (total across all sources)
-
 **Web RAG** (`web_rag/service.py`) — caps chunks per web source:
 - `WEB_MAX_CHUNKS_PER_SOURCE = 12`
 
-**Generation token limits** (`config.py`, `groq_llm.py`, `rag/answer_generator.py`):
-- Normal generation: `GENERATION_MAX_TOKENS = 1800`
-- Repair generation (citation repair): `REPAIR_MAX_TOKENS = 2200`
+**Generation token limits** (`config.py`, `groq_llm.py`):
+- Generation: `GENERATION_MAX_TOKENS = 4096`
 
 These are separate layers (retrieval → evidence selection → prompt assembly → generation) and are not contradictory. Each bounds a different stage of the pipeline.
 

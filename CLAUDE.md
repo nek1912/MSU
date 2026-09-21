@@ -101,7 +101,7 @@ SSE events: `thinking | step | token | metadata | done`
 - ✅ WebRAGService — 10-step pipeline (Tavily/Firecrawl → BM25 → Gemini rerank → verify)
 - ✅ Evidence gate, citation verifier, abstention
 - ✅ 11-language frontend (EN, HI, GU, MR, BN, TA, TE, KN, PA, OR, ML) with chat, grievance, schemes, library pages
-- ✅ Document ingestion: 11 docs, 4778 chunks (pacs_governance, pacs_computerization, pmfby, financial_inclusion)
+- ✅ Document ingestion: 50 docs, 15002 chunks (pacs_governance, pacs_computerization, pmfby, financial_inclusion, schemes)
 - ✅ Grievance localization — `FIELD_PROMPTS` (30 prompts), `SUBMISSION_STEPS`, `FOLLOWUP_PREFIX`, `WORKFLOW_PREFIX` maps in `translations.py`; `translate_field_prompt()` for field questions; frontend field card labels via `dictionaries.ts` i18n lookup
 - ✅ Clerk authentication (optional, configurable)
 - ✅ Thinking process animation — step events with localized labels, auto-collapse

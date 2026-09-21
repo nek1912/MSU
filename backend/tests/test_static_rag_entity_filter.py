@@ -1,5 +1,5 @@
 """Tests for StaticRAG entity_id filtering."""
-from unittest.mock import MagicMock, patch
+
 from app.services.static_rag import StaticRAGService
 
 def test_retrieve_accepts_entity_id():

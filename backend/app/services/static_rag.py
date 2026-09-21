@@ -272,7 +272,7 @@ def _lexical_retrieve(supabase, query_text: str, domain: str,
     """Lexical retrieval via term-overlap on chunks.content."""
     doc_rows = (
         supabase.table("documents")
-        .select("id, title, jurisdiction, state, domain, source_url")
+        .select("id, title, jurisdiction, state, domain, source_url, entity_id")
         .execute()
         .data or []
     )

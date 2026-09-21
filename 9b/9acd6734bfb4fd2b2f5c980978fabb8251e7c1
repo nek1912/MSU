@@ -1,0 +1,44 @@
+PROJECT_STATUS.md
+  s_8b75bc39bb7496::t_6da5ff3a24bd40 148-154,156
+  s_3f52de452dbc8c::t_5920f2945ede2c 175
+  s_8b75bc39bb7496::t_1c5a00d042c06d 37
+DECISIONS.md
+  s_3f52de452dbc8c::t_6b6c20e04fadf7 124-126
+backend/data/DOMAIN_TAXONOMY.md
+  s_8b75bc39bb7496::t_269cc145e7740c 11-20
+CLAUDE.md
+  s_8b75bc39bb7496::t_e04aa36df3498c 104
+README.md
+  s_8b75bc39bb7496::t_4875bd2e54d6ea 215
+architecture.md
+  s_3f52de452dbc8c::t_dc702773046fae 321-322
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "9b9acd6734bfb4fd2b2f5c980978fabb8251e7c1",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_3f52de452dbc8c": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f45be504affeEMZVdxLYpAxWuF",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_8b75bc39bb7496": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f45abed78ffeIpdZoubpH5V7KR",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}

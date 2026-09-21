@@ -145,6 +145,7 @@ class RAGOrchestrator:
         model_override: str | None = None,
         pipeline_mode: str | None = None,
         on_step: Callable[[dict], None] | None = None,
+        entity_id: str | None = None,
     ) -> RAGResponse:
         """Execute the full async dual-pipeline RAG flow.
 
@@ -191,6 +192,7 @@ class RAGOrchestrator:
             state=state,
             classification=classification,
             mode=pipeline_mode or "rag_web",
+            entity_id=entity_id,
         )
         web_total_ms = float(web_result.metadata.get("web_total_ms", 0.0))
 
@@ -433,6 +435,7 @@ class RAGOrchestrator:
         state: str | None,
         classification: QueryClassification | None,
         mode: str | None = None,
+        entity_id: str | None = None,
     ) -> tuple[RAGResult, RAGResult]:
         """Run static and/or web RAG pipelines based on mode.
 
@@ -454,6 +457,7 @@ class RAGOrchestrator:
                     self._static_rag.retrieve,
                     embedding=embedding, query=english_query,
                     domain=domain, state=state,
+                    entity_id=entity_id,
                 )
             except Exception:
                 logger.exception("Static RAG pipeline failed")
@@ -498,6 +502,7 @@ class RAGOrchestrator:
                 self._static_rag.retrieve,
                 embedding=embedding, query=english_query,
                 domain=domain, state=state,
+                entity_id=entity_id,
             )
             result.metadata["retrieval_ms"] = (time.monotonic() - started) * 1000
             return result

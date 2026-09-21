@@ -39,6 +39,7 @@ from app.providers.embeddings import get_embedding_provider
 from app.providers.sarvam_translator import SarvamTranslator
 from app.providers.translator import AzureTranslator
 from app.resolve_response_language import resolve_and_remember
+from app.entity_resolver import EntityResolver
 from app.services.rag_orchestrator import RAGOrchestrator
 from app.conversation_store import ensure_conversation
 from app.session_store import get_history, get_state, save_message, touch_session, trim_messages
@@ -1026,6 +1027,11 @@ async def chat(req: ChatRequest, user_id: str = Depends(require_auth)) -> dict:
                 "mode": "dual_rag", "conversation_id": req.session_id,
             }
 
+        # ── Entity resolution for targeted retrieval ────────────────────────
+        entity_resolver = EntityResolver()
+        entity_resolution = entity_resolver.resolve(ctx.english_query)
+        entity_id = entity_resolution.entity_id if entity_resolution.confidence >= 0.7 else None
+
         # ── Core RAG via orchestrator ────────────────────────────────────
         orchestrator = _get_rag_orchestrator(ctx.settings)
         rag_response = await orchestrator.run(
@@ -1040,6 +1046,7 @@ async def chat(req: ChatRequest, user_id: str = Depends(require_auth)) -> dict:
             session_id=req.session_id,
             language_mix=ctx.language_mix,
             pipeline_mode=req.mode,
+            entity_id=entity_id,
         )
 
         # The LLM is instructed to respond in the user's language directly.
@@ -1378,6 +1385,11 @@ async def chat_stream(req: ChatRequest, user_id: str = Depends(require_auth)):
                 yield _sse_event("done", {})
                 return
 
+            # ── Entity resolution for targeted retrieval ────────────────────
+            entity_resolver = EntityResolver()
+            entity_resolution = entity_resolver.resolve(ctx.english_query)
+            entity_id = entity_resolution.entity_id if entity_resolution.confidence >= 0.7 else None
+
             # ── Core RAG via orchestrator ────────────────────────────────
             orchestrator = _get_rag_orchestrator(ctx.settings)
             rag_response = await orchestrator.run(
@@ -1392,6 +1404,7 @@ async def chat_stream(req: ChatRequest, user_id: str = Depends(require_auth)):
                 session_id=req.session_id,
                 language_mix=ctx.language_mix,
                 pipeline_mode=req.mode,
+                entity_id=entity_id,
             )
 
             # Keep the final language conversion at one explicit response boundary.

@@ -58,6 +58,7 @@ class StaticRAGService:
         domain: str,
         state: str | None,
         k: int | None = None,
+        entity_id: str | None = None,
     ) -> RAGResult:
         """Run static RAG pipeline and return typed result.
 
@@ -80,6 +81,7 @@ class StaticRAGService:
             supabase = get_supabase()
             chunks = self._retrieve_hybrid(
                 supabase, embedding, query, retrieval_domain, state, k=effective_k,
+                entity_id=entity_id,
             )
         except Exception:
             logger.exception("Static RAG retrieval failed")
@@ -148,11 +150,12 @@ class StaticRAGService:
     def _retrieve_hybrid(
         supabase, query_embedding: list[float], query_text: str,
         domain: str, state: str | None, k: int = 6,
+        entity_id: str | None = None,
     ) -> list[RetrievedChunk]:
         """Hybrid retrieval: dense + lexical with RRF fusion."""
-        dense_chunks = _dense_retrieve(supabase, query_embedding, domain, state, k=k)
+        dense_chunks = _dense_retrieve(supabase, query_embedding, domain, state, k=k, entity_id=entity_id)
         try:
-            lexical_chunks = _lexical_retrieve(supabase, query_text, domain, state, k=k)
+            lexical_chunks = _lexical_retrieve(supabase, query_text, domain, state, k=k, entity_id=entity_id)
         except Exception:
             lexical_chunks = []
 
@@ -229,13 +232,15 @@ class StaticRAGService:
 
 
 def _dense_retrieve(supabase, query_embedding: list[float], domain: str,
-                    state: str | None, k: int = 10) -> list[RetrievedChunk]:
+                    state: str | None, k: int = 10,
+                    entity_id: str | None = None) -> list[RetrievedChunk]:
     """Dense retrieval via match_chunks RPC."""
     rows = supabase.rpc("match_chunks", {
         "query_embedding": query_embedding,
         "match_domain": domain,
         "match_state": state,
         "match_count": k,
+        "match_entity_id": entity_id,
     }).execute().data or []
     return [
         RetrievedChunk(
@@ -262,7 +267,8 @@ def _dense_retrieve(supabase, query_embedding: list[float], domain: str,
 
 
 def _lexical_retrieve(supabase, query_text: str, domain: str,
-                      state: str | None, k: int = 10) -> list[RetrievedChunk]:
+                      state: str | None, k: int = 10,
+                      entity_id: str | None = None) -> list[RetrievedChunk]:
     """Lexical retrieval via term-overlap on chunks.content."""
     doc_rows = (
         supabase.table("documents")
@@ -276,7 +282,7 @@ def _lexical_retrieve(supabase, query_text: str, domain: str,
         if d.get("domain") == domain and (
             d.get("jurisdiction") == "central"
             or (state is not None and d.get("state") == state)
-        )
+        ) and (entity_id is None or d.get("entity_id") == entity_id)
     }
     if not eligible:
         return []

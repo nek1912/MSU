@@ -64,6 +64,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2023-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pmfby",
     },
     "Model Byelaws 05.01.2023": {
         "domain": "pacs_governance",
@@ -77,6 +78,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2023-01-05",
         "authority_tier": "secondary",
         "status": "active",
+        "entity_id": "model-pacs-bye-laws",
     },
     "Revised Scheme guidelines (Computerization of PACS project)": {
         "domain": "pacs_computerization",
@@ -90,6 +92,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2023-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pacs-membership",
     },
     "Corrigendum and letter Jun 12, 2023": {
         "domain": "pacs_computerization",
@@ -103,6 +106,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2023-06-12",
         "authority_tier": "secondary",
         "status": "active",
+        "entity_id": "pacs-membership",
     },
     "NSFI_2025_30": {
         "domain": "financial_inclusion",
@@ -116,6 +120,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2025-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "RBI_FAME_Financial_Awareness_Messages": {
         "domain": "financial_inclusion",
@@ -129,6 +134,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-02-26",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "RBI_BEAWARE_Financial_Fraud_Awareness": {
         "domain": "financial_inclusion",
@@ -142,6 +148,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2022-03-07",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "Introduction_To_Insurance_IRDAI": {
         "domain": "financial_inclusion",
@@ -155,6 +162,7 @@ DOC_META: dict[str, dict] = {
         "document_date": None,
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "IntroductionToInsurance": {
         "domain": "financial_inclusion",
@@ -168,6 +176,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "GUIDE310113_F": {
         "domain": "financial_inclusion",
@@ -181,6 +190,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "RBI_BEAWARE_Financial_Fraud": {
         "domain": "financial_inclusion",
@@ -194,6 +204,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "RBI_FAME_Financial_Awareness": {
         "domain": "financial_inclusion",
@@ -207,6 +218,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "RBI_Financial_Education_NSFE": {
         "domain": "financial_inclusion",
@@ -220,6 +232,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "Model_HR_Policy_V21": {
         "domain": "pacs_governance",
@@ -233,6 +246,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2026-04-08",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pacs-membership",
     },
     "PACS_HR_Policy": {
         "domain": "pacs_governance",
@@ -246,6 +260,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pacs-membership",
     },
     "Cooperative_Sugar_Mills_CSM_Scheme": {
         "domain": "pacs_governance",
@@ -259,6 +274,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2023-07-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pacs-membership",
     },
     "Cooperative_Sugar_Mills_Scheme": {
         "domain": "schemes",
@@ -272,6 +288,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "MoC_Young_Professionals_YPs": {
         "domain": "pacs_governance",
@@ -285,6 +302,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2026-04-16",
         "authority_tier": "secondary",
         "status": "active",
+        "entity_id": "pacs-membership",
     },
     "MoC_Advertisement_Faculty_2026": {
         "domain": "schemes",
@@ -298,6 +316,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2026-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "MoC_Hiring_Agency_GeM": {
         "domain": "pacs_computerization",
@@ -311,6 +330,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pacs-membership",
     },
     "MoC_TOR_Internship": {
         "domain": "schemes",
@@ -324,6 +344,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "MoC_Advertisement_YPs": {
         "domain": "schemes",
@@ -337,6 +358,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "MoC_Lok_Sabha_Session_Calendar": {
         "domain": "schemes",
@@ -350,6 +372,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2025-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "MoC_YP_Finance_CRCS": {
         "domain": "schemes",
@@ -363,6 +386,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "MoC_YP_Legal_CEA": {
         "domain": "schemes",
@@ -376,6 +400,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "MoC_Consultant_CRCS": {
         "domain": "schemes",
@@ -389,6 +414,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "MoC_Retired_Consultant_A": {
         "domain": "schemes",
@@ -402,6 +428,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "MoC_Retired_Consultant_B": {
         "domain": "schemes",
@@ -415,6 +442,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "Central_Registrar_Order": {
         "domain": "pacs_governance",
@@ -428,6 +456,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "mscs-act-2002",
     },
     "MoC_Recruitment_Deputation": {
         "domain": "schemes",
@@ -441,6 +470,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "MoC_YP_CET_Policy": {
         "domain": "schemes",
@@ -454,6 +484,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "MoC_YP_Budget_Finance": {
         "domain": "schemes",
@@ -467,6 +498,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "MoC_YP_Legal_Ombudsman": {
         "domain": "schemes",
@@ -480,6 +512,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": None,
     },
     "Cooperative_Member_Introduction": {
         "domain": "pacs_governance",
@@ -493,6 +526,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pacs-membership",
     },
     "Gujarat_Cooperative_Act_1961": {
         "domain": "pacs_governance",
@@ -506,6 +540,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "1961-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "state-coop-act",
     },
     "Affordable Crop Insurance for Every Farmer": {
         "domain": "pmfby",
@@ -519,6 +554,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pmfby",
     },
     "aws_gui_cre": {
         "domain": "pmfby",
@@ -532,6 +568,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pmfby",
     },
     "GuidlinesforAWSandWeather Data-15.04": {
         "domain": "pmfby",
@@ -545,6 +582,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pmfby",
     },
     "National Agricultural Insurance Scheme (NAIS)- Scheme and Operational Modalities": {
         "domain": "pmfby",
@@ -558,6 +596,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pmfby",
     },
     "New Schemes-english_": {
         "domain": "pmfby",
@@ -571,6 +610,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pmfby",
     },
     "PMFBY_Features": {
         "domain": "pmfby",
@@ -584,6 +624,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pmfby",
     },
     "PMFBY_WINDS_Manual_2023_for_Hyperlocal_Weather_Data_Procurement_120923": {
         "domain": "pmfby",
@@ -597,6 +638,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2023-09-12",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pmfby",
     },
     "PMFBY-Advertisement": {
         "domain": "pmfby",
@@ -610,6 +652,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pmfby",
     },
     "PRESS_Bhima": {
         "domain": "pmfby",
@@ -623,6 +666,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pmfby",
     },
     "Revamped Operational Guidelines_17th August 2020": {
         "domain": "pmfby",
@@ -636,6 +680,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2020-08-17",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pmfby",
     },
     "RWBCIS_Revised_Guidelines_1": {
         "domain": "pmfby",
@@ -649,6 +694,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pmfby",
     },
     "Sop For Bank Branch Users For Implementation Of Pmfby Rwbcis During Kharif 2021": {
         "domain": "pmfby",
@@ -662,6 +708,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2021-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pmfby",
     },
     "Unified Package Insurance Scheme (UPIS)-Operational Guidelines (OGs)": {
         "domain": "pmfby",
@@ -675,6 +722,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pmfby",
     },
     "Weather Based Crop Insurance Scheme (WBCIS)-Operational Guidelines (OGs)": {
         "domain": "pmfby",
@@ -688,6 +736,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2024-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pmfby",
     },
     "YESTECH_Manual_2023_v2": {
         "domain": "pmfby",
@@ -701,6 +750,7 @@ DOC_META: dict[str, dict] = {
         "document_date": "2023-01-01",
         "authority_tier": "primary",
         "status": "active",
+        "entity_id": "pmfby",
     },
 }
 
@@ -775,6 +825,7 @@ def _ingest_document(supabase: Client, provider, doc_id: str, chunks: list[dict]
         "version_id": "v1",
         "authority_tier": meta["authority_tier"],
         "status": meta["status"],
+        "entity_id": meta.get("entity_id"),
         "parser_profile": "mineru-content_list_v2",
         "metadata_schema_version": "v1",
     }

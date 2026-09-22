@@ -1,6 +1,6 @@
 """Tests for EntityResolver."""
 
-from backend.app.entity_resolver import EntityResolution, EntityResolver
+from app.entity_resolver import EntityResolver
 
 
 def test_exact_alias_pmfby():

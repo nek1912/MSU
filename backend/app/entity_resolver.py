@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-from backend.app.entity_catalogue import ALIASES, ENTITY_CATALOGUE
+from app.entity_catalogue import ALIASES, ENTITY_CATALOGUE
 
 
 class EntityResolution(BaseModel):

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { useI18n } from "@/lib/i18n/provider";
 import { createSpeechService } from "@/lib/speech";
 import {
@@ -105,18 +105,20 @@ export default function GrievancePage() {
   const steps = STEP_LABELS_KEY.map((k) => t(k));
   const speech = useMemo(() => createSpeechService(), []);
   const [listening, setListening] = useState(false);
+  const cancelListen = useRef<(() => void) | null>(null);
 
   const handleVoiceInput = useCallback(() => {
-    if (listening) return;
+    if (listening) {
+      cancelListen.current?.();
+      return;
+    }
+    if (!speech.supported) return;
     setListening(true);
-    const stop = speech.listen("en", (transcript) => {
-      setComplaint((prev) => (prev ? prev + " " + transcript : transcript));
+    cancelListen.current = speech.listen("en", (text) => {
+      if (text) setComplaint((prev) => (prev ? prev + " " + text : text));
       setListening(false);
+      cancelListen.current = null;
     });
-    setTimeout(() => {
-      stop();
-      setListening(false);
-    }, 15000);
   }, [listening, speech]);
 
   const handleIntake = useCallback(async () => {
@@ -303,7 +305,6 @@ export default function GrievancePage() {
                   <button
                     type="button"
                     onClick={handleVoiceInput}
-                    disabled={listening}
                     className={`mt-3 inline-flex items-center gap-2 text-sm font-medium transition-colors ${
                       listening
                         ? "text-[var(--state-error)] animate-pulse"
@@ -311,7 +312,7 @@ export default function GrievancePage() {
                     }`}
                   >
                     <IconMic className="h-4 w-4" />
-                    {listening ? "Listening…" : t("grievanceWizard.voiceInput")}
+                    {listening ? t("common.stopMic") : t("grievanceWizard.voiceInput")}
                   </button>
                 </div>
                 <div className="border-t border-[var(--border-soft)] bg-[var(--cream)]/50 px-6 py-4">

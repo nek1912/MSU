@@ -118,8 +118,6 @@ export function ChatWindow() {
   const speech = useMemo(() => createSpeechService(), []);
   const [speechReady, setSpeechReady] = useState(false);
   const sp = useSearchParams();
-  const [micSupported, setMicSupported] = useState(false);
-  useEffect(() => setMicSupported(speech.supported), [speech]);
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
   const [input, setInput] = useState("");
@@ -153,7 +151,6 @@ export function ChatWindow() {
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [sessionId] = useState(() => crypto.randomUUID());
   const cancelListen = useRef<(() => void) | null>(null);
-  const micStreamRef = useRef<MediaStream | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const modelPickerRef = useRef<HTMLDivElement>(null);
   const [explicitPending, setExplicitPending] = useState(false);
@@ -469,20 +466,18 @@ export function ChatWindow() {
     }
   }
 
-  async function toggleMic() {
+  function toggleMic() {
     if (listening) {
-      micStreamRef.current?.getTracks().forEach((t) => t.stop());
-      micStreamRef.current = null;
-      setListening(false);
+      cancelListen.current?.();
       return;
     }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      micStreamRef.current = stream;
-      setListening(true);
-    } catch {
-      // mic permission denied
-    }
+    if (!speech.supported) return;
+    setListening(true);
+    cancelListen.current = speech.listen(lang, (text) => {
+      if (text) setInput((prev) => (prev ? prev + " " : "") + text);
+      setListening(false);
+      cancelListen.current = null;
+    });
   }
 
   const suggestedActions = [

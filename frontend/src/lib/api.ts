@@ -332,3 +332,16 @@ export async function fetchVoiceSpeak(
   if (!r.ok) throw new Error(`Voice speak API ${r.status}`);
   return r.json();
 }
+
+export async function fetchVoiceTranscribe(
+  audio: string,
+  language: string,
+): Promise<{ text: string; language: string }> {
+  const r = await fetch("/api/voice/transcribe", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ audio, language }),
+  });
+  if (!r.ok) throw new Error(`Voice transcribe API ${r.status}`);
+  return r.json();
+}
